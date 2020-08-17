@@ -1,0 +1,211 @@
+---
+title: Modeling Quality Assurance Project Plan for the North Umpqua Temperature Total
+  Maximum Daily Load
+author: "Ryan Michie"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+output: word_document
+  fig_caption: yes
+  keep_md: yes
+  reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+  toc: yes
+  fig_width: 12
+  fig_height: 6
+---
+
+```{r setup, include=FALSE}
+
+options(knitr.duplicate.label = 'allow')
+options(tinytex.verbose = TRUE)
+
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning=FALSE,
+                      error = FALSE,
+                      cache = FALSE,
+                      include = TRUE,
+                      fig.keep='all',
+                      fig.path=paste0(out_dir, "/Figures/"),
+                      fig.width = 12, 
+                      fig.height = 6)
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(captioner)
+
+library(sf)
+
+```
+
+# Introduction
+
+The North Umpqua Watershed includes several major drainages (rivers) that support salmonid spawning including: Little River, Rock Creek, Steamboat Creek and other major tributaries of the North Umpqua River that support salmonid spawning/rearing.  The beneficial uses that are affected by temperature are cold water aquatic salmonid use.  As required by law, the most sensitive beneficial uses were considered for listing.  The lower 68 river miles are on the 303(d) list for not attaining temperature criteria during fall spawning periods.  Elevated stream temperatures can place various salmonid life cycles at risk.  A TMDL was completed for the watershed for the salmonid rearing period, but a second TMDL needs to be developed to cover the spawning and egg incubation season.
+
+# Problem Definition and Management Objectives
+
+In 2007 the TMDL for the North Umpqua Subbasin was developed for bacteria, aquatic weeds, biological criteria and temperature. The original temperature TMDLs were based on the Natural Conditions Criteria (NCC) identified in Oregon Administrative Rules (OAR), specifically OAR 340-041-0028(8). These criteria were invalidated by the Oregon U.S. District Court. The applicable numeric and narrative temperature criteria must be used. As required by court order, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDLs for the North Umpqua Subbasin. In revising the TMDLs the models used for the North Umpqua Subbasin mainstem will be updated to target the biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) WQS. The tributary segment TMDLs will also be updated with the BBNC and HUA WQS and a thermal load calculation.
+
+The existing temperature TMDL addresses rearing/migration and spawning period temperature impairments on streams without point sources or dams for the entire basin. In rivers that have no point sources or dams, activities designed to improve summer stream temperatures are the same activities that will improve fall and winter temperatures. The nonpoint source load allocations are expressed as effective shade targets and apply year-round.
+
+Furthermore, the existing temperature TMDL addresses streams with point sources and dams during the rearing/migration (i.e. non-spawning) time period. Waste load allocations have been developed for point sources during the portion of the year when spawning does not occur and will be incorporated into the
+NPDES permits. During the spawning period, there are three impaired segments on the North Umpqua
+River that are downstream of a hydro-electric project and a point source is present. More data and analysis are needed to complete those TMDLs. Likewise, on other streams and rivers that are not currently identified as impaired during the spawning period and have point sources or dams, the TMDLs were not computed.
+
+This QAPP document provides the management context and information about existing models
+to be used for the TMDL revisions.
+
+# Conceptual Model: Key Processes and Variables
+Anthropogenic heat sources are derived from solar radiation as increased levels of sunlight reach the stream surface and effluent discharges to surface waters. Therefore, the pollutants targeted in the existing TMDL are: 
+
+**Anthropogenic Nonpoint Sources**: Heat from human-caused solar radiation loading increases to the stream network, as a result of alterations in near stream vegetation, channel morphology, and flow modifications.
+
+Historically, human activities have altered the stream morphology and hydrology and decreased the amount of riparian vegetation in the basin. The basin includes urban, agricultural, and forested lands. Additionally, hydroelectric projects and multiple points of diversion in the Umpqua River Basin have altered stream flow levels. 
+
+Low summertime flows decrease the thermal assimilative capacity of streams. Pollutant (solar radiation) loading causes larger temperature increases in stream segments where flows are reduced by human uses. 
+
+Larger streams, such as the North Umpqua Rivers naturally experience a large solar flux because their channels are too wide to be significantly shaded by riparian vegetation. Smaller tributaries, such as Little River, are easier to shade and have smaller background solar flux values. Additionally, effective shade levels on smaller streams are more sensitive to riparian disturbances and so the differences between current condition solar flux and background solar flux can be larger.
+
+**Anthropogenic Point Sources**: Heat from warm water discharges of human origin, such as industrial outfalls, waste water treatment plants, and other point sources.
+PacifiCorp’s hydro electric project on the North Umpqua River is responsible for elevated stream temperatures between Lemolo Reservoir and the Umpqua River tidewater boundary. Several large diversions reduce flow volumes within the bypass reaches (the natural stream channel below the diversions). Small flow volumes are much more sensitive to solar heating and stream temperatures warm rapidly within the bypass reaches.
+
+# Technical Approach
+
+## Overview
+
+Stream temperature TMDLs are generally scaled to a subbasin or basin and include all perennial surface waters that have salmonid presence or that contribute to areas with salmonid presence. Since stream temperatures are affected by cumulative interactions between upstream and local sources, the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the North Umpqua is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+
+An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance/removal and channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent. 
+Heat is the identified pollutant. Anthropogenic nonpoint and point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable criteria, cumulatively at the point of maximum impact. Allocated conditions are expressed as solar heat load and solar heat flux (watts, and watts per square meter, respectively). Nonpoint source heat allocations are translated into effective shade surrogate measures. Effective shade surrogate measures provide site-specific targets for land managers. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations. Point source waste load allocations are based on the applicable numeric and/or narrative criteria. Point sources are not allowed to increase stream temperatures more than 0.1 deg-C (a portion of the 0.3 deg-C human use allowance) cumulatively at the point of maximum impact.
+
+Stream temperatures were simulated using a computer model (Heat Source) for the main rivers and their larger tributaries. Simulations focus on the larger streams that contain or influence primary fish habitat. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective
+
+## Model Selection
+
+The modeling framework needs for this project include:
+
+1. Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.
+2. Prediction of hourly solar radiation flux and daily effective shade at a no greater than 50 meter longitudinal resolution.
+3. Ability to evaluate hourly stream temperature response from changes in streamside vegetation within the upstream catchment.
+4. Ability to evaluate hourly stream temperature response from changes in water withdrawals and tributary stream flow within the upstream catchment.
+5. Ability to evaluate hourly stream temperature response from changes in channel morphology within the upstream catchment.
+6. Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.
+7. Prediction of hourly water temperatures in stratified reservoir systems along the North Umpqua River system over a period of months.
+8. Ability to evaluate hourly stream and reservoir temperature response from changes in dam operations along the North Umpqua River System.
+
+For these reasons, the Heat Source stream thermodynamics model was selected for stream temperature simulation. 
+
+# Model Development and Calibration
+
+`r loop`
+
+# Model Evaluation and Acceptance
+
+## Model Uncertainty and Sensitivity
+
+As with any mathematical approximation of reality, a water quality model is subject to significant uncertainties. Direct information on the aggregate prediction uncertainty will arise from the model validation exercise; however, further diagnostics are needed to understand the sources and implications of uncertainty.
+
+The major sources of model uncertainty include the mathematical formulation, boundary conditions data uncertainty, uncertainty in spatial representation (e.g., bathymetry), calibration data uncertainty, and parameter specification. In many cases, a significant amount of the overall prediction uncertainty is due to boundary conditions (e.g., uncertainty in estimation of ungaged tributary flows) and uncertainty in the observed data used for calibration and validation. These sources of uncertainty are largely unavoidable, but do not invalidate the use of the model for decision purposes. Uncertainties in the mathematical formulation and model parameters are usually of greater concern for decision purposes as these describe the cause and effect relationships in the calibrated model. 
+
+The existing North Umpqua mainstem and tributary models were extensively evaluated to determine uncertainty in the model equations as well as data used for boundary inputs. A discussion of the methodology used to evaluate uncertainty is found in Appendix 2: Stream Temperature TMDL Supplemental Information of the 2006 Umpqua Basin TMDL(citation).No additional sensitivity or uncertainty analyses will be performed on the revised Heat Source models. Additional temperature variability analyses will be conducted to evaluate the range of natural thermal conditions and how they may influence stream temperature. It is anticipated that these analyses will be approved iteratively through QAPP addenda.
+
+## Model Acceptance
+For a model to be utilized in the development of TMDLs, the model must first be accepted by the regulatory agencies and stakeholders. The most common model development goals are (1) to minimize the difference between simulated and observed water quality and (2) to capture the spatial and temporal patterns in the observed water quality conditions. Progress toward achieving these goals is commonly captured in error statistics and graphical plots. However, model quality goes beyond these core evaluations. Several parallel tasks to achieve overall model quality are pursued alongside efforts to reduce model error, including:
+1. Incorporation of all available observations of the system (e.g., geometry, flow, boundary inputs/withdrawals, and meteorology) for the time period simulated.
+2. Reasonable estimation methods and assumptions to fill gaps in the observations.
+3. Calibration of model parameters and unmeasured boundary conditions within reasonable bounds to improve agreement between simulated and observed water quality.
+4. Identification of key parameters/processes through model calibration and sensitivity analysis. 
+5. Clear communication of key assumptions during model development with the project team.
+6. Clear written documentation of all important elements in the model, including model setup, boundary conditions, assumptions, and known areas of uncertainty.
+7. Peer review.
+
+The intended use of the revised Heat Source models is to focus on the ability to understand and quantify the contribution of heat inputs and operational methodology on water temperature. As such, the abilities of the models to replicate observed water temperature concentrations and to represent the relative contributions of different stressor sources are of greatest importance. Ideally, the models should attain tight calibration to observed data; however, a less precise calibration can still provide useful information.
+
+Error statistics were calculated for each calibrated model.  Below are the equations used for each type of error statistic.
+
+Mean Error:		[INSERT EQUATION]
+
+Mean Absolute Error:	[INSERT EQUATION]
+
+Root Mean Square Error:	 [INSERT EQUATION]
+
+where,
+ 	= the simulated temperature;
+  = the observed or measured temperature;
+  = the sample size.
+
+# Documentation in Model Reports
+Model updates, setup, and results for the TMDL Revisions will be documented in a technical memorandum that will be provided after model work has been completed. The document will outline updates to the models as well as the analyses performed for the tributaries or sources. Tetra Tech will deliver the Draft Technical Memorandum for USEPA and DEQ to review and provide comments. Tetra Tech will update the memorandum based on the USEPA and DEQ comments and submit a Final Technical Memorandum. 
+
+The Tetra Tech Project Manager will maintain a central project file in Tetra Tech’s Fairfax, Virginia office to contain all related documents, reports, communications, data compilations, checklists or other records, and deliverables (electronic files and hard copies). Electronic files and records will be stored on Tetra Tech’s secure network, which is regularly backed up internally, and to an off-site server to preserve business continuity in the event of natural or other catastrophic events, which may result in local or regional catastrophic failure or disruption. The Project Manager will retain all files for a period of no less than five years after final delivery.
+
+# Peer Review
+
+Peer review of the models and model results will be conducted in the following ways:
+DEQ will conduct interval peer review during the modeling process with input from EPA Region 10 as needed.DEQ will consider feedback on model scenarios and results from the TMDL advisory group and make changes as appropriate. DEQ will, review and respond to any public comments received on the model and model results. and make changes as appropriate.
+
+# Management Scenarios
+
+## Scenario Definitions
+
+### Current Conditions
+This scenario evaluates stream temperature warming or cooling from existing conditions.
+
+### Restored Vegetation
+This scenario stream temperature warming or cooling contributed by removal of streamside vegetation. This scenario will be compared to the current condition model. Elements of this scenario include:
+*	Restoring streamside vegetation in areas along the model extent to minimize anthropogenic loading of solar radiation.
+*	Restoration areas are locations along the model extent that are currently characterized as disturbed or have bare ground, grass, or small shrubs (defined as <= 0.9 meters or 3 feet in height in Heat Source). The management strategy applied in these areas is to restore the vegetation. The restored vegetation type, height, density, and overhang used for Heat Source will be identified during the TMDL process.
+*	Model inputs for land cover height, density, and overhang will be modified to reflect the restored areas.
+*	Heat Source model boundary inputs for stream temperature will be modified to reflect the monthly mean daily maximum and minimum stream temperature changes from restoring disturbed areas modeled in the SSN models. 
+*	All other model inputs will be the same as the current calibrated model.
+
+### Protected Vegetation
+This scenario evaluates stream temperature warming or cooling that would occur if existing vegetation is removed. This scenario will be compared to the current condition model. Elements of this scenario include:
+*	Protecting existing streamside vegetation and actively managing it to a mature stand in order limit new anthropogenic loading of solar radiation.
+*	Protection areas are locations along the model extent with some existing streamside vegetation, such as medium to tall trees. The exact definition will be determined during the TMDL process. Existing streamside vegetation in protection areas will be removed to evaluate the stream warming from the existing trees.
+*	Model inputs for land cover height, density, and overhang will be set to zero in protection areas.
+*	Heat Source model boundary inputs for stream temperature will be modified to reflect the monthly mean daily maximum and minimum stream temperature changes from removing vegetated areas modeled in the SSN models. 
+*	All other model inputs will be the same as the current calibrated model.
+
+### Restored Stream Flow
+This scenario evaluates stream temperature warming or cooling from keeping permitted water withdrawals as instream flow. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
+*	Maintaining all currently permitted water withdrawals as instream flow in order to increase the thermal loading capacity and reduce stream warming.
+*	Model boundary and tributary flows will be set to reflect the additional instream flows.
+*	All other model inputs will be the same as the current calibrated model.
+
+### Channel Morphology
+This scenario evaluates stream temperature warming or cooling from improvements to channel morphology, including projects to restore cold water refuges. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
+* Modifying channel width and/or depth to reflect locations where improvements to channel morphology are needed. The location of channel morphology projects will be determine during the TMDL process.
+* Model inputs for bottom width, channel angle z, manning’s n, gradient, elevation, porosity, percent hyporheic flow, hyporheic zone thickness, land cover height, density, and overhang may be modified in areas with improved channel morphology.
+* All other model inputs will be the same as the current calibrated model.
+
+### TMDL Implementation Plans
+This scenario evaluates stream temperature warming or cooling from proposed or existing DMA TMDL implementation plans. These scenarios will be compared to the non-anthropogenic model scenario. Elements of this scenario include:
+* Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing DMA implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.
+* Model inputs for land cover height, density, overhang, boundary condition flow and temperature, bottom width, channel angle z, manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.
+* All other model inputs will be the same as the current calibrated model.
+
+### TMDL Waste Load Allocations
+This scenario evaluates stream temperature warming or cooling from proposed or existing TMDL Waste Load Allocations. These scenarios will be compared to the non-anthropogenic model scenario. Elements of this scenario include:
+* Modifying point source discharges to reflect proposed or existing TMDL Waste Load Allocations. 
+* All other model inputs will be the same as the current calibrated model.
+
+### Tributary Temperature
+This scenario evaluates stream temperature warming or cooling from tributaries by modifying tributary temperature. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
+* Tributary temperatures will be set to reflect potential conditions.
+* All other model inputs will be the same as the current calibrated model.
+
+### Climate
+This scenario evaluates stream temperature warming or cooling from changes in climate. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
+* Model inputs for air temperature, humidity and wind speed may be modified to reflect potential conditions or climate change scenarios.
+* Model inputs for air temperature, humidity and wind speed may be modified to reflect historic climate change that has influenced current conditions. 
+* All other model inputs will be the same as the current calibrated model.
+
+### Point Sources
+This scenario evaluates stream temperature warming or cooling from permitted point sources. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
+* Removal of all point sources of pollutants.
+* All other model inputs will be the same as the current calibrated model.
+
+### Background
+This scenario evaluates if the stream can achieve the applicable BBNC criteria and what the stream warming or cooling is from multiple anthropogenic activities. This scenario essentially combines the scenarios evaluating restored streamside vegetation, protecting existing vegetation, restoring instream flows, and making improvements to channel morphology. This scenario will be compared to the current conditions model scenario. 
+
+
