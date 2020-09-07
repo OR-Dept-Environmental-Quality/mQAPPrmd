@@ -1,0 +1,161 @@
+---
+author: "yg"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+output: 
+  word_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r setup_chap5, include=FALSE}
+
+options(knitr.duplicate.label = 'allow')
+options(tinytex.verbose = TRUE)
+
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE,
+                      error = TRUE,
+                      cache = FALSE,
+                      cache.comments = FALSE,
+                      include = TRUE,
+                      autodep = TRUE,
+                      eval = TRUE
+                      # fig.keep = 'all',
+                      # fig.path = paste0(out_dir, "/Figures/"),
+                      # fig.width = 12, 
+                      # fig.height = 6
+)
+
+tbls  <- captioner::captioner(prefix="Table")
+figs <- captioner::captioner(prefix="Figure")
+eqns <- captioner::captioner(prefix="Equation")
+
+```
+
+
+## `r waterbody_name`
+
+### Source Characteristics
+Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody:
+
+$$\Delta Temperature = \frac {\Delta Heat}{density \times specific \space heat \times \Delta Flow Volume}$$
+
+Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of coldwater inputs from groundwater. 
+
+**[Update for each stream]** Canton Creek and its contributing watershed area is characterized as primarily a mix of private and federal forestlands. Vegetation removal from forest clear cutting is the dominant source of anthropogenic heat loads (ODEQ 2006). 
+
+There are no active individual NPDES permitted discharges on Canton Creek.
+
+### Data Availability and Quality
+
+#### Meteorology
+Meteorology inputs into the model include air temperature, cloudiness, relative humidity, and wind speed. The data source for these inputs is the National Climatic Data Center weather station at the Roseburg Regional Airport. Data may be adjusted to represent localized climate variability.
+
+#### Continuous Stream Temperature Data
+Continuous temperature data were collected at a number of locations during several years. Table 1 lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. Table 2 summarizes when data were collected at each station. Specific uses for some of this temperature data are described in the model setup and calibration sections later in this report.
+
+```{r t5122_1, echo=FALSE, results='asis'}
+
+t5122_1 <- station %>% 
+  dplyr::filter(section_name == waterbody_name ) %>% 
+  dplyr::select(MLocID, StationDes, OrgID, Lat_DD, Long_DD)
+
+if(NROW(t5122_1)>0){
+  print(knitr::kable(t5122_1, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5122_1",
+                                    caption = paste0("summary"))))
+}
+
+
+```
+
+```{r t5122_2, echo=FALSE, results='asis'}
+
+# waterbody_name <- "Canton Creek"
+
+t5122_2.1 <- dta %>% 
+  dplyr::filter(section_name == waterbody_name ) %>%
+  dplyr::mutate(Result_Numeric = ifelse(!is.na(Result_Numeric),1,0)) %>% 
+  dplyr::mutate(year = lubridate::year(as.Date(SampleStartDate)),
+                month = lubridate::month(as.Date(SampleStartDate)))
+
+mth1 <- data.frame(unique(sort(t5122_2.1$month))) %>% 
+  dplyr::rename(mth1 = "unique.sort.t5122_2.1.month..") %>% 
+  dplyr::mutate(mth1 = as.character(mth1))
+
+mth2 <- data.frame(as.character(c(1:12))) %>% 
+  dplyr::rename(mth2 = "as.character.c.1.12..")
+
+mth2$mth <- dplyr::if_else(mth2$mth2 %in% mth1$mth1, "YES", "NO")
+
+mth_nodata <- subset(mth2,mth == "NO") %>% 
+  dplyr::mutate(mth = as.numeric(na_if(mth,"NO"))) %>% 
+  tidyr::spread(mth2,mth)
+
+t5122_2.2 <- t5122_2.1 %>% 
+  tidyr::spread(month, Result_Numeric) %>% 
+  dplyr::select(-c(1:2,4:6,9:83))
+
+t5122_2.3 <- t5122_2.2 %>% 
+  tibble::rownames_to_column() %>% 
+  left_join(mth_nodata %>% rownames_to_column()) %>% 
+  select(-rowname) %>% 
+  dplyr::group_by(year,MLocID,StationDes,Org_Name) %>% 
+  dplyr::summarise(across(where(is.numeric), ~sum(.x,na.rm=TRUE))) %>% 
+  dplyr::select(year,MLocID,StationDes,Org_Name,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`,`10`,`11`,`12`) %>% 
+  dplyr::rename(Year = year,
+                `Station ID` = MLocID,
+                `Station Description` = StationDes,
+                Organization = Org_Name,
+                Jan = `1`,
+                Feb = `2`,
+                Mar = `3`,
+                Apr = `4`,
+                May = `5`,
+                Jun = `6`,
+                Jul = `7`,
+                Aug = `8`,
+                Sep = `9`,
+                Oct = `10`,
+                Nov = `11`,
+                Dec = `12`)
+
+if(NROW(t5122_2.3)>0){
+  print(knitr::kable(t5122_2.3, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5122_2.3",
+                                    caption = paste0("summary"))))
+}
+  
+
+```
+
+
+
+#### Stream Flow Data
+#### Point Source Discharges
+#### Effective Shade Measurements
+
+### Summertime Critical Period
+
+#### Model Domain
+#### Spatial and Temporal Resolution
+#### Time Frame of Simulation
+#### Model Calibration
+#### Model Inputs and Parameters
+#### Data Gaps
+#### Important Assumptions
+
+### Spawning Period
+
+####	Model Domain
+####	Spatial and Temporal Resolution
+####	Time Frame of Simulation
+####	Model Calibration
+####	Model Inputs and Parameters
+####	Data Gaps
+####	Important Assumptions
