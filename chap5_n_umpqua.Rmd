@@ -13,9 +13,6 @@ output:
 
 ```{r setup_chap5, include=FALSE}
 
-options(knitr.duplicate.label = 'allow')
-options(tinytex.verbose = TRUE)
-
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
                       warning = FALSE,
@@ -31,9 +28,7 @@ knitr::opts_chunk$set(echo = FALSE,
                       # fig.height = 6
 )
 
-tbls  <- captioner::captioner(prefix="Table")
-figs <- captioner::captioner(prefix="Figure")
-eqns <- captioner::captioner(prefix="Equation")
+options(kableExtra.auto_format = F)
 
 ```
 
@@ -41,9 +36,9 @@ eqns <- captioner::captioner(prefix="Equation")
 ## `r waterbody_name`
 
 ### Source Characteristics
-Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody:
+Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody:  
 
-$$\Delta Temperature = \frac {\Delta Heat}{density \times specific \space heat \times \Delta Flow Volume}$$
+$${{\Delta Temperature} = {\frac {\Delta Heat}{density \times specific \space heat \times \Delta Flow Volume}}}$$  
 
 Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of coldwater inputs from groundwater. 
 
@@ -59,23 +54,47 @@ Meteorology inputs into the model include air temperature, cloudiness, relative 
 #### Continuous Stream Temperature Data
 Continuous temperature data were collected at a number of locations during several years. Table 1 lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. Table 2 summarizes when data were collected at each station. Specific uses for some of this temperature data are described in the model setup and calibration sections later in this report.
 
-```{r t5122_1, echo=FALSE, results='asis'}
+```{r t5122_1, include=TRUE, results='asis'}
 
-t5122_1 <- station %>% 
-  dplyr::filter(section_name == waterbody_name ) %>% 
-  dplyr::select(MLocID, StationDes, OrgID, Lat_DD, Long_DD)
+# For testing: waterbody_name <- "Canton Creek"
+
+dta_1 <- dta %>% 
+  dplyr::filter(section_name == waterbody_name)
+
+st_awqms <- station_awqms %>% 
+  dplyr::filter(section_name == waterbody_name) %>% 
+  dplyr::filter(MLocID %in% unique(sort(dta_1$MLocID))) %>% 
+  dplyr::select(MLocID, StationDes, OrgID, Lat_DD, Long_DD) %>% 
+  dplyr::rename(`Station ID` = MLocID,
+                `Station Description` = StationDes,
+                Organization = OrgID,
+                Latitude = Lat_DD,
+                Longitude = Long_DD)
+
+st_model <- station_model %>% 
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::mutate(StationDes = ifelse(is.na(StationDes),`Input Name`,StationDes),
+                OrgID = ifelse(is.na(OrgID),`Data Source`,OrgID)) %>% 
+  dplyr::select(`Station ID`, StationDes, OrgID, Latitude, Longitude) %>% 
+  dplyr::rename(`Station Description` = StationDes,
+                Organization = OrgID)
+
+t5122_1 <- rbind(st_awqms,st_model) %>% 
+  dplyr::group_by(`Station ID`,`Station Description`,Organization,Latitude,Longitude) %>% 
+  dplyr::summarise(n=n()) %>% 
+  dplyr::select(-n)
 
 if(NROW(t5122_1)>0){
   print(knitr::kable(t5122_1, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t5122_1",
-                                    caption = paste0("summary"))))
+                     caption = tbls(name = waterbody_name,
+                                    caption = paste0("Summary of active and historic continuous temperature monitoring locations in the ", waterbody_name, " Watershed currently available in public databases and DEQ files."))))
 }
 
 
 ```
 
 ```{r t5122_2, echo=FALSE, results='asis'}
-
+# to be deleted:
 # waterbody_name <- "Canton Creek"
 
 t5122_2.1 <- dta %>% 
