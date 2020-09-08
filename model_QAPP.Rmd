@@ -90,9 +90,12 @@ lookup_section_name <- station_awqms %>%
   dplyr::summarise(n = n())
 
 data <- df.awqms.raw %>% 
-  dplyr::filter(HUC8_Name == subbasin)
+  dplyr::filter(HUC8_Name == subbasin) %>% 
+  # QA/QC check:
+  dplyr::filter(Result_status %in% c("Final", "Provisional") | 
+                  QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
 
-dta <- merge(data, lookup_section_name, by = c("HUC10")) 
+dta <- merge(data, lookup_section_name, by = c("HUC10"))
 
 ```
 
@@ -204,13 +207,13 @@ The intended use of the revised Heat Source models is to focus on the ability to
 
 Error statistics were calculated for each calibrated model.  Below are the equations used for each type of error statistic.
 
-Mean Error:		$$ME = \frac{1}{n}\sum(X_{sim} - X_{obs})$$
+Mean Error:		$ME = \frac{1}{n}\sum(X_{sim} - X_{obs})$
 
-Mean Absolute Error:	$$MAE = \frac{1}{n}\sum|X_{sim} - X_{obs}|$$
+Mean Absolute Error:	$MAE = \frac{1}{n}\sum|X_{sim} - X_{obs}|$
 
-Root Mean Square Error:	 $$RMSE = \sqrt{\frac{1}{n}\sum(X_{sim} - X_{obs})^2}$$
+Root Mean Square Error:	 $RMSE = \sqrt{\frac{1}{n}\sum(X_{sim} - X_{obs})^2}$
 
-where,
+where,  
     $X_{sim}$ = the simulated temperature;  
     $X_{obs}$ = the observed or measured temperature;  
     $n$ = the sample size.  
