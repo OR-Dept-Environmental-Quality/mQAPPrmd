@@ -11,7 +11,7 @@ output:
     fig_height: 6
 ---
 
-```{r setup_chap5, include=FALSE}
+```{r setup_chap5, include=TRUE}
 
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
@@ -30,6 +30,14 @@ knitr::opts_chunk$set(echo = FALSE,
 
 options(kableExtra.auto_format = F)
 
+# For testing: waterbody_name <- "Canton Creek"
+
+section.dta <- dta %>% 
+  dplyr::filter(section_name == waterbody_name)
+
+section.model.info <- model.info %>% 
+  dplyr::filter(`Section Name` == waterbody_name)
+
 ```
 
 
@@ -38,7 +46,7 @@ options(kableExtra.auto_format = F)
 ### Source Characteristics
 Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody:  
 
-$${{\Delta Temperature} = {\frac {\Delta Heat}{density \times specific \space heat \times \Delta Flow Volume}}}$$  
+$$\Delta Temperature=\frac{\Delta Heat}{Density \times Specific \space Heat \times \Delta Flow \space Volume}$$  
 
 Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of coldwater inputs from groundwater. 
 
@@ -56,14 +64,9 @@ Continuous temperature data were collected at a number of locations during sever
 
 ```{r t5122_1, include=TRUE, results='asis'}
 
-# For testing: waterbody_name <- "Canton Creek"
-
-dta_1 <- dta %>% 
-  dplyr::filter(section_name == waterbody_name)
-
 st_awqms <- station_awqms %>% 
   dplyr::filter(section_name == waterbody_name) %>% 
-  dplyr::filter(MLocID %in% unique(sort(dta_1$MLocID))) %>% 
+  dplyr::filter(MLocID %in% unique(sort(section.dta$MLocID))) %>% 
   dplyr::select(MLocID, StationDes, OrgID, Lat_DD, Long_DD) %>% 
   dplyr::rename(`Station ID` = MLocID,
                 `Station Description` = StationDes,
@@ -95,7 +98,7 @@ if(NROW(t5122_1)>0){
 
 ```{r t5122_2, echo=FALSE, results='asis'}
 # to be deleted:
-# waterbody_name <- "Canton Creek"
+# waterbody_name <- "North Umpqua River"
 
 t5122_2.1 <- dta %>% 
   dplyr::filter(section_name == waterbody_name ) %>%
@@ -153,21 +156,90 @@ if(NROW(t5122_2.3)>0){
 
 ```
 
-
-
 #### Stream Flow Data
+
+Flow volume data and other instream measurements were collected at several sites along `r waterbody_name` [CODE: (Table_3)] by Oregon DEQ. These measurements were used to develop flow mass balances for the `r waterbody_name` temperature model.
+
+[INSERT TABLE 3]
+
+Reliable streamflow data are important to model development, calibration and validation. The USGS maintain streamflow gages on the [CODE: North Umpqua River], as well as major tributaries. Data are readily available from the USGS National Water Information System (NWIS), accompanied by useful QC information. There are no USGS flow gaging stations on Canton Creek. [CODE: IF THERE IS ANY USGS FLOW GAGING STATION, THERE SHOULD BE A TABLE.]
+
 #### Point Source Discharges
+
+Measured flows and temperature data were used to determine the thermal loads from the point source discharges in the Heat Source models. ODEQ maintains a database (<http://www.deq.state.or.us/wq/sisdata/sisdata.asp>) for point source information. There are no individually permitted point sources discharging heat to Canton Creek. [CODE: IF THERE IS ANY POINT SOURCES DISCHARGES, THERE SHOULD BE A TABLE.]
+
 #### Effective Shade Measurements
+
+Effective shade data were not used in model calibration.
+
+Effective shade data in Table 4 were collected to assist model calibration and simulation of incoming solar radiation. All effective shade measurements were collected with a Solar Pathfinder and correspond to solar paths observed during the months of July/August.
+
+[INSERT A TABLE]
 
 ### Summertime Critical Period
 
 #### Model Domain
+
+```{r t5131, include=TRUE, results='asis'}
+
+if(length(section.model.info$`Model Extent Text`)>1){
+  model.domain <- unique(sort(section.model.info$`Model Extent Text`))
+} else {model.domain <- section.model.info$`Model Extent Text`} 
+
+```
+`r model.domain`
+
 #### Spatial and Temporal Resolution
+The length of the defined finite difference and data input sampling rate (dx) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (dt) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
+
+A dx of 50 meters was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution dx will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
+
 #### Time Frame of Simulation
+The model period is `r format(lubridate::ymd(unique(section.model.info$"Model Period Start")), format="%B %d, %Y")` to `r format(lubridate::ymd(unique(section.model.info$"Model Period End")), format="%B %d, %Y")`
+
 #### Model Calibration
+Model calibration was completed by DEQ and described in ODEQ (2006). Adjustments to the calibration model will not be made as part of this QAPP. Temperature, flow, and effective shade calibration sites, are summarized here to improve documentation of the TMDL approach.  If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
+
+Model fit error statistics were be calculated for the calibrated model for both hourly temperatures and 7DADM stream temperatures using Equation A6 - Equation A9.
+
+Equation  
+Mean Error: $ME = \frac{1}{n}\sum(X_{sim} - X_{obs})$
+
+Equation  
+Mean Absolute Error: $MAE = \frac{1}{n}\sum|X_{sim} - X_{obs}|$
+
+Equation  
+Root Mean Square Error: $RMSE = \sqrt{\frac{1}{n}\sum(X_{sim} - X_{obs})^2}$
+
+Equation  
+Nash-Sutcliffe efficiency coefficient: $NS = 1 - \frac {\sum (X_{sim} - X_{obs})^2}{\sum (X_{sim} - \overline{X_{obs}})^2}$
+
+where,  
+    $X_{sim}$ = the model simulated result;  
+    $X_{obs}$ = the field measured result;  
+    $\overline X_{obs}$ = The mean of the field measured result;  
+    $n$ = the total number of results.
+    
+[INSERT TABLE]
+
 #### Model Inputs and Parameters
+This section describes the input model parameters and those which will be most likely adjusted to improve calibration and fit. Adjustments to calibration model parameters will not be made as part of this QAPP. Temperature, flow, and meteorological input parameters are summarized here to improve documentation of the TMDL approach.  If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
+
+[INSERT TABLE]
+
+Hourly meteorology inputs into the model include air temperature, cloudiness, relative humidity, and wind speed. The data source for these inputs is the National Climatic Data Center weather station at the Roseburg Regional Airport. Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.
+
 #### Data Gaps
+Data gaps include:
+
+* Tributary flow and temperature measurements for all tributary model inputs.
+* Measurements of withdrawals flow (if any) within the model extent. 
+* The data source and quality for the following boundary condition inputs; Spring at stream kilometer 13.2, Wolverine Creek, Brouse Creek or Hipower Creek. 
+
+Data gaps were identified and addressed during original development of the Canton Creek model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
+
 #### Important Assumptions
+Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 
 
 ### Spawning Period
 
