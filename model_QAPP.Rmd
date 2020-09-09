@@ -36,7 +36,7 @@ library(captioner)
 library(readxl)
 library(lubridate)
 library(plyr)
-library(sf)
+# library(sf)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -96,6 +96,9 @@ data <- df.awqms.raw %>%
                   QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
 
 dta <- merge(data, lookup_section_name, by = c("HUC10"))
+
+model.info <- cal.model %>% 
+  dplyr::filter(`QAPP Project Area` %in%  subbasin)
 
 ```
 
