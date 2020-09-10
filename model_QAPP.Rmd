@@ -93,9 +93,25 @@ data <- df.awqms.raw %>%
   dplyr::filter(HUC8_Name == subbasin) %>% 
   # QA/QC check:
   dplyr::filter(Result_status %in% c("Final", "Provisional") | 
-                  QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
+                  QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
+  dplyr::left_join(lookup_section_name, by="HUC10")
 
-dta <- merge(data, lookup_section_name, by = c("HUC10"))
+# dta.sample.count will be used in chap5 5.1.2.2
+data.sample.count <- data %>% 
+  dplyr::filter(Statistical_Base == "Maximum") %>% 
+  dplyr::select(Org_Name, MLocID, SampleStartDate, Statistical_Base, Result_Numeric) %>% 
+  dplyr::mutate(month=lubridate::month(SampleStartDate, label=TRUE, abbr=TRUE),
+                year=lubridate::year(SampleStartDate)) %>% 
+  dplyr::group_by(MLocID, Statistical_Base, year, month) %>%
+  dplyr::summarize(Org_Names=paste0(unique(Org_Name), collapse=" ,"),
+                   n=n()) %>%
+  dplyr::ungroup() %>%
+  tidyr::pivot_wider(names_from = month, values_from=n) %>%
+  dplyr::left_join(station_awqms[,c("MLocID","StationDes","GNIS_Name", "MonLocType",
+                                    "Reachcode", "Measure",
+                                    "Lat_DD", "Long_DD", "AU_ID",
+                                    "HUC8_Name", "HUC10_Name","HUC12_Name",
+                                    "HUC8","HUC10","HUC12","section_name")], by="MLocID")
 
 model.info <- cal.model %>% 
   dplyr::filter(`QAPP Project Area` %in%  subbasin)
