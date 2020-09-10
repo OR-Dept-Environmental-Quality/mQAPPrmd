@@ -32,7 +32,7 @@ options(kableExtra.auto_format = F)
 
 # For testing: waterbody_name <- "Canton Creek"
 
-section.dta <- dta %>% 
+section.dta <- data %>% 
   dplyr::filter(section_name == waterbody_name)
 
 section.model.info <- model.info %>% 
@@ -97,62 +97,21 @@ if(NROW(t5122_1)>0){
 ```
 
 ```{r t5122_2, echo=FALSE, results='asis'}
-# to be deleted:
-# waterbody_name <- "North Umpqua River"
 
-t5122_2.1 <- dta %>% 
-  dplyr::filter(section_name == waterbody_name ) %>%
-  dplyr::mutate(Result_Numeric = ifelse(!is.na(Result_Numeric),1,0)) %>% 
-  dplyr::mutate(year = lubridate::year(as.Date(SampleStartDate)),
-                month = lubridate::month(as.Date(SampleStartDate)))
-
-mth1 <- data.frame(unique(sort(t5122_2.1$month))) %>% 
-  dplyr::rename(mth1 = "unique.sort.t5122_2.1.month..") %>% 
-  dplyr::mutate(mth1 = as.character(mth1))
-
-mth2 <- data.frame(as.character(c(1:12))) %>% 
-  dplyr::rename(mth2 = "as.character.c.1.12..")
-
-mth2$mth <- dplyr::if_else(mth2$mth2 %in% mth1$mth1, "YES", "NO")
-
-mth_nodata <- subset(mth2,mth == "NO") %>% 
-  dplyr::mutate(mth = as.numeric(na_if(mth,"NO"))) %>% 
-  tidyr::spread(mth2,mth)
-
-t5122_2.2 <- t5122_2.1 %>% 
-  tidyr::spread(month, Result_Numeric) %>% 
-  dplyr::select(-c(1:2,4:6,9:83))
-
-t5122_2.3 <- t5122_2.2 %>% 
-  tibble::rownames_to_column() %>% 
-  left_join(mth_nodata %>% rownames_to_column()) %>% 
-  select(-rowname) %>% 
-  dplyr::group_by(year,MLocID,StationDes,Org_Name) %>% 
-  dplyr::summarise(across(where(is.numeric), ~sum(.x,na.rm=TRUE))) %>% 
-  dplyr::select(year,MLocID,StationDes,Org_Name,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`,`10`,`11`,`12`) %>% 
+t5122_2 <- data.sample.count %>%
+  dplyr::filter(section_name == waterbody_name) %>% 
+  dplyr::select(year,MLocID,StationDes,Org_Names,Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
   dplyr::rename(Year = year,
                 `Station ID` = MLocID,
                 `Station Description` = StationDes,
-                Organization = Org_Name,
-                Jan = `1`,
-                Feb = `2`,
-                Mar = `3`,
-                Apr = `4`,
-                May = `5`,
-                Jun = `6`,
-                Jul = `7`,
-                Aug = `8`,
-                Sep = `9`,
-                Oct = `10`,
-                Nov = `11`,
-                Dec = `12`)
+                Organization = Org_Names)
 
-if(NROW(t5122_2.3)>0){
-  print(knitr::kable(t5122_2.3, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t5122_2.3",
-                                    caption = paste0("summary"))))
-}
+if(NROW(t5122_2)>0){
+  print(knitr::kable(t5122_2, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5122_2",
+                                    caption = paste0("Summary of existing temperature data in the ", waterbody_name," Watershed. Columns Jan – Dec indicate the number of daily maximum temperature results in each month"))))
   
+}
 
 ```
 
