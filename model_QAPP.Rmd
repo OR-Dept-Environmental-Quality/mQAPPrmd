@@ -1,6 +1,4 @@
 ---
-title: Modeling Quality Assurance Project Plan for the North Umpqua Temperature Total
-  Maximum Daily Load
 author: "Ryan Michie"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output: 
@@ -11,6 +9,15 @@ output:
     fig_caption: yes
     fig_width: 12
     fig_height: 6
+---
+
+```{r setup_1, include=FALSE}
+subbasin = "North Umpqua"
+```
+
+---
+title: "`r paste0("Modeling Quality Assurance Project Plan for the ", subbasin, " Temperature Total
+  Maximum Daily Load")`"
 ---
 
 ```{r setup, include=FALSE}
@@ -47,6 +54,9 @@ cal.input <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/models/Model_Setup
   
 cal.model <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/models/Model_Setup_Info.xlsx",
                                sheet = "Calibration Model Info")
+
+npdes <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/models/NPDES_communication_list.xlsx",
+                               sheet = "Individual_NDPES")
 
 # NOTE: SEARCH WHERE UPDATE IS REQUIRED IN THE SCRIPT.
 # UPDATE REQUIRED:
@@ -114,6 +124,9 @@ data.sample.count <- data %>%
                                     "HUC8","HUC10","HUC12","section_name")], by="MLocID")
 
 model.info <- cal.model %>% 
+  dplyr::filter(`QAPP Project Area` %in%  subbasin)
+
+model.input  <- cal.input %>% 
   dplyr::filter(`QAPP Project Area` %in%  subbasin)
 
 ```
