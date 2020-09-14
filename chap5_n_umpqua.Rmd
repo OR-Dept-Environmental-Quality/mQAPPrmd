@@ -208,10 +208,10 @@ where,
 ```{r t5134, include=TRUE, results='asis'}
 
 t5134 <- section.model.input %>% 
-  dplyr::filter("Input Type" == "Calibration Site") %>% 
-  dplyr::select(StationDes, `Model Location`, `Station ID`, `Data Source`) %>% 
-  dplyr::rename(`Station Description` = StationDes,
-                `Modle Kilometer` = `Model Location`)
+  dplyr::filter(`Input Type` == "Calibration Site") %>% 
+  dplyr::select(`Input Name`, `Model Location`, `Station ID`, `Data Source`) %>% 
+  dplyr::rename(`Station Description` = `Input Name`,
+                `Model Kilometer` = `Model Location`)
 
 if(NROW(t5134)>0){
   print(knitr::kable(t5134, format = "pandoc", padding = 2,
@@ -229,9 +229,8 @@ This section describes the input model parameters and those which will be most l
 
 t5135 <- section.model.input %>% 
   dplyr::filter(!`Input Type` %in%  c("Calibration Site")) %>% 
-  dplyr::select(StationDes, `Model Location`, `Input Parameter`, `Station ID`, `Data Source`) %>% 
-  dplyr::rename(`Station Description` = StationDes,
-                `Modle Kilometer` = `Model Location`,
+  dplyr::select(`Input Name`, `Model Location`, `Input Parameter`, `Station ID`, `Data Source`) %>%   dplyr::rename(`Station Description` = `Input Name`,
+                `Model Kilometer` = `Model Location`,
                 `Model Input Type` = `Input Parameter`)
 
 if(NROW(t5135)>0){
@@ -250,7 +249,7 @@ Data gaps include:
 
 * Tributary flow and temperature measurements for all tributary model inputs.
 * Measurements of withdrawals flow (if any) within the model extent. 
-* The data source and quality for the following boundary condition inputs; Spring at stream kilometer 13.2, Wolverine Creek, Brouse Creek or Hipower Creek. 
+* The data source and quality for the following boundary condition inputs: Spring at stream kilometer 13.2, Wolverine Creek, Brouse Creek or Hipower Creek. 
 
 Data gaps were identified and addressed during original development of the Canton Creek model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
 
