@@ -33,29 +33,44 @@ options(kableExtra.auto_format = F)
 # For testing: waterbody_name <- "Canton Creek"
 
 section.dta <- data %>% 
-  dplyr::filter(section_name == waterbody_name)
+  dplyr::filter(section_name %in%  waterbody_name)
 
 section.model.info <- model.info %>% 
-  dplyr::filter(`Section Name` == waterbody_name)
+  dplyr::filter(`Section Name` %in%  waterbody_name)
 
 section.model.input <- model.input %>% 
-  dplyr::filter(`Section Name` == waterbody_name)
+  dplyr::filter(`Section Name` %in%  waterbody_name)
+
+section.npdes <- npdes %>% 
+  dplyr::filter(`Project Area` %in%  subbasin)%>% 
+  dplyr::filter(`Stream Name` %in%  waterbody_name)
 
 ```
-
 
 ## `r waterbody_name`
 
 ### Source Characteristics
-Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody:  
+Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody (`r eqns(name = "temp_change", display="cite")`).   
 
-$$\Delta Temperature=\frac{\Delta Heat}{Density \times Specific \space Heat \times \Delta Flow \space Volume}$$  
+$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\times \Delta \text {Flow Volume}} \text { }$ (`r eqns(name = "temp_change", display="cite")`)
 
 Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of coldwater inputs from groundwater. 
 
 **[Update for each stream]** Canton Creek and its contributing watershed area is characterized as primarily a mix of private and federal forestlands. Vegetation removal from forest clear cutting is the dominant source of anthropogenic heat loads (ODEQ 2006). 
 
-There are no active individual NPDES permitted discharges on Canton Creek.
+```{r t5x11, echo=FALSE, results='asis'}
+
+if(NROW(section.npdes)>0){
+  
+  cat(paste0("There are ", NROW(section.npdes), " active individual NPDES permitted discharges on ", waterbody_name, "."))
+  
+} else {
+    
+  cat(paste0("There are no active individual NPDES permitted discharges on ", waterbody_name, "."))
+  
+}
+
+```
 
 ### Data Availability and Quality
 
@@ -63,56 +78,57 @@ There are no active individual NPDES permitted discharges on Canton Creek.
 Meteorology inputs into the model include air temperature, cloudiness, relative humidity, and wind speed. The data source for these inputs is the National Climatic Data Center weather station at the Roseburg Regional Airport. Data may be adjusted to represent localized climate variability.
 
 #### Continuous Stream Temperature Data
-Continuous temperature data were collected at a number of locations during several years. Table 1 lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. Table 2 summarizes when data were collected at each station. Specific uses for some of this temperature data are described in the model setup and calibration sections later in this report.
+Continuous temperature data were collected at a number of locations during several years. `r tbls(name="t5x22_1", display="cite")` lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. `r tbls(name="t5x22_2", display="cite")` summarizes when data were collected at each station. Specific uses for some of this temperature data are described in the model setup and calibration sections later in this report.
 
-```{r t5122_1, include=TRUE, results='asis'}
+```{r t5x22_1, echo=FALSE, results='asis'}
 
 st_awqms <- station_awqms %>% 
-  dplyr::filter(section_name == waterbody_name) %>% 
-  dplyr::filter(MLocID %in% unique(sort(section.dta$MLocID))) %>% 
-  dplyr::select(MLocID, StationDes, OrgID, Lat_DD, Long_DD) %>% 
-  dplyr::rename(`Station ID` = MLocID,
-                `Station Description` = StationDes,
-                Organization = OrgID,
-                Latitude = Lat_DD,
-                Longitude = Long_DD)
+  dplyr::filter(section_name %in% waterbody_name) %>% 
+  dplyr::filter(`Station ID` %in% unique(sort(section.dta$MLocID))) %>% 
+  dplyr::select(`Station ID`, `Station Description`, Organization, Latitude, Longitude)
 
 st_model <- station_model %>% 
-  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
-  dplyr::mutate(StationDes = ifelse(is.na(StationDes),`Input Name`,StationDes),
-                OrgID = ifelse(is.na(OrgID),`Data Source`,OrgID)) %>% 
-  dplyr::select(`Station ID`, StationDes, OrgID, Latitude, Longitude) %>% 
-  dplyr::rename(`Station Description` = StationDes,
-                Organization = OrgID)
+  dplyr::filter(`Model Waterbody` %in%  waterbody_name) %>% 
+  dplyr::mutate(`Station Description` = ifelse(is.na(`Station Description`),`Input Name`,`Station Description`),
+                Organization = ifelse(is.na(Organization),`Data Source`,Organization)) %>% 
+  dplyr::select(`Station ID`, `Station Description`, Organization, Latitude, Longitude)
 
-t5122_1 <- rbind(st_awqms,st_model) %>% 
+t5x22_1 <- rbind(st_awqms,st_model) %>% 
   dplyr::group_by(`Station ID`,`Station Description`,Organization,Latitude,Longitude) %>% 
   dplyr::summarise(n=n()) %>% 
   dplyr::select(-n)
 
-if(NROW(t5122_1)>0){
-  print(knitr::kable(t5122_1, format = "pandoc", padding = 2,
-                     caption = tbls(name = waterbody_name,
+if(NROW(t5x22_1)>0){
+  print(knitr::kable(t5x22_1, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5x22_1",
                                     caption = paste0("Summary of active and historic continuous temperature monitoring locations in the ", waterbody_name, " Watershed currently available in public databases and DEQ files."))))
+} else {
+  
+  cat(paste0("There are no active and historic continuous temperature monitoring locations in the ", waterbody_name, " Watershed currently available in public databases and DEQ files."))
+  
 }
-
 
 ```
 
-```{r t5122_2, echo=FALSE, results='asis'}
+```{r t5x22_2, echo=FALSE, results='asis'}
+options(knitr.kable.NA = '')
 
-t5122_2 <- data.sample.count %>%
-  dplyr::filter(section_name == waterbody_name) %>% 
-  dplyr::select(year,MLocID,StationDes,Org_Names,Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
+t5x22_2 <- data.sample.count %>%
+  dplyr::filter(section_name %in%  waterbody_name) %>% 
+  dplyr::select(year,`Station ID`,`Station Description`,Org_Names,
+                Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
+  dplyr::arrange(year) %>% 
   dplyr::rename(Year = year,
-                `Station ID` = MLocID,
-                `Station Description` = StationDes,
                 Organization = Org_Names)
 
-if(NROW(t5122_2)>0){
-  print(knitr::kable(t5122_2, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t5122_2",
-                                    caption = paste0("Summary of existing temperature data in the ", waterbody_name," Watershed. Columns Jan – Dec indicate the number of daily maximum temperature results in each month"))))
+if(NROW(t5x22_2)>0){
+  print(knitr::kable(t5x22_2, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5x22_2",
+                                    caption = paste0("Summary of existing temperature data in the ", waterbody_name," Watershed. Columns Jan – Dec indicate the number of daily maximum temperature results in each month."))))
+  
+} else {
+  
+  cat(paste0("There is no existing temperature data in the ", waterbody_name," Watershed."))
   
 }
 
@@ -122,29 +138,32 @@ if(NROW(t5122_2)>0){
 
 Flow volume data and other instream measurements were collected at several sites along `r waterbody_name` [CODE: (Table_3)] by Oregon DEQ. These measurements were used to develop flow mass balances for the `r waterbody_name` temperature model.
 
-[INSERT TABLE 3]
+[INSERT TABLE]
 
-Reliable streamflow data are important to model development, calibration and validation. The USGS maintain streamflow gages on the [CODE: North Umpqua River], as well as major tributaries. Data are readily available from the USGS National Water Information System (NWIS), accompanied by useful QC information. There are no USGS flow gaging stations on Canton Creek. [CODE: IF THERE IS ANY USGS FLOW GAGING STATION, THERE SHOULD BE A TABLE.]
+Reliable streamflow data are important to model development, calibration and validation. The USGS maintain streamflow gages on the North Umpqua River, as well as major tributaries. Data are readily available from the USGS National Water Information System (NWIS), accompanied by useful QC information. 
+
+There are no USGS flow gaging stations on `r waterbody_name`. **[THIS WILL BE CODED FOR IF TABLE ELSE NO DATA]**
 
 #### Point Source Discharges
 
 Measured flows and temperature data were used to determine the thermal loads from the point source discharges in the Heat Source models. ODEQ maintains a database (<http://www.deq.state.or.us/wq/sisdata/sisdata.asp>) for point source information.
 
-```{r t5124, echo=FALSE, results='asis'}
+```{r t5x24, echo=FALSE, results='asis'}
 
-t5124 <- npdes %>% 
-  dplyr::filter(`Project Area` %in%  subbasin) %>% 
-  dplyr::filter(`Stream Name` %in%  waterbody_name) %>% 
-  dplyr::select(`Common Name`, `Permit Description`, `EPA Class`, `Stream Name`, `River Mile`)
+t5x24 <- section.npdes %>% 
+  dplyr::mutate(`Facility Name and Number` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
+                `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
+                `Stream River Mile` = paste0(`Stream Name`, " ", " RM ",`River Mile`)) %>% 
+  dplyr::select(`Facility Name and Number`, `Permit Type and Description`, `Stream River Mile`)
 
-if(NROW(t5124)>0){
-  print(knitr::kable(t5124, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t5124",
-                                    caption = paste0("Summary of NPDES permitted discharges on ", waterbody_name, " ."))))
+if(NROW(t5x24)>0){
+  print(knitr::kable(t5x24, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5x24",
+                                    caption = paste0("Summary of NPDES permitted discharges on ", waterbody_name, "."))))
   
 } else {
   
-  cat(paste0("There are no individually permitted point sources discharging heat to ", waterbody_name, " ."))
+  cat(paste0("There are no individually permitted point sources discharging heat to ", waterbody_name, "."))
   
 }
 
@@ -177,7 +196,7 @@ if(length(section.model.info$`Model Extent Text`)>1){
 #### Spatial and Temporal Resolution
 The length of the defined finite difference and data input sampling rate (dx) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (dt) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
 
-A dx of 50 meters was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution dx will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
+A dx of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution dx will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
 
 #### Time Frame of Simulation
 The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
@@ -185,18 +204,18 @@ The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Mode
 #### Model Calibration
 Model calibration was completed by DEQ and described in ODEQ (2006). Adjustments to the calibration model will not be made as part of this QAPP. Temperature, flow, and effective shade calibration sites, are summarized here to improve documentation of the TMDL approach.  If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
 
-Model fit error statistics were be calculated for the calibrated model for both hourly temperatures and 7DADM stream temperatures using Equation A6 - Equation A9.
+Model fit error statistics were calculated for the calibrated model for both hourly temperatures and 7DADM stream temperatures using Equation A6 - Equation A9.
 
-Equation  
+Equation A6:  
 Mean Error: $ME = \frac{1}{n}\sum(X_{sim} - X_{obs})$
 
-Equation  
+Equation A7:  
 Mean Absolute Error: $MAE = \frac{1}{n}\sum|X_{sim} - X_{obs}|$
 
-Equation  
+Equation A8:  
 Root Mean Square Error: $RMSE = \sqrt{\frac{1}{n}\sum(X_{sim} - X_{obs})^2}$
 
-Equation  
+Equation A9:  
 Nash-Sutcliffe efficiency coefficient: $NS = 1 - \frac {\sum (X_{sim} - X_{obs})^2}{\sum (X_{sim} - \overline{X_{obs}})^2}$
 
 where,  
@@ -205,17 +224,17 @@ where,
     $\overline X_{obs}$ = The mean of the field measured result;  
     $n$ = the total number of results.
     
-```{r t5134, include=TRUE, results='asis'}
+```{r t5x34, include=TRUE, results='asis'}
 
-t5134 <- section.model.input %>% 
-  dplyr::filter("Input Type" == "Calibration Site") %>% 
-  dplyr::select(StationDes, `Model Location`, `Station ID`, `Data Source`) %>% 
-  dplyr::rename(`Station Description` = StationDes,
-                `Modle Kilometer` = `Model Location`)
+t5x34 <- section.model.input %>% 
+  dplyr::filter(`Input Type` == "Calibration Site") %>% 
+  dplyr::select(`Input Name`, `Model Location`, `Station ID`, `Data Source`) %>% 
+  dplyr::rename(`Station Description` = `Input Name`,
+                `Model Kilometer` = `Model Location`)
 
-if(NROW(t5134)>0){
-  print(knitr::kable(t5134, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t5134",
+if(NROW(t5x34)>0){
+  print(knitr::kable(t5x34, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5x34",
                                     caption = paste0("Continuous stream temperature data calibration sites used in the existing ", waterbody_name, " Heat Source Model."))))
   
 }
@@ -225,18 +244,17 @@ if(NROW(t5134)>0){
 #### Model Inputs and Parameters
 This section describes the input model parameters and those which will be most likely adjusted to improve calibration and fit. Adjustments to calibration model parameters will not be made as part of this QAPP. Temperature, flow, and meteorological input parameters are summarized here to improve documentation of the TMDL approach.  If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
 
-```{r t5135, include=TRUE, results='asis'}
+```{r t5x35, include=TRUE, results='asis'}
 
-t5135 <- section.model.input %>% 
-  dplyr::filter(!`Input Type` %in%  c("Calibration Site")) %>% 
-  dplyr::select(StationDes, `Model Location`, `Input Parameter`, `Station ID`, `Data Source`) %>% 
-  dplyr::rename(`Station Description` = StationDes,
-                `Modle Kilometer` = `Model Location`,
+t5x35 <- section.model.input %>% 
+  dplyr::filter(!`Input Type` %in%  c("Calibration Site", "Instantaneous")) %>% 
+  dplyr::select(`Input Name`, `Model Location`, `Input Parameter`, `Station ID`, `Data Source`) %>%   dplyr::rename(`Station Description` = `Input Name`,
+                `Model Kilometer` = `Model Location`,
                 `Model Input Type` = `Input Parameter`)
 
-if(NROW(t5135)>0){
-  print(knitr::kable(t5135, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t5135",
+if(NROW(t5x35)>0){
+  print(knitr::kable(t5x35, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t5x35",
                                     caption = paste0("Boundary condition inputs to the existing ", waterbody_name, " Heat Source Model."))))
   
 }
@@ -248,11 +266,11 @@ Hourly meteorology inputs into the model include air temperature, cloudiness, re
 #### Data Gaps
 Data gaps include:
 
-* Tributary flow and temperature measurements for all tributary model inputs.
-* Measurements of withdrawals flow (if any) within the model extent. 
-* The data source and quality for the following boundary condition inputs; Spring at stream kilometer 13.2, Wolverine Creek, Brouse Creek or Hipower Creek. 
+* Tributary flow and temperature measurements for all tributary model inputs.  
+* Measurements of withdrawals flow (if any) within the model extent.  
+* The data source and quality for the following boundary condition inputs: Spring at stream kilometer 13.2, Wolverine Creek, Brouse Creek or Hipower Creek. **[UPDATE FOR EACH STREAM]**
 
-Data gaps were identified and addressed during original development of the Canton Creek model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
+Data gaps were identified and addressed during original development of the `r waterbody_name` model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
 
 #### Important Assumptions
 Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 

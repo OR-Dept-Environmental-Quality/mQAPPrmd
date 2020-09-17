@@ -1,7 +1,7 @@
 ---
 author: "Ryan Michie"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
-output: 
+output:
   word_document:
     reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
     keep_md: yes
@@ -9,14 +9,19 @@ output:
     fig_caption: yes
     fig_width: 12
     fig_height: 6
+  html_document:
+    toc: yes
+    df_print: paged
 ---
 
 ```{r setup_1, include=FALSE}
-subbasin = "North Umpqua"
+# NOTE: SEARCH WHERE UPDATE IS REQUIRED IN THE SCRIPT.
+# UPDATE REQUIRED:
+qapp_project_area = "North Umpqua Subbasin"
 ```
 
 ---
-title: "`r paste0("Modeling Quality Assurance Project Plan for the ", subbasin, " Temperature Total
+title: "`r paste0("Modeling Quality Assurance Project Plan for the ", qapp_project_area, " Temperature Total
   Maximum Daily Load")`"
 ---
 
@@ -42,7 +47,7 @@ library(tidyverse)
 library(captioner)
 library(readxl)
 library(lubridate)
-library(plyr)
+# library(plyr)
 # library(sf)
 
 tbls  <- captioner::captioner(prefix="Table")
@@ -58,7 +63,6 @@ cal.model <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/models/Model_Setup
 npdes <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/models/NPDES_communication_list.xlsx",
                                sheet = "Individual_NDPES")
 
-# NOTE: SEARCH WHERE UPDATE IS REQUIRED IN THE SCRIPT.
 # UPDATE REQUIRED:
 load("T:/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_Umpqua Basin.RData") # df.awqms.raw
 
@@ -71,7 +75,7 @@ unique(sort(df.awqms.raw$HUC8_Name))
 subbasin <- "North Umpqua"
 
 station_awqms <- df.stations.state %>% 
-  dplyr::filter(HUC8_Name == subbasin) %>% 
+  dplyr::filter(HUC8_Name %in%  subbasin) %>% 
   # Check and compare the HUC10_Names to QAPP Section Names
   # unique(sort(station$HUC10_Name))
   # UPDATE REQUIRED:
@@ -86,13 +90,19 @@ station_awqms <- df.stations.state %>%
                                       section_name)) %>% 
   dplyr::mutate(section_name = ifelse(HUC12_Name %in%  c("Lake Creek"),
                                       "Lake Creek",
-                                      section_name))
+                                      section_name)) %>% 
+  dplyr::rename(`Station ID` = MLocID,
+                `Station Description` = StationDes,
+                Organization = OrgID,
+                Latitude = Lat_DD,
+                Longitude = Long_DD)
 
 # unique(sort(station_awqms$section_name))
 
 station_model <- cal.input %>% 
-  dplyr::filter(`QAPP Project Area` %in%  subbasin) %>% 
-  dplyr::filter(!is.na(Latitude))
+  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
+  dplyr::filter(!is.na(Latitude)) %>% 
+  dplyr::left_join(station_awqms[,c("Station ID", "Station Description", "Organization")], by="Station ID")
 
 lookup_section_name <- station_awqms %>% 
   dplyr::select(HUC10, section_name) %>% 
@@ -100,34 +110,30 @@ lookup_section_name <- station_awqms %>%
   dplyr::summarise(n = n())
 
 data <- df.awqms.raw %>% 
-  dplyr::filter(HUC8_Name == subbasin) %>% 
+  dplyr::filter(HUC8_Name %in%  subbasin) %>% 
   # QA/QC check:
   dplyr::filter(Result_status %in% c("Final", "Provisional") | 
                   QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
   dplyr::left_join(lookup_section_name, by="HUC10")
 
-# dta.sample.count will be used in chap5 5.1.2.2
+# data.sample.count will be used in chap5 5.1.2.2
 data.sample.count <- data %>% 
   dplyr::filter(Statistical_Base == "Maximum") %>% 
   dplyr::select(Org_Name, MLocID, SampleStartDate, Statistical_Base, Result_Numeric) %>% 
   dplyr::mutate(month=lubridate::month(SampleStartDate, label=TRUE, abbr=TRUE),
                 year=lubridate::year(SampleStartDate)) %>% 
   dplyr::group_by(MLocID, Statistical_Base, year, month) %>%
-  dplyr::summarize(Org_Names=paste0(unique(Org_Name), collapse=" ,"),
-                   n=n()) %>%
+  dplyr::summarize(Org_Names=paste0(unique(Org_Name), collapse=" ,"),n=n()) %>%
   dplyr::ungroup() %>%
   tidyr::pivot_wider(names_from = month, values_from=n) %>%
-  dplyr::left_join(station_awqms[,c("MLocID","StationDes","GNIS_Name", "MonLocType",
-                                    "Reachcode", "Measure",
-                                    "Lat_DD", "Long_DD", "AU_ID",
-                                    "HUC8_Name", "HUC10_Name","HUC12_Name",
-                                    "HUC8","HUC10","HUC12","section_name")], by="MLocID")
+  dplyr::rename(`Station ID` = MLocID) %>% 
+  dplyr::left_join(station_awqms[,c("Station ID", "Station Description", "section_name")], by="Station ID")
 
 model.info <- cal.model %>% 
-  dplyr::filter(`QAPP Project Area` %in%  subbasin)
+  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
 
 model.input  <- cal.input %>% 
-  dplyr::filter(`QAPP Project Area` %in%  subbasin)
+  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
 
 ```
 
@@ -164,35 +170,35 @@ PacifiCorp’s hydro electric project on the North Umpqua River is responsible f
 
 ## Overview
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin and include all perennial surface waters that have salmonid presence or that contribute to areas with salmonid presence. Since stream temperatures are affected by cumulative interactions between upstream and local sources, the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the North Umpqua is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin and include all perennial surface waters that have salmonid presence or that contribute to areas with salmonid presence. Since stream temperatures are affected by cumulative interactions between upstream and local sources, the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the `r subbasin` is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance/removal and channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
-Heat is the identified pollutant. Anthropogenic nonpoint and point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable criteria, cumulatively at the point of maximum impact. Allocated conditions are expressed as solar heat load and solar heat flux (watts, and watts per square meter, respectively). Nonpoint source heat allocations are translated into effective shade surrogate measures. Effective shade surrogate measures provide site-specific targets for land managers. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations. Point source waste load allocations are based on the applicable numeric and/or narrative criteria. Point sources are not allowed to increase stream temperatures more than 0.1 deg-C (a portion of the 0.3 deg-C human use allowance) cumulatively at the point of maximum impact.
+Heat is the identified pollutant. Anthropogenic nonpoint and point sources are not permitted to heat a waterbody more than 0.3 $^\circ C$ above the applicable criteria, cumulatively at the point of maximum impact. Allocated conditions are expressed as solar heat load and solar heat flux (watts, and watts per square meter, respectively). Nonpoint source heat allocations are translated into effective shade surrogate measures. Effective shade surrogate measures provide site-specific targets for land managers. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations. Point source waste load allocations are based on the applicable numeric and/or narrative criteria. Point sources are not allowed to increase stream temperatures more than 0.1 $^\circ C$ (a portion of the 0.3 $^\circ C$ human use allowance) cumulatively at the point of maximum impact.
 
-Stream temperatures were simulated using a computer model (Heat Source) for the main rivers and their larger tributaries. Simulations focus on the larger streams that contain or influence primary fish habitat. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective
+Stream temperatures were simulated using a computer model (Heat Source) for the main rivers and their larger tributaries. Simulations focus on the larger streams that contain or influence primary fish habitat. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective.
 
 ## Model Selection
 
 The modeling framework needs for this project include:
 
-1. Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.
-  
-2. Prediction of hourly solar radiation flux and daily effective shade at a no greater than 50 meter longitudinal resolution.
-  
-3. Ability to evaluate hourly stream temperature response from changes in streamside vegetation within the upstream catchment.
-  
-4. Ability to evaluate hourly stream temperature response from changes in water withdrawals and tributary stream flow within the upstream catchment.
-  
-5. Ability to evaluate hourly stream temperature response from changes in channel morphology within the upstream catchment.
-  
-6. Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.
-  
-7. Prediction of hourly water temperatures in stratified reservoir systems along the North Umpqua River system over a period of months.
-  
-8. Ability to evaluate hourly stream and reservoir temperature response from changes in dam operations along the North Umpqua River System.
+1)	Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.  
 
-For these reasons, the Heat Source stream thermodynamics model was selected for stream temperature simulation. 
+2)	Prediction of hourly solar radiation flux and daily effective shade at a no greater than 50 meter longitudinal resolution.  
+
+3)	Ability to evaluate hourly stream temperature response from changes in streamside vegetation within the upstream catchment.  
+
+4)	Ability to evaluate hourly stream temperature response from changes in water withdrawals and tributary stream flow within the upstream catchment.  
+
+5)	Ability to evaluate hourly stream temperature response from changes in channel morphology within the upstream catchment.  
+
+6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
+
+7)	Prediction of hourly water temperatures in stratified reservoir systems along the North Umpqua River system over a period of months.  
+
+8)	Ability to evaluate hourly stream and reservoir temperature response from changes in dam operations along the North Umpqua River System.  
+
+For these reasons, the Heat Source stream thermodynamics model was selected for stream temperature simulation.  
 
 # Model Development and Calibration
 
@@ -216,24 +222,24 @@ As with any mathematical approximation of reality, a water quality model is subj
 
 The major sources of model uncertainty include the mathematical formulation, boundary conditions data uncertainty, uncertainty in spatial representation (e.g., bathymetry), calibration data uncertainty, and parameter specification. In many cases, a significant amount of the overall prediction uncertainty is due to boundary conditions (e.g., uncertainty in estimation of ungaged tributary flows) and uncertainty in the observed data used for calibration and validation. These sources of uncertainty are largely unavoidable, but do not invalidate the use of the model for decision purposes. Uncertainties in the mathematical formulation and model parameters are usually of greater concern for decision purposes as these describe the cause and effect relationships in the calibrated model. 
 
-The existing North Umpqua mainstem and tributary models were extensively evaluated to determine uncertainty in the model equations as well as data used for boundary inputs. A discussion of the methodology used to evaluate uncertainty is found in Appendix 2: Stream Temperature TMDL Supplemental Information of the 2006 Umpqua Basin TMDL(citation).No additional sensitivity or uncertainty analyses will be performed on the revised Heat Source models. Additional temperature variability analyses will be conducted to evaluate the range of natural thermal conditions and how they may influence stream temperature. It is anticipated that these analyses will be approved iteratively through QAPP addenda.
+The existing North Umpqua mainstem and tributary models were extensively evaluated to determine uncertainty in the model equations as well as data used for boundary inputs. A discussion of the methodology used to evaluate uncertainty is found in *Appendix 2: Stream Temperature TMDL Supplemental Information of the 2006 Umpqua Basin TMDL*(citation). No additional sensitivity or uncertainty analyses will be performed on the revised Heat Source models. Additional temperature variability analyses will be conducted to evaluate the range of natural thermal conditions and how they may influence stream temperature. It is anticipated that these analyses will be approved iteratively through QAPP addenda.
 
 ## Model Acceptance
 For a model to be utilized in the development of TMDLs, the model must first be accepted by the regulatory agencies and stakeholders. The most common model development goals are (1) to minimize the difference between simulated and observed water quality and (2) to capture the spatial and temporal patterns in the observed water quality conditions. Progress toward achieving these goals is commonly captured in error statistics and graphical plots. However, model quality goes beyond these core evaluations. Several parallel tasks to achieve overall model quality are pursued alongside efforts to reduce model error, including:
 
-  1. Incorporation of all available observations of the system (e.g., geometry, flow, boundary inputs/withdrawals, and meteorology) for the time period simulated.
-  
-  2. Reasonable estimation methods and assumptions to fill gaps in the observations.
-  
-  3. Calibration of model parameters and unmeasured boundary conditions within reasonable bounds to improve agreement between simulated and observed water quality.
-  
-  4. Identification of key parameters/processes through model calibration and sensitivity analysis.
-  
-  5. Clear communication of key assumptions during model development with the project team.
-  
-  6. Clear written documentation of all important elements in the model, including model setup, boundary conditions, assumptions, and known areas of uncertainty.
-  
-  7. Peer review.
+1)	Incorporation of all available observations of the system (e.g., geometry, flow, boundary inputs/withdrawals, and meteorology) for the time period simulated.  
+
+2)	Reasonable estimation methods and assumptions to fill gaps in the observations.  
+
+3)	Calibration of model parameters and unmeasured boundary conditions within reasonable bounds to improve agreement between simulated and observed water quality.  
+
+4)	Identification of key parameters/processes through model calibration and sensitivity analysis.  
+
+5)	Clear communication of key assumptions during model development with the project team.  
+
+6)	Clear written documentation of all important elements in the model, including model setup, boundary conditions, assumptions, and known areas of uncertainty.  
+
+7)	Peer review.
 
 The intended use of the revised Heat Source models is to focus on the ability to understand and quantify the contribution of heat inputs and operational methodology on water temperature. As such, the abilities of the models to replicate observed water temperature concentrations and to represent the relative contributions of different stressor sources are of greatest importance. Ideally, the models should attain tight calibration to observed data; however, a less precise calibration can still provide useful information.
 
@@ -249,6 +255,10 @@ where,
     $X_{sim}$ = the simulated temperature;  
     $X_{obs}$ = the observed or measured temperature;  
     $n$ = the sample size.  
+
+Error statistics were calculated for both the spatial (TIR) and temporal (hourly instream measurements) temperatures.  Table 64 contains the error statistics for each stream simulated. 
+
+[INSERT TABLE]
 
 # Documentation in Model Reports
 Model updates, setup, and results for the TMDL Revisions will be documented in a technical memorandum that will be provided after model work has been completed. The document will outline updates to the models as well as the analyses performed for the tributaries or sources. Tetra Tech will deliver the Draft Technical Memorandum for USEPA and DEQ to review and provide comments. Tetra Tech will update the memorandum based on the USEPA and DEQ comments and submit a Final Technical Memorandum. 
@@ -273,7 +283,7 @@ DEQ will, review and respond to any public comments received on the model and mo
 This scenario evaluates stream temperature warming or cooling from existing conditions.
 
 ### Restored Vegetation
-This scenario stream temperature warming or cooling contributed by removal of streamside vegetation. This scenario will be compared to the current condition model. Elements of this scenario include:
+This scenario evaluates stream temperature warming or cooling contributed by removal of streamside vegetation. This scenario will be compared to the current condition model. Elements of this scenario include:
 
   *	Restoring streamside vegetation in areas along the model extent to minimize anthropogenic loading of solar radiation.
     
