@@ -47,6 +47,8 @@ library(tidyverse)
 library(captioner)
 library(readxl)
 library(lubridate)
+library(flextable)
+library(webshot)
 # library(plyr)
 # library(sf)
 
@@ -154,6 +156,7 @@ Furthermore, the existing temperature TMDL addresses streams with point sources 
 This QAPP document provides the management context and information about existing models to be used for the TMDL revisions.
 
 # Conceptual Model: Key Processes and Variables
+
 Anthropogenic heat sources are derived from solar radiation as increased levels of sunlight reach the stream surface and effluent discharges to surface waters. Therefore, the pollutants targeted in the existing TMDL are: 
 
 **Anthropogenic Nonpoint Sources**: Heat from human-caused solar radiation loading increases to the stream network, as a result of alterations in near stream vegetation, channel morphology, and flow modifications.
@@ -227,6 +230,7 @@ The major sources of model uncertainty include the mathematical formulation, bou
 The existing North Umpqua mainstem and tributary models were extensively evaluated to determine uncertainty in the model equations as well as data used for boundary inputs. A discussion of the methodology used to evaluate uncertainty is found in *Appendix 2: Stream Temperature TMDL Supplemental Information of the 2006 Umpqua Basin TMDL*(citation). No additional sensitivity or uncertainty analyses will be performed on the revised Heat Source models. Additional temperature variability analyses will be conducted to evaluate the range of natural thermal conditions and how they may influence stream temperature. It is anticipated that these analyses will be approved iteratively through QAPP addenda.
 
 ## Model Acceptance
+
 For a model to be utilized in the development of TMDLs, the model must first be accepted by the regulatory agencies and stakeholders. The most common model development goals are (1) to minimize the difference between simulated and observed water quality and (2) to capture the spatial and temporal patterns in the observed water quality conditions. Progress toward achieving these goals is commonly captured in error statistics and graphical plots. However, model quality goes beyond these core evaluations. Several parallel tasks to achieve overall model quality are pursued alongside efforts to reduce model error, including:
 
 1)	Incorporation of all available observations of the system (e.g., geometry, flow, boundary inputs/withdrawals, and meteorology) for the time period simulated.  
@@ -260,7 +264,7 @@ where,
 
 Error statistics were calculated for both the spatial (TIR) and temporal (hourly instream measurements) temperatures.  Table 64 contains the error statistics for each stream simulated. 
 
-[Compare]
+**[Compare]**
 Model fit error statistics were calculated for the calibrated model for both hourly temperatures and 7DADM stream temperatures using Equation A6 - Equation A9.
 
 Equation A6:  
@@ -281,10 +285,8 @@ where,
     $\overline X_{obs}$ = The mean of the field measured result;  
     $n$ = the total number of results.
 
-
-[INSERT TABLE]
-
 # Documentation in Model Reports
+
 Model updates, setup, and results for the TMDL Revisions will be documented in a technical memorandum that will be provided after model work has been completed. The document will outline updates to the models as well as the analyses performed for the tributaries or sources. Tetra Tech will deliver the Draft Technical Memorandum for USEPA and DEQ to review and provide comments. Tetra Tech will update the memorandum based on the USEPA and DEQ comments and submit a Final Technical Memorandum. 
 
 The Tetra Tech Project Manager will maintain a central project file in Tetra Tech’s Fairfax, Virginia office to contain all related documents, reports, communications, data compilations, checklists or other records, and deliverables (electronic files and hard copies). Electronic files and records will be stored on Tetra Tech’s secure network, which is regularly backed up internally, and to an off-site server to preserve business continuity in the event of natural or other catastrophic events, which may result in local or regional catastrophic failure or disruption. The Project Manager will retain all files for a period of no less than five years after final delivery.
@@ -320,6 +322,7 @@ This scenario evaluates stream temperature warming or cooling contributed by rem
   *	All other model inputs will be the same as the current calibrated model.
 
 ### Protected Vegetation
+
 This scenario evaluates stream temperature warming or cooling that would occur if existing vegetation is removed. This scenario will be compared to the current condition model. Elements of this scenario include:
 
   *	Protecting existing streamside vegetation and actively managing it to a mature stand in order limit new anthropogenic loading of solar radiation.
@@ -333,6 +336,7 @@ This scenario evaluates stream temperature warming or cooling that would occur i
   *	All other model inputs will be the same as the current calibrated model.
 
 ### Restored Stream Flow
+
 This scenario evaluates stream temperature warming or cooling from keeping permitted water withdrawals as instream flow. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
   *	Maintaining all currently permitted water withdrawals as instream flow in order to increase the thermal loading capacity and reduce stream warming.
@@ -351,6 +355,7 @@ This scenario evaluates stream temperature warming or cooling from improvements 
   * All other model inputs will be the same as the current calibrated model.
 
 ### TMDL Implementation Plans
+
 This scenario evaluates stream temperature warming or cooling from proposed or existing DMA TMDL implementation plans. These scenarios will be compared to the non-anthropogenic model scenario. Elements of this scenario include:
 
   * Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing DMA implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.
@@ -360,6 +365,7 @@ This scenario evaluates stream temperature warming or cooling from proposed or e
   * All other model inputs will be the same as the current calibrated model.
 
 ### TMDL Waste Load Allocations
+
 This scenario evaluates stream temperature warming or cooling from proposed or existing TMDL Waste Load Allocations. These scenarios will be compared to the non-anthropogenic model scenario. Elements of this scenario include:
 
   * Modifying point source discharges to reflect proposed or existing TMDL Waste Load Allocations. 
@@ -374,6 +380,7 @@ This scenario evaluates stream temperature warming or cooling from tributaries b
   * All other model inputs will be the same as the current calibrated model.
 
 ### Climate
+
 This scenario evaluates stream temperature warming or cooling from changes in climate. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
   * Model inputs for air temperature, humidity and wind speed may be modified to reflect potential conditions or climate change scenarios.
@@ -383,6 +390,7 @@ This scenario evaluates stream temperature warming or cooling from changes in cl
   * All other model inputs will be the same as the current calibrated model.
 
 ### Point Sources
+
 This scenario evaluates stream temperature warming or cooling from permitted point sources. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
   * Removal of all point sources of pollutants.
@@ -390,6 +398,7 @@ This scenario evaluates stream temperature warming or cooling from permitted poi
   * All other model inputs will be the same as the current calibrated model.
 
 ### Background
+
 This scenario evaluates if the stream can achieve the applicable BBNC criteria and what the stream warming or cooling is from multiple anthropogenic activities. This scenario essentially combines the scenarios evaluating restored streamside vegetation, protecting existing vegetation, restoring instream flows, and making improvements to channel morphology. This scenario will be compared to the current conditions model scenario. 
 
 ## Canton Creek
@@ -414,9 +423,24 @@ This scenario evaluates if the stream can achieve the applicable BBNC criteria a
 
 ## Project Team/Roles
 
-Table 65. The roles and responsibilities of each team member involved in the temperature TMDL replacement project.
+```{r echo=FALSE}
 
-[Insert Table 65]
+roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/models/roles.xlsx",
+                               sheet = "roles")
+
+troles <- flextable::regulartable(roles) %>% 
+  flextable::set_table_properties(layout = "autofit") %>% 
+  flextable::merge_h(i = c(1,13)) %>% 
+  flextable::bold(i = c(1,13)) %>% 
+  flextable::bg(i = 1, bg = "#B52222", part = "body") %>% 
+  flextable::valign(valign = "top") %>% 
+  flextable::theme_box() %>% 
+  flextable::set_caption(tbls(name = paste0("roles"),
+                                    caption = paste0("The roles and responsibilities of each team member involved in the temperature TMDL replacement project.")))
+
+troles
+
+```
 
 ## Expertise and Special Training Requirements
 
@@ -436,12 +460,15 @@ The DEQ Project Manager (or designee) will provide monthly progress reports to U
   * Data quality assessment findings regarding model input data and model outputs
 
 ## Project Schedule
+
 The schedule for the initial phase of North Umpqua Temperature TMDL Revisions is detailed ???Where?? and extends though ???When??. Under the court order, the revised TMDL must be approved by August 30, 2024. Given the need for USEPA review, public notice, comments, and responses, it is estimated the the modeling analysis and associated documentation must be completed by April 2024. A detailed project schedule will be developed as part of the Technical Direction for the next phase(s) of the project.
 
 # Data Management
+
 Tetra Tech will not conduct sampling (primary data collection) for this task. Secondary data collected as part of this task will be maintained as hardcopy only, both hardcopy and electronic, or electronic only, depending on their nature. All electronic data will be maintained on Tetra Tech’s computers and servers. Tetra Tech’s computers are either covered by on-site service agreements or serviced by in-house specialists. When a problem with a microcomputer occurs, in-house computer specialists diagnose the problem and correct it if possible. When outside assistance is necessary, the computer specialists call the appropriate vendor. For other computer equipment requiring outside repair and not covered by a service contract, local computer service companies are used on a time-and-materials basis. Routine maintenance of microcomputers is performed by in-house computer specialists. Electric power to each microcomputer flows through a surge suppressor to protect electronic components from potentially damaging voltage spikes. All computer users have been instructed on the importance of routinely archiving work assignment data files from hard drive to compact disc or server storage. The office network server is backed up on tape nightly during the week. Screening for viruses on electronic files loaded on microcomputers or the network is standard company policy. Automated screening systems have been placed on all Tetra Tech computer systems and are updated regularly to ensure that viruses are identified and destroyed. Annual maintenance of software is performed to keep up with evolutionary changes in computer storage, media, and programs.
 
 # Recordkeeping and Archiving
+
 Thorough documentation of all modeling activities is necessary to be able to effectively interpret the results. All records and documents relevant to the application, including electronic versions of data and input data sets, will be maintained at Tetra Tech’s offices in the central file. Tetra Tech will deliver a copy of the records and documents in the central file to USEPA at the end of the task. Unless other arrangements are made, records will be maintained at Tetra Tech’s offices for a minimum of 3 years following task completion.
 
 The Tetra Tech Project Manager and designees will maintain files, as appropriate, as repositories for information and data used in models and for preparing reports and documents during the task. Electronic project files are maintained on network computers and are backed up weekly. The Tetra Tech Project Manager will supervise the use of materials in the central files. The following information will be included in the hard copy or electronic task files in the central file:
@@ -469,9 +496,11 @@ All data files, source codes, and executable versions of the computer software w
 The Tetra Tech Modeling QC Officer and other experienced technical staff will review the materials listed above during internal peer review of modified existing models or new codes or models. The designated QC Officers will perform QC checks on any modifications to the source code used in the design process. All new input and output files, together with existing files, records, codes, and data sets, will be saved for inspection and possible reuse.
 
 # QAPP Review and Approval
+
 The DEQ Project Manager will lead distribution of the draft QAPP to their respective project teams. Comments from USEPA, Tetra Tech, and relevant reviewers will be provided to the Project Manager for further discussion if appropriate, and revision and submittal of the final plan within 10 business days of receipt of comments. Following USEPA approval, the Project Manager will distribute the final, signed copy to their respective staff assigned to the project. Official copies of the final, approved QAPP will be retained. If any change(s) in the QAPP are required during the project, they must be described in a memorandum and approved by the signatories to this QAPP and attached to the QAPP.
 
 # Implementation and Adaptive Management
+
 Due to the complexity of model development, some elements of the project might not proceed according to plan. Should an obstacle arise that requires a change in approach, Tetra Tech, in consultation with the project team, will return to the QAPP as a topic template for evaluating the effects on other aspects of the project. Tetra Tech will update the QAPP as needed through revisions or addenda, as model development proceeds and new aspects of the system are understood. Significant changes in technical approach would be described in the updated QAPP and would be reviewed by the project team listed on the QAPP approval page prior to implementation.
 
 # References
