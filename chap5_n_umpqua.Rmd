@@ -138,20 +138,20 @@ if(NROW(t5x22_2)>0){
 
 #### Stream Flow Data
 
-Flow volume data and other instream measurements were collected at several sites along `r waterbody_name` (`r tbls(name=paste0("t5x23", waterbody_name), display="cite")`) by Oregon DEQ. These measurements were used to develop flow mass balances for the `r waterbody_name` temperature model.
+Flow volume data and other instream measurements were collected at several sites along `r waterbody_name` (`r tbls(name=paste0("t5x23_1", waterbody_name), display="cite")`) by Oregon DEQ. These measurements were used to develop flow mass balances for the `r waterbody_name` temperature model.
 
-```{r t5x23, echo=FALSE, results='asis'}
+```{r t5x23_1, echo=FALSE, results='asis'}
 
-t5x23 <- section.model.input %>% 
+t5x23_1 <- section.model.input %>% 
   dplyr::filter(`Input Parameter` %in% c("Flow")) %>% 
   dplyr::mutate(`Station Location` = ifelse(is.na(Latitude), `Station ID`, paste0(Latitude,", ", Longitude))) %>% 
   dplyr::select(`Input Name`, `Measurement Date`, `Station Location`, `Model Location`, `Data Source`) %>% 
   dplyr::rename(`Location Description` = `Input Name`,
                 `Model Location (Kilometer)` = `Model Location`)
 
-if(NROW(t5x23)>0){
-  print(knitr::kable(t5x23, format = "pandoc", padding = 2,
-                     caption = tbls(name = paste0("t5x23", waterbody_name),
+if(NROW(t5x23_1)>0){
+  print(knitr::kable(t5x23_1, format = "pandoc", padding = 2,
+                     caption = tbls(name = paste0("t5x23_1", waterbody_name),
                                     caption = paste0("Instantaneous flow measurements in  ", waterbody_name, "."))))
   
 } else {
@@ -164,7 +164,27 @@ if(NROW(t5x23)>0){
 
 Reliable streamflow data are important to model development, calibration and validation. The USGS maintain streamflow gages on the North Umpqua River, as well as major tributaries. Data are readily available from the USGS National Water Information System (NWIS), accompanied by useful QC information. 
 
-There are no USGS flow gaging stations on `r waterbody_name`. **[THIS WILL BE CODED FOR IF TABLE ELSE NO DATA]**
+```{r t5x23_2, echo=FALSE, results='asis'}
+
+t5x23_2 <- usgs.station.tbl %>% 
+  dplyr::filter(section_name %in%  waterbody_name) %>% 
+  dplyr::select(-c(HUC10,section_name,n))
+
+if(NROW(t5x23_2)>0){
+  
+  cat(paste0("There are ", NROW(t5x23_2), " USGS flow gaging stations on ", waterbody_name, " (",  tbls(name=paste0("t5x23_2", waterbody_name), display="cite"), ")."))
+
+  print(knitr::kable(t5x23_2, format = "pandoc", padding = 2,
+                     caption = tbls(name = paste0("t5x23_2", waterbody_name),
+                                    caption = paste0("USGS flow gaging stations in ", waterbody_name, "."))))
+  
+} else {
+  
+  cat(paste0("There are no USGS flow gaging stations on ", waterbody_name, "."))
+  
+}
+
+```
 
 #### Point Source Discharges
 
@@ -206,7 +226,7 @@ if(NROW(t5x25)>0){
   
   cat(paste0("Effective shade data in ", tbls(name=paste0("t5x25", waterbody_name), display="cite"), " were collected to assist model calibration and simulation of incoming solar radiation. All effective shade measurements were collected with a Solar Pathfinder and correspond to solar paths observed during the months of July/August."))
   
-  print(knitr::kable(t5x23, format = "pandoc", padding = 2,
+  print(knitr::kable(t5x25, format = "pandoc", padding = 2,
                      caption = tbls(name = paste0("t5x25", waterbody_name),
                                     caption = paste0("Effective shade data collected along  ", waterbody_name, "."))))
   
