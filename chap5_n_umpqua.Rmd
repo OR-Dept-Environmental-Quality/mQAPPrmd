@@ -92,6 +92,7 @@ st_awqms <- station_awqms %>%
 st_model <- station_model %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name) %>% 
   dplyr::filter(`Input Parameter` %in%  c("Water Temperature")) %>% 
+  dplyr::filter(!(`Data Source` == "") & !(`Interpolated Data` == "T")) %>% 
   dplyr::mutate(`Station Description` = ifelse(is.na(`Station Description`),`Input Name`,`Station Description`),
                 Organization = ifelse(is.na(Organization),`Data Source`,Organization)) %>% 
   dplyr::select(`Station ID`, `Station Description`, Organization, Latitude, Longitude)

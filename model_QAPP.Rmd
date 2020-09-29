@@ -53,6 +53,7 @@ library(sf)
 library(dataRetrieval)
 library(rgdal)
 library(ggplot2)
+library(stringr)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -197,8 +198,22 @@ usgs.station.tbl <- usgs.station.subbasins %>%
                 `Begin Date` = begin_date,
                 `End Date` = end_date,
                 HUC10 = HUC_10) %>% 
-  dplyr::left_join(lookup_section_name, by="HUC10")
-
+  dplyr::left_join(lookup_section_name, by="HUC10") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " R ", " RIVER ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " @ ", " AT ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " & ", " AND ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " CK ", " CREEK ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " CR ", " CREEK ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " NR ", " NEAR ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, "N\\.", "NORTH ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, "N ", "NORTH ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " ABV ", " ABOVE ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " BLW ", " BELOW ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " P ", " POWER ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " CA ", " CANAL ") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, "OREG", "OR") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, "\\.", "") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, "T FLS", "TOKETEE FALLS")
 
 ```
 
