@@ -150,9 +150,9 @@ subbasin_num <- "17100301"
 
 usgs.stations <- whatNWISdata(stateCd="OR",
                               parameterCd = "00060") %>%  # 00060	= Discharge [ft3/s]
+  dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
+  dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
   dplyr::filter(huc_cd %in% subbasin_num) %>%
-  dplyr::filter(site_tp_cd %in% c("ST")) %>% # ST = Stream
-  dplyr::filter(data_type_cd %in% c("dv")) %>%  # dv = Daily
   dplyr::select(agency_cd, site_no, station_nm, site_tp_cd, dec_lat_va, dec_long_va,begin_date, end_date) %>% 
   dplyr::mutate(long_sf=dec_long_va,
                 lat_sf=dec_lat_va) %>%
@@ -283,13 +283,13 @@ For these reasons, the Heat Source stream thermodynamics model was selected for 
 
 # Model Development and Calibration
 
-```{r chap5, include = FALSE}
+```{r chap5, include=FALSE}
 
 chap5 <- NULL
 
 for(i in unique(sort(station_awqms$section_name))){
     waterbody_name <- i
-    chap5 <- c(chap5, knitr::knit_child(input = "chap5_n_umpqua.Rmd", envir = globalenv()))
+    chap5 <- c(chap5, knitr::knit_child(input = "chap5_n_umpqua_2.Rmd", envir = globalenv()))
 }
 
 ```
@@ -327,39 +327,19 @@ The intended use of the revised Heat Source models is to focus on the ability to
 
 Error statistics were calculated for each calibrated model.  Below are the equations used for each type of error statistic.
 
-Mean Error:		$ME = \frac{1}{n}\sum(X_{sim} - X_{obs})$
-
-Mean Absolute Error:	$MAE = \frac{1}{n}\sum|X_{sim} - X_{obs}|$
-
-Root Mean Square Error:	 $RMSE = \sqrt{\frac{1}{n}\sum(X_{sim} - X_{obs})^2}$
-
-where,  
-    $X_{sim}$ = the simulated temperature;  
-    $X_{obs}$ = the observed or measured temperature;  
-    $n$ = the sample size.  
-
-Error statistics were calculated for both the spatial (TIR) and temporal (hourly instream measurements) temperatures.  Table 64 contains the error statistics for each stream simulated. 
-
-**[Compare]**
-Model fit error statistics were calculated for the calibrated model for both hourly temperatures and 7DADM stream temperatures using Equation A6 - Equation A9.
-
-Equation A6:  
 Mean Error: $ME = \frac{1}{n}\sum(X_{sim} - X_{obs})$
 
-Equation A7:  
 Mean Absolute Error: $MAE = \frac{1}{n}\sum|X_{sim} - X_{obs}|$
 
-Equation A8:  
 Root Mean Square Error: $RMSE = \sqrt{\frac{1}{n}\sum(X_{sim} - X_{obs})^2}$
 
-Equation A9:  
 Nash-Sutcliffe efficiency coefficient: $NS = 1 - \frac {\sum (X_{sim} - X_{obs})^2}{\sum (X_{sim} - \overline{X_{obs}})^2}$
 
 where,  
-    $X_{sim}$ = the model simulated result;  
-    $X_{obs}$ = the field measured result;  
-    $\overline X_{obs}$ = The mean of the field measured result;  
-    $n$ = the total number of results.
+    $X_{sim}$ = The simulated temperature;  
+    $X_{obs}$ = The observed or measured temperature;  
+    $\overline X_{obs}$ = The mean of the observed or measured temperature;  
+    $n$ = The sample size.
 
 # Documentation in Model Reports
 
@@ -501,7 +481,7 @@ This scenario evaluates if the stream can achieve the applicable BBNC criteria a
 
 ```{r echo=FALSE}
 
-roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/models/roles.xlsx",
+roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/roles.xlsx",
                                sheet = "roles")
 
 troles <- flextable::regulartable(roles) %>% 
@@ -580,4 +560,3 @@ The DEQ Project Manager will lead distribution of the draft QAPP to their respec
 Due to the complexity of model development, some elements of the project might not proceed according to plan. Should an obstacle arise that requires a change in approach, Tetra Tech, in consultation with the project team, will return to the QAPP as a topic template for evaluating the effects on other aspects of the project. Tetra Tech will update the QAPP as needed through revisions or addenda, as model development proceeds and new aspects of the system are understood. Significant changes in technical approach would be described in the updated QAPP and would be reviewed by the project team listed on the QAPP approval page prior to implementation.
 
 # References
-

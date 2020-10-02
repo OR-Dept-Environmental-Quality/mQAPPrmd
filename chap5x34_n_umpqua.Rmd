@@ -1,0 +1,56 @@
+---
+output: 
+  word_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r setup_chap5x34, include=TRUE}
+
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE,
+                      error = FALSE,
+                      cache = FALSE,
+                      cache.comments = FALSE,
+                      include = TRUE,
+                      autodep = TRUE,
+                      eval = TRUE
+                      # fig.keep = 'all',
+                      # fig.path = paste0(out_dir, "/Figures/"),
+                      # fig.width = 12, 
+                      # fig.height = 6
+)
+
+options(kableExtra.auto_format = F)
+
+# For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
+
+
+```
+
+##### `r model_extent`
+
+```{r t5x34j, include=TRUE, results='asis'}
+  
+t5x34j <- section.model.input %>% 
+  dplyr::filter(`Model Extent` %in%  model_extent) %>% 
+  dplyr::filter(`Input Type` == "Calibration Site") %>% 
+  dplyr::select(`Input Name`, `Model Location`, `Input Parameter`,  `Station ID`, `Data Source`) %>% 
+  dplyr::rename(`Station Description` = `Input Name`,
+                `Model Location (Kilometer)` = `Model Location`,
+                `Model Input Type` = `Input Parameter`)
+
+  if(NROW(t5x34j)>0){
+    print(knitr::kable(t5x34j, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t5x34j", model_extent),
+                                      caption = paste0("Calibration sites and parameters used in the existing ", model_extent, "."))))
+    
+  }
+
+
+```
