@@ -1,6 +1,4 @@
 ---
-author: "yg"
-date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output: 
   word_document:
     reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
@@ -16,10 +14,10 @@ output:
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
                       warning = FALSE,
-                      error = TRUE,
+                      error = FALSE,
                       cache = FALSE,
                       cache.comments = FALSE,
-                      include = TRUE,
+                      include = FALSE,
                       autodep = TRUE,
                       eval = TRUE
                       # fig.keep = 'all',
@@ -30,7 +28,7 @@ knitr::opts_chunk$set(echo = FALSE,
 
 options(kableExtra.auto_format = F)
 
-# For testing: waterbody_name <- "Canton Creek"
+# For testing: waterbody_name <- "North Umpqua River"
 
 section.dta <- data %>% 
   dplyr::filter(section_name %in%  waterbody_name)
@@ -44,6 +42,10 @@ section.model.input <- model.input %>%
 section.npdes <- npdes %>% 
   dplyr::filter(`Project Area` %in%  subbasin)%>% 
   dplyr::filter(`Stream Name` %in%  waterbody_name)
+
+model.extent <- unique(ifelse(section.model.input$`Model Waterbody` == section.model.input$`Model Extent`, TRUE, FALSE))
+
+model.extent <- na.omit(model.extent)
 
 ```
 
@@ -250,6 +252,7 @@ if(length(section.model.info$`Model Extent Text`)>1){
 } else {model.domain <- section.model.info$`Model Extent Text`} 
 
 ```
+
 `r model.domain`
 
 #### Spatial and Temporal Resolution
@@ -268,17 +271,34 @@ Model calibration was completed by DEQ and described in ODEQ (2006). Adjustments
 
 ```{r t5x34, include=TRUE, results='asis'}
 
-t5x34 <- section.model.input %>% 
-  dplyr::filter(`Input Type` == "Calibration Site") %>% 
-  dplyr::select(`Input Name`, `Model Location`, `Input Parameter`,  `Station ID`, `Data Source`) %>% 
-  dplyr::rename(`Station Description` = `Input Name`,
-                `Model Location (Kilometer)` = `Model Location`,
-                `Model Input Type` = `Input Parameter`)
-
-if(NROW(t5x34)>0){
-  print(knitr::kable(t5x34, format = "pandoc", padding = 2,
-                     caption = tbls(name = paste0("t5x34", waterbody_name),
-                                    caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model."))))
+if(model.extent == FALSE){
+  
+  chap5x34 <- NULL
+  
+  for(j in unique(sort(section.model.input$`Model Extent`))){
+    
+    model_extent <- j
+    chap5x34 <- c(chap5x34, knitr::knit_child(input = "chap5x34_n_umpqua.Rmd", envir = globalenv()))
+    
+  }
+  
+  cat(chap5x34, collapse = "\n")
+  
+} else {
+  
+  t5x34 <- section.model.input %>% 
+    dplyr::filter(`Input Type` == "Calibration Site") %>% 
+    dplyr::select(`Input Name`, `Model Location`, `Input Parameter`,  `Station ID`, `Data Source`) %>% 
+    dplyr::rename(`Station Description` = `Input Name`,
+                  `Model Location (Kilometer)` = `Model Location`,
+                  `Model Input Type` = `Input Parameter`)
+  
+  if(NROW(t5x34)>0){
+    print(knitr::kable(t5x34, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t5x34", waterbody_name),
+                                      caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model."))))
+    
+  }
   
 }
 
@@ -289,6 +309,22 @@ if(NROW(t5x34)>0){
 This section describes the input model parameters and those which will be most likely adjusted to improve calibration and fit. Adjustments to calibration model parameters will not be made as part of this QAPP. Temperature, flow, and meteorological input parameters are summarized here to improve documentation of the TMDL approach.  If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
 
 ```{r t5x35, include=TRUE, results='asis'}
+
+if(model.extent == FALSE){
+  
+  chap5x35 <- NULL
+  
+  for(j in unique(sort(section.model.input$`Model Extent`))){
+    
+    model_extent <- j
+    chap5x35 <- c(chap5x35, knitr::knit_child(input = "chap5x35_n_umpqua.Rmd", envir = globalenv()))
+    
+  }
+  
+  cat(chap5x35, collapse = "\n")
+  
+} else {
+
 
 t5x35 <- section.model.input %>% 
   dplyr::filter(!`Input Type` %in%  c("Calibration Site")) %>% 
@@ -304,6 +340,7 @@ if(NROW(t5x35)>0){
   
 }
 
+}
 ```
 
 Hourly meteorology inputs into the model include air temperature, cloudiness, relative humidity, and wind speed. The data source for these inputs is the National Climatic Data Center weather station at the Roseburg Regional Airport. Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.
