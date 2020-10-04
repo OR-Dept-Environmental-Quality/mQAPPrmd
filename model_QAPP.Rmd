@@ -14,7 +14,7 @@ output:
     df_print: paged
 ---
 
-```{r setup_1, include=FALSE}
+```{r, label=`proj-area`, include=FALSE}
 # NOTE: SEARCH WHERE UPDATE IS REQUIRED IN THE SCRIPT.
 # UPDATE REQUIRED:
 qapp_project_area = "North Umpqua Subbasin"
@@ -25,22 +25,16 @@ title: "`r paste0("Modeling Quality Assurance Project Plan for the ", qapp_proje
   Maximum Daily Load")`"
 ---
 
-```{r setup, include=FALSE}
+```{r, label=`setup`, include=FALSE}
 
 options(knitr.duplicate.label = 'allow')
 options(tinytex.verbose = TRUE)
 
-knitr::opts_chunk$set(echo = FALSE,
-                      message = FALSE,
-                      warning=FALSE,
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
                       error = FALSE,
-                      cache = FALSE,
-                      include = TRUE #,
-                      # fig.keep='all',
-                      # fig.path=paste0(out_dir, "/Figures/"),
-                      # fig.width = 12, 
-                      # fig.height = 6
-                      )
+                      message = FALSE,
+                      autodep = TRUE)
 
 library(knitr); library(kableExtra)
 library(tidyverse)
@@ -283,7 +277,7 @@ For these reasons, the Heat Source stream thermodynamics model was selected for 
 
 # Model Development and Calibration
 
-```{r chap5, include=FALSE}
+```{r, label=`chap5`, include=FALSE}
 
 chap5 <- NULL
 
@@ -293,6 +287,7 @@ for(i in unique(sort(station_awqms$section_name))){
 }
 
 ```
+
 `r paste(chap5, collapse = "\n")`
 
 # Model Evaluation and Acceptance
@@ -479,7 +474,7 @@ This scenario evaluates if the stream can achieve the applicable BBNC criteria a
 
 ## Project Team/Roles
 
-```{r echo=FALSE}
+```{r, label=`roles`, echo=FALSE}
 
 roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/roles.xlsx",
                                sheet = "roles")
@@ -560,3 +555,5 @@ The DEQ Project Manager will lead distribution of the draft QAPP to their respec
 Due to the complexity of model development, some elements of the project might not proceed according to plan. Should an obstacle arise that requires a change in approach, Tetra Tech, in consultation with the project team, will return to the QAPP as a topic template for evaluating the effects on other aspects of the project. Tetra Tech will update the QAPP as needed through revisions or addenda, as model development proceeds and new aspects of the system are understood. Significant changes in technical approach would be described in the updated QAPP and would be reviewed by the project team listed on the QAPP approval page prior to implementation.
 
 # References
+
+

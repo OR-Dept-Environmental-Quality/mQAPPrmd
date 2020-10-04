@@ -9,22 +9,13 @@ output:
     fig_height: 6
 ---
 
-```{r setup_chap5, include=TRUE}
+```{r, label=`setup-chap5`, include=FALSE}
 
-knitr::opts_chunk$set(echo = FALSE,
-                      message = FALSE,
+knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
                       error = FALSE,
-                      cache = FALSE,
-                      cache.comments = FALSE,
-                      include = FALSE,
-                      autodep = TRUE,
-                      eval = TRUE
-                      # fig.keep = 'all',
-                      # fig.path = paste0(out_dir, "/Figures/"),
-                      # fig.width = 12, 
-                      # fig.height = 6
-)
+                      message = FALSE,
+                      autodep = TRUE)
 
 options(kableExtra.auto_format = F)
 
@@ -61,7 +52,7 @@ Stream temperature is influenced by natural factors such as climate, geomorpholo
 
 **[Update for each stream]** Canton Creek and its contributing watershed area is characterized as primarily a mix of private and federal forestlands. Vegetation removal from forest clear cutting is the dominant source of anthropogenic heat loads (ODEQ 2006). 
 
-```{r t5x11, echo=FALSE, results='asis'}
+```{r, label=`t5x11`, echo=FALSE}
 
 if(NROW(section.npdes)>0){
   
@@ -84,7 +75,7 @@ Meteorology inputs into the model include air temperature, cloudiness, relative 
 
 Continuous temperature data were collected at a number of locations during several years. `r tbls(name=paste0("t5x22_1", waterbody_name), display="cite")` lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. `r tbls(name=paste0("t5x22_2", waterbody_name), display="cite")` summarizes when data were collected at each station. Specific uses for some of this temperature data are described in the model setup and calibration sections later in this report.
 
-```{r t5x22_1, echo=FALSE, results='asis'}
+```{r, label=`t5x22_1`, echo=FALSE}
 
 st_awqms <- station_awqms %>% 
   dplyr::filter(section_name %in% waterbody_name) %>% 
@@ -117,8 +108,8 @@ if(NROW(t5x22_1)>0){
 
 ```
 
-```{r t5x22_2, echo=FALSE, results='asis'}
-options(knitr.kable.NA = '')
+```{r, label=`t5x22_2`, echo=FALSE}
+options(knitr.kable.NA = '') # hide NAs in table
 
 t5x22_2 <- data.sample.count %>%
   dplyr::filter(section_name %in%  waterbody_name) %>% 
@@ -143,7 +134,7 @@ if(NROW(t5x22_2)>0){
 
 Flow volume data and other instream measurements were collected at several sites along `r waterbody_name` (`r tbls(name=paste0("t5x23_1", waterbody_name), display="cite")`) by Oregon DEQ. These measurements were used to develop flow mass balances for the `r waterbody_name` temperature model.
 
-```{r t5x23_1, echo=FALSE, results='asis'}
+```{r, label=`t5x23_1`, echo=FALSE}
 
 t5x23_1 <- section.model.input %>% 
   dplyr::filter(`Input Parameter` %in% c("Flow")) %>% 
@@ -167,7 +158,7 @@ if(NROW(t5x23_1)>0){
 
 Reliable streamflow data are important to model development, calibration and validation. The USGS maintain streamflow gages on the North Umpqua River, as well as major tributaries. Data are readily available from the USGS National Water Information System (NWIS), accompanied by useful QC information. 
 
-```{r t5x23_2, echo=FALSE, results='asis'}
+```{r, label=`t5x23_2`, echo=FALSE}
 
 t5x23_2 <- usgs.station.tbl %>% 
   dplyr::filter(section_name %in%  waterbody_name) %>% 
@@ -193,7 +184,7 @@ if(NROW(t5x23_2)>0){
 
 Measured flows and temperature data were used to determine the thermal loads from the point source discharges in the Heat Source models. ODEQ maintains a database (<http://www.deq.state.or.us/wq/sisdata/sisdata.asp>) for point source information.
 
-```{r t5x24, echo=FALSE, results='asis'}
+```{r, label=`t5x24`, echo=FALSE}
 
 t5x24 <- section.npdes %>% 
   dplyr::mutate(`Facility Name and Number` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
@@ -216,7 +207,7 @@ if(NROW(t5x24)>0){
 
 #### Effective Shade Measurements
 
-```{r t5x25, echo=FALSE, results='asis'}
+```{r, label=`t5x25`, echo=FALSE}
 
 t5x25 <- section.model.input %>% 
   dplyr::filter(`Input Parameter` %in% c("Effective Shade")) %>% 
@@ -245,7 +236,7 @@ if(NROW(t5x25)>0){
 
 #### Model Domain
 
-```{r t5x31, include=TRUE, results='asis'}
+```{r, label=`t5x31`, include=FALSE}
 
 if(length(section.model.info$`Model Extent Text`)>1){
   model.domain <- unique(sort(section.model.info$`Model Extent Text`))
@@ -269,7 +260,7 @@ The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Mode
 
 Model calibration was completed by DEQ and described in ODEQ (2006). Adjustments to the calibration model will not be made as part of this QAPP. Temperature, flow, and effective shade calibration sites, are summarized here to improve documentation of the TMDL approach.  If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
 
-```{r t5x34, include=TRUE, results='asis'}
+```{r, label=`t5x34`, include=FALSE}
 
 if(model.extent == FALSE){
   
@@ -281,9 +272,7 @@ if(model.extent == FALSE){
     chap5x34 <- c(chap5x34, knitr::knit_child(input = "chap5x34_n_umpqua.Rmd", envir = globalenv()))
     
   }
-  
-  cat(chap5x34, collapse = "\n")
-  
+
 } else {
   
   t5x34 <- section.model.input %>% 
@@ -292,23 +281,19 @@ if(model.extent == FALSE){
     dplyr::rename(`Station Description` = `Input Name`,
                   `Model Location (Kilometer)` = `Model Location`,
                   `Model Input Type` = `Input Parameter`)
-  
-  if(NROW(t5x34)>0){
-    print(knitr::kable(t5x34, format = "pandoc", padding = 2,
-                       caption = tbls(name = paste0("t5x34", waterbody_name),
-                                      caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model."))))
-    
-  }
-  
+
 }
 
 ```
+
+`r if(model.extent == FALSE){paste(chap5x34, collapse = "\n")}else{if(NROW(t5x34)>0){knitr::kable(t5x34, format = "pandoc", padding = 2,caption = tbls(name = paste0("t5x34", waterbody_name),caption = paste0("Calibration sites and parameters usedin the existing ", waterbody_name, " Heat Source Model.")))}}`
+
 
 #### Model Inputs and Parameters
 
 This section describes the input model parameters and those which will be most likely adjusted to improve calibration and fit. Adjustments to calibration model parameters will not be made as part of this QAPP. Temperature, flow, and meteorological input parameters are summarized here to improve documentation of the TMDL approach.  If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
 
-```{r t5x35, include=TRUE, results='asis'}
+```{r, label=`t5x35`, include=FALSE}
 
 if(model.extent == FALSE){
   
@@ -320,9 +305,7 @@ if(model.extent == FALSE){
     chap5x35 <- c(chap5x35, knitr::knit_child(input = "chap5x35_n_umpqua.Rmd", envir = globalenv()))
     
   }
-  
-  cat(chap5x35, collapse = "\n")
-  
+
 } else {
 
 
@@ -333,15 +316,11 @@ t5x35 <- section.model.input %>%
                 `Model Location (Kilometer)` = `Model Location`,
                 `Model Input Type` = `Input Parameter`)
 
-if(NROW(t5x35)>0){
-  print(knitr::kable(t5x35, format = "pandoc", padding = 2,
-                     caption = tbls(name = paste0("t5x35", waterbody_name),
-                                    caption = paste0("Boundary condition inputs to the existing ", waterbody_name, " Heat Source Model."))))
-  
-}
-
 }
 ```
+
+`r if(model.extent == FALSE){paste(chap5x35, collapse = "\n")}else{if(NROW(t5x35)>0){knitr::kable(t5x35, format = "pandoc", padding = 2,caption = tbls(name = paste0("t5x35", waterbody_name),caption = paste0("Boundary condition inputs to the existing ", waterbody_name, " Heat Source Model.")))}}`
+
 
 Hourly meteorology inputs into the model include air temperature, cloudiness, relative humidity, and wind speed. The data source for these inputs is the National Climatic Data Center weather station at the Roseburg Regional Airport. Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.
 
