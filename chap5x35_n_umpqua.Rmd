@@ -9,22 +9,13 @@ output:
     fig_height: 6
 ---
 
-```{r setup_chap5x34, include=TRUE}
+```{r setup_chap5x34, include=FALSE}
 
-knitr::opts_chunk$set(echo = FALSE,
-                      message = FALSE,
+knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
                       error = FALSE,
-                      cache = FALSE,
-                      cache.comments = FALSE,
-                      include = TRUE,
-                      autodep = TRUE,
-                      eval = TRUE
-                      # fig.keep = 'all',
-                      # fig.path = paste0(out_dir, "/Figures/"),
-                      # fig.width = 12, 
-                      # fig.height = 6
-)
+                      message = FALSE,
+                      autodep = TRUE)
 
 options(kableExtra.auto_format = F)
 
@@ -35,7 +26,7 @@ options(kableExtra.auto_format = F)
 
 ##### `r model_extent`
 
-```{r t5x35j, include=TRUE, results='asis'}
+```{r, label=t5x35j, echo=FALSE}
   
 t5x35j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
