@@ -30,18 +30,22 @@ options(kableExtra.auto_format = F)
   
 t5x35j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
-  dplyr::filter(`Input Type` == "Calibration Site") %>% 
-  dplyr::select(`Input Name`, `Model Location`, `Input Parameter`,  `Station ID`, `Data Source`) %>% 
-  dplyr::rename(`Station Description` = `Input Name`,
-                `Model Location (Kilometer)` = `Model Location`,
-                `Model Input Type` = `Input Parameter`)
+  dplyr::filter(!`Site Type` == "Calibration Site") %>% 
+  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
+  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+  dplyr::select(`Site Name`, `Station ID`, `Model_Location`, `Parameter`, `Data Source`) %>% 
+  dplyr::rename(`Station Description` = `Site Name`,
+                `Model Location` = `Model_Location`)
 
   if(NROW(t5x35j)>0){
     print(knitr::kable(t5x35j, format = "pandoc", padding = 2,
                        caption = tbls(name = paste0("t5x35j", model_extent),
                                       caption = paste0("Boundary condition inputs to the existing ", model_extent, "."))))
     
+  }  else {
+    
+    cat(paste0("There were no temperature or flow boundary conditions input to this model."))
+    
   }
-
 
 ```

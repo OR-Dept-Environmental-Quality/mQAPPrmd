@@ -27,14 +27,16 @@ options(kableExtra.auto_format = F)
 ##### `r model_extent`
 
 ```{r, label=`t5x34j`, echo=FALSE}
+# for test: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
   
 t5x34j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
-  dplyr::filter(`Input Type` == "Calibration Site") %>% 
-  dplyr::select(`Input Name`, `Model Location`, `Input Parameter`,  `Station ID`, `Data Source`) %>% 
-  dplyr::rename(`Station Description` = `Input Name`,
-                `Model Location (Kilometer)` = `Model Location`,
-                `Model Input Type` = `Input Parameter`)
+  dplyr::filter(`Site Type` == "Calibration Site") %>%
+  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
+  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+  dplyr::select(`Site Name`, `Station ID`, `Model_Location`, `Parameter`, `Data Source`) %>% 
+  dplyr::rename(`Station Description` = `Site Name`,
+                `Model Location` = `Model_Location`)
 
   if(NROW(t5x34j)>0){
     print(knitr::kable(t5x34j, format = "pandoc", padding = 2,
@@ -42,6 +44,5 @@ t5x34j <- section.model.input %>%
                                       caption = paste0("Calibration sites and parameters used in the existing ", model_extent, "."))))
     
   }
-
 
 ```
