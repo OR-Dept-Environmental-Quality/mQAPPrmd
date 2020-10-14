@@ -21,8 +21,7 @@ qapp_project_area = "North Umpqua Subbasin"
 ```
 
 ---
-title: "`r paste0("Modeling Quality Assurance Project Plan for the ", qapp_project_area, " Temperature Total
-  Maximum Daily Load")`"
+title: "`r paste0("Modeling Quality Assurance Project Plan for the ", qapp_project_area, " Temperature Total Maximum Daily Load")`"
 ---
 
 ```{r, label=`setup`, include=FALSE}
@@ -48,6 +47,7 @@ library(dataRetrieval)
 library(rgdal)
 library(ggplot2)
 library(stringr)
+library(english)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -59,7 +59,10 @@ cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"),
                                sheet = "Calibration Inputs")
   
 cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"),
-                               sheet = "Calibration Model Info")
+                               sheet = "Calibration Model Setup Info")
+
+cal.tir <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"),
+                               sheet = "TIR Calibration")
 
 npdes <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"),
                                sheet = "Individual_NDPES")
@@ -103,7 +106,8 @@ station_awqms <- df.stations.state %>%
 station_model <- cal.input %>% 
   dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
   # dplyr::filter(!is.na(Latitude)) %>% 
-  dplyr::left_join(station_awqms[,c("Station ID", "Station Description", "Organization")], by="Station ID")
+  dplyr::left_join(station_awqms[,c("Station ID", "Station Description", "Organization")], by="Station ID") %>% 
+  dplyr::mutate(Latitude = as.numeric(Latitude))
 
 lookup_section_name <- station_awqms %>% 
   dplyr::select(HUC10, section_name) %>% 
@@ -136,7 +140,9 @@ model.info <- cal.model %>%
   dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
 
 model.input  <- cal.input %>% 
-  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
+  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
+  dplyr::mutate(Latitude = round(as.numeric(Latitude),4),
+                Longitude = round(Longitude,3))
 
 # USGS Flow data ----
 # UPDATE REQUIRED:
@@ -207,7 +213,11 @@ usgs.station.tbl <- usgs.station.subbasins %>%
   dplyr::mutate_at("Station Name", str_replace_all, " CA ", " CANAL ") %>% 
   dplyr::mutate_at("Station Name", str_replace_all, "OREG", "OR") %>% 
   dplyr::mutate_at("Station Name", str_replace_all, "\\.", "") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, "T FLS", "TOKETEE FALLS")
+  dplyr::mutate_at("Station Name", str_replace_all, "T FLS", "TOKETEE FALLS") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, ",OR", "") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, ", OR", "") %>% 
+  dplyr::mutate_at("Station Name", str_replace_all, " OR", "") %>% 
+  dplyr::mutate(`Station Name` = stringr::str_to_title(`Station Name`))
 
 ```
 
@@ -283,7 +293,7 @@ chap5 <- NULL
 
 for(i in unique(sort(station_awqms$section_name))){
     waterbody_name <- i
-    chap5 <- c(chap5, knitr::knit_child(input = "chap5_n_umpqua_2.Rmd", envir = globalenv()))
+    chap5 <- c(chap5, knitr::knit_child(input = "chap5_n_umpqua.Rmd", envir = globalenv()))
 }
 
 ```
@@ -346,7 +356,7 @@ The Tetra Tech Project Manager will maintain a central project file in Tetra Tec
 
 Peer review of the models and model results will be conducted in the following ways:
 
-DEQ will conduct interval peer review during the modeling process with input from EPA Region 10 as needed.
+DEQ will conduct internal peer review during the modeling process with input from EPA Region 10 as needed.
 
 DEQ will consider feedback on model scenarios and results from the TMDL advisory group and make changes as appropriate.
 
