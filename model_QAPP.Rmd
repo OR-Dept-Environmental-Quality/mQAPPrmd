@@ -14,10 +14,10 @@ output:
     df_print: paged
 ---
 
-```{r, label=`proj-area`, include=FALSE}
-# NOTE: SEARCH WHERE UPDATE IS REQUIRED IN THE SCRIPT.
-# UPDATE REQUIRED:
-qapp_project_area = "North Umpqua Subbasin"
+```{r, label=`load-data`, include=FALSE}
+
+load("data.RData")
+
 ```
 
 ---
@@ -27,6 +27,7 @@ title: "`r paste0("Modeling Quality Assurance Project Plan for the ", qapp_proje
 ```{r, label=`setup`, include=FALSE}
 
 options(knitr.duplicate.label = 'allow')
+options(knitr.kable.NA = '')
 options(tinytex.verbose = TRUE)
 
 knitr::opts_chunk$set(results = "asis",
@@ -41,9 +42,7 @@ library(captioner)
 library(readxl)
 library(lubridate)
 library(flextable)
-library(webshot)
-library(sf)
-library(dataRetrieval)
+library(sf); library(sp)
 library(rgdal)
 library(ggplot2)
 library(stringr)
@@ -52,172 +51,6 @@ library(english)
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
 eqns <- captioner::captioner(prefix="Equation")
-
-data.dir <- "T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-
-cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"),
-                               sheet = "Calibration Inputs")
-  
-cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"),
-                               sheet = "Calibration Model Setup Info")
-
-cal.tir <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"),
-                               sheet = "TIR Calibration")
-
-npdes <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"),
-                               sheet = "Individual_NDPES")
-
-# UPDATE REQUIRED:
-load("T:/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_Umpqua Basin.RData") # df.awqms.raw
-
-load("T:/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
-
-unique(sort(df.awqms.raw$HUC8_Name))
-# "North Umpqua" "South Umpqua" "Umpqua"
-
-# UPDATE REQUIRED:
-subbasin <- "North Umpqua"
-
-station_awqms <- df.stations.state %>% 
-  dplyr::filter(HUC8_Name %in%  subbasin) %>% 
-  # Check and compare the HUC10_Names to QAPP Section Names
-  # unique(sort(station$HUC10_Name))
-  # UPDATE REQUIRED:
-  dplyr::mutate(section_name = ifelse(HUC10_Name %in%  c("Headwaters North Umpqua River", 
-                                                      "Lower North Umpqua River",
-                                                      "Middle North Umpqua River",
-                                                      "Upper North Umpqua River"),
-                                      "North Umpqua River",
-                                      HUC10_Name)) %>% 
-  dplyr::mutate(section_name = ifelse(HUC12_Name %in%  c("Upper Cavitt Creek"),
-                                      "Cavitt Creek",
-                                      section_name)) %>% 
-  dplyr::mutate(section_name = ifelse(HUC12_Name %in%  c("Lake Creek"),
-                                      "Lake Creek",
-                                      section_name)) %>% 
-  dplyr::rename(`Station ID` = MLocID,
-                `Station Description` = StationDes,
-                Organization = OrgID,
-                Latitude = Lat_DD,
-                Longitude = Long_DD)
-
-# unique(sort(station_awqms$section_name))
-
-station_model <- cal.input %>% 
-  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
-  # dplyr::filter(!is.na(Latitude)) %>% 
-  dplyr::left_join(station_awqms[,c("Station ID", "Station Description", "Organization")], by="Station ID") %>% 
-  dplyr::mutate(Latitude = as.numeric(Latitude))
-
-lookup_section_name <- station_awqms %>% 
-  dplyr::select(HUC10, section_name) %>% 
-  dplyr::group_by(HUC10, section_name) %>% 
-  dplyr::summarise(n = n())
-
-data <- df.awqms.raw %>% 
-  dplyr::filter(HUC8_Name %in%  subbasin) %>% 
-  # QA/QC check:
-  dplyr::filter(Result_status %in% c("Final", "Provisional") | 
-                  QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
-  dplyr::left_join(lookup_section_name, by="HUC10")
-
-# data.sample.count will be used in chap5 5.x.2.2
-data.sample.count <- data %>% 
-  dplyr::filter(Statistical_Base == "Maximum") %>% 
-  dplyr::select(Org_Name, MLocID, SampleStartDate, Statistical_Base, Result_Numeric) %>% 
-  dplyr::mutate(month=lubridate::month(SampleStartDate, label=TRUE, abbr=TRUE),
-                year=lubridate::year(SampleStartDate)) %>% 
-  dplyr::group_by(MLocID, Statistical_Base, year, month) %>%
-  dplyr::summarize(Org_Names=paste0(unique(Org_Name), collapse=" ,"),n=n()) %>%
-  dplyr::ungroup() %>%
-  tidyr::pivot_wider(names_from = month, values_from=n) %>%
-  dplyr::rename(`Station ID` = MLocID) %>% 
-  dplyr::left_join(station_awqms[,c("Station ID", "Station Description", "section_name")], by="Station ID") %>% 
-  dplyr::rename(Year = year,
-                Organization = Org_Names)
-
-model.info <- cal.model %>% 
-  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
-
-model.input  <- cal.input %>% 
-  dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
-  dplyr::mutate(Latitude = round(as.numeric(Latitude),4),
-                Longitude = round(Longitude,3))
-
-# USGS Flow data ----
-# UPDATE REQUIRED:
-subbasin_num <- "17100301"
-
-usgs.stations <- whatNWISdata(stateCd="OR",
-                              parameterCd = "00060") %>%  # 00060	= Discharge [ft3/s]
-  dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
-  dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
-  dplyr::filter(huc_cd %in% subbasin_num) %>%
-  dplyr::select(agency_cd, site_no, station_nm, site_tp_cd, dec_lat_va, dec_long_va,begin_date, end_date) %>% 
-  dplyr::mutate(long_sf=dec_long_va,
-                lat_sf=dec_lat_va) %>%
-  dplyr::distinct() %>%
-  sf::st_as_sf(coords = c("long_sf",  "lat_sf"), crs = sf::st_crs("+init=EPSG:4269"))
-
-# sf::st_write(usgs.stations, "N_Umpqua_usgs_flow_sites.shp")
-
-web.huc8 <- sf::read_sf(dsn = "T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/web_hu08.shp",
-                        layer = "web_hu08")
-
-web.huc12 <- sf::read_sf(dsn = "T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/web_poly.shp",
-                         layer = "web_poly")
-
-qapp_project_area_huc8 <- web.huc8 %>% 
-  dplyr::filter(HUC_8 %in% subbasin_num)
-
-# ggplot() + 
-#  geom_sf(data = web.huc12, colour = "light gray", fill = NA) +
-#  geom_sf(data = web.huc8, colour = "blue", fill = NA) +
-#  geom_sf(data = qapp_project_area_huc8, colour = "red", fill = NA)
-
-qapp_project_area_huc12 <- web.huc12 %>% 
-  dplyr::filter(sf::st_contains(qapp_project_area_huc8, ., sparse = FALSE))
-
-# ggplot2::ggplot(qapp_project_area_huc12) + geom_sf()
-
-usgs.station.subbasins <-  sf::st_join(x = usgs.stations,
-                                       y = qapp_project_area_huc12,
-                                       join = st_intersects,
-                                       left = TRUE)
-
-# ggplot2::ggplot(usgs.station.subbasins) + geom_sf()
-
-st_geometry(usgs.station.subbasins) <- NULL
-
-usgs.station.tbl <- usgs.station.subbasins %>% 
-  dplyr::select(station_nm, agency_cd, dec_lat_va, dec_long_va, begin_date, end_date, HUC_10) %>% 
-  dplyr::rename(`Station Name`= station_nm,
-                Agency = agency_cd,
-                Latitude = dec_lat_va,
-                Longitude = dec_long_va,
-                `Begin Date` = begin_date,
-                `End Date` = end_date,
-                HUC10 = HUC_10) %>% 
-  dplyr::left_join(lookup_section_name, by="HUC10") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " R ", " RIVER ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " @ ", " AT ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " & ", " AND ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " CK ", " CREEK ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " CR ", " CREEK ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " NR ", " NEAR ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, "N\\.", "NORTH ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, "N ", "NORTH ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " ABV ", " ABOVE ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " BLW ", " BELOW ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " P ", " POWER ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " CA ", " CANAL ") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, "OREG", "OR") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, "\\.", "") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, "T FLS", "TOKETEE FALLS") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, ",OR", "") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, ", OR", "") %>% 
-  dplyr::mutate_at("Station Name", str_replace_all, " OR", "") %>% 
-  dplyr::mutate(`Station Name` = stringr::str_to_title(`Station Name`))
 
 ```
 
@@ -285,20 +118,275 @@ The modeling framework needs for this project include:
 
 For these reasons, the Heat Source stream thermodynamics model was selected for stream temperature simulation.  
 
-# Model Development and Calibration
+# Data Availability and Quality
 
-```{r, label=`chap5`, include=FALSE}
 
-chap5 <- NULL
+## Meteorology
 
-for(i in unique(sort(station_awqms$section_name))){
-    waterbody_name <- i
-    chap5 <- c(chap5, knitr::knit_child(input = "chap5_n_umpqua.Rmd", envir = globalenv()))
+```{r, label=`t51_1`, echo=FALSE}
+
+# for test: qapp_project_area = "Upper Rogue Subbasin"
+# for test: metsite <- "Medford Airport, National Climatic Data Center"
+
+for(metsite in unique(sort(model.input$`Data Source`))){
+
+t51_1 <- model.input %>% 
+  dplyr::filter(`Site Type` %in% c("Meteorological")) %>% 
+  dplyr::filter(`Data Source` %in%  metsite) %>% 
+  dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                  `Site Name`,
+                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
+  dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%  
+  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
+  dplyr::group_by(Location, `Latitude/Longitude`) %>% 
+  dplyr::summarise(Parameter = toString(Parameter))
+
+if(NROW(t51_1)>0){
+  print(knitr::kable(t51_1, format = "pandoc", padding = 2,
+                     caption = tbls(name = paste0("t51_1",metsite),
+                                    caption = paste0("Meteorological data avialable at ", metsite, " in ", qapp_project_area, "."))))
+}
+
 }
 
 ```
 
-`r paste(chap5, collapse = "\n")`
+```{r, label=`t51-2`, echo=FALSE}
+
+t51_2 <- ncdc.station.tbl %>% 
+  dplyr::mutate(Location = paste0(name," (", station.id,")"),
+                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
+  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
+  dplyr::arrange(Location)
+
+if(NROW(t51_2)>0){
+  print(knitr::kable(t51_2, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_2",
+                                    caption = paste0("Meteorological data of ", qapp_project_area, " available in NOAA National Climatic Data Center database."))))
+}
+
+
+
+```
+
+
+## Thermal Infrared (TIR) Data
+
+```{r, label=`t52`, echo=FALSE}
+
+t52 <- model.input %>% 
+  dplyr::filter(`Station ID` == "TIR") %>% 
+  dplyr::rename(`Abbreviated Reference` = `Data Source`) %>% 
+  dplyr::left_join(ref, by = "Abbreviated Reference") %>% 
+  dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`))
+
+waterbodies <- unique(sort(t52$`Model Waterbody`))
+
+citations <- unique(sort(t52$`Abbreviated Reference`))
+
+```
+`r paste0("TIR data are available for ", knitr::combine_words(waterbodies), " (", knitr::combine_words(citations), ").")`
+
+## Continuous Stream Temperature Data
+
+All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). Table X to Table Y list all the locations where continuous stream temperature data were collected and the organizations that collected that data. Table Y to Table Z summarizes when data were collected at each station.
+
+```{r, label=`t53`, echo=FALSE}
+
+for(waterbody_name in unique(sort(station_awqms$section_name))){
+  
+  # test: waterbody_name <- "Canton Creek"
+  
+  section.dta <- data %>% 
+    dplyr::filter(section_name %in% waterbody_name)
+  
+  st_awqms <- station_awqms %>% 
+    dplyr::filter(section_name %in% waterbody_name) %>% 
+    dplyr::filter(`Station ID` %in% unique(sort(section.dta$MLocID))) %>% 
+    dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
+  
+  st_model <- station_model %>% 
+    dplyr::filter(`Model Waterbody` %in%  waterbody_name) %>% 
+    dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
+    dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
+    dplyr::mutate(`Station Description` = ifelse(is.na(`Station Description`),`Site Name`,`Station Description`),
+                  Organization = ifelse(is.na(Organization),`Data Source`,Organization)) %>% 
+    dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
+  
+  t53_1 <- rbind(st_awqms,st_model) %>% 
+    dplyr::filter(!`Station ID` == "TIR") %>% 
+    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                    `Station Description`,
+                                    paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
+    dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>% 
+    dplyr::group_by(Location,`Latitude/Longitude`, Organization) %>% 
+    dplyr::summarise(n=n()) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::select(-n) %>% 
+    dplyr::arrange(Location)
+  
+  t53_2 <- data.sample.count %>%
+    dplyr::filter(section_name %in% waterbody_name) %>% 
+    dplyr::filter(!`Station ID` == "TIR") %>% 
+    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                    `Station Description`,
+                                    paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
+    dplyr::select(Year, Location,Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
+    dplyr::arrange(Year, Location)
+  
+  if(NROW(t53_1)>0){
+    print(knitr::kable(t53_1, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t53_1", waterbody_name),
+                                      caption = paste0("Continuous temperature monitoring locations in the ", waterbody_name, " Watershed currently available in public databases and DEQ files."))))
+  }
+  
+  if(NROW(t53_2)>0){
+    print(knitr::kable(t53_2, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t53_2", waterbody_name),
+                                      caption = paste0("Summary of existing temperature data in the ", waterbody_name," Watershed. Columns Jan – Dec indicate the number of daily maximum temperature results in each month."))))
+    
+  }
+  
+}
+
+```
+
+## Stream Flow Data
+
+Table X - Table Y list flow volume data and other instream measurements that were collected by Oregon DEQ.
+
+```{r, label=`t54_1`, echo=FALSE}
+
+for(waterbody_name in unique(sort(station_awqms$section_name))){
+  
+  section.model.input <- model.input %>% 
+    dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+  
+  t54_1 <- section.model.input %>% 
+    dplyr::filter(`Parameter` %in% c("Flow")) %>% 
+    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                    `Site Name`,
+                                    paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
+    dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%
+    dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>% 
+    dplyr::select(Location, `Latitude/Longitude`, `Model_Location`, `Measurement Date`, `Data Source`)
+  
+  if(NROW(t54_1)>0){
+    
+    print(knitr::kable(t54_1, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t54_1", waterbody_name),
+                                      caption = paste0("Instantaneous flow measurements in  ", waterbody_name, "watershed."))))
+    
+  }
+}
+
+
+```
+
+The USGS maintains a number of streamflow gages in the North Umpqua Subbasin. Table X - Table Y list the USGS flow gaging stations.
+
+```{r, label=`t54_2`, echo=FALSE}
+
+for(waterbody_name in unique(sort(station_awqms$section_name))){
+  
+  t54_2 <- usgs.station.tbl %>% 
+    dplyr::filter(section_name %in%  waterbody_name) %>% 
+    dplyr::select(-c(HUC10,section_name,n))
+  
+  if(NROW(t54_2)>0){
+    
+    print(knitr::kable(t54_2, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t54_2", waterbody_name),
+                                      caption = paste0("USGS flow gaging stations in ", waterbody_name, "."))))
+    
+  }
+
+}
+
+```
+
+## Point Source Discharges
+
+```{r, label=`t55`, echo=FALSE}
+
+  section.npdes.ind <- npdes.ind %>% 
+    dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
+    dplyr::mutate(`Facility Name and Number` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
+                  `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
+                  `Stream River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
+    dplyr::select(`Facility Name and Number`, `Permit Type and Description`, `Stream River Mile`)
+  
+  section.npdes.gen <- npdes.gen %>% 
+    dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
+    dplyr::mutate(`Facility Name and Number` = paste0(CommonName," (", `WQ File Nbr`,")"),
+                  `Permit Type and Description` = paste0(PermitType, ": ", PermitDescription),
+                  `Stream River Mile` = ifelse(is.na(StreamName), NA, paste0(StreamName, " ", " RM ",RiverMile))) %>% 
+    dplyr::select(`Facility Name and Number`, `Permit Type and Description`, `Stream River Mile`)
+  
+  t55 <- model.input %>% 
+    dplyr::filter(`Site Type` == "Point Source") %>% 
+    dplyr::mutate(`Permit Type and Description` = NA,
+                  `Stream River Mile` = NA) %>% 
+    dplyr::select(`Site Name`, `Permit Type and Description`, `Stream River Mile`) %>% 
+    dplyr::rename(`Facility Name and Number` = `Site Name`) %>% 
+    rbind(section.npdes.ind, section.npdes.gen) %>% 
+    dplyr::arrange(`Permit Type and Description`)
+  
+  if(NROW(t55)>0){
+    
+    print(knitr::kable(t55, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t55", waterbody_name),
+                                      caption = paste0("Summary of NPDES permitted discharges on ", qapp_project_area, "."))))
+    
+  }
+
+```
+
+## Effective Shade Measurements
+
+```{r, label=`t56`, echo=FALSE}
+
+for(waterbody_name in unique(sort(station_awqms$section_name))){
+  
+  section.model.input <- model.input %>% 
+    dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+  
+  t56 <- section.model.input %>% 
+    dplyr::filter(`Parameter` %in% c("Effective Shade")) %>% 
+    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                    `Site Name`,
+                                    paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
+    dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%
+    dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>% 
+    dplyr::select(Location, `Latitude/Longitude`, `Model_Location`, `Measurement Date`, `Data Source`)
+
+  if(NROW(t56)>0){
+    
+    print(knitr::kable(t56, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t56", waterbody_name),
+                                      caption = paste0("Effective shade data collected along  ", waterbody_name, "watershed."))))
+    
+  }
+  
+}
+
+```
+
+# Model Development and Calibration
+
+```{r, label=`chap6`, include=FALSE}
+
+chap6 <- NULL
+
+for(waterbody_name in unique(sort(station_awqms$section_name))){
+    
+    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+    
+}
+
+```
+
+`r paste(chap6, collapse = "\n")`
 
 # Model Evaluation and Acceptance
 
@@ -565,5 +653,4 @@ The DEQ Project Manager will lead distribution of the draft QAPP to their respec
 Due to the complexity of model development, some elements of the project might not proceed according to plan. Should an obstacle arise that requires a change in approach, Tetra Tech, in consultation with the project team, will return to the QAPP as a topic template for evaluating the effects on other aspects of the project. Tetra Tech will update the QAPP as needed through revisions or addenda, as model development proceeds and new aspects of the system are understood. Significant changes in technical approach would be described in the updated QAPP and would be reviewed by the project team listed on the QAPP approval page prior to implementation.
 
 # References
-
 

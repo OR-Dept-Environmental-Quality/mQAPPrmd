@@ -1,0 +1,178 @@
+---
+output: 
+  word_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r, label=`setup-chap6`, include=FALSE}
+
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      autodep = TRUE)
+
+options(kableExtra.auto_format = F)
+options(knitr.kable.NA = '')
+
+# For testing: waterbody_name <- "North Umpqua River"
+# For testing: waterbody_name <- "Cavitt Creek"
+# For testing: waterbody_name <- "Antelope Creek"
+
+# section.dta <- data %>% 
+#   dplyr::filter(section_name %in%  waterbody_name)
+
+section.model.info <- model.info %>% 
+  dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+
+section.model.input <- model.input %>% 
+  dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+
+model.extent <- unique(ifelse(section.model.input$`Model Waterbody` == section.model.input$`Model Extent`, TRUE, FALSE))
+
+model.extent <- na.omit(model.extent)
+
+```
+
+## `r waterbody_name`
+
+
+### Source Characteristics
+
+Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody (`r eqns(name = "temp_change", display="cite")`).   
+
+$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\times \Delta \text {Flow Volume}} \text { }$ (`r eqns(name = "temp_change", display="cite")`)
+
+Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of coldwater inputs from groundwater.
+
+### Model Domain
+
+```{r, label=`t6x1`, include=FALSE}
+
+if(length(section.model.info$`Model Extent Text`)>1){
+  model.domain <- unique(sort(section.model.info$`Model Extent`))
+} else {model.domain <- section.model.info$`Model Extent Text`} 
+
+```
+
+`r model.domain`
+
+### Spatial and Temporal Resolution
+
+The model input sampling rate (dx) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (dt) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
+
+A dx of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution dx will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
+
+### Time Frame of Simulation
+
+The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
+
+### Model Calibration
+
+```{r, label=`t6x4`, include=FALSE}
+options(knitr.kable.NA = '') # hide NAs in table
+
+if(!model.extent == TRUE){
+  
+  chap6x4 <- NULL
+  
+  for(model_extent in unique(sort(section.model.input$`Model Extent`))){
+    
+    chap6x4 <- c(chap6x4, knitr::knit_child(input = "chap6x4.Rmd", envir = globalenv()))
+    
+  }
+
+} else {
+  
+  t6x4 <- section.model.input %>% 
+    dplyr::filter(`Site Type` == "Calibration Site") %>%
+    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                  `Site Name`,
+                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>%   
+    dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
+    dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
+    dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+    dplyr::select(Location, `Model_Location`, `Parameter`, `Data Source`) %>% 
+    dplyr::rename(`Model Location` = `Model_Location`,
+                  `Calibration Parameter` = `Parameter`)
+    
+}
+
+```
+
+Model calibration was completed by DEQ and described in ODEQ (2006). It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized here to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
+
+`r if(!model.extent == TRUE){paste(chap6x4, collapse = "\n")}else{if(NROW(t6x4)>0){knitr::kable(t6x4, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x4", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))}}`
+
+### Model Parameters
+
+```{r, label=`t6x5_1`, include=FALSE}
+
+if(!model.extent == TRUE){
+  
+  chap6x5 <- NULL
+  
+  for(model_extent in unique(sort(section.model.input$`Model Extent`))){
+    
+    chap6x5 <- c(chap6x5, knitr::knit_child(input = "chap6x5.Rmd", envir = globalenv()))
+
+  }
+
+} else {
+
+  t6x5_1 <- section.model.input %>% 
+    dplyr::filter(!`Site Type` %in%  c("Calibration Site")) %>% 
+    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                    `Site Name`,
+                                    paste0(`Site Name`, " (", `Station ID`, ")"))) %>%  
+    dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
+    dplyr::mutate(DataSource = ifelse(`Interpolated Data` == "T",
+                                      ifelse(!is.na(`Data Source`),
+                                             paste0(`Data Source`, ". ", Note), 
+                                             Note),
+                                      ifelse(!is.na(`Data Source`), 
+                                             `Data Source`, 
+                                             NA))) %>% 
+    dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+    dplyr::select(Location, `Model_Location`, `Site Type`, `Parameter`, DataSource) %>%
+    dplyr::rename(`Model Location` = `Model_Location`,
+                  `Input Type` = `Site Type`,
+                  `Data Source` = DataSource)
+
+}
+```
+
+This section describes the model input parameters, the source of that data, and those parameters which will be most likely adjusted to improve calibration and fit. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
+
+`r if(!model.extent == TRUE){paste(chap6x5, collapse = "\n")}else{if(NROW(t6x5_1)>0){knitr::kable(t6x5_1, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5_1", waterbody_name),caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))}}`
+
+```{r, label=`t6x5_2`, include=FALSE}
+
+t6x5_2 <- section.model.input %>%
+  dplyr::filter(`Site Type` == "Meteorological")
+
+met.site <- gsub(",.*", "", unique(t6x5_2$`Data Source`))
+met.org <- gsub(".*,", "", unique(t6x5_2$`Data Source`))
+
+```
+
+Hourly meteorology inputs into the model include `r tolower(knitr::combine_words(unique(sort(t6x5_2$Parameter))))`. The data source for these inputs is the `r met.org` weather station at the `r met.site`. Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. `r unique(sort(t6x5_2$Note))`
+
+### Data Gaps
+
+Data gaps include:
+
+* Tributary flow and temperature measurements for all tributary model inputs.  
+* Measurements of withdrawals flow (if any) within the model extent.  
+* The data source and quality for the following boundary condition inputs: `r paste(unique(sort(t6x5_1$"Location"), collapse = ", "))`. **[UPDATE FOR EACH STREAM]**
+
+Data gaps were identified and addressed during original development of the `r waterbody_name` model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
+
+### Important Assumptions
+
+Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 
