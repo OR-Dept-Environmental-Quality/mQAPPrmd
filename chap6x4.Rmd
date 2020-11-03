@@ -1,0 +1,52 @@
+---
+output: 
+  word_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r setup_chap6x4, include=FALSE}
+
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      autodep = TRUE)
+
+options(kableExtra.auto_format = F)
+
+# For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
+
+
+```
+
+##### `r model_extent`
+
+```{r, label=`t6x4j`, echo=FALSE}
+# For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
+
+t6x4j <- section.model.input %>% 
+  dplyr::filter(`Model Extent` %in%  model_extent) %>% 
+  dplyr::filter(`Site Type` == "Calibration Site") %>%
+  dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                  `Site Name`,
+                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>%   
+  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
+  dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
+  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+  dplyr::select(Location, `Model_Location`, `Parameter`, `Data Source`) %>% 
+  dplyr::rename(`Model Location` = `Model_Location`,
+                `Calibration Parameter` = `Parameter`)
+
+if(NROW(t6x4j)>0){
+  print(knitr::kable(t6x4j, format = "pandoc", padding = 2,
+                     caption = tbls(name = paste0("t6x4j", model_extent),
+                                    caption = paste0("Calibration sites and parameters used in the existing ", model_extent, " Heat Source Model."))))
+  
+}
+
+```
