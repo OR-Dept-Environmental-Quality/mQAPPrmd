@@ -151,7 +151,7 @@ if(NROW(t51_1)>0){
 
 ```
 
-```{r, label=`t51-2`, echo=FALSE}
+```{r, label=`t51_2`, echo=FALSE}
 
 t51_2 <- ncdc.station.tbl %>% 
   dplyr::mutate(Location = paste0(name," (", station.id,")"),
@@ -165,10 +165,39 @@ if(NROW(t51_2)>0){
                                     caption = paste0("Meteorological data of ", qapp_project_area, " available in NOAA National Climatic Data Center database."))))
 }
 
+```
 
+```{r, label=`t51_3`, echo=FALSE}
+
+t51_3 <- agrimet.station.tbl %>% 
+  dplyr::mutate(Location = paste0(description.x," (", siteid,")"),
+                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
+  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
+  dplyr::arrange(Location)
+
+if(NROW(t51_3)>0){
+  print(knitr::kable(t51_3, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_3",
+                                    caption = paste0("Meteorological data of ", qapp_project_area, " available in USBL Cooperative Agricultural Weather Network database."))))
+}
 
 ```
 
+```{r, label=`t51_4`, echo=FALSE}
+
+t51_4 <- mw.station.tbl %>% 
+  dplyr::mutate(Location = paste0(NAME," (", STID,")"),
+                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), ", ",round(as.numeric(long),3))) %>% 
+  dplyr::select(Location, `Latitude/Longitude`) %>% 
+  dplyr::arrange(Location)
+
+if(NROW(t51_4)>0){
+  print(knitr::kable(t51_4, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_4",
+                                    caption = paste0("Meteorological data of ", qapp_project_area, " available in Mesowest database."))))
+}
+
+```
 
 ## Thermal Infrared (TIR) Data
 

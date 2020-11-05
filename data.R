@@ -2,8 +2,10 @@ library(tidyverse)
 library(readxl)
 library(dataRetrieval)
 library(rgdal)
-library(rnoaa)
 library(sf)
+library(rnoaa) # NCDC
+library(mesowest) # Mesowest
+
 
 # Function ----
 ## Used in the TIR reference:
@@ -128,6 +130,7 @@ huc8.extent <- c(42.21762,-122.9461,43.13418,-122.1365)
 
 
 # Build Data ----
+# _ AWQMS and Model Setup Info ----
 station_model <- cal.input %>% 
   dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
   dplyr::left_join(station_awqms[,c("Station ID", "Station Description", "Organization")], by="Station ID") %>% 
@@ -168,7 +171,7 @@ model.input  <- cal.input %>%
   dplyr::mutate(Latitude = round(as.numeric(Latitude),4),
                 Longitude = round(Longitude,3))
 
-# USGS Flow data
+# _ USGS Flow data ----
 usgs.stations <- dataRetrieval::whatNWISdata(stateCd="OR",
                                              parameterCd = "00060") %>%  # 00060	= Discharge [ft3/s]
   dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
@@ -242,7 +245,9 @@ usgs.station.tbl <- usgs.stations.subbasin %>%
   dplyr::mutate_at("Station Name and ID", str_replace_all, " OR", "") %>% 
   dplyr::mutate(`Station Name and ID` = stringr::str_to_title(`Station Name and ID`))
 
-# NCDC meteorological data
+# _ NCDC meteorological data ----
+# NOAA National Climatic Data Center: https://www.ncdc.noaa.gov/
+
 options(noaakey = "aQnyFVAjwXAXPGTLMWeGkJLVllZPJHuk")
 ncdc.stations.extent <- rnoaa::ncdc_stations(extent = huc8.extent,limit = 1000)
 
@@ -325,6 +330,89 @@ ncdc.station.tbl <- ncdc.stations.subbasin %>%
   dplyr::mutate_at("name", str_replace_all, "Wnw", "WNW") %>% 
   dplyr::mutate_at("name", str_replace_all, "Ssw", "SSW")
 
+# _ NIFC RAWS meteorological data ----
+# Remote Automatic Weather Stations: https://raws.nifc.gov/
+# setup
+# Note that vignettes require knitr and rmarkdown
+#install.packages('knitr')
+#install.packages('rmarkdown')
+#install.packages('MazamaSpatialUtils')
+#install.packages('MazamaLocationUtils')
+#devtools::install_github('MazamaScience/RAWSmet')
+#library(MazamaSpatialUtils)
+#dir.create('~/Data/Spatial', recursive = TRUE)
+#setSpatialDataDir('~/Data/Spatial')
+#installSpatialData()
+#library(RAWSmet)
+#dir.create('~/Data/RAWS', recursive = TRUE)
+#setRawsDataDir('~/Data/RAWS')
+# Cannot install the package "RAWSmet". Posted an issue at https://github.com/MazamaScience/RAWSmet/issues
+
+# _ USBR AgriMet ----
+# Bureau of Reclamation Columbia-Pacific Northwest Region: https://www.usbr.gov/pn/agrimet/
+agrimet.stations.or <- read.csv("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/agrimet_stations.csv") %>% 
+  dplyr::filter(state == "OR")
+agrimet.parameters <- read.csv("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/agrimet_parameters.csv")
+agrimet.stations <- agrimet.stations.or  %>%
+  dplyr::left_join(agrimet.parameters, by = "siteid") %>% 
+  dplyr::mutate(lat = latitude, long = longitude) %>% 
+  sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs("+init=EPSG:4269"))
+
+#ggplot() +
+#geom_sf(data = agrimet.stations)
+
+agrimet.stations.huc8 <- agrimet.stations %>% 
+  filter(sf::st_contains(qapp_project_area_huc8, ., sparse = FALSE))
+
+#ggplot() +
+#geom_sf(data = web.huc8)+
+#geom_sf(data = agrimet.stations)
+
+#ggplot() +
+#geom_sf(data = qapp_project_area_huc8) +
+#geom_sf(data = agrimet.stations.huc8)
+
+
+agrimet.stations.subbasin <-  sf::st_join(x = agrimet.stations.huc8,
+                                       y = qapp_project_area_huc12,
+                                       join = st_intersects,
+                                       left = TRUE)
+
+sf::st_geometry(agrimet.stations.subbasin) <- NULL
+
+agrimet.station.tbl <- agrimet.stations.subbasin
+
+# _ MesoWest climate data ----
+#devtools::install_github('fickse/mesowest')
+#mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y")
+mw.meta <- mesowest::mw(service = "metadata", state = "OR")
+mw.variables.list  <- mwvariables()
+mw.variables <- data.frame(matrix(unlist(mw.variables.list$VARIABLES)))
+#library(purrr)
+#mw.variables <- purrr::map_df(mw.variables.list$VARIABLES, ~as.data.frame(.x), .id="id")
+#write.csv(mw.variables,"mw_variables.csv")
+mw.stations <- mw.meta$STATION %>%
+  dplyr::mutate(lat = LATITUDE, long = LONGITUDE) %>% 
+  sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
+
+mw.stations.huc8 <- mw.stations %>% 
+  filter(sf::st_contains(qapp_project_area_huc8, ., sparse = FALSE))
+
+mw.stations.subbasin <-  sf::st_join(x = mw.stations.huc8,
+                                     y = qapp_project_area_huc12,
+                                     join = st_intersects,
+                                     left = TRUE)
+
+#ggplot() +
+#geom_sf(data = qapp_project_area_huc8) +
+#geom_sf(data = mw.stations.subbasin)
+
+
+sf::st_geometry(mw.stations.subbasin) <- NULL
+
+mw.station.tbl <- mw.stations.subbasin
+
+
 # SAVE DATA ----
 rm(cal.input)
 rm(cal.model)
@@ -335,7 +423,6 @@ rm(web.huc8)
 rm(web.huc12)
 rm(qapp_project_area_huc8)
 rm(qapp_project_area_huc12)
-rm(usgs.station.subbasins)
 rm(ncdc.stations.extent)
 rm(ncdc.stations)
 rm(ncdc.stations.huc8)
