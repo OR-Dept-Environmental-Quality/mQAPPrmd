@@ -14,12 +14,6 @@ output:
     df_print: paged
 ---
 
-```{r, label=`load-data`, include=FALSE}
-
-load("data.RData")
-
-```
-
 ---
 title: "`r paste0("Modeling Quality Assurance Project Plan for the ", qapp_project_area, " Temperature Total Maximum Daily Load")`"
 ---
@@ -47,6 +41,7 @@ library(rgdal)
 library(ggplot2)
 library(stringr)
 library(english)
+library(pacman)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -120,31 +115,51 @@ For these reasons, the Heat Source stream thermodynamics model was selected for 
 
 # Data Availability and Quality
 
-
 ## Meteorology
+
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet), and University of Utah MesoWest database. Table 1 - Table Y list available meteorological data from these sources in the `r qapp_project_area`.
 
 ```{r, label=`t51_1`, echo=FALSE}
 
-# for test: qapp_project_area = "Upper Rogue Subbasin"
-# for test: metsite <- "Medford Airport, National Climatic Data Center"
+# for test: metsite <- "DRI-RAWS"
 
-for(metsite in unique(sort(model.input$`Data Source`))){
+if(NROW(model.input[which(model.input$`Site Type` == "Meteorological"),])>0){
 
-t51_1 <- model.input %>% 
+t51_1_table_count <- 0
+
+for(metsite in unique(sort(model.input[which(model.input$`Site Type` == "Meteorological"),]$`Data Source`))){
+
+#t51_1 <- model.input %>% 
+#  dplyr::filter(`Site Type` %in% c("Meteorological")) %>% 
+#  dplyr::filter(`Data Source` %in%  metsite) %>% 
+#  dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+#                                  `Site Name`,
+#                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
+#  dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%  
+#  dplyr::select(`Station Name and ID`, `Latitude/Longitude`, Parameter) %>% 
+#  dplyr::group_by(`Station Name and ID`, `Latitude/Longitude`) %>% 
+#  dplyr::summarize(Parameter = toString(Parameter))
+
+  t51_1 <- model.input %>% 
   dplyr::filter(`Site Type` %in% c("Meteorological")) %>% 
   dplyr::filter(`Data Source` %in%  metsite) %>% 
-  dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Site Name`,
-                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
-  dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%  
-  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
-  dplyr::group_by(Location, `Latitude/Longitude`) %>% 
-  dplyr::summarise(Parameter = toString(Parameter))
+  dplyr::mutate(`Station Name` = `Site Name`,
+                `Station ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`), NA, `Station ID`),
+                Latitude = ifelse(is.na(Latitude), NA, round(Latitude,5)),
+                Longitude = ifelse(is.na(Longitude), NA, round(Longitude,4))) %>% 
+  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::summarize(n=n()) %>% 
+  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::arrange(`Station Name`, `Station ID`)  
+  
+t51_1_table_count <- ifelse(NROW(t51_1)>0,t51_1_table_count+1,t51_1_table_count)
 
 if(NROW(t51_1)>0){
   print(knitr::kable(t51_1, format = "pandoc", padding = 2,
                      caption = tbls(name = paste0("t51_1",metsite),
-                                    caption = paste0("Meteorological data avialable at ", metsite, " in ", qapp_project_area, "."))))
+                                    caption = paste0("Meteorological stations at ", metsite, " in ", qapp_project_area, "."))))
+}
+
 }
 
 }
@@ -153,53 +168,136 @@ if(NROW(t51_1)>0){
 
 ```{r, label=`t51_2`, echo=FALSE}
 
+#t51_2 <- ncdc.station.tbl %>% 
+#  dplyr::mutate(`Station Name and ID` = paste0(name," (", station.id,")"),
+#                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
+#  dplyr::select(`Station Name and ID`, `Latitude/Longitude`, Parameter) %>% 
+#  dplyr::arrange(`Station Name and ID`)
+
 t51_2 <- ncdc.station.tbl %>% 
-  dplyr::mutate(Location = paste0(name," (", station.id,")"),
-                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
-  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
-  dplyr::arrange(Location)
+  dplyr::mutate(`Station Name` = name,
+                `Station ID` = station.id,
+                Latitude = round(lat,4),
+                Longitude = round(long,3)) %>% 
+  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::summarize(n=n()) %>%
+  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::arrange(`Station Name`, `Station ID`)
 
 if(NROW(t51_2)>0){
   print(knitr::kable(t51_2, format = "pandoc", padding = 2,
                      caption = tbls(name = "t51_2",
-                                    caption = paste0("Meteorological data of ", qapp_project_area, " available in NOAA National Climatic Data Center database."))))
+                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in National Climatic Data Center (NCDC) database."))))
 }
 
 ```
 
 ```{r, label=`t51_3`, echo=FALSE}
 
-t51_3 <- agrimet.station.tbl %>% 
-  dplyr::mutate(Location = paste0(description.x," (", siteid,")"),
-                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
-  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
-  dplyr::arrange(Location)
+#t51_3 <- raws.station.tbl %>% 
+#  dplyr::mutate(`Station Name and ID` = ifelse(is.na(nwsID), paste0(siteName," (", wrccID,")"), paste0(siteName," (", wrccID, nwsID,")")),
+#                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3)),
+#                Agency = agency) %>% 
+#  dplyr::select(`Station Name and ID`, `Latitude/Longitude`, Agency) %>% 
+#  dplyr::arrange(`Station Name and ID`)
 
+t51_3 <- raws.station.tbl %>% 
+  dplyr::mutate(`Station Name` = siteName,
+                `Station ID` = ifelse(is.na(nwsID), wrccID, paste0(wrccID, " ", nwsID)),
+                Latitude = round(lat,4),
+                Longitude = round(long,3)) %>% 
+  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::summarize(n=n()) %>%
+  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::arrange(`Station Name`, `Station ID`)
+  
 if(NROW(t51_3)>0){
   print(knitr::kable(t51_3, format = "pandoc", padding = 2,
                      caption = tbls(name = "t51_3",
-                                    caption = paste0("Meteorological data of ", qapp_project_area, " available in USBL Cooperative Agricultural Weather Network database."))))
+                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in Remote Automatic Weather Station (RAWS) database."))))
 }
 
 ```
 
 ```{r, label=`t51_4`, echo=FALSE}
 
-t51_4 <- mw.station.tbl %>% 
-  dplyr::mutate(Location = paste0(NAME," (", STID,")"),
-                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), ", ",round(as.numeric(long),3))) %>% 
-  dplyr::select(Location, `Latitude/Longitude`) %>% 
-  dplyr::arrange(Location)
+#t51_4 <- agrimet.station.tbl %>% 
+#  dplyr::mutate(Location = paste0(description.x," (", siteid,")"),
+#                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
+#  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
+#  dplyr::arrange(Location)
+
+t51_4 <- agrimet.station.tbl %>%
+  dplyr::mutate(`Station Name` = description.x,
+                `Station ID` = siteid,
+                Latitude = round(lat,4),
+                Longitude = round(long,3)) %>% 
+  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::summarize(n=n()) %>%
+  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::arrange(`Station Name`, `Station ID`)
 
 if(NROW(t51_4)>0){
   print(knitr::kable(t51_4, format = "pandoc", padding = 2,
                      caption = tbls(name = "t51_4",
-                                    caption = paste0("Meteorological data of ", qapp_project_area, " available in Mesowest database."))))
+                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in USBL Cooperative Agricultural Weather Network (AgriMet) database."))))
 }
 
 ```
 
+```{r, label=`t51_5`, echo=FALSE}
+
+#t51_5 <- mw.station.tbl %>% 
+#  dplyr::mutate(Location = paste0(NAME," (", STID,")"),
+#                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), ", ",round(as.numeric(long),3))) %>% 
+#  dplyr::select(Location, `Latitude/Longitude`) %>% 
+#  dplyr::arrange(Location)
+
+t51_5 <- mw.station.tbl %>% 
+  dplyr::mutate(`Station Name` = NAME,
+                `Station ID` = STID,
+                Latitude = round(as.numeric(lat),4),
+                Longitude = round(as.numeric(long),3)) %>% 
+  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::summarize(n=n()) %>%
+  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::arrange(`Station Name`, `Station ID`)
+
+if(NROW(t51_5)>0){
+  print(knitr::kable(t51_5, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_5",
+                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in MesoWest database."))))
+}
+
+```
+
+```{r, label=`t51`, echo=FALSE}
+
+if(NROW(model.input[which(model.input$`Site Type` == "Meteorological"),])>0){
+  
+tables <- data.frame(tbl_name = c("t51_1","t51_2","t51_3","t51_4","t51_5"),
+                     tbl_rows = c(NROW(t51_1),NROW(t51_2),NROW(t51_3),NROW(t51_4),NROW(t51_5))) %>% 
+  dplyr::filter(tbl_rows != "0")
+
+t51_num <- NROW(tables) + t51_1_table_count
+
+} else {
+ 
+  tables <- data.frame(tbl_name = c("t51_2","t51_3","t51_4","t51_5"),
+                       tbl_rows = c(NROW(t51_2),NROW(t51_3),NROW(t51_4),NROW(t51_5))) %>% 
+    dplyr::filter(tbl_rows != "0")
+  
+  t51_num <- NROW(tables)
+  
+}
+
+```
+
+*[Insert this table number to Table Y: `r t51_num`]*
+
 ## Thermal Infrared (TIR) Data
+
+ODEQ contracted with Watershed Sciences, Inc. to provide airborne thermal infrared (TIR) imagery of spatial temperature patterns within the `r qapp_project_area`. TIR data were used to characterize the thermal regime of the streams and habitat quality in the basin where the TIR data were available.
 
 ```{r, label=`t52`, echo=FALSE}
 
@@ -218,63 +316,58 @@ citations <- unique(sort(t52$`Abbreviated Reference`))
 
 ## Continuous Stream Temperature Data
 
-All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). Table X to Table Y list all the locations where continuous stream temperature data were collected and the organizations that collected that data. Table Y to Table Z summarizes when data were collected at each station.
+All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). `r tbls(name = "t53_1", display="cite")` list all the locations where continuous stream temperature data were collected and the organizations that collected that data. `r tbls(name = "t53_2", display="cite")` summarizes when data were collected at each station.
 
-```{r, label=`t53`, echo=FALSE}
+```{r, label=`t53_1`, echo=FALSE}
 
-for(waterbody_name in unique(sort(station_awqms$section_name))){
-  
-  # test: waterbody_name <- "Canton Creek"
-  
-  section.dta <- data %>% 
-    dplyr::filter(section_name %in% waterbody_name)
-  
-  st_awqms <- station_awqms %>% 
-    dplyr::filter(section_name %in% waterbody_name) %>% 
-    dplyr::filter(`Station ID` %in% unique(sort(section.dta$MLocID))) %>% 
-    dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
-  
-  st_model <- station_model %>% 
-    dplyr::filter(`Model Waterbody` %in%  waterbody_name) %>% 
-    dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
-    dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
-    dplyr::mutate(`Station Description` = ifelse(is.na(`Station Description`),`Site Name`,`Station Description`),
-                  Organization = ifelse(is.na(Organization),`Data Source`,Organization)) %>% 
-    dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
-  
-  t53_1 <- rbind(st_awqms,st_model) %>% 
-    dplyr::filter(!`Station ID` == "TIR") %>% 
-    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                    `Station Description`,
-                                    paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
-    dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>% 
-    dplyr::group_by(Location,`Latitude/Longitude`, Organization) %>% 
-    dplyr::summarise(n=n()) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::select(-n) %>% 
-    dplyr::arrange(Location)
-  
-  t53_2 <- data.sample.count %>%
-    dplyr::filter(section_name %in% waterbody_name) %>% 
-    dplyr::filter(!`Station ID` == "TIR") %>% 
-    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                    `Station Description`,
-                                    paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
-    dplyr::select(Year, Location,Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
-    dplyr::arrange(Year, Location)
-  
-  if(NROW(t53_1)>0){
-    print(knitr::kable(t53_1, format = "pandoc", padding = 2,
-                       caption = tbls(name = paste0("t53_1", waterbody_name),
-                                      caption = paste0("Continuous temperature monitoring locations in the ", waterbody_name, " Watershed currently available in public databases and DEQ files."))))
-  }
-  
-  if(NROW(t53_2)>0){
-    print(knitr::kable(t53_2, format = "pandoc", padding = 2,
-                       caption = tbls(name = paste0("t53_2", waterbody_name),
-                                      caption = paste0("Summary of existing temperature data in the ", waterbody_name," Watershed. Columns Jan – Dec indicate the number of daily maximum temperature results in each month."))))
-    
-  }
+st_awqms <- station_awqms %>% 
+  dplyr::rename(`Station Description` = StationDes,
+                Organization = OrgID,
+                Latitude = Lat_DD,
+                Longitude = Long_DD) %>% 
+  dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
+
+st_model <- station_model %>% 
+  dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
+  dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
+  dplyr::mutate(`Station Description` = ifelse(is.na(StationDes),`Site Name`,StationDes),
+                Organization = ifelse(is.na(OrgID),`Data Source`,OrgID)) %>% 
+  dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
+
+t53_1 <- rbind(st_awqms,st_model) %>% 
+  dplyr::filter(!`Station ID` == "TIR") %>% 
+  dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                  `Station Description`,
+                                  paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
+  dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>% 
+  dplyr::group_by(`Station Name and ID`,`Latitude/Longitude`, Organization) %>% 
+  dplyr::summarize(n=n()) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(-n) %>% 
+  dplyr::arrange(`Station Name and ID`)
+
+if(NROW(t53_1)>0){
+  print(knitr::kable(t53_1, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t53_1",
+                                    caption = paste0("Continuous temperature monitoring stations in the ", qapp_project_area, " currently available in public databases and DEQ files."))))
+}
+
+```
+
+```{r, label=`t53_2`, echo=FALSE}
+
+t53_2 <- data.sample.count %>%
+  dplyr::filter(!`Station ID` == "TIR") %>% 
+  dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                  StationDes,
+                                  paste0(StationDes, " (", `Station ID`, ")"))) %>% 
+  dplyr::select(Year, `Station Name and ID`, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
+  dplyr::arrange(Year, `Station Name and ID`)
+
+if(NROW(t53_2)>0){
+  print(knitr::kable(t53_2, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t53_2",
+                                    caption = paste0("Summary of existing temperature data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month."))))
   
 }
 
@@ -282,16 +375,11 @@ for(waterbody_name in unique(sort(station_awqms$section_name))){
 
 ## Stream Flow Data
 
-Table X - Table Y list flow volume data and other instream measurements that were collected by Oregon DEQ.
+`r tbls(name = "t54_1", display="cite")` list flow volume data and other instream measurements that were collected by Oregon DEQ.
 
 ```{r, label=`t54_1`, echo=FALSE}
 
-for(waterbody_name in unique(sort(station_awqms$section_name))){
-  
-  section.model.input <- model.input %>% 
-    dplyr::filter(`Model Waterbody` %in%  waterbody_name)
-  
-  t54_1 <- section.model.input %>% 
+  t54_1 <- model.input %>% 
     dplyr::filter(`Parameter` %in% c("Flow")) %>% 
     dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                     `Site Name`,
@@ -303,34 +391,29 @@ for(waterbody_name in unique(sort(station_awqms$section_name))){
   if(NROW(t54_1)>0){
     
     print(knitr::kable(t54_1, format = "pandoc", padding = 2,
-                       caption = tbls(name = paste0("t54_1", waterbody_name),
-                                      caption = paste0("Instantaneous flow measurements in  ", waterbody_name, "watershed."))))
+                       caption = tbls(name = "t54_1",
+                                      caption = paste0("Instantaneous flow measurements in  ", qapp_project_area, "."))))
     
   }
-}
+
 
 
 ```
 
-The USGS maintains a number of streamflow gages in the North Umpqua Subbasin. Table X - Table Y list the USGS flow gaging stations.
+The USGS maintains a number of streamflow gages in the North Umpqua Subbasin. `r tbls(name = "t54_2", display="cite")` list the USGS flow gaging stations.
 
 ```{r, label=`t54_2`, echo=FALSE}
 
-for(waterbody_name in unique(sort(station_awqms$section_name))){
-  
-  t54_2 <- usgs.station.tbl %>% 
-    dplyr::filter(section_name %in%  waterbody_name) %>% 
-    dplyr::select(-c(HUC10,section_name,n))
+  t54_2 <- usgs.station.tbl
   
   if(NROW(t54_2)>0){
     
     print(knitr::kable(t54_2, format = "pandoc", padding = 2,
-                       caption = tbls(name = paste0("t54_2", waterbody_name),
-                                      caption = paste0("USGS flow gaging stations in ", waterbody_name, "."))))
+                       caption = tbls(name = "t54_2",
+                                      caption = paste0("USGS flow gaging stations in ", qapp_project_area, "."))))
     
   }
 
-}
 
 ```
 
@@ -364,7 +447,7 @@ for(waterbody_name in unique(sort(station_awqms$section_name))){
   if(NROW(t55)>0){
     
     print(knitr::kable(t55, format = "pandoc", padding = 2,
-                       caption = tbls(name = paste0("t55", waterbody_name),
+                       caption = tbls(name = "t55",
                                       caption = paste0("Summary of NPDES permitted discharges on ", qapp_project_area, "."))))
     
   }
@@ -375,12 +458,7 @@ for(waterbody_name in unique(sort(station_awqms$section_name))){
 
 ```{r, label=`t56`, echo=FALSE}
 
-for(waterbody_name in unique(sort(station_awqms$section_name))){
-  
-  section.model.input <- model.input %>% 
-    dplyr::filter(`Model Waterbody` %in%  waterbody_name)
-  
-  t56 <- section.model.input %>% 
+  t56 <- model.input %>% 
     dplyr::filter(`Parameter` %in% c("Effective Shade")) %>% 
     dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                     `Site Name`,
@@ -392,12 +470,10 @@ for(waterbody_name in unique(sort(station_awqms$section_name))){
   if(NROW(t56)>0){
     
     print(knitr::kable(t56, format = "pandoc", padding = 2,
-                       caption = tbls(name = paste0("t56", waterbody_name),
-                                      caption = paste0("Effective shade data collected along  ", waterbody_name, "watershed."))))
+                       caption = tbls(name = "t56",
+                                      caption = paste0("Effective shade data collected along  ", qapp_project_area, "."))))
     
   }
-  
-}
 
 ```
 
@@ -407,7 +483,7 @@ for(waterbody_name in unique(sort(station_awqms$section_name))){
 
 chap6 <- NULL
 
-for(waterbody_name in unique(sort(station_awqms$section_name))){
+for(waterbody_name in unique(sort(model.info$`Model Waterbody`))){
     
     chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
     
@@ -425,7 +501,7 @@ As with any mathematical approximation of reality, a water quality model is subj
 
 The major sources of model uncertainty include the mathematical formulation, boundary conditions data uncertainty, uncertainty in spatial representation (e.g., bathymetry), calibration data uncertainty, and parameter specification. In many cases, a significant amount of the overall prediction uncertainty is due to boundary conditions (e.g., uncertainty in estimation of ungaged tributary flows) and uncertainty in the observed data used for calibration and validation. These sources of uncertainty are largely unavoidable, but do not invalidate the use of the model for decision purposes. Uncertainties in the mathematical formulation and model parameters are usually of greater concern for decision purposes as these describe the cause and effect relationships in the calibrated model. 
 
-The existing North Umpqua mainstem and tributary models were extensively evaluated to determine uncertainty in the model equations as well as data used for boundary inputs. A discussion of the methodology used to evaluate uncertainty is found in *Appendix 2: Stream Temperature TMDL Supplemental Information of the 2006 Umpqua Basin TMDL*(citation). No additional sensitivity or uncertainty analyses will be performed on the revised Heat Source models. Additional temperature variability analyses will be conducted to evaluate the range of natural thermal conditions and how they may influence stream temperature. It is anticipated that these analyses will be approved iteratively through QAPP addenda.
+The existing North Umpqua mainstem and tributary models were extensively evaluated to determine uncertainty in the model equations as well as data used for boundary inputs. A discussion of the methodology used to evaluate uncertainty is found in *Appendix 2: Stream Temperature TMDL Supplemental Information of the 2006 Umpqua Basin TMDL* (citation). No additional sensitivity or uncertainty analyses will be performed on the revised Heat Source models. Additional temperature variability analyses will be conducted to evaluate the range of natural thermal conditions and how they may influence stream temperature. It is anticipated that these analyses will be approved iteratively through QAPP addenda.
 
 ## Model Acceptance
 
@@ -480,6 +556,8 @@ DEQ will consider feedback on model scenarios and results from the TMDL advisory
 DEQ will, review and respond to any public comments received on the model and model results, and make changes as appropriate.
 
 # Management Scenarios
+
+Management scenarios described in this section summarize means by which the current conditions and possible alternatives will be evaluated. Some or all of these scenarios will be executed and assessed in the modeling.
 
 ## Scenario Definitions
 
