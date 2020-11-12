@@ -20,12 +20,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# For testing: waterbody_name <- "North Umpqua River"
-# For testing: waterbody_name <- "Cavitt Creek"
-# For testing: waterbody_name <- "Antelope Creek"
-
-# section.dta <- data %>% 
-#   dplyr::filter(section_name %in%  waterbody_name)
+# for test: waterbody_name <- "Anderson Creek"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -33,7 +28,9 @@ section.model.info <- model.info %>%
 section.model.input <- model.input %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
 
-model.extent <- unique(ifelse(section.model.input$`Model Waterbody` == section.model.input$`Model Extent`, TRUE, FALSE))
+model.extent <- ifelse(NROW(section.model.input)>0,
+                       ifelse(section.model.input$`Model Waterbody` == section.model.input$`Model Extent`, TRUE, FALSE),
+                       TRUE)
 
 model.extent <- na.omit(model.extent)
 
@@ -60,13 +57,13 @@ if(length(section.model.info$`Model Extent Text`)>1){
 
 ```
 
-`r model.domain`
+The extents of the model domain are/will be the `r model.domain`.
 
 ### Spatial and Temporal Resolution
 
-The model input sampling rate (dx) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (dt) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
+The model input sampling rate (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
 
-A dx of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution dx will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
+A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
 
 ### Time Frame of Simulation
 
@@ -159,9 +156,17 @@ t6x5_2 <- section.model.input %>%
 met.site <- gsub(",.*", "", unique(t6x5_2$`Data Source`))
 met.org <- gsub(".*,", "", unique(t6x5_2$`Data Source`))
 
-```
+if(NROW(t6x5_2)>1){
+  
+  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x5_2$Parameter)))),". The data source for these inputs is the ", met.org," weather station at the ", met.site,". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. ",unique(sort(t6x5_2$Note))))
+  
+} else {
+  
+  cat("There is no meteorology inputs into the model.")
+  
+}
 
-Hourly meteorology inputs into the model include `r tolower(knitr::combine_words(unique(sort(t6x5_2$Parameter))))`. The data source for these inputs is the `r met.org` weather station at the `r met.site`. Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. `r unique(sort(t6x5_2$Note))`
+```
 
 ### Data Gaps
 
@@ -169,7 +174,7 @@ Data gaps include:
 
 * Tributary flow and temperature measurements for all tributary model inputs.  
 * Measurements of withdrawals flow (if any) within the model extent.  
-* The data source and quality for the following boundary condition inputs: `r paste(unique(sort(t6x5_1$"Location"), collapse = ", "))`. **[UPDATE FOR EACH STREAM]**
+* The data source and quality for the following boundary condition inputs: `r if(NROW(t6x5_1)>0){paste(unique(sort(t6x5_1$"Location"), collapse = ", "))}else{cat("No data")}`. **[UPDATE FOR EACH STREAM]**
 
 Data gaps were identified and addressed during original development of the `r waterbody_name` model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
 
