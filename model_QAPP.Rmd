@@ -117,174 +117,85 @@ For these reasons, the Heat Source stream thermodynamics model was selected for 
 
 ## Meteorology
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet), and University of Utah MesoWest database. Table 1 - Table Y list available meteorological data from these sources in the `r qapp_project_area`.
+```{r, label=`t51_setup`, echo=FALSE}
 
-```{r, label=`t51_1`, echo=FALSE}
-
-# for test: metsite <- "DRI-RAWS"
-
-if(NROW(model.input[which(model.input$`Site Type` == "Meteorological"),])>0){
-
-t51_1_table_count <- 0
-
-for(metsite in unique(sort(model.input[which(model.input$`Site Type` == "Meteorological"),]$`Data Source`))){
-
-#t51_1 <- model.input %>% 
-#  dplyr::filter(`Site Type` %in% c("Meteorological")) %>% 
-#  dplyr::filter(`Data Source` %in%  metsite) %>% 
-#  dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-#                                  `Site Name`,
-#                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
-#  dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%  
-#  dplyr::select(`Station Name and ID`, `Latitude/Longitude`, Parameter) %>% 
-#  dplyr::group_by(`Station Name and ID`, `Latitude/Longitude`) %>% 
-#  dplyr::summarize(Parameter = toString(Parameter))
-
-  t51_1 <- model.input %>% 
-  dplyr::filter(`Site Type` %in% c("Meteorological")) %>% 
-  dplyr::filter(`Data Source` %in%  metsite) %>% 
-  dplyr::mutate(`Station Name` = `Site Name`,
-                `Station ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`), NA, `Station ID`),
-                Latitude = ifelse(is.na(Latitude), NA, round(Latitude,5)),
-                Longitude = ifelse(is.na(Longitude), NA, round(Longitude,4))) %>% 
-  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
-  dplyr::summarize(n=n()) %>% 
-  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
-  dplyr::arrange(`Station Name`, `Station ID`)  
+if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   
-t51_1_table_count <- ifelse(NROW(t51_1)>0,t51_1_table_count+1,t51_1_table_count)
-
-if(NROW(t51_1)>0){
-  print(knitr::kable(t51_1, format = "pandoc", padding = 2,
-                     caption = tbls(name = paste0("t51_1",metsite),
-                                    caption = paste0("Meteorological stations at ", metsite, " in ", qapp_project_area, "."))))
+  t51_1 <- model.input %>% 
+    dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
+    dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>%
+    dplyr::mutate(Station = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                   `Data Source`,
+                                   paste0(`Station ID`, ", ", `Data Source`)),
+                  `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3))),
+                  `Available Data` = Parameter) %>% 
+    dplyr::select(Station, `Latitude/Longitude`, `Available Data`) %>%
+    dplyr::group_by(Station, `Latitude/Longitude`) %>% 
+    dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`))))
+  
 }
-
-}
-
-}
-
-```
-
-```{r, label=`t51_2`, echo=FALSE}
-
-#t51_2 <- ncdc.station.tbl %>% 
-#  dplyr::mutate(`Station Name and ID` = paste0(name," (", station.id,")"),
-#                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
-#  dplyr::select(`Station Name and ID`, `Latitude/Longitude`, Parameter) %>% 
-#  dplyr::arrange(`Station Name and ID`)
 
 t51_2 <- ncdc.station.tbl %>% 
-  dplyr::mutate(`Station Name` = name,
+  dplyr::filter(!str_detect(station.id,"COOP")) %>% 
+  dplyr::mutate(`Station` = name,
                 `Station ID` = station.id,
-                Latitude = round(lat,4),
-                Longitude = round(long,3)) %>% 
-  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3)),
+                `Available Data` = Parameter) %>%
+  dplyr::group_by(`Station`, `Station ID`, `Latitude/Longitude`, `Available Data`) %>% 
   dplyr::summarize(n=n()) %>%
-  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
-  dplyr::arrange(`Station Name`, `Station ID`)
-
-if(NROW(t51_2)>0){
-  print(knitr::kable(t51_2, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t51_2",
-                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in National Climatic Data Center (NCDC) database."))))
-}
-
-```
-
-```{r, label=`t51_3`, echo=FALSE}
-
-#t51_3 <- raws.station.tbl %>% 
-#  dplyr::mutate(`Station Name and ID` = ifelse(is.na(nwsID), paste0(siteName," (", wrccID,")"), paste0(siteName," (", wrccID, nwsID,")")),
-#                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3)),
-#                Agency = agency) %>% 
-#  dplyr::select(`Station Name and ID`, `Latitude/Longitude`, Agency) %>% 
-#  dplyr::arrange(`Station Name and ID`)
+  dplyr::select(`Station`, `Station ID`, `Latitude/Longitude`, `Available Data`) %>% 
+  dplyr::arrange(`Station`, `Station ID`)
 
 t51_3 <- raws.station.tbl %>% 
-  dplyr::mutate(`Station Name` = siteName,
-                `Station ID` = ifelse(is.na(nwsID), wrccID, paste0(wrccID, " ", nwsID)),
-                Latitude = round(lat,4),
-                Longitude = round(long,3)) %>% 
-  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+  dplyr::mutate(`Station` = siteName,
+                `Station wrccID` = wrccID,
+                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3)),
+                Agency = agency) %>% 
+  dplyr::group_by(`Station`, `Station wrccID`, `Latitude/Longitude`, Agency) %>% 
   dplyr::summarize(n=n()) %>%
-  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
-  dplyr::arrange(`Station Name`, `Station ID`)
-  
-if(NROW(t51_3)>0){
-  print(knitr::kable(t51_3, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t51_3",
-                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in Remote Automatic Weather Station (RAWS) database."))))
-}
-
-```
-
-```{r, label=`t51_4`, echo=FALSE}
-
-#t51_4 <- agrimet.station.tbl %>% 
-#  dplyr::mutate(Location = paste0(description.x," (", siteid,")"),
-#                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
-#  dplyr::select(Location, `Latitude/Longitude`, Parameter) %>% 
-#  dplyr::arrange(Location)
+  dplyr::select(`Station`, `Station wrccID`, `Latitude/Longitude`, Agency) %>% 
+  dplyr::arrange(`Station`, `Station wrccID`)
 
 t51_4 <- agrimet.station.tbl %>%
-  dplyr::mutate(`Station Name` = description.x,
+  dplyr::mutate(`Station` = description.x,
                 `Station ID` = siteid,
-                Latitude = round(lat,4),
-                Longitude = round(long,3)) %>% 
-  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+                `Latitude/Longitude` = paste0(round(lat,4), ", ",round(long,3))) %>% 
+  dplyr::group_by(`Station`, `Station ID`, `Latitude/Longitude`) %>% 
   dplyr::summarize(n=n()) %>%
-  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
-  dplyr::arrange(`Station Name`, `Station ID`)
+  dplyr::select(`Station`, `Station ID`, `Latitude/Longitude`) %>% 
+  dplyr::arrange(`Station`, `Station ID`)
 
-if(NROW(t51_4)>0){
-  print(knitr::kable(t51_4, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t51_4",
-                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in USBL Cooperative Agricultural Weather Network (AgriMet) database."))))
-}
+t51_5 <- hydromet.station.tbl %>% 
+  dplyr::filter(Parameter %in% c("Air Temperature","Precipitation")) %>% 
+  dplyr::mutate(`Station` = Station.Name,
+                `Station ID` = Station.ID,
+                `Latitude/Longitude` = paste0(round(as.numeric(Lat),4), ", ",round(as.numeric(Long),3)),
+                `Available Data` = Parameter) %>% 
+  dplyr::select(`Station`, `Station ID`, `Latitude/Longitude`, `Available Data`) %>%
+  dplyr::group_by(`Station`, `Station ID`, `Latitude/Longitude`) %>% 
+  dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`))))
 
-```
-
-```{r, label=`t51_5`, echo=FALSE}
-
-#t51_5 <- mw.station.tbl %>% 
-#  dplyr::mutate(Location = paste0(NAME," (", STID,")"),
-#                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), ", ",round(as.numeric(long),3))) %>% 
-#  dplyr::select(Location, `Latitude/Longitude`) %>% 
-#  dplyr::arrange(Location)
-
-t51_5 <- mw.station.tbl %>% 
-  dplyr::mutate(`Station Name` = NAME,
+t51_6 <- mw.station.tbl %>% 
+  dplyr::mutate(`Station` = NAME,
                 `Station ID` = STID,
-                Latitude = round(as.numeric(lat),4),
-                Longitude = round(as.numeric(long),3)) %>% 
-  dplyr::group_by(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
+                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), ", ",round(as.numeric(long),3))) %>% 
+  dplyr::group_by(`Station`, `Station ID`, `Latitude/Longitude`) %>% 
   dplyr::summarize(n=n()) %>%
-  dplyr::select(`Station Name`, `Station ID`, Latitude, Longitude) %>% 
-  dplyr::arrange(`Station Name`, `Station ID`)
+  dplyr::select(`Station`, `Station ID`, `Latitude/Longitude`) %>% 
+  dplyr::arrange(`Station`, `Station ID`)
 
-if(NROW(t51_5)>0){
-  print(knitr::kable(t51_5, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t51_5",
-                                    caption = paste0("Meteorological stations in ", qapp_project_area, " available in MesoWest database."))))
-}
-
-```
-
-```{r, label=`t51`, echo=FALSE}
-
-if(NROW(model.input[which(model.input$`Site Type` == "Meteorological"),])>0){
+if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   
-tables <- data.frame(tbl_name = c("t51_1","t51_2","t51_3","t51_4","t51_5"),
-                     tbl_rows = c(NROW(t51_1),NROW(t51_2),NROW(t51_3),NROW(t51_4),NROW(t51_5))) %>% 
-  dplyr::filter(tbl_rows != "0")
-
-t51_num <- NROW(tables) + t51_1_table_count
-
+  tables <- data.frame(tbl_name = c("t51_1","t51_2","t51_3","t51_4","t51_5","t51_6"),
+                       tbl_rows = c(NROW(t51_1),NROW(t51_2),NROW(t51_3),NROW(t51_4),NROW(t51_5),NROW(t51_6))) %>% 
+    dplyr::filter(tbl_rows != "0")
+  
+  t51_num <- NROW(tables)
+  
 } else {
- 
-  tables <- data.frame(tbl_name = c("t51_2","t51_3","t51_4","t51_5"),
-                       tbl_rows = c(NROW(t51_2),NROW(t51_3),NROW(t51_4),NROW(t51_5))) %>% 
+  
+  tables <- data.frame(tbl_name = c("t51_2","t51_3","t51_4","t51_5","t51_6"),
+                       tbl_rows = c(NROW(t51_2),NROW(t51_3),NROW(t51_4),NROW(t51_5),NROW(t51_6))) %>% 
     dplyr::filter(tbl_rows != "0")
   
   t51_num <- NROW(tables)
@@ -293,7 +204,51 @@ t51_num <- NROW(tables) + t51_1_table_count
 
 ```
 
-*[Insert this table number to Table Y: `r t51_num`]*
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorologic monitoring stations Network (Hydromet), and University of Utah MesoWest database. `r ifelse(NROW(model.input[which(model.input$"Model Location Type" == "Meteorological"),])>0,tbls(name = "t51_1", display="cite"),tbls(name = "t51_2", display="cite"))` - Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`.
+
+```{r, label=`t51_tbls`, echo=FALSE}
+
+if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
+  
+  if(NROW(t51_1)>0){
+    print(knitr::kable(t51_1, format = "pandoc", padding = 2,
+                       caption = tbls(name = "t51_1",
+                                      caption = paste0("Meteorologcial stations and data available in public databases and DEQ files in the ", qapp_project_area, "."))))
+  }
+  
+}
+
+if(NROW(t51_2)>0){
+  print(knitr::kable(t51_2, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_2",
+                                    caption = paste0("Meteorologcial stations and data available in the National Climatic Data Center (NCDC) database in the ", qapp_project_area, "."))))
+}
+
+if(NROW(t51_3)>0){
+  print(knitr::kable(t51_3, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_3",
+                                    caption = paste0("Meteorologcial stations and data, including ", knitr::combine_words(unique(sort(tolower(raws.station.tbl$Parameter)))), ", available in the Remote Automatic Weather Station (RAWS) database in the ", qapp_project_area, "."))))
+}
+
+if(NROW(t51_4)>0){
+  print(knitr::kable(t51_4, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_4",
+                                    caption = paste0("Meteorologcial stations and data, including air temperature, precipitation, relative humidity and wind, available in the USBL AgriMet database in the ", qapp_project_area, "."))))
+}
+
+if(NROW(t51_5)>0){
+  print(knitr::kable(t51_5, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_5",
+                                    caption = paste0("Meteorologcial stations and data available in the USBL Hydromet database in the ", qapp_project_area, "."))))
+}
+
+if(NROW(t51_6)>0){
+  print(knitr::kable(t51_6, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t51_6",
+                                    caption = paste0("Meteorologcial stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area, "."))))
+}
+
+```
 
 ## Thermal Infrared (TIR) Data
 
@@ -330,15 +285,15 @@ st_awqms <- station_awqms %>%
 st_model <- station_model %>% 
   dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
   dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
-  dplyr::mutate(`Station Description` = ifelse(is.na(StationDes),`Site Name`,StationDes),
+  dplyr::mutate(`Station Description` = ifelse(is.na(StationDes),`Model Location Name`,StationDes),
                 Organization = ifelse(is.na(OrgID),`Data Source`,OrgID)) %>% 
   dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
 
 t53_1 <- rbind(st_awqms,st_model) %>% 
   dplyr::filter(!`Station ID` == "TIR") %>% 
   dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Station Description`,
-                                  paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
+                                               `Station Description`,
+                                               paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
   dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>% 
   dplyr::group_by(`Station Name and ID`,`Latitude/Longitude`, Organization) %>% 
   dplyr::summarize(n=n()) %>% 
@@ -359,8 +314,8 @@ if(NROW(t53_1)>0){
 t53_2 <- data.sample.count %>%
   dplyr::filter(!`Station ID` == "TIR") %>% 
   dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  StationDes,
-                                  paste0(StationDes, " (", `Station ID`, ")"))) %>% 
+                                               StationDes,
+                                               paste0(StationDes, " (", `Station ID`, ")"))) %>% 
   dplyr::select(Year, `Station Name and ID`, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
   dplyr::arrange(Year, `Station Name and ID`)
 
@@ -375,105 +330,109 @@ if(NROW(t53_2)>0){
 
 ## Stream Flow Data
 
-`r tbls(name = "t54_1", display="cite")` list flow volume data and other instream measurements that were collected by Oregon DEQ.
+`r tbls(name = "t54", display="cite")` lists the stations for flow volume data and other instream measurements that were available in USGS, Oregon DEQ, and other public databases.
 
-```{r, label=`t54_1`, echo=FALSE}
+```{r, label=`t54`, echo=FALSE}
 
-  t54_1 <- model.input %>% 
-    dplyr::filter(`Parameter` %in% c("Flow")) %>% 
-    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                    `Site Name`,
-                                    paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
-    dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%
-    dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>% 
-    dplyr::select(Location, `Latitude/Longitude`, `Model_Location`, `Measurement Date`, `Data Source`)
+t54_1 <- model.input %>% 
+  dplyr::filter(`Parameter` %in% c("Flow")) %>%
+  dplyr::filter(!`Data Source` == "USGS" & is.na(`Interpolated Data`)) %>% 
+  dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% 
+  dplyr::mutate(Station = `Model Location Name`,
+                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, ", ", Longitude))) %>% 
+  dplyr::select(Station, `Station ID`, `Latitude/Longitude`, `Data Source`)
+
+t54_2 <- usgs.station.tbl %>% 
+  dplyr::mutate(Station = station_nm,
+                `Station ID`= site_no,
+                `Latitude/Longitude` = paste0(round(dec_lat_va,4), ", ",round(dec_long_va,3)),
+                `Data Source` = "USGS") %>% 
+  dplyr::select(Station, `Station ID`, `Latitude/Longitude`, `Data Source`)
+
+t54_3 <- hydromet.station.tbl %>% 
+  dplyr::filter(Parameter %in% c("Discharge", "Spillway Discharge", "Flow")) %>% 
+  dplyr::distinct(Lat, Long, .keep_all = TRUE) %>% 
+  dplyr::mutate(Station = Station.Name,
+                `Station ID` = Station.ID,
+                `Latitude/Longitude` = paste0(round(as.numeric(Lat),4), ", ",round(as.numeric(Long),3)),
+                `Data Source` = "Hydromet") %>% 
+  dplyr::select(Station, `Station ID`, `Latitude/Longitude`, `Data Source`)
+
+t54 <- rbind(t54_1,t54_2,t54_3) %>% 
+  dplyr::arrange(Station)
+
+if(NROW(t54)>0){
   
-  if(NROW(t54_1)>0){
-    
-    print(knitr::kable(t54_1, format = "pandoc", padding = 2,
-                       caption = tbls(name = "t54_1",
-                                      caption = paste0("Instantaneous flow measurements in  ", qapp_project_area, "."))))
-    
-  }
-
-
-
-```
-
-The USGS maintains a number of streamflow gages in the North Umpqua Subbasin. `r tbls(name = "t54_2", display="cite")` list the USGS flow gaging stations.
-
-```{r, label=`t54_2`, echo=FALSE}
-
-  t54_2 <- usgs.station.tbl
+  print(knitr::kable(t54, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t54",
+                                    caption = paste0("Flow measurements in  ", qapp_project_area, "."))))
   
-  if(NROW(t54_2)>0){
-    
-    print(knitr::kable(t54_2, format = "pandoc", padding = 2,
-                       caption = tbls(name = "t54_2",
-                                      caption = paste0("USGS flow gaging stations in ", qapp_project_area, "."))))
-    
-  }
-
+}
 
 ```
 
 ## Point Source Discharges
 
+`r tbls(name = "t55_1", display="cite")` identifies all the active individual NPDES permittees in the `r qapp_project_area`. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven day average daily maximum. When possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_2", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
+
 ```{r, label=`t55`, echo=FALSE}
 
-  section.npdes.ind <- npdes.ind %>% 
-    dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
-    dplyr::mutate(`Facility Name and Number` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
-                  `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
-                  `Stream River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
-    dplyr::select(`Facility Name and Number`, `Permit Type and Description`, `Stream River Mile`)
+section.npdes.ind <- npdes.ind %>% 
+  dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
+  dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
+  dplyr::mutate(`Facility Name and Number` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
+                `Latitude/Longitude` = paste0(round(Latitude,4), ", ",round(Longitude,3)),
+                `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
+                `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
+  dplyr::select(`Facility Name and Number`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
+  dplyr::arrange(`Facility Name and Number`)
+
+if(NROW(section.npdes.ind)>0){
   
-  section.npdes.gen <- npdes.gen %>% 
-    dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
-    dplyr::mutate(`Facility Name and Number` = paste0(CommonName," (", `WQ File Nbr`,")"),
-                  `Permit Type and Description` = paste0(PermitType, ": ", PermitDescription),
-                  `Stream River Mile` = ifelse(is.na(StreamName), NA, paste0(StreamName, " ", " RM ",RiverMile))) %>% 
-    dplyr::select(`Facility Name and Number`, `Permit Type and Description`, `Stream River Mile`)
+  print(knitr::kable(section.npdes.ind, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t55_1",
+                                    caption = paste0("Summary of individual NPDES permitted discharges on ", qapp_project_area, "."))))
   
-  t55 <- model.input %>% 
-    dplyr::filter(`Site Type` == "Point Source") %>% 
-    dplyr::mutate(`Permit Type and Description` = NA,
-                  `Stream River Mile` = NA) %>% 
-    dplyr::select(`Site Name`, `Permit Type and Description`, `Stream River Mile`) %>% 
-    dplyr::rename(`Facility Name and Number` = `Site Name`) %>% 
-    rbind(section.npdes.ind, section.npdes.gen) %>% 
-    dplyr::arrange(`Permit Type and Description`)
+}
+
+section.npdes.gen <- npdes.gen %>% 
+  dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
+  dplyr::mutate(`Permit Type and Description` = paste0(PermitType, ": ", PermitDescription)) %>% 
+  dplyr::group_by(`Permit Type and Description`) %>% 
+  dplyr::summarise(`Number of Permits` = n())
+
+if(NROW(section.npdes.gen)>0){
   
-  if(NROW(t55)>0){
-    
-    print(knitr::kable(t55, format = "pandoc", padding = 2,
-                       caption = tbls(name = "t55",
-                                      caption = paste0("Summary of NPDES permitted discharges on ", qapp_project_area, "."))))
-    
-  }
+  print(knitr::kable(section.npdes.gen, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t55_2",
+                                    caption = paste0("Summary of general NPDES permitting types in the ", qapp_project_area, "."))))
+  
+}
 
 ```
 
 ## Effective Shade Measurements
 
+`r tbls(name = "t56", display="cite")` lists the stations for effective shade measurements that were available in the public and Oregon DEQ databases.
+
 ```{r, label=`t56`, echo=FALSE}
 
-  t56 <- model.input %>% 
-    dplyr::filter(`Parameter` %in% c("Effective Shade")) %>% 
-    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                    `Site Name`,
-                                    paste0(`Site Name`, " (", `Station ID`, ")"))) %>% 
-    dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>%
-    dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>% 
-    dplyr::select(Location, `Latitude/Longitude`, `Model_Location`, `Measurement Date`, `Data Source`)
+t56 <- model.input %>% 
+  dplyr::filter(`Parameter` %in% c("Effective Shade")) %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% 
+  dplyr::mutate(Station = `Model Location Name`,
+                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, ", ", Longitude))) %>% 
+  dplyr::select(Station, `Station ID`, `Latitude/Longitude`, `Data Source`)
 
-  if(NROW(t56)>0){
-    
-    print(knitr::kable(t56, format = "pandoc", padding = 2,
-                       caption = tbls(name = "t56",
-                                      caption = paste0("Effective shade data collected along  ", qapp_project_area, "."))))
-    
-  }
+if(NROW(t56)>0){
+  
+  print(knitr::kable(t56, format = "pandoc", padding = 2,
+                     caption = tbls(name = "t56",
+                                    caption = paste0("Effective shade data collected along  ", qapp_project_area, "."))))
+  
+}
 
 ```
 
@@ -484,9 +443,9 @@ The USGS maintains a number of streamflow gages in the North Umpqua Subbasin. `r
 chap6 <- NULL
 
 for(waterbody_name in unique(sort(model.info$`Model Waterbody`))){
-    
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
-    
+  
+  chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+  
 }
 
 ```
@@ -534,10 +493,10 @@ Root Mean Square Error: $RMSE = \sqrt{\frac{1}{n}\sum(X_{sim} - X_{obs})^2}$
 Nash-Sutcliffe efficiency coefficient: $NS = 1 - \frac {\sum (X_{sim} - X_{obs})^2}{\sum (X_{sim} - \overline{X_{obs}})^2}$
 
 where,  
-    $X_{sim}$ = The simulated temperature;  
-    $X_{obs}$ = The observed or measured temperature;  
-    $\overline X_{obs}$ = The mean of the observed or measured temperature;  
-    $n$ = The sample size.
+$X_{sim}$ = The simulated temperature;  
+$X_{obs}$ = The observed or measured temperature;  
+$\overline X_{obs}$ = The mean of the observed or measured temperature;  
+$n$ = The sample size.
 
 # Documentation in Model Reports
 
@@ -567,91 +526,91 @@ This scenario evaluates stream temperature warming or cooling from existing cond
 ### Restored Vegetation
 This scenario evaluates stream temperature warming or cooling contributed by removal of streamside vegetation. This scenario will be compared to the current condition model. Elements of this scenario include:
 
-  *	Restoring streamside vegetation in areas along the model extent to minimize anthropogenic loading of solar radiation.
-    
-  *	Restoration areas are locations along the model extent that are currently characterized as disturbed or have bare ground, grass, or small shrubs (defined as <= 0.9 meters or 3 feet in height in Heat Source). The management strategy applied in these areas is to restore the vegetation. The restored vegetation type, height, density, and overhang used for Heat Source will be identified during the TMDL process.
-    
-  *	Model inputs for land cover height, density, and overhang will be modified to reflect the restored areas.
-    
-  *	Heat Source model boundary inputs for stream temperature will be modified to reflect the monthly mean daily maximum and minimum stream temperature changes from restoring disturbed areas modeled in the SSN models. 
-    
-  *	All other model inputs will be the same as the current calibrated model.
+*	Restoring streamside vegetation in areas along the model extent to minimize anthropogenic loading of solar radiation.
+
+*	Restoration areas are locations along the model extent that are currently characterized as disturbed or have bare ground, grass, or small shrubs (defined as <= 0.9 meters or 3 feet in height in Heat Source). The management strategy applied in these areas is to restore the vegetation. The restored vegetation type, height, density, and overhang used for Heat Source will be identified during the TMDL process.
+
+*	Model inputs for land cover height, density, and overhang will be modified to reflect the restored areas.
+
+*	Heat Source model boundary inputs for stream temperature will be modified to reflect the monthly mean daily maximum and minimum stream temperature changes from restoring disturbed areas modeled in the SSN models. 
+
+*	All other model inputs will be the same as the current calibrated model.
 
 ### Protected Vegetation
 
 This scenario evaluates stream temperature warming or cooling that would occur if existing vegetation is removed. This scenario will be compared to the current condition model. Elements of this scenario include:
 
-  *	Protecting existing streamside vegetation and actively managing it to a mature stand in order limit new anthropogenic loading of solar radiation.
-    
-  *	Protection areas are locations along the model extent with some existing streamside vegetation, such as medium to tall trees. The exact definition will be determined during the TMDL process. Existing streamside vegetation in protection areas will be removed to evaluate the stream warming from the existing trees.
-    
-  *	Model inputs for land cover height, density, and overhang will be set to zero in protection areas.
-    
-  *	Heat Source model boundary inputs for stream temperature will be modified to reflect the monthly mean daily maximum and minimum stream temperature changes from removing vegetated areas modeled in the SSN models. 
-    
-  *	All other model inputs will be the same as the current calibrated model.
+*	Protecting existing streamside vegetation and actively managing it to a mature stand in order limit new anthropogenic loading of solar radiation.
+
+*	Protection areas are locations along the model extent with some existing streamside vegetation, such as medium to tall trees. The exact definition will be determined during the TMDL process. Existing streamside vegetation in protection areas will be removed to evaluate the stream warming from the existing trees.
+
+*	Model inputs for land cover height, density, and overhang will be set to zero in protection areas.
+
+*	Heat Source model boundary inputs for stream temperature will be modified to reflect the monthly mean daily maximum and minimum stream temperature changes from removing vegetated areas modeled in the SSN models. 
+
+*	All other model inputs will be the same as the current calibrated model.
 
 ### Restored Stream Flow
 
 This scenario evaluates stream temperature warming or cooling from keeping permitted water withdrawals as instream flow. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
-  *	Maintaining all currently permitted water withdrawals as instream flow in order to increase the thermal loading capacity and reduce stream warming.
-    
-  *	Model boundary and tributary flows will be set to reflect the additional instream flows.
-    
-  *	All other model inputs will be the same as the current calibrated model.
+*	Maintaining all currently permitted water withdrawals as instream flow in order to increase the thermal loading capacity and reduce stream warming.
+
+*	Model boundary and tributary flows will be set to reflect the additional instream flows.
+
+*	All other model inputs will be the same as the current calibrated model.
 
 ### Channel Morphology
 This scenario evaluates stream temperature warming or cooling from improvements to channel morphology, including projects to restore cold water refuges. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
-  * Modifying channel width and/or depth to reflect locations where improvements to channel morphology are needed. The location of channel morphology projects will be determine during the TMDL process.
+* Modifying channel width and/or depth to reflect locations where improvements to channel morphology are needed. The location of channel morphology projects will be determine during the TMDL process.
 
-  * Model inputs for bottom width, channel angle z, manning’s n, gradient, elevation, porosity, percent hyporheic flow, hyporheic zone thickness, land cover height, density, and overhang may be modified in areas with improved channel morphology.
+* Model inputs for bottom width, channel angle z, manning’s n, gradient, elevation, porosity, percent hyporheic flow, hyporheic zone thickness, land cover height, density, and overhang may be modified in areas with improved channel morphology.
 
-  * All other model inputs will be the same as the current calibrated model.
+* All other model inputs will be the same as the current calibrated model.
 
 ### TMDL Implementation Plans
 
 This scenario evaluates stream temperature warming or cooling from proposed or existing DMA TMDL implementation plans. These scenarios will be compared to the non-anthropogenic model scenario. Elements of this scenario include:
 
-  * Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing DMA implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.
+* Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing DMA implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.
 
-  * Model inputs for land cover height, density, overhang, boundary condition flow and temperature, bottom width, channel angle z, manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.
+* Model inputs for land cover height, density, overhang, boundary condition flow and temperature, bottom width, channel angle z, manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.
 
-  * All other model inputs will be the same as the current calibrated model.
+* All other model inputs will be the same as the current calibrated model.
 
 ### TMDL Waste Load Allocations
 
 This scenario evaluates stream temperature warming or cooling from proposed or existing TMDL Waste Load Allocations. These scenarios will be compared to the non-anthropogenic model scenario. Elements of this scenario include:
 
-  * Modifying point source discharges to reflect proposed or existing TMDL Waste Load Allocations. 
+* Modifying point source discharges to reflect proposed or existing TMDL Waste Load Allocations. 
 
-  * All other model inputs will be the same as the current calibrated model.
+* All other model inputs will be the same as the current calibrated model.
 
 ### Tributary Temperature
 This scenario evaluates stream temperature warming or cooling from tributaries by modifying tributary temperature. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
-  * Tributary temperatures will be set to reflect potential conditions.
+* Tributary temperatures will be set to reflect potential conditions.
 
-  * All other model inputs will be the same as the current calibrated model.
+* All other model inputs will be the same as the current calibrated model.
 
 ### Climate
 
 This scenario evaluates stream temperature warming or cooling from changes in climate. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
-  * Model inputs for air temperature, humidity and wind speed may be modified to reflect potential conditions or climate change scenarios.
+* Model inputs for air temperature, humidity and wind speed may be modified to reflect potential conditions or climate change scenarios.
 
-  * Model inputs for air temperature, humidity and wind speed may be modified to reflect historic climate change that has influenced current conditions. 
+* Model inputs for air temperature, humidity and wind speed may be modified to reflect historic climate change that has influenced current conditions. 
 
-  * All other model inputs will be the same as the current calibrated model.
+* All other model inputs will be the same as the current calibrated model.
 
 ### Point Sources
 
 This scenario evaluates stream temperature warming or cooling from permitted point sources. This scenario will be compared to the current conditions model scenario. Elements of this scenario include:
 
-  * Removal of all point sources of pollutants.
+* Removal of all point sources of pollutants.
 
-  * All other model inputs will be the same as the current calibrated model.
+* All other model inputs will be the same as the current calibrated model.
 
 ### Background
 
@@ -682,7 +641,7 @@ This scenario evaluates if the stream can achieve the applicable BBNC criteria a
 ```{r, label=`roles`, echo=FALSE}
 
 roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/roles.xlsx",
-                               sheet = "roles")
+                           sheet = "roles")
 
 troles <- flextable::regulartable(roles) %>% 
   flextable::set_table_properties(layout = "autofit") %>% 
@@ -692,7 +651,7 @@ troles <- flextable::regulartable(roles) %>%
   flextable::valign(valign = "top") %>% 
   flextable::theme_box() %>% 
   flextable::set_caption(tbls(name = paste0("roles"),
-                                    caption = paste0("The roles and responsibilities of each team member involved in the temperature TMDL replacement project.")))
+                              caption = paste0("The roles and responsibilities of each team member involved in the temperature TMDL replacement project.")))
 
 troles
 
@@ -708,12 +667,12 @@ Additional expertise or special training is not necessary at this time.
 
 The DEQ Project Manager (or designee) will provide monthly progress reports to USEPA. As appropriate, these reports will inform USEPA of the following:
 
-  * Adherence to project schedule and budget
-  * Deviations from approved QAPP, as determined from project assessment and oversight activities
-  * The impact of any deviations on model application quality and uncertainty
-  * The need for and results of response actions to correct any deviations
-  * Potential uncertainties in decisions based on model predictions and data
-  * Data quality assessment findings regarding model input data and model outputs
+* Adherence to project schedule and budget
+* Deviations from approved QAPP, as determined from project assessment and oversight activities
+* The impact of any deviations on model application quality and uncertainty
+* The need for and results of response actions to correct any deviations
+* Potential uncertainties in decisions based on model predictions and data
+* Data quality assessment findings regarding model input data and model outputs
 
 ## Project Schedule
 
@@ -729,25 +688,25 @@ Thorough documentation of all modeling activities is necessary to be able to eff
 
 The Tetra Tech Project Manager and designees will maintain files, as appropriate, as repositories for information and data used in models and for preparing reports and documents during the task. Electronic project files are maintained on network computers and are backed up weekly. The Tetra Tech Project Manager will supervise the use of materials in the central files. The following information will be included in the hard copy or electronic task files in the central file:
 
-  * Any reports and documents prepared
-  * Contract and task order information
-  * QAPP and draft and final versions of requirements and design documents
-  * Electronic copies of models
-  * Results of technical reviews, internal and external design tests, quality assessments of output data, and audits
-  * Documentation of response actions during the task to correct problems
-  * Input and test data sets
-  * Communications (memoranda; internal notes; telephone conversation records; letters; meeting minutes; and all written correspondence among the task team personnel, suppliers, or others)
-  * Studies, reports, documents, and newspaper articles pertaining to the task
-  * Special data compilations
+* Any reports and documents prepared
+* Contract and task order information
+* QAPP and draft and final versions of requirements and design documents
+* Electronic copies of models
+* Results of technical reviews, internal and external design tests, quality assessments of output data, and audits
+* Documentation of response actions during the task to correct problems
+* Input and test data sets
+* Communications (memoranda; internal notes; telephone conversation records; letters; meeting minutes; and all written correspondence among the task team personnel, suppliers, or others)
+* Studies, reports, documents, and newspaper articles pertaining to the task
+* Special data compilations
 
 Records of receipt with information on source and description of documentation will be filed along with the original data sheets and files to ensure traceability. Records of actions and subsequent findings will be kept during additional data processing.
 
 All data files, source codes, and executable versions of the computer software will be retained for internal peer review, auditing, or post-task reuse in the electronic task files in the administrative record. These materials include the following:
 
-  * Versions of the source and executable code used
-  * Databases used for model input, as necessary
-  * Key assumptions
-  * Documentation of the model code and verification testing for newly developed codes or modifications to the existing model
+* Versions of the source and executable code used
+* Databases used for model input, as necessary
+* Key assumptions
+* Documentation of the model code and verification testing for newly developed codes or modifications to the existing model
 
 The Tetra Tech Modeling QC Officer and other experienced technical staff will review the materials listed above during internal peer review of modified existing models or new codes or models. The designated QC Officers will perform QC checks on any modifications to the source code used in the design process. All new input and output files, together with existing files, records, codes, and data sets, will be saved for inspection and possible reuse.
 

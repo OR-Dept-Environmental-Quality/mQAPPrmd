@@ -30,10 +30,10 @@ options(kableExtra.auto_format = F)
 
 t6x5j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
-  dplyr::filter(!`Site Type` == "Calibration Site") %>% 
+  dplyr::filter(!`Model Location Type` == "Calibration Site") %>% 
   dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Site Name`,
-                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>%  
+                                  `Model Location Name`,
+                                  paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
   dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
   dplyr::mutate(DataSource = ifelse(`Interpolated Data` == "T",
                                     ifelse(!is.na(`Data Source`),
@@ -43,9 +43,9 @@ t6x5j <- section.model.input %>%
                                            `Data Source`, 
                                            NA))) %>% 
   dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-  dplyr::select(Location, `Model_Location`, `Site Type`, `Parameter`, DataSource) %>%
+  dplyr::select(Location, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
   dplyr::rename(`Model Location` = `Model_Location`,
-                `Input Type` = `Site Type`,
+                `Input Type` = `Model Location Type`,
                 `Data Source` = DataSource)
 
 if(NROW(t6x5j)>0){

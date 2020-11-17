@@ -1,6 +1,24 @@
-setwd("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/mQAPPrmd")
+library(rmarkdown)
 
-output.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/mQAPPrmd/markdown/"
+setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
+
+output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/20201113"
+
+## for test:
+# qapp_project_area = "Applegate, Illinois, Lower Rogue, and Middle Rogue Subbasins"
+# qapp_project_area = "John Day River Basin"
+# qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
+# qapp_project_area = "Lower Willamette, Clackamas, and Sandy Subbasins"
+# qapp_project_area = "Malheur River Subbasins"
+# qapp_project_area = "Mid Willamette Subbasins"
+# qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
+# qapp_project_area = "North Umpqua Subbasin"
+# qapp_project_area = "South Umpqua and Umpqua Subbasins"
+# qapp_project_area = "Southern Willamette Subbasins"
+# qapp_project_area = "Upper Rogue Subbasin"
+# qapp_project_area = "Walla Walla Subbasin"
+# qapp_project_area = "Willamette River Mainstem and Major Tributaries"
+# qapp_project_area = "Willow Creek Subbasin"
 
 for (qapp_project_area in qapp_project_areas$areas) {
   

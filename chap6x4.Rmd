@@ -31,10 +31,10 @@ options(kableExtra.auto_format = F)
 
 t6x4j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
-  dplyr::filter(`Site Type` == "Calibration Site") %>%
+  dplyr::filter(`Model Location Type` == "Calibration Site") %>%
   dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Site Name`,
-                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>%   
+                                  `Model Location Name`,
+                                  paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%   
   dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
   dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
   dplyr::arrange(Parameter,desc(`Model Location`)) %>% 

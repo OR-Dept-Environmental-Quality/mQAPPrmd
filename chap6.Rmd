@@ -87,10 +87,10 @@ if(!model.extent == TRUE){
 } else {
   
   t6x4 <- section.model.input %>% 
-    dplyr::filter(`Site Type` == "Calibration Site") %>%
+    dplyr::filter(`Model Location Type` == "Calibration Site") %>%
     dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Site Name`,
-                                  paste0(`Site Name`, " (", `Station ID`, ")"))) %>%   
+                                  `Model Location Name`,
+                                  paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%   
     dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
     dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
     dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
@@ -123,10 +123,10 @@ if(!model.extent == TRUE){
 } else {
 
   t6x5_1 <- section.model.input %>% 
-    dplyr::filter(!`Site Type` %in%  c("Calibration Site")) %>% 
+    dplyr::filter(!`Model Location Type` %in%  c("Calibration Site")) %>% 
     dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                    `Site Name`,
-                                    paste0(`Site Name`, " (", `Station ID`, ")"))) %>%  
+                                    `Model Location Name`,
+                                    paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
     dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
     dplyr::mutate(DataSource = ifelse(`Interpolated Data` == "T",
                                       ifelse(!is.na(`Data Source`),
@@ -136,9 +136,9 @@ if(!model.extent == TRUE){
                                              `Data Source`, 
                                              NA))) %>% 
     dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-    dplyr::select(Location, `Model_Location`, `Site Type`, `Parameter`, DataSource) %>%
+    dplyr::select(Location, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
     dplyr::rename(`Model Location` = `Model_Location`,
-                  `Input Type` = `Site Type`,
+                  `Input Type` = `Model Location Type`,
                   `Data Source` = DataSource)
 
 }
@@ -151,7 +151,7 @@ This section describes the model input parameters, the source of that data, and 
 ```{r, label=`t6x5_2`, include=FALSE}
 
 t6x5_2 <- section.model.input %>%
-  dplyr::filter(`Site Type` == "Meteorological")
+  dplyr::filter(`Model Location Type` == "Meteorological")
 
 met.site <- gsub(",.*", "", unique(t6x5_2$`Data Source`))
 met.org <- gsub(".*,", "", unique(t6x5_2$`Data Source`))
