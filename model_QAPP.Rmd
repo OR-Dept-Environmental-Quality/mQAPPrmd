@@ -204,7 +204,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 
 ```
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorologic monitoring stations Network (Hydromet), and University of Utah MesoWest database. `r ifelse(NROW(model.input[which(model.input$"Model Location Type" == "Meteorological"),])>0,tbls(name = "t51_1", display="cite"),tbls(name = "t51_2", display="cite"))` - Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`.
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from ODEQ database, NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorologic Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. `r ifelse(NROW(model.input[which(model.input$"Model Location Type" == "Meteorological"),])>0,tbls(name = "t51_1", display="cite"),tbls(name = "t51_2", display="cite"))` - Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`.
 
 ```{r, label=`t51_tbls`, echo=FALSE}
 
@@ -221,7 +221,11 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 if(NROW(t51_2)>0){
   print(knitr::kable(t51_2, format = "pandoc", padding = 2,
                      caption = tbls(name = "t51_2",
-                                    caption = paste0("Meteorologcial stations and data available in the National Climatic Data Center (NCDC) database in the ", qapp_project_area, "."))))
+                                    caption = paste0("Meteorologcial stations and data available in the National Climatic Data Center (NCDC) database in the ",
+                                                     qapp_project_area, "."))) %>%
+          kableExtra::kable_styling() %>% 
+          kableExtra::add_footnote(label = paste0("Data were retrieved from NOAA National Climatic Data Center (https://www.ncdc.noaa.gov/) on ", update.date, "." ))
+        )
 }
 
 if(NROW(t51_3)>0){
@@ -295,11 +299,16 @@ t53_1 <- rbind(st_awqms,st_model) %>%
                                                `Station Description`,
                                                paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
   dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>% 
-  dplyr::group_by(`Station Name and ID`,`Latitude/Longitude`, Organization) %>% 
-  dplyr::summarize(n=n()) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::select(-n) %>% 
+  dplyr::mutate(`Station Name and ID` = stringr::str_to_title(`Station Name and ID`)) %>% 
+  dplyr::mutate_at("Station Name and ID", str_replace_all, "Ordeq", "ORDEQ") %>%
+  dplyr::mutate_at("Station Name and ID", str_replace_all, " Rm", " RM") %>%
+  dplyr::mutate_at("Station Name and ID", str_replace_all, "Lb", "LB") %>%
+  dplyr::mutate_at("Station Name and ID", str_replace_all, "Nf", "NF") %>%
+  dplyr::mutate_at("Station Name and ID", str_replace_all, "Sf", "SF") %>%
+  dplyr::distinct(`Station Name and ID`, .keep_all=TRUE) %>%
+  dplyr::select(`Station Name and ID`,`Latitude/Longitude`, Organization) %>% 
   dplyr::arrange(`Station Name and ID`)
+  
 
 if(NROW(t53_1)>0){
   print(knitr::kable(t53_1, format = "pandoc", padding = 2,
@@ -430,7 +439,7 @@ if(NROW(t56)>0){
   
   print(knitr::kable(t56, format = "pandoc", padding = 2,
                      caption = tbls(name = "t56",
-                                    caption = paste0("Effective shade data collected along  ", qapp_project_area, "."))))
+                                    caption = paste0("Effective shade data collected in the  ", qapp_project_area, "."))))
   
 }
 

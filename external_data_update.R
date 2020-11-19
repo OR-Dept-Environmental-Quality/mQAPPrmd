@@ -1,4 +1,4 @@
-# Update date: 2020-11-12
+update.date <- "2020/11/12"
 
 library(tidyverse)
 library(readxl)
@@ -69,14 +69,16 @@ for(i in 1:length(raws.meta$wrccID)){
 ## Note: data spreadsheets were manually organized.
 ## agrimet_stations.csv: https://www.usbr.gov/pn/agrimet/location.html
 ## agrimet_parameters.csv: https://www.usbr.gov/pn/agrimet/aginfo/station_params.html#crvo
-agrimet.stations <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/agrimet_stations.csv")
-agrimet.parameters <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/agrimet_parameters.csv")
+## both agrimet.stations and agrimet.parameters moved to data.R
+## agrimet.stations <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/agrimet_stations.csv")
+## agrimet.parameters <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/agrimet_parameters.csv")
 
 # Hydromet Data ----
 ## Bureau of Reclamation Columbia-Pacific Northwest Region:
 ## Note: data spreadsheets were manually organized.
 ## hydromet.csv: https://www.usbr.gov/pn/hydromet/decod_params.html
-hydromet <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/hydromet.csv")
+## hydromet upload moved to data.R
+## hydromet <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/hydromet.csv")
 
 # MesoWest Met Data ----
 ## Github: https://github.com/fickse/mesowest
@@ -94,15 +96,13 @@ write.csv(mw.variables.clean, "mw_variables.csv") # check setwd()
 # SAVE DATA ----
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download")
 
-save(usgs.stations.or,
+save(update.date,
+     usgs.stations.or,
      ncdc.station.or,
      ncdc.datacats.or,
      raws.meta,
      raws.data.type,
-     agrimet.stations,
-     agrimet.parameters,
-     hydromet,
      mw.meta,
-     mw.variables.clean,
+     mw.variables.list,
      file = "data_sources.RData")
 
