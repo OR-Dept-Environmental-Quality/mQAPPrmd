@@ -32,6 +32,9 @@ cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
 ref <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "References")
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Individual_NDPES")
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Gen_NPDES")
+agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
+agrimet.parameters <- read.csv(paste0(data.dir, "download/agrimet_parameters.csv"))
+hydromet <- read.csv(paste0(data.dir, "download/hydromet.csv"))
 lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
 web.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
                         layer = "Study_Areas_v5_HUC8_scope")
@@ -251,7 +254,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   agrimet.station.tbl <- agrimet.stations.subbasin %>% 
     dplyr::left_join(agrimet.station.data.type, by = "siteid")
   
-  # USBR Hydromet ----
+  # _ USBR Hydromet ----
   hydromet.station.tbl <- hydromet %>% 
     dplyr::filter(`QAPP.Project.Area` == qapp_project_area)
   

@@ -1,0 +1,75 @@
+---
+output: 
+  word_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r setup_chap6x5, include=FALSE}
+
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      autodep = TRUE)
+
+options(kableExtra.auto_format = F)
+
+# For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
+
+
+```
+
+##### `r model_extent`
+
+```{r, label=t6x5j, echo=FALSE}
+
+# HS
+#hsv.num <- unique(substr(section.tmdl$"Model version", 13,13))
+#hsv.tbl <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = paste0("hs", hsv.num))
+
+#hs <- knitr::knit_child(input = paste0("hs", hsv.num, ".Rmd"), quiet = TRUE)
+#cat(hs, sep = '\n')
+
+#print(knitr::kable(hsv.tbl, format = "pandoc", padding = 2,
+#                   caption = tbls(name = paste0("hsv.tbl", model_extent),
+#                                  caption = paste0("Summary of model inputs and input categories required for Heat Source version ", hsv.num,"."))))
+
+# Model parameter input
+
+t6x5j <- section.model.input %>% 
+  dplyr::filter(`Model Extent` %in%  model_extent) %>% 
+  dplyr::filter(!`Model Location Type` == "Calibration Site") %>% 
+  dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                  `Model Location Name`,
+                                  paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
+  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
+  dplyr::mutate(DataSource = ifelse(`Interpolated Data` == "T",
+                                    ifelse(!is.na(`Data Source`),
+                                           paste0(`Data Source`, ". ", Note), 
+                                           Note),
+                                    ifelse(!is.na(`Data Source`), 
+                                           `Data Source`, 
+                                           NA))) %>% 
+  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+  dplyr::select(Location, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
+  dplyr::rename(`Model Location` = `Model_Location`,
+                `Input Type` = `Model Location Type`,
+                `Data Source` = DataSource)
+
+if(NROW(t6x5j)>0){
+  print(knitr::kable(t6x5j, format = "pandoc", padding = 2,
+                     caption = tbls(name = paste0("t6x5j", model_extent),
+                                    caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, "."))))
+  
+}  else {
+  
+  cat(paste0("There were no temperature or flow boundary conditions input to this model."))
+  
+}
+
+```
