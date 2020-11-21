@@ -177,7 +177,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
   ncdc.datacats <- ncdc.datacats.or %>% 
     dplyr::filter(name %in% c("Air Temperature", "Precipitation", "Weather Type", "Wind", "Wind Speed", "Cloudiness", "Relative Humidity", "Humidity")) %>% 
     dplyr::group_by(station.id) %>% 
-    dplyr::summarise(Parameter = toString(sort(name)))
+    dplyr::summarise(Parameter = toString(sort(name))) %>% 
+    dplyr::ungroup()
   
   ncdc.station.tbl <- ncdc.stations.subbasin %>% 
     dplyr::rename(station.id = id) %>% 

@@ -28,19 +28,6 @@ options(kableExtra.auto_format = F)
 
 ```{r, label=t6x5j, echo=FALSE}
 
-# HS
-#hsv.num <- unique(substr(section.tmdl$"Model version", 13,13))
-#hsv.tbl <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = paste0("hs", hsv.num))
-
-#hs <- knitr::knit_child(input = paste0("hs", hsv.num, ".Rmd"), quiet = TRUE)
-#cat(hs, sep = '\n')
-
-#print(knitr::kable(hsv.tbl, format = "pandoc", padding = 2,
-#                   caption = tbls(name = paste0("hsv.tbl", model_extent),
-#                                  caption = paste0("Summary of model inputs and input categories required for Heat Source version ", hsv.num,"."))))
-
-# Model parameter input
-
 t6x5j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(!`Model Location Type` == "Calibration Site") %>% 

@@ -86,28 +86,30 @@ if(!model.extent == TRUE){
     chap6x5 <- c(chap6x5, knitr::knit_child(input = "chap6x5.Rmd", envir = globalenv()))
     
   }
-
+  
 } else {
   
   t6x5 <- section.model.input %>% 
     dplyr::filter(`Model Location Type` == "Calibration Site") %>%
     dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Model Location Name`,
-                                  paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%   
+                                    `Model Location Name`,
+                                    paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%   
     dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
     dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
     dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
     dplyr::select(Location, `Model_Location`, `Parameter`, `Data Source`) %>% 
     dplyr::rename(`Model Location` = `Model_Location`,
                   `Calibration Parameter` = `Parameter`)
-
-  }
+  
+  t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  
+}
 
 ```
 
 Model calibration was completed by DEQ and described in the `r paste0(unique(section.tmdl$"TMDL Document"), " (", strip_alpha(unique(section.tmdl$"Abbreviated Reference")), ")")`. It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized here to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
 
-`r if(!model.extent == TRUE){paste(chap6x5, collapse = "\n")}else{if(NROW(t6x5)>0){knitr::kable(t6x5, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))}}`
+`r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
 
 ### Model Parameters
 
@@ -117,24 +119,41 @@ Model calibration was completed by DEQ and described in the `r paste0(unique(sec
 hsv.num <- unique(substr(section.tmdl$"Model version", 13,13))
 hsv.tbl <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = paste0("hs", hsv.num))
 
+hsv_tbl <- knitr::kable(hsv.tbl, format = "pandoc", padding = 2,
+                        caption = tbls(name = paste0("hsv.tbl", waterbody_name), 
+                                       caption = paste0("Summary of model inputs and input categories required for Heat Source version ", hsv.num,".")))
+
 # Model parameter input
 if(!model.extent == TRUE){
-
+  
   chap6x6 <- NULL
   
   for(model_extent in unique(sort(section.model.input$`Model Extent`))){
     
     chap6x6 <- c(chap6x6, knitr::knit_child(input = "chap6x6.Rmd", envir = globalenv()))
-
+    
   }
-
+  
 } else {
-
+  
+  t6x6_met <- section.model.input %>% 
+    dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
+    dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`) %>% 
+    dplyr::summarize(`Model Location` = toString(unique(sort(`Model Location`))),
+                     Parameter = toString(unique(sort(Parameter))))%>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(`Model_Location` = paste0(`Model Location`," ", `Location Units`)) %>% 
+    dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`) %>% 
+    dplyr::rename(`Location/Station ID` = `Station ID`,
+                  `Model Location` = Model_Location,
+                  `Input Type` = `Model Location Type`,
+                  `Data Source/Notes` = `Data Source`)
+  
   t6x6_1 <- section.model.input %>% 
-    dplyr::filter(!`Model Location Type` %in%  c("Calibration Site")) %>% 
-    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                    `Model Location Name`,
-                                    paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
+    dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
+    dplyr::mutate(`Location/Station ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                                 `Model Location Name`,
+                                                 paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
     dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(round(`Model Location`,2)," ", `Location Units`))) %>%
     dplyr::mutate(DataSource = ifelse(`Interpolated Data` == "T",
                                       ifelse(!is.na(`Data Source`),
@@ -143,12 +162,17 @@ if(!model.extent == TRUE){
                                       ifelse(!is.na(`Data Source`), 
                                              `Data Source`, 
                                              NA))) %>% 
-    dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-    dplyr::select(Location, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
+    dplyr::select(`Location/Station ID`, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
     dplyr::rename(`Model Location` = `Model_Location`,
                   `Input Type` = `Model Location Type`,
-                  `Data Source` = DataSource)
-
+                  `Data Source/Notes` = DataSource) %>% 
+    rbind(t6x6_met) %>% 
+    dplyr::arrange(Parameter,desc(`Model Location`))
+  
+  t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
+                              caption = tbls(name = paste0("t6x6_1", waterbody_name),
+                                             caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
+  
 }
 
 ```
@@ -156,24 +180,23 @@ if(!model.extent == TRUE){
 ```{r, child=paste0("hs",hsv.num,".Rmd")}
 ```
 
-`r knitr::kable(hsv.tbl, format = "pandoc", padding = 2,caption = tbls(name = paste0("hsv.tbl", waterbody_name), caption = paste0("Summary of model inputs and input categories required for Heat Source version ", hsv.num,".")))`
+`r hsv_tbl`
 
 `r if(!model.extent == TRUE){} else {paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the model input parameters, the source of that data, and those parameters which will be most likely adjusted to improve calibration and fit. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.")}`
 
-`r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){knitr::kable(t6x6_1, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x6_1", waterbody_name),caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))}}`
+`r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
 ```{r, label=`t6x6_2`, echo=FALSE}
 
 t6x6_2 <- section.model.input %>%
   dplyr::filter(`Model Location Type` == "Meteorological")
 
-met.site <- gsub(",.*", "", unique(t6x6_2$`Data Source`))
-met.org <- gsub(".*,", "", unique(t6x6_2$`Data Source`))
-
 if(NROW(t6x6_2)>1){
   
-  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". The data source for these inputs is the ", met.org," weather station at the ", met.site,". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. ",unique(sort(t6x6_2$Note))))
+  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". The data source for these inputs is the ", unique(sort(t6x6_2$`Station ID`)), " ", unique(sort(t6x6_2$`Data Source`)), ". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
   
+  cat(unique(sort(t6x6_2$Note)))
+
 } else {
   
   cat("There is no meteorology inputs into the model.")
@@ -188,7 +211,7 @@ Data gaps include:
 
 * Tributary flow and temperature measurements for all tributary model inputs.  
 * Measurements of withdrawals flow (if any) within the model extent.  
-* The data source and quality for the following boundary condition inputs: `r if(NROW(t6x6_1)>0){paste(unique(sort(t6x6_1$"Location"), collapse = ", "))}else{cat("No data")}`. **[UPDATE FOR EACH STREAM]**
+* The data source and quality for the following boundary condition inputs: `r if(NROW(t6x6_1)>0){paste(unique(sort(t6x6_1$"Location/Station ID"), collapse = ", "))}else{cat("No data")}`. **[UPDATE FOR EACH STREAM]**
 
 Data gaps were identified and addressed during original development of the `r waterbody_name` model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
 
