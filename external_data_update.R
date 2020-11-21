@@ -89,7 +89,8 @@ mw.variables.clean <- mw.variables %>%
   dplyr::rename(Parameter = "matrix.unlist.mw.variables.list.VARIABLES..") %>% 
   dplyr::slice(which(row_number() %% 3 == 1)) %>% 
   dplyr::group_by(Parameter) %>% 
-  dplyr::summarise(n=n())
+  dplyr::summarise(n=n()) %>% 
+  dplyr::ungroup()
 ## Edit mw.variables in Excel.
 write.csv(mw.variables.clean, "mw_variables.csv") # check setwd()
 
