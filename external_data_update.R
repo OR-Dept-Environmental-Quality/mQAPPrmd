@@ -1,4 +1,4 @@
-update.date <- "2020/11/12"
+update.date <- "2020/11/23"
 
 library(tidyverse)
 library(readxl)
@@ -92,7 +92,7 @@ mw.variables.clean <- mw.variables %>%
   dplyr::summarise(n=n()) %>% 
   dplyr::ungroup()
 ## Edit mw.variables in Excel.
-write.csv(mw.variables.clean, "mw_variables.csv") # check setwd()
+# write.csv(mw.variables.clean, "mw_variables.csv") # 1. check setwd(); 2. use lookup table
 
 # SAVE DATA ----
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download")

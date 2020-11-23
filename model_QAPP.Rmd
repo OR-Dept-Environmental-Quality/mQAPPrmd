@@ -138,7 +138,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
     
     t51_sp_tbl <- knitr::kable(t51_sp, format = "pandoc", padding = 2,
                                caption = tbls(name = "t51_sp",
-                                              caption = paste0("Meteorologcial stations and data available in public databases and DEQ files in the ", qapp_project_area, ".")))
+                                              caption = paste0("Meteorological stations and data available in public databases and DEQ files in the ", qapp_project_area, ".")))
     
   }
   
@@ -160,7 +160,7 @@ if(NROW(t51_ncdc)>0){
   
   t51_ncdc_tbl <- knitr::kable(t51_ncdc, format = "pandoc", padding = 2,
                                caption = tbls(name = "t51_ncdc",
-                                              caption = paste0("Meteorologcial stations and data available in the National Climatic Data Center (NCDC) database in the ",
+                                              caption = paste0("Meteorological stations and data available in the National Climatic Data Center (NCDC) database in the ",
                                                                qapp_project_area, ".")))
 }
 
@@ -179,7 +179,7 @@ if(NROW(t51_raws)>0){
   
   t51_raws_tbl <- knitr::kable(t51_raws, format = "pandoc", padding = 2,
                                caption = tbls(name = "t51_raws",
-                                              caption = paste0("Meteorologcial stations and data, including ", knitr::combine_words(unique(sort(tolower(raws.station.tbl$Parameter)))), ", available in the Remote Automatic Weather Station (RAWS) database in the ", qapp_project_area, ".")))
+                                              caption = paste0("Meteorological stations and data, including ", knitr::combine_words(unique(sort(tolower(raws.station.tbl$Parameter)))), ", available in the Remote Automatic Weather Station (RAWS) database in the ", qapp_project_area, ".")))
   
 }
 
@@ -197,7 +197,7 @@ if(NROW(t51_agrimet)>0){
   
   t51_agrimet_tbl <- knitr::kable(t51_agrimet, format = "pandoc", padding = 2,
                                   caption = tbls(name = "t51_agrimet",
-                                                 caption = paste0("Meteorologcial stations and data, including air temperature, precipitation, relative humidity and wind, available in the USBL AgriMet database in the ", qapp_project_area, ".")))
+                                                 caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity and wind, available in the USBL AgriMet database in the ", qapp_project_area, ".")))
   
 }
 
@@ -216,7 +216,7 @@ if(NROW(t51_hydromet)>0){
   
   t51_hydromet_tbl <- knitr::kable(t51_hydromet, format = "pandoc", padding = 2,
                                    caption = tbls(name = "t51_hydromet",
-                                                  caption = paste0("Meteorologcial stations and data available in the USBL Hydromet database in the ", qapp_project_area, ".")))
+                                                  caption = paste0("Meteorological stations and data available in the USBL Hydromet database in the ", qapp_project_area, ".")))
   
 }
 
@@ -234,7 +234,7 @@ if(NROW(t51_mw)>0){
   
   t51_mw_tbl <- knitr::kable(t51_mw, format = "pandoc", padding = 2,
                              caption = tbls(name = "t51_mw",
-                                            caption = paste0("Meteorologcial stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area, ".")))
+                                            caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area, ".")))
   
 }
 
@@ -275,7 +275,8 @@ t52 <- model.input %>%
   dplyr::filter(`Station ID` == "TIR") %>% 
   dplyr::rename(`Abbreviated Reference` = `Data Source`) %>% 
   dplyr::left_join(ref, by = "Abbreviated Reference") %>% 
-  dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`))
+  dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
+  dplyr::mutate(Reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`)))
 
 waterbodies <- unique(sort(t52$`Model Waterbody`))
 
@@ -319,6 +320,7 @@ t53_1 <- rbind(st_awqms,st_model) %>%
   dplyr::mutate_at("Station Name and ID", str_replace_all, "Sf", "SF") %>%
   dplyr::distinct(`Station Name and ID`, .keep_all=TRUE) %>%
   dplyr::mutate(Organization = ifelse(Organization == "OregonDEQ", "ODEQ", Organization)) %>% 
+  dplyr::mutate(Organization = ifelse(Organization == "11NPSWRD_WQX", "EPA WQX", Organization)) %>% 
   dplyr::select(`Station Name and ID`,`Latitude/Longitude`, Organization) %>% 
   dplyr::arrange(`Station Name and ID`)
 
@@ -411,7 +413,7 @@ if(NROW(t54_sp)>0){
 
 ```
 
-`r tbls(name = "t54_usgs", display="cite")` - `r tbls(name = "t54_sp", display="cite")` lists the stations for flow volume data and other instream measurements that were available in USGS, Oregon DEQ, and other public databases.
+`r tbls(name = "t54_usgs", display="cite")` - `r tbls(name = "t54_sp", display="cite")` list the stations for flow volume data and other instream measurements that were available in USGS, Oregon DEQ, and other public databases.
 
 `r t54_usgs_tbl`
 `r t54_hydromet_tbl`
@@ -460,7 +462,7 @@ if(NROW(section.npdes.gen)>0){
 `r tbls(name = "t55_ind", display="cite")` identifies all the active individual NPDES permittees in the `r qapp_project_area`. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven day average daily maximum. When possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_gen", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
 
 `r t55_ind_tbl`
-`r t55_gen_tbl`
+`r if(NROW(section.npdes.gen)>0){t55_gen_tbl}`
 
 ## Effective Shade Measurements
 
@@ -765,4 +767,32 @@ The DEQ Project Manager will lead distribution of the draft QAPP to their respec
 Due to the complexity of model development, some elements of the project might not proceed according to plan. Should an obstacle arise that requires a change in approach, Tetra Tech, in consultation with the project team, will return to the QAPP as a topic template for evaluating the effects on other aspects of the project. Tetra Tech will update the QAPP as needed through revisions or addenda, as model development proceeds and new aspects of the system are understood. Significant changes in technical approach would be described in the updated QAPP and would be reviewed by the project team listed on the QAPP approval page prior to implementation.
 
 # References
+
+```{r, label=`qapp_ref`, echo=FALSE}
+
+tmdl.ref <- model.info %>% 
+  dplyr::filter(`QAPP Project Area` %in% qapp_project_area) %>% 
+  dplyr::distinct(`TMDL Document`, `Abbreviated Reference`) %>% 
+  dplyr::left_join(ref, by = "Abbreviated Reference") %>% 
+  dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
+  dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
+  dplyr::select(reference)
+
+
+tir.ref <- data.frame(unique(sort(t52$Reference))) %>% 
+  dplyr::rename(reference = "unique.sort.t52.Reference..")
+
+qapp.ref <- rbind(tmdl.ref,tir.ref)
+
+for(r in unique(sort(qapp.ref$reference))) {
+  
+  cat(paste0(r,"    "))
+  cat("\
+  
+      ")
+  cat("\n")
+  
+}
+
+```
 
