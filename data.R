@@ -3,6 +3,8 @@ library(readxl)
 library(rgdal)
 library(sf)
 library(ggplot2)
+library(odeqtmdl)
+
 
 # Functions ----
 
@@ -30,6 +32,7 @@ load(paste0(data.dir,"/download/data_sources.RData"))
 cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Model Setup Info")
 cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Inputs")
 ref <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "References")
+# tmdl.temp <- odeqtmdl::tmdl_db %>% dplyr::filter(pollutant_name_TMDL == "Temperature")
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Individual_NDPES")
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Gen_NPDES")
 agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
@@ -94,7 +97,9 @@ for (qapp_project_area in qapp_project_areas$areas) {
     tidyr::pivot_wider(names_from = month, values_from=n) %>%
     dplyr::rename(`Station ID` = MLocID) %>% 
     dplyr::left_join(station_awqms[,c("Station ID", "StationDes")], by="Station ID") %>% 
-    dplyr::rename(Year = year)
+    dplyr::rename(Year = year) %>% 
+    dplyr::mutate(`StationDes` = stringr::str_to_title(`StationDes`)) %>% 
+    dplyr::mutate_at("StationDes", str_replace_all, "Or", "OR")
   
   model.info <- cal.model %>% 
     dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
@@ -303,6 +308,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
        hydromet.station.tbl,
        mw.station.tbl,
        ref,
+       # tmdl.temp,
        data.dir,
        huc8.extent,
        file.name,

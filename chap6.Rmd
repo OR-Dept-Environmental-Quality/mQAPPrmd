@@ -29,6 +29,7 @@ section.model.input <- model.input %>%
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
 
 section.tmdl <- section.model.info %>% 
+  dplyr::filter(`Primary Model Parameter` == "Temperature") %>% 
   dplyr::filter(is.na(`Reference Report`))
 
 model.extent <- ifelse(NROW(section.model.input)>0,
@@ -116,12 +117,16 @@ Model calibration was completed by DEQ and described in the `r paste0(unique(sec
 ```{r, label=`t6x6_1`, include=FALSE}
 
 # HS
+if(NROW(section.tmdl)>0) {
+  
 hsv.num <- unique(substr(section.tmdl$"Model version", 13,13))
 hsv.tbl <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = paste0("hs", hsv.num))
 
 hsv_tbl <- knitr::kable(hsv.tbl, format = "pandoc", padding = 2,
                         caption = tbls(name = paste0("hsv.tbl", waterbody_name), 
                                        caption = paste0("Summary of model inputs and input categories required for Heat Source version ", hsv.num,".")))
+
+}
 
 # Model parameter input
 if(!model.extent == TRUE){
@@ -177,10 +182,19 @@ if(!model.extent == TRUE){
 
 ```
 
-```{r, child=paste0("hs",hsv.num,".Rmd")}
+```{r, label=`hs_v`, echo=FALSE}
+
+if(NROW(section.tmdl)>0) {
+  
+  child=paste0("hs",hsv.num,".Rmd")
+  hs.v <- knitr::knit_child(child, quiet = TRUE)
+  cat(hs.v, sep = "\n")
+  
+}
+
 ```
 
-`r hsv_tbl`
+`r if(NROW(section.tmdl)>0) {hsv_tbl}`
 
 `r if(!model.extent == TRUE){} else {paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the model input parameters, the source of that data, and those parameters which will be most likely adjusted to improve calibration and fit. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.")}`
 
