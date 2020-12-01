@@ -128,7 +128,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   usgs.stations.subbasin <-  sf::st_join(x = usgs.stations,
                                          y = qapp_project_area_huc8,
-                                         join = st_intersects,
+                                         join = st_within,
                                          left = TRUE)
   
   #ggplot() +
@@ -174,7 +174,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   ncdc.stations.subbasin <-  sf::st_join(x = ncdc.stations.huc8,
                                          y = qapp_project_area_huc8,
-                                         join = st_intersects,
+                                         join = st_within,
                                          left = TRUE)
   
   sf::st_geometry(ncdc.stations.subbasin) <- NULL
@@ -212,7 +212,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   raws.stations.subbasin <-  sf::st_join(x = raws.stations.huc8,
                                          y = qapp_project_area_huc8,
-                                         join = st_intersects,
+                                         join = st_within,
                                          left = TRUE)
   
   sf::st_geometry(raws.stations.subbasin) <- NULL
@@ -247,7 +247,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   agrimet.stations.subbasin <-  sf::st_join(x = agrimet.stations.huc8,
                                             y = qapp_project_area_huc8,
-                                            join = st_intersects,
+                                            join = st_within,
                                             left = TRUE)
   
   sf::st_geometry(agrimet.stations.subbasin) <- NULL
@@ -274,7 +274,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   mw.stations.subbasin <-  sf::st_join(x = mw.stations.huc8,
                                        y = qapp_project_area_huc8,
-                                       join = st_intersects,
+                                       join = st_within,
                                        left = TRUE)
   
   sf::st_geometry(mw.stations.subbasin) <- NULL
@@ -294,7 +294,9 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
   
-  save(model.info,
+  save(df.stations.state,
+       web.huc8,
+       model.info,
        model.input,
        station_awqms,
        station_model,
