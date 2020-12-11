@@ -9,7 +9,7 @@ output:
     fig_height: 6
 ---
 
-```{r setup_chap6x5, include=FALSE}
+```{r setup_chap6x6, include=FALSE}
 
 knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
@@ -26,9 +26,9 @@ options(kableExtra.auto_format = F)
 
 ##### `r model_extent`
 
-```{r, label=t6x5j, echo=FALSE}
+```{r, label=t6x6j, echo=FALSE}
 
-t6x5j <- section.model.input %>% 
+t6x6j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(!`Model Location Type` == "Calibration Site") %>% 
   dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
@@ -48,9 +48,9 @@ t6x5j <- section.model.input %>%
                 `Input Type` = `Model Location Type`,
                 `Data Source` = DataSource)
 
-if(NROW(t6x5j)>0){
-  print(knitr::kable(t6x5j, format = "pandoc", padding = 2,
-                     caption = tbls(name = paste0("t6x5j", model_extent),
+if(NROW(t6x6j)>0){
+  print(knitr::kable(t6x6j, format = "pandoc", padding = 2,
+                     caption = tbls(name = paste0("t6x6j", model_extent),
                                     caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, "."))))
   
 }  else {
