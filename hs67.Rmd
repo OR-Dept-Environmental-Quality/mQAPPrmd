@@ -1,0 +1,40 @@
+---
+output: 
+  word_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r setup_hs67, include=FALSE}
+
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      autodep = TRUE)
+
+options(kableExtra.auto_format = F)
+
+```
+
+### Heat Source Version 7
+
+Heat Source version 7 is similar to Heat Source version 6 with a few notable exceptions discussed in this section. The general differences between the two sets of model parameters are outlined below, with a complete list of different model parameters summarized in `r tbls(name = "hs67", display="cite")`. Heat Source version 7:
+
+*	allows for variable flow rate time series on the boundary conditions and tributary inputs;        
+
+*	requires input of latitude, longitude and aspect for each node of the model;        
+
+*	uses Manning’s equation exclusively to calculate channel hydraulics and omits the ability to specify rating curve coefficients for certain aspects of channel hydraulics;       
+
+*	includes cloudiness (as a percentage of clear sky) as a meteorological input—Heat Source version 6 assumes the clear sky conditions;        
+
+*	allows specifically for groundwater (accretion) and diversion inputs to the model; and        
+
+*	specifies additional morphology data such as bed sediment parameters and channel gradient. 
+
+`r hs67.tbl`

@@ -1,0 +1,26 @@
+---
+output: 
+  word_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r setup_hs6, include=FALSE}
+
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      autodep = TRUE)
+
+options(kableExtra.auto_format = F)
+
+```
+
+### SHADOW
+
+The SHADOW model version 2.3 is a shade, solar input and stream temperature model developed by the U.S. Forest Service (USFS 1993). DEQ used USFS SHADOW modeling results in its development for the original `r pro.area.tmdls`. DEQ does not intend to remodel any of the stream segments for the `r qapp_project_area`.  If the need arises to revisit some of the SHADOW modeling, this QAPP will be updated at that time to inform the project team on how to proceed. Complete documentation of the model methodology and inputs are discussed in the SHADOW Users Manual (USFS 1993).
