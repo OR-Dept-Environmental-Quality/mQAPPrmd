@@ -32,15 +32,17 @@ options(kableExtra.auto_format = F)
 t6x5j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(`Model Location Type` == "Calibration Site") %>%
-  dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Model Location Name`,
-                                  paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%   
-  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
-  dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
-  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-  dplyr::select(Location, `Model_Location`, `Parameter`, `Data Source`) %>% 
-  dplyr::rename(`Model Location` = `Model_Location`,
-                `Calibration Parameter` = `Parameter`)
+  dplyr::mutate(Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Station ID` = ifelse(`Station ID` == "TIR","",`Station ID`),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`)),
+                  `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
+    dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+    dplyr::select(`Model Location Name (Station ID)`, `Model_Location`,  `Parameter`, `Data Source`) %>% 
+    dplyr::rename(`Model Location` = `Model_Location`,
+                  `Calibration Parameter` = `Parameter`)
 
 if(NROW(t6x5j)>0){
   print(knitr::kable(t6x5j, format = "pandoc", padding = 2,

@@ -337,37 +337,37 @@ ODEQ contracted with Watershed Sciences, Inc. to provide airborne thermal infrar
 ```{r, label=`t53`, echo=FALSE}
 
 st_awqms <- station_awqms %>% 
-  dplyr::rename(`Station Description` = StationDes,
+  dplyr::rename(Station = StationDes,
                 Organization = OrgID,
                 Latitude = Lat_DD,
                 Longitude = Long_DD) %>% 
-  dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
+  dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
 
 st_model <- station_model %>% 
   dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
   dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
-  dplyr::mutate(`Station Description` = ifelse(is.na(StationDes),`Model Location Name`,StationDes),
+  dplyr::mutate(Station = ifelse(is.na(StationDes),`Model Location Name`,StationDes),
                 Organization = ifelse(is.na(OrgID),`Data Source`,OrgID)) %>% 
-  dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
+  dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
 
 t53_1 <- rbind(st_awqms,st_model) %>% 
   dplyr::filter(!`Station ID` == "TIR") %>% 
-  dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                               `Station Description`,
-                                               paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
   dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>% 
-  dplyr::mutate(`Station Name and ID` = stringr::str_to_title(`Station Name and ID`)) %>% 
-  dplyr::mutate_at("Station Name and ID", str_replace_all, "Ordeq", "ORDEQ") %>%
-  dplyr::mutate_at("Station Name and ID", str_replace_all, " Rm", " RM") %>%
-  dplyr::mutate_at("Station Name and ID", str_replace_all, "Lb", "LB") %>%
-  dplyr::mutate_at("Station Name and ID", str_replace_all, "Nf", "NF") %>%
-  dplyr::mutate_at("Station Name and ID", str_replace_all, "Sf", "SF") %>%
-  dplyr::distinct(`Station Name and ID`, .keep_all=TRUE) %>%
+  dplyr::mutate(Station = stringr::str_to_title(Station)) %>% 
+  dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
+  dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Lb", "LB") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Nf", "NF") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Sf", "SF") %>%
+  dplyr::distinct(Station, .keep_all=TRUE) %>%
   dplyr::mutate(Organization = ifelse(Organization == "OregonDEQ", "ODEQ", Organization)) %>% 
   dplyr::mutate(Organization = ifelse(Organization == "11NPSWRD_WQX", "EPA WQX", Organization)) %>% 
   dplyr::mutate(Organization = ifelse(Organization == "USFS(NOSTORETID)", "USFS", Organization)) %>%
-  dplyr::select(`Station Name and ID`,`Latitude/Longitude`, Organization) %>% 
-  dplyr::arrange(`Station Name and ID`)
+  dplyr::select(Station,`Station ID`,`Latitude/Longitude`, Organization) %>% 
+  dplyr::arrange(`Station ID`)
+
+t53_1 <- t53_1[!duplicated(t53_1$`Latitude/Longitude`),] %>% 
+  dplyr::arrange(Station)
 
 if(NROW(t53_1)>0){
   
@@ -379,11 +379,11 @@ if(NROW(t53_1)>0){
 
 t53_2 <- data.sample.count %>%
   dplyr::filter(!`Station ID` == "TIR") %>% 
-  dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+  dplyr::mutate(`Station (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                StationDes,
                                                paste0(StationDes, " (", `Station ID`, ")"))) %>% 
-  dplyr::select(Year, `Station Name and ID`, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
-  dplyr::arrange(Year, `Station Name and ID`)
+  dplyr::select(Year, `Station (Station ID)`, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
+  dplyr::arrange(Year, `Station (Station ID)`)
 
 if(NROW(t53_2)>0){
   
@@ -429,6 +429,9 @@ t54_sp <- model.input %>%
   dplyr::mutate(Station = `Model Location Name`,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, ", ", Longitude))) %>% 
   dplyr::select(Station, `Station ID`, `Latitude/Longitude`, `Data Source`) %>% 
+  dplyr::arrange(`Station ID`)
+
+t54_sp <- t54_sp[!duplicated(t54_sp$`Latitude/Longitude`),] %>% 
   dplyr::arrange(Station)
 
 if(NROW(t54_usgs)>0){
@@ -473,12 +476,12 @@ section.npdes.ind <- npdes.ind %>%
   dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
   dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
-  dplyr::mutate(`Facility Name and Number` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
+  dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), ", ",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
                 `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
-  dplyr::select(`Facility Name and Number`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
-  dplyr::arrange(`Facility Name and Number`)
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
+  dplyr::arrange(`Facility Name (Facility Number)`)
 
 if(NROW(section.npdes.ind)>0){
   
@@ -533,7 +536,11 @@ t56 <- model.input %>%
   dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% 
   dplyr::mutate(Station = `Model Location Name`,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, ", ", Longitude))) %>% 
-  dplyr::select(Station, `Station ID`, `Latitude/Longitude`, `Data Source`)
+  dplyr::select(Station, `Station ID`, `Latitude/Longitude`, `Data Source`) %>% 
+  dplyr::arrange(`Station ID`)
+
+t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>% 
+  dplyr::arrange(Station)
 
 if(NROW(t56)>0){
   
@@ -582,7 +589,7 @@ if(mod.check == "11"){
 
   hs67.tbl <- knitr::kable(hs67, format = "pandoc", padding = 2,
                            caption = tbls(name = "hs67", 
-                                          caption = paste0("Summary of model inputs and input categories required for Heat Source version 7.")))
+                                          caption = paste0("Summary of model inputs and input categories required for Heat Source version 6 and 7.")))
   
 } else {
   
@@ -590,7 +597,7 @@ if(mod.check == "11"){
     
     hs68.tbl <- knitr::kable(hs68, format = "pandoc", padding = 2,
                              caption = tbls(name = "hs68", 
-                                            caption = paste0("Summary of model inputs and input categories required for Heat Source version 8.")))
+                                            caption = paste0("Summary of model inputs and input categories required for Heat Source version 6 and 8.")))
     
   } else {
     
@@ -598,11 +605,11 @@ if(mod.check == "11"){
       
       hs67.tbl <- knitr::kable(hs67, format = "pandoc", padding = 2,
                                caption = tbls(name = "hs67", 
-                                              caption = paste0("Summary of model inputs and input categories required for Heat Source version 7.")))
+                                              caption = paste0("Summary of model inputs and input categories required for Heat Source version 6 and 7.")))
      
       hs68.tbl <- knitr::kable(hs68, format = "pandoc", padding = 2,
                                caption = tbls(name = "hs68", 
-                                              caption = paste0("Summary of model inputs and input categories required for Heat Source version 8.")))  
+                                              caption = paste0("Summary of model inputs and input categories required for Heat Source version 6 and 8.")))  
       
     } else {
       
@@ -614,8 +621,6 @@ if(mod.check == "11"){
 }
 
 # model versions
-
-
 mod.v <- NULL
 
 if(mod.check == "11"){
@@ -680,7 +685,12 @@ if(mod.check == "11"){
   }
 }
 
+# SHADOW Model
+
+
+
 #
+# Note: SHADOW model need to be filtered out from model.info.
 chap6 <- NULL
 
 for(waterbody_name in unique(sort(model.info$`Model Waterbody`))){

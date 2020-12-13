@@ -49,7 +49,7 @@ Stream temperature is influenced by natural factors such as climate, geomorpholo
 
 if(length(section.model.info$`Model Extent Text`)>1){
   
-  model.domain <- unique(sort(section.model.info$`Model Extent`))
+  model.domain <- unique(sort(section.model.info$`Model Extent Text`))
   
 } else {
   
@@ -89,13 +89,15 @@ if(!model.extent == TRUE){
   
   t6x5 <- section.model.input %>% 
     dplyr::filter(`Model Location Type` == "Calibration Site") %>%
-    dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                    `Model Location Name`,
-                                    paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%   
-    dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
-    dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
+    dplyr::mutate(Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Station ID` = ifelse(`Station ID` == "TIR","",`Station ID`),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`)),
+                  `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
     dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-    dplyr::select(Location, `Model_Location`, `Parameter`, `Data Source`) %>% 
+    dplyr::select(`Model Location Name (Station ID)`, `Model_Location`,  `Parameter`, `Data Source`) %>% 
     dplyr::rename(`Model Location` = `Model_Location`,
                   `Calibration Parameter` = `Parameter`)
   
@@ -133,24 +135,20 @@ if(!model.extent == TRUE){
     dplyr::ungroup() %>% 
     dplyr::mutate(`Model_Location` = paste0(`Model Location`," ", `Location Units`)) %>% 
     dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`) %>% 
-    dplyr::rename(`Location/Station ID` = `Station ID`,
+    dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
                   `Model Location` = Model_Location,
                   `Input Type` = `Model Location Type`)
   
   t6x6_1 <- section.model.input %>% 
     dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
-    dplyr::mutate(`Location/Station ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                                 `Model Location Name`,
-                                                 paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
+    dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
     dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(round(`Model Location`,2)," ", `Location Units`))) %>%
-    dplyr::mutate(DataSource = ifelse(`Interpolated Data` == "T",
-                                      ifelse(!is.na(`Data Source`),
-                                             paste0(`Data Source`, ". ", Note), 
-                                             Note),
-                                      ifelse(!is.na(`Data Source`), 
-                                             `Data Source`, 
-                                             NA))) %>% 
-    dplyr::select(`Location/Station ID`, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
+    dplyr::mutate(DataSource = ifelse(is.na(`Data Source`),
+                                      ifelse(is.na(Note),NA,Note),
+                                      ifelse(is.na(Note),`Data Source`,paste0(`Data Source`, ". ", Note))))%>% 
+    dplyr::select(`Model Location Name (Station ID)`, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
     dplyr::rename(`Model Location` = `Model_Location`,
                   `Input Type` = `Model Location Type`,
                   `Data Source` = DataSource) %>% 
@@ -162,6 +160,7 @@ if(!model.extent == TRUE){
                                              caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
   
 }
+
 ```
 
 `r if(!model.extent == TRUE){} else {paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the model input parameters, the source of that data, and those parameters which will be most likely adjusted to improve calibration and fit. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.")}`
@@ -192,7 +191,7 @@ Data gaps include:
 
 * Tributary flow and temperature measurements for all tributary model inputs.  
 * Measurements of withdrawals flow (if any) within the model extent.  
-* The data source and quality for the following boundary condition inputs: `r if(NROW(t6x6_1)>0){paste(unique(sort(t6x6_1$"Location/Station ID"), collapse = ", "))}else{cat("No data")}`. **[UPDATE FOR EACH STREAM]**
+* The data source and quality for the following boundary condition inputs: `r if(NROW(t6x6_1)>0){paste(unique(sort(t6x6_1$"Model Location Name (Station ID)"), collapse = ", "))}else{cat("No data")}`. **[UPDATE FOR EACH STREAM]**
 
 Data gaps were identified and addressed during original development of the `r waterbody_name` model. These approaches have not changed as the calibrated models are being used without refinements. If updates are made to the models in the future, this information will be updated and documented in an addendum to this QAPP. The modeling framework utilizes the best available data for setting up the model boundary conditions to provide a sound technical basis for TMDL analysis and evaluation of the temperature water quality standards.
 

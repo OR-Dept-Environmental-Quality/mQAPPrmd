@@ -28,25 +28,35 @@ options(kableExtra.auto_format = F)
 
 ```{r, label=t6x6j, echo=FALSE}
 
+t6x6j_met <- section.model.input %>% 
+  dplyr::filter(`Model Extent` %in%  model_extent) %>% 
+  dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
+  dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`) %>% 
+  dplyr::summarize(`Model Location` = toString(unique(sort(`Model Location`))),
+                   Parameter = toString(unique(sort(Parameter))))%>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(`Model_Location` = paste0(`Model Location`," ", `Location Units`)) %>% 
+  dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`) %>% 
+  dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
+                `Model Location` = Model_Location,
+                `Input Type` = `Model Location Type`)
+
 t6x6j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
-  dplyr::filter(!`Model Location Type` == "Calibration Site") %>% 
-  dplyr::mutate(Location = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                  `Model Location Name`,
-                                  paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
-  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`))) %>%
-  dplyr::mutate(DataSource = ifelse(`Interpolated Data` == "T",
-                                    ifelse(!is.na(`Data Source`),
-                                           paste0(`Data Source`, ". ", Note), 
-                                           Note),
-                                    ifelse(!is.na(`Data Source`), 
-                                           `Data Source`, 
-                                           NA))) %>% 
-  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-  dplyr::select(Location, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
+  dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
+  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                                            `Model Location Name`,
+                                                            paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
+  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(round(`Model Location`,2)," ", `Location Units`))) %>%
+  dplyr::mutate(DataSource = ifelse(is.na(`Data Source`),
+                                    ifelse(is.na(Note),NA,Note),
+                                    ifelse(is.na(Note),`Data Source`,paste0(`Data Source`, ". ", Note))))%>% 
+  dplyr::select(`Model Location Name (Station ID)`, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
   dplyr::rename(`Model Location` = `Model_Location`,
                 `Input Type` = `Model Location Type`,
-                `Data Source` = DataSource)
+                `Data Source` = DataSource) %>% 
+  rbind(t6x6j_met) %>% 
+  dplyr::arrange(Parameter,desc(`Model Location`))
 
 if(NROW(t6x6j)>0){
   print(knitr::kable(t6x6j, format = "pandoc", padding = 2,
@@ -58,5 +68,6 @@ if(NROW(t6x6j)>0){
   cat(paste0("There were no temperature or flow boundary conditions input to this model."))
   
 }
+
 
 ```
