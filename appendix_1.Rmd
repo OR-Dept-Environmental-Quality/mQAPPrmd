@@ -1,0 +1,27 @@
+---
+title: "Appendix 1"
+output: 
+  officedown::rdocx_document:
+    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    mapstyles:
+      Normal: ['First Paragraph']
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.cap = TRUE)
+library(officedown)
+library(officer)
+```
+
+<!---BLOCK_LANDSCAPE_START--->
+
+```{r, echo=FALSE}
+
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/t53_2_tbl.RData")
+
+```
+
+`r t53_2_tbl`
+
+<!---BLOCK_LANDSCAPE_STOP--->
+

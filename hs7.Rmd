@@ -27,7 +27,7 @@ hs7 <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = "hs7")
 
 hs7.tbl <- knitr::kable(hs7, format = "pandoc", padding = 2,
                         caption = tbls(name = "hs7", 
-                                       caption = paste0("Summary of model inputs and input categories required for Heat Source version 7.")))
+                                       caption = paste0("Summary of model inputs required for Heat Source version 7.")))
 
 ```
 

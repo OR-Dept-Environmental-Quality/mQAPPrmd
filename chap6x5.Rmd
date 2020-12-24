@@ -19,30 +19,33 @@ knitr::opts_chunk$set(results = "asis",
 
 options(kableExtra.auto_format = F)
 
-# For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
-
+# For testing: model_extent <- "Little Applegate"
 
 ```
 
 ##### `r model_extent`
 
 ```{r, label=`t6x5j`, echo=FALSE}
-# For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
 
 t6x5j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(`Model Location Type` == "Calibration Site") %>%
-  dplyr::mutate(Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
-                  `Station ID` = ifelse(`Station ID` == "TIR","",`Station ID`),
-                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
-                                                              `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
-                  `Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(`Model Location`," ", `Location Units`)),
-                  `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`)) %>% 
-    dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-    dplyr::select(`Model Location Name (Station ID)`, `Model_Location`,  `Parameter`, `Data Source`) %>% 
-    dplyr::rename(`Model Location` = `Model_Location`,
-                  `Calibration Parameter` = `Parameter`)
+  dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
+                Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
+                `Station ID` = ifelse(`Station ID` == "TIR",NA,`Station ID`),
+                `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                                                            `Model Location Name`,
+                                                            paste0(`Model Location Name`, " (",`Station ID`,")"))) %>% 
+  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+  #dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Parameter`, `Data Source`) %>% 
+  dplyr::rename(`Calibration Parameter` = `Parameter`)
+
+t6x5j_col <- t6x5j %>% 
+  dplyr::filter(!is.na(`Location Units`))
+
+names(t6x5j)[names(t6x5j) == "Model Location"] <- if(NROW(t6x5j_col)>0){paste0("Model Location (",unique(t6x5j_col$`Location Units`),")")}else{paste0("Model Location")}
+
+t6x5j <- t6x5j[,c(18,9,6,13)]
 
 if(NROW(t6x5j)>0){
   print(knitr::kable(t6x5j, format = "pandoc", padding = 2,

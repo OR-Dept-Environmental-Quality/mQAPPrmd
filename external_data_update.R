@@ -1,4 +1,4 @@
-update.date <- "2020/11/23"
+update.date <- "2020-12-20"
 
 library(tidyverse)
 library(readxl)
@@ -17,6 +17,27 @@ mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # 
 # USGS Flow Data ----
 ## Github: https://github.com/USGS-R/dataRetrieval
 usgs.stations.or <- dataRetrieval::whatNWISdata(stateCd="OR", parameterCd = "00060") # 00060	= Discharge [ft3/s]
+
+# NCEI Staion Meta ----
+# https://www.ncdc.noaa.gov/homr/reports
+ncei <- read.delim("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/emshr_lite.txt")
+
+ncei.databases <- c("NCDC","COOP","WBAN","ICAO","FAA","NWSLI","WMO   TRANS","GHCND") 
+
+ncei.datacats.or <- NULL
+
+for(db in ncei.databases){
+  
+  get <- rnoaa::ncdc_datacats(stationid = ncei$db,
+                              extent = c(41.5,-125,46.5,-116),
+                              limit = 1000)
+  
+  if(NROW(get$data)>0){
+    get$data$station.id <- db
+  }
+  
+  ncei.datacats.or <- rbind(ncei.datacats.or,get$data)
+}
 
 # NCDC Met Data ----
 ## NOAA National Climatic Data Center: https://www.ncdc.noaa.gov/
@@ -99,11 +120,13 @@ setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R
 
 save(update.date,
      usgs.stations.or,
+     ncei,
+     ncei.datacats.or,
      ncdc.station.or,
      ncdc.datacats.or,
      raws.meta,
      raws.data.type,
      mw.meta,
      mw.variables.list,
-     file = "data_sources.RData")
+     file = paste0("data_sources_",update.date,".RData"))
 
