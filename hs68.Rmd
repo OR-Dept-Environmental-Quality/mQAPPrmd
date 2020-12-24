@@ -21,24 +21,31 @@ options(kableExtra.auto_format = F)
 
 ```
 
+```{r, hs68_tbl, echo=FALSE}
+
+hs68 <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = "hs68")
+
+hs68.tbl <- knitr::kable(hs68, format = "pandoc", padding = 2,
+                             caption = tbls(name = "hs68", 
+                                            caption = paste0("Summary of the model inputs that are different between Heat Source version 6 and Heat Source version 8.")))
+
+```
+
 ### Heat Source Version 8
 
-Heat Source version 8 is similar to Heat Source version 6 with a few notable exceptions discussed in this section. The general differences between the two sets of model parameters are outlined below, with a complete list of different model parameters summarized in `r tbls(name = "hs68", display="cite")`. Heat Source version 8:
+The model parameters for Heat Source version 8 are similar to Heat Source version 6 with a few notable exceptions:
 
+*	Model can simulate an unlimited number of days;       
+*	Star pattern landcover input with variable landcover height, density, and ground elevation inputs;        
 *	allows for variable flow rate time series on the boundary conditions and tributary inputs;        
-
 *	requires input of latitude, longitude and aspect for each node of the model;        
-
 *	uses Manning’s equation exclusively to calculate channel hydraulics and omits the ability to specify rating curve coefficients for certain aspects of channel hydraulics;       
-
 *	includes cloudiness (as a percentage of clear sky) as a meteorological input—Heat Source version 6 assumes the clear sky conditions;        
-
 *	allows specifically for groundwater (accretion) and diversion inputs to the model;        
-
 *	specifies additional morphology data such as bottom width, bed sediment parameters and channel gradient;        
-
 *	specifies bed conduction inputs such as hyporheic exchange parameters; and        
+*	allows for the use of LiDAR data to be used for vegetation density and overhang.        
 
-*	allows for the use of LiDAR data to be used for vegetation density and overhang.
+`r tbls(name = "hs68", display="cite")` summarizes the list of model parameters that are different between Heat Source version 6 and Heat Source version 8.
 
 `r hs68.tbl`

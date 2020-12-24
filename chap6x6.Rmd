@@ -19,26 +19,24 @@ knitr::opts_chunk$set(results = "asis",
 
 options(kableExtra.auto_format = F)
 
-# For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
+# For testing: model_extent <- "Little Applegate"
 
 
 ```
 
 ##### `r model_extent`
 
-```{r, label=t6x6j, echo=FALSE}
+```{r, label=t6x6j, include=FALSE}
 
 t6x6j_met <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
-  dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`) %>% 
+  dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
   dplyr::summarize(`Model Location` = toString(unique(sort(`Model Location`))),
                    Parameter = toString(unique(sort(Parameter))))%>% 
   dplyr::ungroup() %>% 
-  dplyr::mutate(`Model_Location` = paste0(`Model Location`," ", `Location Units`)) %>% 
-  dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`) %>% 
+  #dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`, Note) %>% 
   dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
-                `Model Location` = Model_Location,
                 `Input Type` = `Model Location Type`)
 
 t6x6j <- section.model.input %>% 
@@ -47,21 +45,23 @@ t6x6j <- section.model.input %>%
   dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                             `Model Location Name`,
                                                             paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
-  dplyr::mutate(`Model_Location` = ifelse(is.na(`Model Location`), NA, paste0(round(`Model Location`,2)," ", `Location Units`))) %>%
-  dplyr::mutate(DataSource = ifelse(is.na(`Data Source`),
-                                    ifelse(is.na(Note),NA,Note),
-                                    ifelse(is.na(Note),`Data Source`,paste0(`Data Source`, ". ", Note))))%>% 
-  dplyr::select(`Model Location Name (Station ID)`, `Model_Location`, `Model Location Type`, `Parameter`, DataSource) %>%
-  dplyr::rename(`Model Location` = `Model_Location`,
-                `Input Type` = `Model Location Type`,
-                `Data Source` = DataSource) %>% 
+  dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
+  dplyr::rename(`Input Type` = `Model Location Type`) %>% 
   rbind(t6x6j_met) %>% 
   dplyr::arrange(Parameter,desc(`Model Location`))
 
+t6x6j_col <- t6x6j %>% 
+  dplyr::filter(!is.na(`Location Units`))
+
+names(t6x6j)[names(t6x6j) == "Model Location"] <- if(NROW(t6x6j_col)>0){paste0("Model Location (",unique(t6x6j_col$`Location Units`),")")}else{paste0("Model Location")}
+
+t6x6j <- t6x6j[,-c(3)]
+
 if(NROW(t6x6j)>0){
-  print(knitr::kable(t6x6j, format = "pandoc", padding = 2,
+  
+  t6x6j_tbl <- knitr::kable(t6x6j, format = "pandoc", padding = 2,
                      caption = tbls(name = paste0("t6x6j", model_extent),
-                                    caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, "."))))
+                                    caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, ".")))
   
 }  else {
   
@@ -69,5 +69,5 @@ if(NROW(t6x6j)>0){
   
 }
 
-
 ```
+`r if(NROW(t6x6j)>0){paste0(tbls(name = paste0("t6x6j", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
