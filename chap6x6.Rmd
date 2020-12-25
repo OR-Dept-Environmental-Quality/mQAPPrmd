@@ -60,8 +60,8 @@ t6x6j <- t6x6j[,-c(3)]
 if(NROW(t6x6j)>0){
   
   t6x6j_tbl <- knitr::kable(t6x6j, format = "pandoc", padding = 2,
-                     caption = tbls(name = paste0("t6x6j", model_extent),
-                                    caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, ".")))
+                            caption = tbls(name = paste0("t6x6j", model_extent),
+                                           caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, ".")))
   
 }  else {
   

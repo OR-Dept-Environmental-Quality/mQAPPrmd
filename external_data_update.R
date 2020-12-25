@@ -1,4 +1,4 @@
-update.date <- "2020-12-20"
+update.date <- "2020-12-24"
 
 library(tidyverse)
 library(readxl)
@@ -39,28 +39,28 @@ for(db in ncei.databases){
   ncei.datacats.or <- rbind(ncei.datacats.or,get$data)
 }
 
-# NCDC Met Data ----
+# _# NCDC Met Data ----
 ## NOAA National Climatic Data Center: https://www.ncdc.noaa.gov/
 ## Package: https://cran.r-project.org/web/packages/rnoaa/rnoaa.pdf
 ## Github: https://github.com/ropensci/rnoaa
 # Extents of Study_Areas_v5_HUC8_scope: bbox: xmin: -124.4334 ymin: 41.99523 xmax: -116.5826 ymax: 46.00114
-ncdc.stations.a <- rnoaa::ncdc_stations(extent = c(41.5,-125,46.5,-123),limit = 1000)
-ncdc.stations.b <- rnoaa::ncdc_stations(extent = c(41.5,-123,46.5,-122),limit = 1000)
-ncdc.stations.c <- rnoaa::ncdc_stations(extent = c(41.5,-122,46.5,-119),limit = 1000)
-ncdc.stations.d <- rnoaa::ncdc_stations(extent = c(41.5,-119,46.5,-116),limit = 1000)
-ncdc.station.or <- rnoaa::ncdc_combine(ncdc.stations.a, ncdc.stations.b, ncdc.stations.c, ncdc.stations.d)
+#ncdc.stations.a <- rnoaa::ncdc_stations(extent = c(41.5,-125,46.5,-123),limit = 1000)
+#ncdc.stations.b <- rnoaa::ncdc_stations(extent = c(41.5,-123,46.5,-122),limit = 1000)
+#ncdc.stations.c <- rnoaa::ncdc_stations(extent = c(41.5,-122,46.5,-119),limit = 1000)
+#ncdc.stations.d <- rnoaa::ncdc_stations(extent = c(41.5,-119,46.5,-116),limit = 1000)
+#ncdc.station.or <- rnoaa::ncdc_combine(ncdc.stations.a, ncdc.stations.b, ncdc.stations.c, ncdc.stations.d)
 
 ## Querying for NCDC datacats takes a long time.
-ncdc.datacats.or <- NULL
+#ncdc.datacats.or <- NULL
 
-for(id in 1:length(ncdc.station.or$id)){
-  get <- rnoaa::ncdc_datacats(stationid = ncdc.station.or$id[id],
-                       limit = 1000)
-  if(NROW(get$data)>0){
-    get$data$station.id <- ncdc.station.or$id[id]
-  }
-  ncdc.datacats.or <- rbind(ncdc.datacats.or,get$data)
-}
+#for(id in 1:length(ncdc.station.or$id)){
+#  get <- rnoaa::ncdc_datacats(stationid = ncdc.station.or$id[id],
+#                              limit = 1000)
+#  if(NROW(get$data)>0){
+#    get$data$station.id <- ncdc.station.or$id[id]
+#  }
+#  ncdc.datacats.or <- rbind(ncdc.datacats.or,get$data)
+#}
 
 # RAWS Met Data----
 ## Remote Automatic Weather Stations: https://raws.nifc.gov/
@@ -122,8 +122,8 @@ save(update.date,
      usgs.stations.or,
      ncei,
      ncei.datacats.or,
-     ncdc.station.or,
-     ncdc.datacats.or,
+     #ncdc.station.or,
+     #ncdc.datacats.or,
      raws.meta,
      raws.data.type,
      mw.meta,

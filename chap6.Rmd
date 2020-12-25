@@ -104,7 +104,7 @@ if(!model.extent == TRUE){
     dplyr::filter(!is.na(`Location Units`))
   
   names(t6x5)[names(t6x5) == "Model Location"] <- if(NROW(t6x5_col)>0){paste0("Model Location (",unique(t6x5_col$`Location Units`),")")}else{paste0("Model Location")}
-
+  
   t6x5 <- t6x5[,c(18,9,6,13)]
   
   t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
@@ -180,7 +180,7 @@ t6x6_2 <- section.model.input %>%
 
 if(NROW(t6x6_2)>1){
   
-  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". The data source for these inputs is the ", knitr::combine_words(sort(unique(paste0(t6x6_met$`Model Location Name (Station ID)`," from ", t6x6_met$`Data Source`)))), ". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
+  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". The data source for these inputs is the ", knitr::combine_words(sort(unique(paste0(t6x6_met$`Model Location Name (Station ID)`," of ", t6x6_met$`Data Source`)))), ". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
   
   # cat(unique(sort(t6x6_2$Note)))
   
@@ -196,8 +196,8 @@ if(NROW(t6x6_2)>1){
 ```{r, label=`data_gap`, echo=FALSE}
 
 tdata.gap <- knitr::kable(data.gap, format = "pandoc", padding = 2,
-                       caption = tbls(name = "data.gap",
-                                      caption = paste0("Methods to derive model parameters for data gaps.")))
+                          caption = tbls(name = "data.gap",
+                                         caption = paste0("Methods to derive model parameters for data gaps.")))
 
 ```
 
