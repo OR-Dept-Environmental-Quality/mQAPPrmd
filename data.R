@@ -29,7 +29,9 @@ strip_tbl_num <- function(x) {
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"/download/data_sources.RData"))
+# external data update date;
+update.date <- "2020-12-24"
+load(paste0(data.dir,"/download/data_sources_",update.date,".RData"))
 agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
 agrimet.parameters <- read.csv(paste0(data.dir, "download/agrimet_parameters.csv"))
 hydromet <- read.csv(paste0(data.dir, "download/hydromet.csv"))
@@ -41,8 +43,8 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
                                        ifelse(substr(`Model version`, 13,13) == "7", "Heat Source Version 7",
                                               ifelse(substr(`Model version`, 13,13) == "8", "Heat Source Version 8",
                                                      ifelse(substr(`Model version`, 13,13) == "9", "Heat Source Version 9",
-                                                            ifelse(substr(`Model version`, 1,2) == "CE", "CE-Qual-W2 Version 3", NA)))))) %>% 
-  dplyr::mutate(Model_version = ifelse(is.na(`Model version`) & `Primary Model Parameter` == "Solar", "SHADOW", Model_version)) %>% 
+                                                            ifelse(substr(`Model version`, 1,2) == "CE", "CE-Qual-W2 Version 3","SHADOW")))))) %>% 
+  #dplyr::mutate(Model_version = ifelse(is.na(`Model version`) & `Primary Model Parameter` == "Solar", "SHADOW", Model_version)) %>% 
   dplyr::mutate(mod_rmd = ifelse(Model_version == "Heat Source Version 6", "hs6",
                                  ifelse(Model_version == "Heat Source Version 7", "hs7",
                                         ifelse(Model_version == "Heat Source Version 8", "hs8",
@@ -58,7 +60,7 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
 
 cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Inputs") %>% 
   dplyr::filter(!`QAPP Project Area` == "Upper Klamath and Lost Subbasins")
-
+schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
 ref <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "References")
 roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "roles")
 risks <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "risks")
@@ -68,7 +70,8 @@ data.gap <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Individual_NDPES")
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Gen_NPDES")
 lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
-qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv"))
+qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv")) %>% 
+  dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
 web.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
                         layer = "Study_Areas_v5_HUC8_scope")
 
@@ -91,10 +94,10 @@ ncei.stations <- ncei %>%
   sf::st_as_sf(coords = c("LON_DEC", "LAT_DEC"), crs = sf::st_crs("+init=EPSG:4269"))
 
 ###
-ncdc.stations <- ncdc.station.or %>% 
-  dplyr::mutate(lat = latitude,
-                long = longitude) %>% 
-  sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs("+init=EPSG:4269"))
+#ncdc.stations <- ncdc.station.or %>% 
+#  dplyr::mutate(lat = latitude,
+#                long = longitude) %>% 
+#  sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ RAWS met data ----
 raws.stations <- raws.meta %>% 
@@ -448,7 +451,7 @@ pro.areas <- pro.areas %>%
                                          Project_Na == "Walla Walla Subbasin" ~ "#78c679", #green
                                          Project_Na == "Willow Creek Subbasin" ~ "#78c679")) %>%  #green
   dplyr::left_join(qapp_project_areas, by = c("Project_Na" = "areas")) %>% 
-  dplyr::mutate(CompleteD = format(as.Date(complete.date,"%m/%d/%Y"),"%b %d, %Y")) %>% 
+  dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%m/%d/%Y"),"%b %d, %Y")) %>% 
   dplyr::mutate(map_link = paste0("<a href='http://192.168.0.12:8888/mQAPPrmd/maps/",file.name,".html'>",Project_Na,"</a>"))
 
 pro.reaches <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
@@ -464,19 +467,19 @@ pro.reaches <- pro.reaches %>%
 
 # _ Model Segments ----
 temp.model.streams <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/temp_model_streams_temp_projects.shp",
-                             layer = "temp_model_streams_temp_projects")
+                                  layer = "temp_model_streams_temp_projects")
 
 temp.model.streams <- sf::st_transform(temp.model.streams, 4326)
 
 shadow.model.streams <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_streams_temp_projects_clean.shp",
-                                  layer = "shade_model_streams_temp_projects_clean") %>% 
+                                    layer = "shade_model_streams_temp_projects_clean") %>% 
   dplyr::select(-`Project_Na`) %>% 
   dplyr::rename(`Project_Na` = `Project__1`)
 
 shadow.model.streams <- sf::st_transform(shadow.model.streams, 4326)
 
 shadow.model.area <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_area_SWillamette_temp_projects.shp",
-                                   layer = "shade_model_area_SWillamette_temp_projects")
+                                 layer = "shade_model_area_SWillamette_temp_projects")
 
 shadow.model.area <- sf::st_transform(shadow.model.area, 4326)
 

@@ -109,8 +109,8 @@ t2 <- pro.cat.45.rivers.tbl %>%
 if(NROW(t2)>0){
   
   t2 <- knitr::kable(t2, format = "pandoc", padding = 2,
-                            caption = tbls(name = "t2",
-                                           caption = paste0("Waterbodies listed for temperature impairment based on Section 303(d) Category 5 in the 2018/20 Integrated Report.")))
+                     caption = tbls(name = "t2",
+                                    caption = paste0("Waterbodies listed for temperature impairment based on Section 303(d) Category 5 in the 2018/20 Integrated Report.")))
   
 }
 
@@ -267,12 +267,12 @@ t51 <- t51[!duplicated(t51$`Latitude, Longitude`),]
 t51 <- t51[!duplicated(t51$`Station`),]
 
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
-
+  
   t51.sp <- t51 %>% 
     dplyr::filter(tbl=="worksheet") %>% 
     dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
     dplyr::arrange(`Station`)
-             
+  
   if(NROW(t51.sp)>0){
     
     t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
@@ -570,7 +570,7 @@ Data on surface water diversion rates (usage) and the points of diversion (locat
 Estimates of water diversion rates and location of points of diversion can be derived from the following OWRD sources:
 
 * [Water Rights Information System][WRIS] (WRIS) – the WRIS database contains all permitted or certificated water rights. Data in the WRIS corresponding to quantities of water for use are expressed as maximum use allowable, generally as monthly, seasonal or annual rates or volumes. These maximum values may not correspond to actual usage, which will likely vary based on factors such as irrigation application rate or household consumer demand. Oregon DEQ may choose to incorporate the maximum amount allowable or some lesser quantity provided sufficient information is available to support those rates in the modeling.  Water rights information can also be accessed using their online mapping application (https://apps.wrd.state.or.us/apps/gis/wr/Default.aspx).
-    
+
 * [Water Use Reports][Water Use Reports] – some, but not all, water rights holders must monitor and report the water they use to the state, typically on a monthly or yearly basis, as a requirement of their water rights. These water use reports will be used to develop withdrawal time series based on the information at hand.
 
 [WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
@@ -620,8 +620,8 @@ tmdl.mod.1<- model.info %>%
   dplyr::rename(`Model Version` = Model_version)
 
 tmdl.mod.tbl <- knitr::kable(tmdl.mod.1, format = "pandoc", padding = 2,
-                          caption = tbls(name = "tmdl.mod",
-                                         caption = paste0("Models used in the development of the ", pro.area.tmdls, ".")))
+                             caption = tbls(name = "tmdl.mod",
+                                            caption = paste0("Models used in the development of the ", pro.area.tmdls, ".")))
 
 # model versions
 tmdl.mod.2 <- model.info %>% 
@@ -639,7 +639,7 @@ if(mod.check == "11"){
   for(mod in unique(sort(modv$mod_rmd))){
     
     mod.child <- paste0(mod,".Rmd")
-
+    
     mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
                knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
                knitr::knit_child(input = mod.child, envir = globalenv()))
@@ -680,7 +680,7 @@ if(mod.check == "11"){
                    knitr::knit_child(input = mod.child, envir = globalenv()))
         
       }
-
+      
     } else {
       
       for(mod in unique(sort(tmdl.mod.2$mod_rmd))){
@@ -693,11 +693,6 @@ if(mod.check == "11"){
   }
 }
 
-# SHADOW Model
-
-
-
-#
 # Note: SHADOW model streams were not included in Section 6 sub-sections of Model Waterbodies
 chap6 <- NULL
 
@@ -713,7 +708,7 @@ The following models were used in the development of the `r paste0(pro.area.tmdl
 
 `r tmdl.mod.tbl`
 
-Model calibration was completed by DEQ and described in `r paste0( pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`. It is unlikely that adjustments to the existing calibrated model will occur as part of this project. If it is determined at a later date the calibration needs to be updated the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
+Model calibration was completed by DEQ and described in `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`. It is unlikely that adjustments to the existing calibrated model will occur as part of this project. If it is determined at a later date the calibration needs to be updated the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
 
 `r paste(mod.v, collapse = "\n")`
 
@@ -952,13 +947,13 @@ The pre TMDL project phase will generally occur between January 2020 through the
 |       **P1.1** Organize and gather effluent data from all active NPDES permittees in the temperature TMDL replacement project area.     
 
 |       **P1.2** Organize and gather all available and relevant river temperature, stream flow, habitat, effective shade, and channel morphology.       
-  
+
 |       **P1.3** Complete an open data solicitation.  During the solicitation period, the public may submit continuous stream temperature data and NPDES effluent data to DEQ in the watersheds subject to the temperature TMDL replacements.     
 
 |       **P1.4** Review data collected. Data submitted to DEQ will be screened for completeness and quality, and whether the results are within the typical range expected for that season and time of day.     
 
 |       **P1.5** Stream temperature data will be made available in DEQ’s Ambient Water Quality Monitoring System database (AWQMS).     
-  
+
 **Task P2** Develop modeling Quality Assurance Project Plans (QAPPs).  The modeling QAPPs will identify the available data and overall technical approach to be taken for each TMDL project.     
 
 **Task P3** Mapping of Designated Management Agencies (DMAs) and Responsible Persons for counties that are within the project area. All Oregon counties are within the project area except Tillamook and Clatsop, and Deschutes counties.     
@@ -971,7 +966,7 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **TMDL and WQMP development phase**    
 
-The TMDL and WQMP development phase is scheduled to begin **[begin date of task 1]** with EPA’s final agency action approving or disapproving of the TMDL no later than `r format(as.Date(qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$complete.date,"%m/%d/%Y"),"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to EPA for their action.
+The TMDL and WQMP development phase is scheduled to begin on `r format(qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$Task.1.Start,"%B %d, %Y")` with EPA’s final agency action approving or disapproving of the TMDL no later than `r format(qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$EPA.Approval,"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to EPA for their action.
 
 # Data Management
 
@@ -1022,61 +1017,61 @@ TMDL documents: At each key stage of TMDL and WQMP development copies of the fol
 
 *	Public Comment Draft:     
 
-    +	Public Comment Draft TMDL and WQMP Report (Both Word and PDF)    
-    
-    +	Draft TMDL Appendices (Both Word and PDF)    
-    
-    +	Public Notice document    
-    
-    +	TMDL Summary Fact Sheet    
-    
-    +	News release    
-    
-    +	GovDelivery Notice and email    
-    
-    +	Other public notification emails    
-    
-    +	Mailing List (if used)    
-    
-    +	Public Comments Errata    
-    
++	Public Comment Draft TMDL and WQMP Report (Both Word and PDF)    
+
++	Draft TMDL Appendices (Both Word and PDF)    
+
++	Public Notice document    
+
++	TMDL Summary Fact Sheet    
+
++	News release    
+
++	GovDelivery Notice and email    
+
++	Other public notification emails    
+
++	Mailing List (if used)    
+
++	Public Comments Errata    
+
 *	Public Comments Received: Copy of all public comments received    
 
 *	Final TMDL and WQMP documents:    
 
-    +	TMDL signed Order (both Word and PDF)    
-    
-    +	TMDL issuance letter to EPA (both Word and PDF)    
-    
-    +	EPA approval letter (EPA)    
-    
-    +	Response to Comment Document (both Word and PDF)    
-    
-    +	TMDL and WQMP Report (both Word and PDF)    
-    
-    +	TMDL Appendices (both Word and PDF)    
-    
-    +	TMDL Summary Fact Sheet    
-    
-    +	News release    
-    
-    +	GovDelivery Notice and email    
-    
-    +	Other public notification emails    
-    
-    +	DMA/RP notification letters (both Word and PDF)    
-    
-    +	Addendums    
-    
-    +	Errata    
-    
-    +	Petitions    
-    
-    +	Director’s Petition Action (acceptance or rejection of petition)    
-    
-    +	Response to Petition    
-    
-    +	Attains upload files    
++	TMDL signed Order (both Word and PDF)    
+
++	TMDL issuance letter to EPA (both Word and PDF)    
+
++	EPA approval letter (EPA)    
+
++	Response to Comment Document (both Word and PDF)    
+
++	TMDL and WQMP Report (both Word and PDF)    
+
++	TMDL Appendices (both Word and PDF)    
+
++	TMDL Summary Fact Sheet    
+
++	News release    
+
++	GovDelivery Notice and email    
+
++	Other public notification emails    
+
++	DMA/RP notification letters (both Word and PDF)    
+
++	Addendums    
+
++	Errata    
+
++	Petitions    
+
++	Director’s Petition Action (acceptance or rejection of petition)    
+
++	Response to Petition    
+
++	Attains upload files    
 
 # QAPP Review and Approval
 
@@ -1119,7 +1114,7 @@ mod.ref <- model.info %>%
   dplyr::filter(!is.na(mod_ref)) %>% 
   dplyr::rename(reference = mod_ref) %>% 
   dplyr::select(reference)
-  
+
 
 other.ref <- data.frame(reference = c('Beck, M.B. 1987. "Water Quality Modeling: A Review of the Analysis of Uncertainty". Water Resources Research 23(8), 1393',
                                       'EPA (U.S. Environmental Protection Agency). 2009. "Guidance on the Development, Evaluation, and Application of Environmental Models". Council for Regulatory Environmental Modeling, Washington D.C., EPA/100/K-09/003.',
@@ -1137,7 +1132,16 @@ other.ref <- data.frame(reference = c('Beck, M.B. 1987. "Water Quality Modeling:
                                       'Smesruda, J.K., Boyd, M.S., Cuencac, R.H., Eisnerd, S.L. 2014. “A mechanistic energy balance model for predicting water temperature in surface flow wetlands.” Ecological Engineering. 67:11-24.378.',
                                       'Westhoff , M.C., Savenije, H.H.G., Luxemburg W.M.J., Stelling, G.S., van de Giesen, N.C., Selker , J.S., Pfister, L., and Uhlenbrook, S. 2007. “A distributed stream temperature model using high resolution temperature observations.” Hydrology and Earth Sciences. 11(4): 1469–1480.',
                                       'Woltemeade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
-                                      'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.'))
+                                      'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
+                                      'Gianfagna, C. J. 2015. “Watershed area ratio accurately predicts daily streamflow in nested catchments in the Catskills, New York.” Journal of Hydrology, 583-594.',
+                                      'Risley, J. S. 2009. “Estimating flow-duration and low-flow frequency statistics for unregulated stream in Oregon.” Reston, VA: U.S. Geological Survey.',
+                                      'Bencala, K.E. and Walters, R.A. 1983. “Simulation of solute transport in a mountain pool‐and‐riffle stream: A transient storage model.” Water Resources Research. 19(3), 718-724.',
+                                      'Hart, D. R. 1995. “Parameter estimation and stochastic interpretation of the transient storage model for solute transport in streams.” Water Resources Research. 31(2), 323-328.',
+                                      'Pelletier, G.J., Chapra, C., Taob, H. 2006. “QUAL2Kw – A framework for modeling water quality in streams and rivers using a genetic algorithm for calibration.” Environmental Modelling & Software. 21(3), 419-425.',
+                                      'Sinokrot B.A. and Stefan H.G. 1993. “Stream Temperature Dynamics: Measurements and Modeling.” Water Resources Research. 29(7), 2299-2312.',
+                                      'Ries, K.G., III, Newson J.K., Smith, M.J., Guthrie, J.D., Steeves, P.A., Haluska, T.L., Kolb, K.R., Thompson, R.F., Santoro, R.D., and Vraga, H.W.. 2017. “StreamStats, version 4: U.S. Geological Survey Fact 2017–3046, 4 p.” https://doi.org/10.3133/fs20173046. [Supersedes USGS Fact Sheet 2008–3067.]',
+                                      'Lorenz, D.L. and Ziegeweid, J.R. 2016. “Methods to estimate historical daily streamflow for ungaged stream locations in Minnesota. No. 2015-5181.” US Geological Survey, 2016.',
+                                      'Risley, J., Stonewall, A. and Haluska, T. 2008. “Estimating flow-duration and low-flow frequency statistics for unregulated streams in Oregon. No. FHWA-OR-RD-09-03”. Geological Survey (US), 2008.'))
 
 qapp.ref <- rbind(tmdl.ref,tir.ref,mod.ref,other.ref) %>% 
   dplyr::arrange(reference)
