@@ -8,7 +8,6 @@ library(tigris)
 options(tigris_use_cache = TRUE)
 
 # Functions ----
-
 strip_alpha <- function(x) {
   
   x2<- gsub(pattern="[a-z]$", replacement="", x=x, ignore.case = TRUE)
@@ -25,7 +24,6 @@ strip_tbl_num <- function(x) {
 }
 
 # General data ----
-
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
@@ -35,7 +33,6 @@ load(paste0(data.dir,"/download/data_sources_",update.date,".RData"))
 agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
 agrimet.parameters <- read.csv(paste0(data.dir, "download/agrimet_parameters.csv"))
 hydromet <- read.csv(paste0(data.dir, "download/hydromet.csv"))
-
 cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Model Setup Info") %>% 
   dplyr::filter(!`QAPP Project Area` == "Upper Klamath and Lost Subbasins") %>% 
   # for Section 6.1 General Model Parameters
@@ -57,7 +54,6 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
   dplyr::mutate(mod_ref = ifelse(mod_rmd == "ce", 'Cole, T.M., and S. A. Wells. 2000. "CE-QUAL-W2: A Two-Dimensional, Laterally Averaged, Hydrodynamic and Water Quality Model, Version 3.0." Instruction Report EL-2000. US Army Engineering and Research Development Center, Vicksburg, MS.',
                                  ifelse(mod_rmd == "sh", 'USFS (U.S. Forest Service). 1993. “SHADOW v. 2.3 - Stream Temperature Management Program. Prepared by Chris Park USFS, Pacific Northwest Region.”',
                                         NA)))
-
 cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Inputs") %>% 
   dplyr::filter(!`QAPP Project Area` == "Upper Klamath and Lost Subbasins")
 schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
@@ -72,7 +68,7 @@ npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx")
 lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
 qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
-web.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
+wbd.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
                         layer = "Study_Areas_v5_HUC8_scope")
 
 # _ IR2018/20 Cat 4 & 5 ----
@@ -87,17 +83,10 @@ cat.45.rivers.tbl <- cat.45.rivers
 sf::st_geometry(cat.45.rivers.tbl) <- NULL
 
 # _ NCDC met data ----
-# Updated
 ncei.stations <- ncei %>% 
   dplyr::mutate(lat = LAT_DEC,
                 long = LON_DEC) %>% 
   sf::st_as_sf(coords = c("LON_DEC", "LAT_DEC"), crs = sf::st_crs("+init=EPSG:4269"))
-
-###
-#ncdc.stations <- ncdc.station.or %>% 
-#  dplyr::mutate(lat = latitude,
-#                long = longitude) %>% 
-#  sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ RAWS met data ----
 raws.stations <- raws.meta %>% 
@@ -132,7 +121,6 @@ mw.stations <- mw.meta$STATION %>%
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
 # qapp_project_area = "Southern Willamette Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
-# qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
 for (qapp_project_area in qapp_project_areas$areas) {
@@ -153,7 +141,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::left_join(station_awqms[,c("Station ID", "StationDes", "OrgID")], by="Station ID")
   
   data <- df.awqms.raw.state %>% 
-    dplyr::filter(HUC8_Name %in%  subbasin) %>% 
+    dplyr::filter(HUC8 %in%  subbasin_num) %>% 
     # QA/QC check:
     dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
   
@@ -185,14 +173,14 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
   
-  qapp_project_area_huc8 <- web.huc8 %>% 
+  qapp_project_area_huc8 <- wbd.huc8 %>% 
     dplyr::filter(HUC_8 %in% subbasin_num)
   
   qapp_project_area_huc8_union <- sf::st_union(qapp_project_area_huc8)
   
   # _ IR2018/20 Cat 4 & 5 ----
   pro.cat.45.rivers.tbl <- cat.45.rivers.tbl %>% 
-    dplyr::filter(QAPP_Project_Area %in%  qapp_project_area)
+    dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
   
   # _ USGS flow data ----
   usgs.stations <- usgs.stations.or %>%  # Discharge [ft3/s]
@@ -257,59 +245,6 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   ncei.station.tbl <- ncei.stations.subbasin %>% 
     dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Nw", "NW") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Ne", "NE") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Nnw", "NNW") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Se", "SE") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Ese", "ESE") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Wnw", "WNW") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Wsw", "WSW") %>%
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Ssw", "SSW") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Ene", "ENE") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Sse", "SSE") %>% 
-  #dplyr::mutate_at("STATION_NAME", str_replace_all, "Sw", "SW")
-  
-  ###
-  ncdc.stations.huc8 <- ncdc.stations %>% 
-    filter(sf::st_contains(qapp_project_area_huc8_union, ., sparse = FALSE))
-  
-  ncdc.stations.subbasin <-  sf::st_join(x = ncdc.stations.huc8,
-                                         y = qapp_project_area_huc8,
-                                         join = st_within,
-                                         left = TRUE)
-  
-  sf::st_geometry(ncdc.stations.subbasin) <- NULL
-  
-  #ggplot() 
-  #geom_sf(data = web.huc8) 
-  #geom_sf(data = qapp_project_area_huc8,
-  #        colour = "blue") 
-  #geom_sf(data = ncei.stations.subbasin) 
-  #geom_sf_label(data = ncdc.stations,
-  #              aes(lat, long, label = name))
-  
-  
-  ncdc.datacats <- ncdc.datacats.or %>% 
-    dplyr::filter(name %in% c("Air Temperature", "Precipitation", "Weather Type", "Wind", "Wind Speed", "Cloudiness", "Relative Humidity", "Humidity")) %>% 
-    dplyr::group_by(station.id) %>% 
-    dplyr::summarise(Parameter = toString(sort(name))) %>% 
-    dplyr::ungroup()
-  
-  ncdc.station.tbl <- ncdc.stations.subbasin %>% 
-    dplyr::rename(station.id = id) %>% 
-    dplyr::left_join(ncdc.datacats, by = "station.id") %>% 
-    dplyr::mutate_at("name", str_replace_all, ", OR US", "") %>% 
-    dplyr::mutate(name = stringr::str_to_title(name)) %>% 
-    dplyr::mutate_at("name", str_replace_all, "Nw", "NW") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Ne", "NE") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Nnw", "NNW") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Se", "SE") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Ese", "ESE") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Wnw", "WNW") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Ssw", "SSW") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Ene", "ENE") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Sse", "SSE") %>% 
-    dplyr::mutate_at("name", str_replace_all, "Sw", "SW")
   
   # _ RAWS met data ----
   raws.stations.huc8 <- raws.stations %>% 
@@ -341,7 +276,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     filter(sf::st_contains(qapp_project_area_huc8_union, ., sparse = FALSE))
   
   #  ggplot() 
-  #    geom_sf(data = web.huc8)
+  #    geom_sf(data = wbd.huc8)
   #    geom_sf(data = qapp_project_area_huc8,
   #            colour = "blue") 
   #    geom_sf(data = agrimet.stations.or) 
@@ -395,7 +330,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
   
   save(df.stations.state,
-       web.huc8,
+       wbd.huc8,
        model.info,
        model.input,
        pro.area.tmdls,
@@ -411,7 +346,6 @@ for (qapp_project_area in qapp_project_areas$areas) {
        pro.cat.45.rivers.tbl,
        usgs.station.tbl,
        ncei.station.tbl,
-       ncdc.station.tbl,
        raws.station.tbl,
        agrimet.station.tbl,
        hydromet.station.tbl,

@@ -95,7 +95,8 @@ if(!model.extent == TRUE){
                   `Station ID` = ifelse(`Station ID` == "TIR",NA,`Station ID`),
                   `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                               `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (",`Station ID`,")"))) %>% 
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model Location` = round(`Model Location`,1)) %>% 
     dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
     #dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Parameter`, `Data Source`) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
@@ -148,7 +149,8 @@ if(!model.extent == TRUE){
     dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
     dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                               `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>%  
+                                                              paste0(`Model Location Name`, " (", `Station ID`, ")")),
+                  `Model Location` = round(`Model Location`,1)) %>%  
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 
