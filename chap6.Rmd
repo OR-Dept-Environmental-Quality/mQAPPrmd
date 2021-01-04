@@ -71,6 +71,10 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
 
+### Important Assumptions
+
+Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 
+
 ### Model Calibration
 
 ```{r, label=`t6x5`, include=FALSE}
@@ -136,7 +140,8 @@ if(!model.extent == TRUE){
 } else {
   
   t6x6_met <- section.model.input %>% 
-    dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
+    dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>%
+    dplyr::mutate(Note = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",Note),Note)) %>% 
     dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
     dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,1)))),
                      Parameter = toString(unique(sort(Parameter))))%>% 
@@ -150,7 +155,8 @@ if(!model.extent == TRUE){
     dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                  `Model Location` = round(`Model Location`,1)) %>%  
+                  `Model Location` = round(`Model Location`,1),
+                  Note = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",Note),Note)) %>%  
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 
@@ -192,23 +198,3 @@ if(NROW(t6x6_2)>1){
   
 }
 ```
-
-### Data Gaps
-
-```{r, label=`data_gap`, echo=FALSE}
-
-tdata.gap <- knitr::kable(data.gap, format = "pandoc", padding = 2,
-                          caption = tbls(name = "data.gap",
-                                         caption = paste0("Methods to derive model parameters for data gaps.")))
-
-```
-
-Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, so too does the amount of information needed to parameterize it. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
-
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs table (`r if(!model.extent == TRUE){tbls(name = paste0("t6x6j", waterbody_name),display="cite")} else {tbls(name = paste0("t6x6_1", waterbody_name),display="cite")}`).
-
-`r tdata.gap`
-
-### Important Assumptions
-
-Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 

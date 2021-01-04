@@ -31,6 +31,7 @@ options(kableExtra.auto_format = F)
 t6x6j_met <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
+  dplyr::mutate(Note = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",Note),Note)) %>%
   dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
   dplyr::summarize(`Model Location` = toString(unique(sort(`Model Location`))),
                    Parameter = toString(unique(sort(Parameter))))%>% 
@@ -45,7 +46,8 @@ t6x6j <- section.model.input %>%
   dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                             `Model Location Name`,
                                                             paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                  `Model Location` = round(`Model Location`,1)) %>%  
+                  `Model Location` = round(`Model Location`,1),
+                  Note = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",Note),Note)) %>%    
   dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
   dplyr::rename(`Input Type` = `Model Location Type`) %>% 
   rbind(t6x6j_met) %>% 

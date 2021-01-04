@@ -781,6 +781,34 @@ if(mod.check == "11"){
   }
 }
 
+```
+
+The following models were used in the development of the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` for the associated waterbodies (`r tbls(name = "tmdl.mod", display="cite")`).
+
+`r tmdl.mod.tbl`
+
+Model calibration was completed by DEQ and described in `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`. It is unlikely that adjustments to the existing calibrated model will occur as part of this project. If it is determined at a later date the calibration needs to be updated the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
+
+`r paste(mod.v, collapse = "\n")`
+
+## Data Gaps
+
+```{r, label=`data_gap`, echo=FALSE}
+
+tdata.gap <- knitr::kable(data.gap, format = "pandoc", padding = 2,
+                          caption = tbls(name = "data.gap",
+                                         caption = paste0("Methods to derive model parameters for data gaps.")))
+
+```
+
+Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, so too does the amount of information needed to parameterize it. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
+
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the sections of Model Parameters.
+
+`r tdata.gap`
+
+```{r, label=`chap6x`, include=FALSE}
+
 # Note: SHADOW model streams were not included in Section 6 sub-sections of Model Waterbodies
 chap6 <- NULL
 
@@ -797,15 +825,8 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
   
 }
 
+
 ```
-
-The following models were used in the development of the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` for the associated waterbodies (`r tbls(name = "tmdl.mod", display="cite")`).
-
-`r tmdl.mod.tbl`
-
-Model calibration was completed by DEQ and described in `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`. It is unlikely that adjustments to the existing calibrated model will occur as part of this project. If it is determined at a later date the calibration needs to be updated the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
-
-`r paste(mod.v, collapse = "\n")`
 
 `r paste(chap6, collapse = "\n")`
 
