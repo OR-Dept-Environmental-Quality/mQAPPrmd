@@ -26,8 +26,9 @@ strip_tbl_num <- function(x) {
 # General data ----
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-# external data update date;
+# external data update date:
 update.date <- "2020-12-24"
 load(paste0(data.dir,"/download/data_sources_",update.date,".RData"))
 agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
@@ -41,7 +42,6 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
                                               ifelse(substr(`Model version`, 13,13) == "8", "Heat Source Version 8",
                                                      ifelse(substr(`Model version`, 13,13) == "9", "Heat Source Version 9",
                                                             ifelse(substr(`Model version`, 1,2) == "CE", "CE-Qual-W2 Version 3","SHADOW")))))) %>% 
-  #dplyr::mutate(Model_version = ifelse(is.na(`Model version`) & `Primary Model Parameter` == "Solar", "SHADOW", Model_version)) %>% 
   dplyr::mutate(mod_rmd = ifelse(Model_version == "Heat Source Version 6", "hs6",
                                  ifelse(Model_version == "Heat Source Version 7", "hs7",
                                         ifelse(Model_version == "Heat Source Version 8", "hs8",
@@ -68,19 +68,13 @@ npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx")
 lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
 qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
-wbd.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
-                        layer = "Study_Areas_v5_HUC8_scope")
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
                              layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL") %>% 
   dplyr::left_join(lookup_huc, by = "HUC12")
-
-cat.45.rivers <- sf::st_transform(cat.45.rivers, 4326)
-
-cat.45.rivers.tbl <- cat.45.rivers
-
-sf::st_geometry(cat.45.rivers.tbl) <- NULL
+cat.45.rivers.tbl <- sf::st_transform(cat.45.rivers, 4326) %>% 
+  sf::st_drop_geometry()
 
 # _ NCDC met data ----
 ncei.stations <- ncei %>% 
@@ -105,6 +99,10 @@ agrimet.stations.or <- agrimet.stations %>%
 mw.stations <- mw.meta$STATION %>%
   dplyr::mutate(lat = LATITUDE, long = LONGITUDE) %>% 
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
+
+# _ HUC 8 ----
+wbd.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
+                        layer = "Study_Areas_v5_HUC8_scope")
 
 # QAPP Project Area Data ----
 
@@ -145,7 +143,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     # QA/QC check:
     dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
   
-  # data.sample.count will be used in the Section 5.3
+  # data.sample.count will be used in the Appendix 1
   data.sample.count <- data %>% 
     dplyr::filter(Statistical_Base == "Maximum") %>% 
     dplyr::select(Org_Name, MLocID, SampleStartDate, Statistical_Base, Result_Numeric) %>% 
@@ -197,13 +195,12 @@ for (qapp_project_area in qapp_project_areas$areas) {
   usgs.stations.subbasin <-  sf::st_join(x = usgs.stations,
                                          y = qapp_project_area_huc8,
                                          join = st_within,
-                                         left = TRUE)
+                                         left = TRUE) %>% 
+    sf::st_drop_geometry()
   
   #ggplot() 
   #  geom_sf(data = qapp_project_area_huc8) 
   #  geom_sf(data = usgs.stations.subbasin)
-  
-  sf::st_geometry(usgs.stations.subbasin) <- NULL
   
   usgs.station.tbl <- usgs.stations.subbasin %>% 
     dplyr::mutate_at("station_nm", str_replace_all, " R ", " RIVER ") %>% 
@@ -239,9 +236,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
   ncei.stations.subbasin <-  sf::st_join(x = ncei.stations.huc8,
                                          y = qapp_project_area_huc8,
                                          join = st_within,
-                                         left = TRUE)
-  
-  sf::st_geometry(ncei.stations.subbasin) <- NULL
+                                         left = TRUE) %>% 
+    sf::st_drop_geometry()
   
   ncei.station.tbl <- ncei.stations.subbasin %>% 
     dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
@@ -253,9 +249,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
   raws.stations.subbasin <-  sf::st_join(x = raws.stations.huc8,
                                          y = qapp_project_area_huc8,
                                          join = st_within,
-                                         left = TRUE)
-  
-  sf::st_geometry(raws.stations.subbasin) <- NULL
+                                         left = TRUE) %>% 
+    sf::st_drop_geometry()
   
   raws.station.data.type <- raws.data.type %>% 
     dplyr::rename(Parameter = "unlist.type.list.columnNames.") %>% 
@@ -265,8 +260,6 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::mutate_at("Parameter", str_replace_all, "temperature", "Temperature") %>%
     dplyr::mutate_at("Parameter", str_replace_all, "windDirection", "Wind Direction") %>%
     dplyr::mutate_at("Parameter", str_replace_all, "windSpeed", "Wind Speed")
-  #dplyr::group_by(wrccID) %>% 
-  #dplyr::summarise(Parameter = toString(sort(Parameter)))
   
   raws.station.tbl <- raws.stations.subbasin %>% 
     dplyr::left_join(raws.station.data.type, by = "wrccID")
@@ -286,9 +279,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
   agrimet.stations.subbasin <-  sf::st_join(x = agrimet.stations.huc8,
                                             y = qapp_project_area_huc8,
                                             join = st_within,
-                                            left = TRUE)
-  
-  sf::st_geometry(agrimet.stations.subbasin) <- NULL
+                                            left = TRUE) %>% 
+    sf::st_drop_geometry()
   
   agrimet.station.data.type <- agrimet.parameters %>% 
     dplyr::filter(Type %in% c("Air Temperature","Precipitation", "Relative Humidity", "Wind"))
@@ -309,9 +301,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
   mw.stations.subbasin <-  sf::st_join(x = mw.stations.huc8,
                                        y = qapp_project_area_huc8,
                                        join = st_within,
-                                       left = TRUE)
-  
-  sf::st_geometry(mw.stations.subbasin) <- NULL
+                                       left = TRUE) %>% 
+    sf::st_drop_geometry()
   
   mw.station.tbl <- mw.stations.subbasin %>% 
     dplyr::mutate(NAME = stringr::str_to_title(NAME))  
@@ -330,6 +321,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
   
   save(df.stations.state,
+       df.stations,
        wbd.huc8,
        model.info,
        model.input,
@@ -576,25 +568,28 @@ met.ncdc <- ncdc.stations %>%
   dplyr::mutate_at("name", str_replace_all, "Sse", "SSE") %>% 
   dplyr::mutate_at("name", str_replace_all, "Sw", "SW") %>% 
   dplyr::mutate(`Station` = paste0(`Station ID`," at ",name," (NCDC)")) %>% 
-  dplyr::select(Station, Latitude, Longitude)
+  dplyr::select(Station, Latitude, Longitude) %>% 
+  sf::st_drop_geometry()
 
-sf::st_geometry(met.ncdc) <- NULL
+#sf::st_geometry(met.ncdc) <- NULL
 
 met.raws <- raws.stations %>% 
   dplyr::rename(Latitude = lat,
                 Longitude = long) %>% 
   dplyr::mutate(`Station` = paste0(agency," station ", wrccID, " at ", siteName, " (RAWS)")) %>% 
-  dplyr::select(Station, Latitude, Longitude)
+  dplyr::select(Station, Latitude, Longitude) %>% 
+  sf::st_drop_geometry()
 
-sf::st_geometry(met.raws) <- NULL
+#sf::st_geometry(met.raws) <- NULL
 
 met.agrimet <- agrimet.stations.or %>%
   dplyr::rename(Latitude = lat,
                 Longitude = long) %>%
   dplyr::mutate(`Station` = paste0(siteid, " - ", description, " (AgriMet)")) %>% 
-  dplyr::select(Station, Latitude, Longitude)
+  dplyr::select(Station, Latitude, Longitude) %>% 
+  sf::st_drop_geometry()
 
-sf::st_geometry(met.agrimet) <- NULL
+#sf::st_geometry(met.agrimet) <- NULL
 
 met.hydromet <- hydromet %>% 
   dplyr::filter(Parameter %in% c("Air Temperature","Precipitation")) %>% 
@@ -607,9 +602,10 @@ met.mw <- mw.stations %>%
   dplyr::rename(Latitude = lat,
                 Longitude = long) %>%
   dplyr::mutate(`Station` = paste0(STID, " - ", NAME, " (MesoWest)")) %>% 
-  dplyr::select(Station, Latitude, Longitude)
+  dplyr::select(Station, Latitude, Longitude) %>% 
+  sf::st_drop_geometry()
 
-sf::st_geometry(met.mw) <- NULL
+#sf::st_geometry(met.mw) <- NULL
 
 met.pro <- rbind(met.sp, met.ncdc, met.raws, met.agrimet, met.hydromet, met.mw) %>% 
   dplyr::filter(!is.na(Latitude)) %>% 

@@ -1,7 +1,7 @@
 ---
 output: 
   word_document:
-    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Applegate River"
+# for test: waterbody_name <- "North Umpqua River"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -34,15 +34,15 @@ model.extent <- na.omit(model.extent)
 
 ```
 
-## `r paste0(waterbody_name, " (Summer Priod)")`
+## `r paste0(waterbody_name, " (Summer Period)")`
 
 ### Source Characteristics
 
-Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody (Equation 1).   
+Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody (`r eqns(name = paste0("temp",waterbody_name), display="cite")`).   
 
-$$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\times \Delta \text {Flow Volume}}  \hspace{3em}\text{Equation 1}$$
+$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\times \Delta \text {Flow Volume}}  \hspace{3em}$ `r eqns(name = paste0("temp",waterbody_name), display="cite")`
 
-Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of coldwater inputs from groundwater.
+Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of cold water inputs from groundwater.
 
 ### Model Domain
 
@@ -71,6 +71,10 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
 
+### Important Assumptions
+
+Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 
+
 ### Model Calibration
 
 ```{r, label=`t6x5`, include=FALSE}
@@ -91,12 +95,15 @@ if(!model.extent == TRUE){
   t6x5 <- section.model.input %>% 
     dplyr::filter(`Model Location Type` == "Calibration Site") %>%
     dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
+                  `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`),
                   Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
                   `Station ID` = ifelse(`Station ID` == "TIR",NA,`Station ID`),
-                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (",`Station ID`,")")),
-                  `Model Location` = round(`Model Location`,1)) %>% 
+                  `Model Location` = round(`Model Location`,2)) %>% 
     dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
     #dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Parameter`, `Data Source`) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
@@ -114,7 +121,7 @@ if(!model.extent == TRUE){
 
 ```
 
-Model calibration was completed by DEQ and described in the `r paste0(unique(section.model.info$'TMDL Document'), " (", strip_alpha(unique(section.model.info$"Abbreviated Reference")), ")")`. It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized here to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.
+`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$"Abbreviated Reference")), "). It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized in the "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
 
@@ -137,8 +144,12 @@ if(!model.extent == TRUE){
   
   t6x6_met <- section.model.input %>% 
     dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
+    dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
+                  `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>% 
     dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
-    dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,1)))),
+    dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
                      Parameter = toString(unique(sort(Parameter))))%>% 
     dplyr::ungroup() %>% 
     #dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`, Note) %>% 
@@ -147,10 +158,14 @@ if(!model.extent == TRUE){
   
   t6x6_1 <- section.model.input %>% 
     dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
-    dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+    dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                  `Model Location` = round(`Model Location`,1)) %>%  
+                  `Model Location` = round(`Model Location`,2),
+                  `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
+                  `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>%
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 
@@ -193,27 +208,7 @@ if(NROW(t6x6_2)>1){
 }
 ```
 
-### Data Gaps
-
-```{r, label=`data_gap`, echo=FALSE}
-
-tdata.gap <- knitr::kable(data.gap, format = "pandoc", padding = 2,
-                          caption = tbls(name = "data.gap",
-                                         caption = paste0("Methods to derive model parameters for data gaps.")))
-
-```
-
-Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, so too does the amount of information needed to parameterize it. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
-
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs table (`r if(!model.extent == TRUE){tbls(name = paste0("t6x6j", waterbody_name),display="cite")} else {tbls(name = paste0("t6x6_1", waterbody_name),display="cite")}`).
-
-`r tdata.gap`
-
-### Important Assumptions
-
-Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 
-
-## `r paste0(waterbody_name, " (Spawning Priod)")`
+## `r paste0(waterbody_name, " (Spawning Period)")`
 
 ### Source Characteristics
 
@@ -223,10 +218,8 @@ Key assumptions made during collection, handling, transformation (harmonizing fo
 
 ### Time Frame of Simulation
 
+### Important Assumptions
+
 ### Model Calibration
 
 ### Model Parameters
-
-### Data Gaps
-
-### Important Assumptions

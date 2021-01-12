@@ -1,7 +1,7 @@
 ---
 output: 
   word_document:
-    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -31,7 +31,10 @@ options(kableExtra.auto_format = F)
 t6x6j_met <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
-  dplyr::mutate(Note = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",Note),Note)) %>%
+  dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
+                `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>% 
   dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
   dplyr::summarize(`Model Location` = toString(unique(sort(`Model Location`))),
                    Parameter = toString(unique(sort(Parameter))))%>% 
@@ -46,8 +49,11 @@ t6x6j <- section.model.input %>%
   dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                             `Model Location Name`,
                                                             paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                  `Model Location` = round(`Model Location`,1),
-                  Note = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",Note),Note)) %>%    
+                `Model Location` = round(`Model Location`,2),
+                `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
+                `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>%    
   dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
   dplyr::rename(`Input Type` = `Model Location Type`) %>% 
   rbind(t6x6j_met) %>% 
@@ -66,11 +72,9 @@ if(NROW(t6x6j)>0){
                             caption = tbls(name = paste0("t6x6j", model_extent),
                                            caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, ".")))
   
-}  else {
-  
-  cat(paste0("There were no temperature or flow boundary conditions input to this model."))
-  
 }
 
 ```
-`r if(NROW(t6x6j)>0){paste0(tbls(name = paste0("t6x6j", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
+`r if(NROW(t6x6j)>0){paste0(tbls(name = paste0("t6x6j", model_extent),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
+
+`r if(NROW(t6x6j)>0){t6x6j_tbl}else{paste0("There were no boundary condition and tributary inputs to this model.")}`

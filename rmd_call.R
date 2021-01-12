@@ -3,7 +3,7 @@ library(rmarkdown)
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/20210103/"
+output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/20210110/"
 
 qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv"))
 
@@ -32,6 +32,6 @@ for (qapp_project_area in qapp_project_areas$areas) {
   rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/mQAPPrmd/model_QAPP.Rmd",
                     output_format = "word_document",
                     output_dir = output.dir,
-                    output_file=paste0("QAPP_",file.name, "_", Sys.Date(),".docx"))
+                    output_file=paste0("QAPP_",file.name, ".docx"))
   
 }

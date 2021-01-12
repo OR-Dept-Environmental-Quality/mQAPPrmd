@@ -8,7 +8,6 @@ library(tigris)
 options(tigris_use_cache = TRUE)
 
 # Functions ----
-
 strip_alpha <- function(x) {
   
   x2<- gsub(pattern="[a-z]$", replacement="", x=x, ignore.case = TRUE)
@@ -27,8 +26,9 @@ strip_tbl_num <- function(x) {
 # General data ----
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-# external data update date;
+# external data update date:
 update.date <- "2020-12-24"
 load(paste0(data.dir,"/download/data_sources_",update.date,".RData"))
 agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
@@ -42,7 +42,6 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
                                               ifelse(substr(`Model version`, 13,13) == "8", "Heat Source Version 8",
                                                      ifelse(substr(`Model version`, 13,13) == "9", "Heat Source Version 9",
                                                             ifelse(substr(`Model version`, 1,2) == "CE", "CE-Qual-W2 Version 3","SHADOW")))))) %>% 
-  #dplyr::mutate(Model_version = ifelse(is.na(`Model version`) & `Primary Model Parameter` == "Solar", "SHADOW", Model_version)) %>% 
   dplyr::mutate(mod_rmd = ifelse(Model_version == "Heat Source Version 6", "hs6",
                                  ifelse(Model_version == "Heat Source Version 7", "hs7",
                                         ifelse(Model_version == "Heat Source Version 8", "hs8",
@@ -69,20 +68,13 @@ npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx")
 lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
 qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
-will.huc10 <- sf::read_sf(dsn = paste0(data.dir,"gis/project_reach_HUC10.shp"),
-                          layer = "project_reach_HUC10") %>% 
-  dplyr::filter(!`HU_8_NAME` == "Middle Snake-Payette")
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
                              layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL") %>% 
   dplyr::left_join(lookup_huc, by = "HUC12")
-
-cat.45.rivers <- sf::st_transform(cat.45.rivers, 4326)
-
-cat.45.rivers.tbl <- cat.45.rivers
-
-sf::st_geometry(cat.45.rivers.tbl) <- NULL
+cat.45.rivers.tbl <- sf::st_transform(cat.45.rivers, 4326) %>% 
+  sf::st_drop_geometry()
 
 # _ NCDC met data ----
 ncei.stations <- ncei %>% 
@@ -108,6 +100,11 @@ mw.stations <- mw.meta$STATION %>%
   dplyr::mutate(lat = LATITUDE, long = LONGITUDE) %>% 
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
 
+# RUN BELOW IF AFTER data.R ----
+will.huc10 <- sf::read_sf(dsn = paste0(data.dir,"gis/project_reach_HUC10.shp"),
+                          layer = "project_reach_HUC10") %>% 
+  dplyr::filter(!`HU_8_NAME` == "Middle Snake-Payette")
+
 # Willamette River Mainstem and Major Tributaries ----
 qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 
@@ -132,7 +129,7 @@ data <- df.awqms.raw.state %>%
   # QA/QC check:
   dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
 
-# data.sample.count will be used in the Section 5.3
+# data.sample.count will be used in the Appendix 1
 data.sample.count <- data %>% 
   dplyr::filter(Statistical_Base == "Maximum") %>% 
   dplyr::select(Org_Name, MLocID, SampleStartDate, Statistical_Base, Result_Numeric) %>% 
@@ -187,13 +184,12 @@ usgs.stations.huc10 <- usgs.stations %>%
 usgs.stations.subbasin <-  sf::st_join(x = usgs.stations.huc10,
                                        y = qapp_project_area_huc10,
                                        join = st_within,
-                                       left = TRUE)
+                                       left = TRUE) %>% 
+  sf::st_drop_geometry()
 
 #ggplot() +
 #  geom_sf(data = qapp_project_area_huc10) +
 #  geom_sf(data = usgs.stations.subbasin)
-
-sf::st_geometry(usgs.stations.subbasin) <- NULL
 
 usgs.station.tbl <- usgs.stations.subbasin %>% 
   dplyr::mutate_at("station_nm", str_replace_all, " R ", " RIVER ") %>% 
@@ -228,9 +224,8 @@ ncei.stations.huc10 <- ncei.stations %>%
 ncei.stations.subbasin <-  sf::st_join(x = ncei.stations.huc10,
                                        y = qapp_project_area_huc10,
                                        join = st_within,
-                                       left = TRUE)
-
-sf::st_geometry(ncei.stations.subbasin) <- NULL
+                                       left = TRUE) %>% 
+  sf::st_drop_geometry()
 
 ncei.station.tbl <- ncei.stations.subbasin %>% 
   dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
@@ -242,9 +237,8 @@ raws.stations.huc10 <- raws.stations %>%
 raws.stations.subbasin <-  sf::st_join(x = raws.stations.huc10,
                                        y = qapp_project_area_huc10,
                                        join = st_within,
-                                       left = TRUE)
-
-sf::st_geometry(raws.stations.subbasin) <- NULL
+                                       left = TRUE) %>% 
+  sf::st_drop_geometry()
 
 raws.station.data.type <- raws.data.type %>% 
   dplyr::rename(Parameter = "unlist.type.list.columnNames.") %>% 
@@ -275,9 +269,8 @@ agrimet.stations.huc10 <- agrimet.stations.or %>%
 agrimet.stations.subbasin <-  sf::st_join(x = agrimet.stations.huc10,
                                           y = qapp_project_area_huc10,
                                           join = st_within,
-                                          left = TRUE)
-
-sf::st_geometry(agrimet.stations.subbasin) <- NULL
+                                          left = TRUE) %>% 
+  sf::st_drop_geometry()
 
 agrimet.station.data.type <- agrimet.parameters %>% 
   dplyr::filter(Type %in% c("Air Temperature","Precipitation", "Relative Humidity", "Wind"))
@@ -298,9 +291,8 @@ mw.stations.huc10 <- mw.stations %>%
 mw.stations.subbasin <-  sf::st_join(x = mw.stations.huc10,
                                      y = qapp_project_area_huc10,
                                      join = st_within,
-                                     left = TRUE)
-
-sf::st_geometry(mw.stations.subbasin) <- NULL
+                                     left = TRUE) %>% 
+  sf::st_drop_geometry()
 
 mw.station.tbl <- mw.stations.subbasin %>% 
   dplyr::mutate(NAME = stringr::str_to_title(NAME))  
@@ -319,6 +311,7 @@ mw.station.tbl <- mw.stations.subbasin %>%
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
 save(df.stations.state,
+     df.stations,
      will.huc10 ,
      model.info,
      model.input,
