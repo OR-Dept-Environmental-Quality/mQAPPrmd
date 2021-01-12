@@ -4,7 +4,7 @@ date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
   officedown::rdocx_document:
   word_document:
-    reference_docx: N:/Status_and_Trend_Reports/Report_Files/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -40,7 +40,7 @@ library(flextable)
 library(sf); library(sp)
 library(rgdal)
 library(ggplot2)
-library(stringr)
+library(stringr);library(stringi)
 library(english)
 library(pacman)
 
@@ -49,8 +49,31 @@ figs <- captioner::captioner(prefix="Figure")
 eqns <- captioner::captioner(prefix="Equation")
 
 ```
+\newpage
+
+**[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
+
+This report prepared by:
+
+Oregon Department of Environmental Quality  
+700 NE Multnomah Street, Suite 600  
+Portland, OR 97232  
+1-800-452-4011  
+www.oregon.gov/deq
+
+Contact:  
+Ryan Michie  
+503-229-6162
+
+In cooperation with:
+
+EPA Region 10  
+Tetra Tech, Inc.
+
+Documents can be provided upon request in an alternate format for individuals with disabilities or in a language other than English for people with limited English skills. To request a document in another format or language, call DEQ in Portland at 503-229-5696, or toll-free in Oregon at 1-800-452-4011, ext. 5696; or email deqinfo@deq.state.or.us.
 
 \newpage
+**[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
 
 **[Approval Page]**
 
@@ -63,15 +86,15 @@ eqns <- captioner::captioner(prefix="Equation")
 
 # Introduction
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total maximum daily load (TMDL) replacement project.
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project.
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. A TMDL establishes a pollutant-reduction target and allocates the maximum amount of pollutant load reductions necessary to the contributing source(s) of the pollutant. The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list.
 
-The `r qapp_project_area` includes several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature. A TMDL was previously developed for the `r paste0( pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}`, but this TMDL must be replaced due to recent litigation.
+The `r qapp_project_area` includes several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature. `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL was previously developed for the ", qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), "), but this TMDL must be replaced due to recent litigation.")}else{paste0("TMDLs were previously developed for the ",qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), "), but the TMDLs must be replaced due to recent litigation.")}`
 
-In 2012, The U.S. District Court found that EPA’s approval of an element of Oregon’s water quality standard for temperature, the Natural Conditions Criteria, was unlawful. The Natural Conditions Criterion stated that where the natural thermal potential of all or a portion of a water body exceeds the biologically-based numeric temperature criteria in OAR 340-041-0028(4), the natural thermal potential temperatures supersede the biologically-based criteria, and are deemed to be the applicable temperature criteria for that water body. This portion of the temperature water quality standard was effective from 2003 until EPA disapproved it in response to the court decision in 2013. Many temperature TMDLs were based on this criteria, and this became the subject of a second lawsuit brought by the Northwest Environmental Advocates against EPA asserting the EPA unlawfully approved TMDLs that were based on the now disapproved Natural Conditions Criterion. The court issued a judgment on Oct. 4, 2019, requiring DEQ and EPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard.
+In 2012, The U.S. District Court found that EPA’s approval of an element of Oregon’s water quality standard for temperature, the Natural Conditions Criteria, was unlawful. The Natural Conditions Criterion stated that where the natural thermal potential of all or a portion of a waterbody exceeds the biologically-based numeric temperature criteria in OAR 340-041-0028(4), the natural thermal potential temperatures supersede the biologically-based criteria, and are deemed to be the applicable temperature criteria for that waterbody. This portion of the temperature water quality standard was effective from 2003 until EPA disapproved it in response to the court decision in 2013. Many temperature TMDLs were based on this criteria, and this became the subject of a second lawsuit brought by the Northwest Environmental Advocates against EPA asserting the EPA unlawfully approved TMDLs that were based on the now disapproved Natural Conditions Criterion. The court issued a judgment on October 4, 2019, requiring DEQ and EPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard.
 
-This QAPP has been developed to document the analysis and numerical modeling approach that will support the TMDL as well as other project details. To that end, the modeling and analysis used in the previous TMDL will form the basis of the modeling approach for the TMDL replacement. In particular, this QAPP details the following:
+This QAPP has been developed to document the analysis and numerical modeling approach that will support the `r qapp_project_area` TMDL as well as other project details. To that end, the modeling and analysis used in the previous TMDL will form the basis of the modeling approach for the TMDL replacement. In particular, this QAPP details the following:
 
 *	Definition of the issue and objectives, including the spatial and temporal extents of the water quality impairments (Section 2);    
 
@@ -92,9 +115,9 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 # Problem Definition and Management Objectives
 
-```{r, label=`cat45`, echo=FALSE}
+```{r, label=`cat5`, echo=FALSE}
 
-t2 <- pro.cat.45.rivers.tbl %>% 
+tcat5 <- pro.cat.45.rivers.tbl %>% 
   dplyr::filter(IR_categor == "Category 5") %>% 
   dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
   dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
@@ -106,10 +129,10 @@ t2 <- pro.cat.45.rivers.tbl %>%
   dplyr::select(Waterbody,`Assessment Unit ID`,`Year Listed`,`Criterion Period`) %>% 
   dplyr::arrange(Waterbody,`Year Listed`)
 
-if(NROW(t2)>0){
+if(NROW(tcat5)>0){
   
-  t2 <- knitr::kable(t2, format = "pandoc", padding = 2,
-                     caption = tbls(name = "t2",
+  tcat5 <- knitr::kable(tcat5, format = "pandoc", padding = 2,
+                     caption = tbls(name = "tcat5",
                                     caption = paste0("Waterbodies listed for temperature impairment based on Section 303(d) Category 5 in the 2018/20 Integrated Report.")))
   
 }
@@ -117,17 +140,17 @@ if(NROW(t2)>0){
 
 ```
 
-`r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed for **[Update based on the Project Area: bacteria, aquatic weeds, biological criteria and temperature]**. The original temperature TMDLs were based on the Natural Conditions Criteria (NCC) identified in Oregon Administrative Rules (OAR), specifically OAR 340-041-0028(8). These criteria were invalidated by the Oregon U.S. District Court. The applicable numeric and narrative temperature criteria must be used. As required by court order, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the models used for the `r qapp_project_area` reaches will be updated to target the biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) WQS. **[Update: This includes the John Day River and the North and Middle Forks of the John Day River}**.
+`r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed for **[Update based on the project area: bacteria, aquatic weeds, biological criteria and temperature]**. The original temperature TMDLs were based on the Natural Conditions Criteria (NCC) identified in Oregon Administrative Rules (OAR), specifically OAR 340-041-0028(8). These criteria were invalidated by the Oregon U.S. District Court. The applicable numeric and narrative temperature criteria must be used. As required by court order, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards. **[Update with specific temperature criteria based on the project area]**.
 
-The existing temperature TMDL addresses rearing/migration and spawning period temperature impairments on streams with both point and not point sources of thermal loads. In river and stream reaches that have no point sources or dams, activities designed to improve summer stream temperatures are the same activities that will improve fall and winter temperatures. The nonpoint source load allocations may be expressed as effective shade targets, channel morphological changes, and in-stream flow targets, and apply year-round.
+The existing temperature TMDL addresses temperature on streams with **[Update both point and not point sources]** of thermal loads. 
 
-The existing temperature TMDL also addresses streams with point sources and dams during the rearing/migration (i.e. non-spawning) time period. Waste load allocations have been developed for point sources during the portion of the year when spawning does not occur and will be incorporated into the NPDES permits. During the spawning period, there are three impaired segments on the **[Update Project Area]** River that are downstream of a hydro-electric project and a point source is present. More data and analysis are needed to complete those TMDLs. Likewise, on other streams and rivers that are not currently identified as impaired during the spawning period and have point sources or dams, the TMDLs were not computed.
+The TMDL will provide load and waste load allocations for sources of thermal loads. **[Update if any specific info is needed for certain listings, time periods, or sources. Eg. During the spawning period, there are three impaired segments on the XX River that are downstream of a hydro-electric project. Modeling analysis are needed to complete TMDLs for these waterbodies.]**
 
-Since the issuance of the original TMDL, the waterbody impairments may have changed based on the 2018/2020 Section 303(d) Category 5 list. These changes may affect the location(s) and time(s) of year. As part of the TMDL update, DEQ will address the temperature impairments for these water bodies based on the 2018/2020 list. Those listings, as they pertain to the `r subbasin` QAPP project area, are summarized in `r tbls(name = "t2", display="cite")`. 
+Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the 2018/2020 Section 303(d) Category 5 list has changed since the original TMDL was developed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
 
-`r if(NROW(t2)>0){t2}`
+`r if(NROW(tcat5)>0){tcat5}`
 
-This QAPP document provides the management context and information about existing models to be used for the TMDL revisions.
+This QAPP document provides the management context and information about existing models to be used for the TMDL replacement.
 
 # Conceptual Model: Key Processes and Variables
 
@@ -135,27 +158,37 @@ Anthropogenic heat sources are derived from solar radiation as increased levels 
 
 **Anthropogenic Nonpoint Sources**: Heat from human-caused solar radiation loading increases to the stream network, as a result of alterations in near stream vegetation, channel morphology, and flow modifications.
 
-Historically, human activities have altered the stream morphology and hydrology and decreased the amount of riparian vegetation in the basin. The basin includes urban, agricultural, and forested lands. Additionally, hydroelectric projects and multiple points of diversion in the **[Update Project Area]** River Basin have altered stream flow levels. 
+Historically, human activities have altered the stream morphology and hydrology and decreased the amount of riparian vegetation in the basin. The basin includes urban, agricultural, and forested lands. **[Update based on the project area: Additionally, hydroelectric projects and multiple points of diversion in the XX River Basin have altered stream flow levels.]** 
 
 Low summertime flows decrease the thermal assimilative capacity of streams. Pollutant (solar radiation) loading causes larger temperature increases in stream segments where flows are reduced by human uses. 
 
-Larger streams, such as the **[Update Project Area]** Rivers naturally experience a large solar flux because their channels are too wide for riparian vegetation to effectively shade the surface of the water. Smaller tributaries, such as **[Update Model Waterbodies]**, are easier to shade and have smaller background solar flux values. Additionally, effective shade levels on smaller streams are more sensitive to riparian disturbances and so the differences between current condition solar flux and background solar flux can be larger.
+Larger streams, such as the **[Update waterbody]** Rivers naturally experience a large solar flux because their channels are too wide for riparian vegetation to effectively shade the surface of the water. Smaller tributaries, such as **[Update waterbodies]**, are easier to shade and have smaller background solar flux values. Additionally, effective shade levels on smaller streams are more sensitive to riparian disturbances and so the differences between current condition solar flux and background solar flux can be larger.
 
 **Anthropogenic Point Sources**: Heat from warm water discharges of human origin, such as industrial outfalls, municipal waste-water treatment plants (WWTP), and other point sources.
 
-PacifiCorp’s hydro electric project on the **[Update Project Area]** River is responsible for elevated stream temperatures between **[Update Model Waterbodies]** and the **[Update Model Waterbodies]** River tidewater boundary.
+PacifiCorp’s hydroelectric project on the **[Update project area]** River is responsible for elevated stream temperatures between **[Update waterbody]** and the **[Update waterbody]** River tidewater boundary.
 
 # Technical Approach
 
 ## Overview
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin and include all perennial surface waters that have salmonid presence or that contribute to areas with salmonid presence. Since stream temperatures are affected by cumulative interactions between upstream and local sources, the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the `r subbasin` is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+```{r,label=`chap6-model`,echo=FALSE}
+# 6.1 summary table
+tmdl.mod.1<- model.info %>% 
+  dplyr::group_by(Model_version) %>% 
+  dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::rename(`Model Version` = Model_version) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Version` == "SHADOW", "Multiple streams (see Section 6.2)", `Model Waterbody`))
+```
+
+Stream temperature TMDLs are generally scaled to a subbasin or basin and include all perennial surface waters that have salmonid presence or that contribute to areas with salmonid presence. Since stream temperatures are affected by cumulative interactions between upstream and local sources, the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance/removal and channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
 The pollutant addressed in the temperature TMDL is heat. Anthropogenic nonpoint and point sources are not permitted to heat a waterbody more than 0.3 $^\circ C$ above the applicable criteria, cumulatively at the point of maximum impact. Allocated conditions are expressed as solar heat load and solar heat flux (watts, and watts per square meter, respectively). Nonpoint source heat allocations are translated into effective shade surrogate measures. Effective shade surrogate measures provide site-specific targets for land managers. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations. Point source waste load allocations are based on the applicable numeric and/or narrative criteria. Point sources are not allowed to increase stream temperatures more than 0.1 $^\circ C$ (a portion of the 0.3 $^\circ C$ human use allowance) cumulatively at the point of maximum impact.
 
-Stream temperatures were simulated using a computer model (Heat Source) for the main rivers and their larger tributaries. Simulations focus on the larger streams that contain or influence primary fish habitat. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective shade.
+Stream temperatures were simulated using `r if(NROW(tmdl.mod.1)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.1$'Model Version')`) for the main rivers and their larger tributaries. Simulations focus on the larger streams that contain or influence primary fish habitat. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective shade.
 
 ## Model Selection
 
@@ -173,7 +206,9 @@ The modeling framework needs for this project include:
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-For these reasons, the Heat Source stream thermodynamics model was selected for stream temperature simulation. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd 1998). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST 2004) where the model was found to be scientifically sound.
+7)	**[Update as needed]**
+
+For these reasons, the Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was selected for stream temperature simulation. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The heat source model has been used in numerous stream temperature related studies including Bond et al. (2015), Diabat et al. (2013), Holzapfel et al. (2013), Justice et al. (2017), Lawrence et al. (2014), Loheide and Gorelick (2006), Woltemade and Hawkins (2016), and Wondzell et al. (2019). Heat Source has also been used in numerous TMDLs.
 
@@ -187,16 +222,16 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
   t51_sp <- model.input %>% 
     dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
     dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>%
-    dplyr::mutate(Station = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+    dplyr::mutate(Station = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                    `Data Source`,
                                    paste0(`Station ID`, ", ", `Data Source`)),
                   `Station ID` = NA,
-                  `Latitude, Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3))),
+                  `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
                   `Available Data` = Parameter,
                   Agency = NA,
                   tbl = "worksheet") %>% 
-    dplyr::select(`Station ID`, Station, `Latitude, Longitude`, `Available Data`,Agency,tbl) %>%
-    dplyr::group_by(`Station ID`, Station, `Latitude, Longitude`,Agency,tbl) %>% 
+    dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
+    dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
     dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
     dplyr::ungroup()
 }
@@ -204,66 +239,69 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 t51_ncei <- ncei.station.tbl %>% 
   dplyr::mutate(`Station` = STATION_NAME,
                 `Station ID` = NCDC,
-                `Latitude, Longitude` = paste0(round(lat,4), ", ",round(long,3)),
+                `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = NA,
                 tbl = "ncei") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`, `Available Data`,Agency,tbl) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(Station, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Latitude, Longitude`, .keep_all=TRUE)
+  dplyr::distinct(Station, .keep_all=TRUE)
 
 t51_raws <- raws.station.tbl %>% 
   dplyr::mutate(`Station` = siteName,
                 `Station ID` = wrccID,
-                `Latitude, Longitude` = paste0(round(lat,4), ", ",round(long,3)),
+                `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = agency,
                 tbl = "raws") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`, `Available Data`,Agency,tbl) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Station`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Latitude, Longitude`, .keep_all=TRUE)
+  dplyr::distinct(`Station`, .keep_all=TRUE)
 
 t51_agrimet <- agrimet.station.tbl %>%
   dplyr::mutate(`Station` = description.x,
                 `Station ID` = siteid,
-                `Latitude, Longitude` = paste0(round(lat,4), ", ",round(long,3)),
+                `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = NA,
                 tbl = "agrimet") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`, `Available Data`,Agency,tbl) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Station`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Latitude, Longitude`, .keep_all=TRUE)
+  dplyr::distinct(`Station`, .keep_all=TRUE)
 
 t51_hydromet <- hydromet.station.tbl %>% 
   dplyr::filter(Parameter %in% c("Air Temperature","Precipitation")) %>% 
   dplyr::mutate(`Station` = Station.Name,
                 `Station ID` = Station.ID,
-                `Latitude, Longitude` = paste0(round(as.numeric(Lat),4), ", ",round(as.numeric(Long),3)),
+                `Latitude/Longitude` = paste0(round(as.numeric(Lat),4), "/",round(as.numeric(Long),3)),
                 `Available Data` = Parameter,
                 Agency = NA,
                 tbl = "hydromet") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`, `Available Data`,Agency,tbl) %>%
-  dplyr::group_by(`Station ID`, Station, `Latitude, Longitude`,Agency,tbl) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
+  dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
   dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
   dplyr::ungroup()
 
 t51_mw <- mw.station.tbl %>% 
   dplyr::mutate(`Station` = NAME,
                 `Station ID` = STID,
-                `Latitude, Longitude` = paste0(round(as.numeric(lat),4), ", ",round(as.numeric(long),3)),
+                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), "/",round(as.numeric(long),3)),
                 `Available Data` = NA,
                 Agency = NA,
                 tbl = "mw") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`, `Available Data`,Agency,tbl) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Station`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Latitude, Longitude`, .keep_all=TRUE)
+  dplyr::distinct(`Station`, .keep_all=TRUE)
 
-t51 <- rbind(t51_sp,t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)
-t51 <- t51[!duplicated(t51$`Latitude, Longitude`),]
+if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
+t51 <- rbind(t51_sp,t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)} else {
+t51 <- rbind(t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)  
+}
+
+t51_na <- t51 %>% dplyr::filter(is.na(`Latitude/Longitude`))
+t51 <- t51[!duplicated(t51$`Latitude/Longitude`),] %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  rbind(t51_na)
 t51 <- t51[!duplicated(t51$`Station`),]
 
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
@@ -280,12 +318,12 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
                                               caption = paste0("Meteorological stations and data available in DEQ files for the ", qapp_project_area, ".")))
     
   }
-  
 }
 
 t51.ncei <- t51 %>% 
   dplyr::filter(tbl=="ncei") %>% 
-  dplyr::select(-c(`Available Data`,Agency,tbl))
+  dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::arrange(`Station ID`)
 
 if(NROW(t51.ncei)>0){
   
@@ -297,7 +335,8 @@ if(NROW(t51.ncei)>0){
 
 t51.raws <- t51 %>% 
   dplyr::filter(tbl=="raws") %>% 
-  dplyr::select(-c(`Available Data`,tbl))
+  dplyr::select(-c(`Available Data`,tbl)) %>% 
+  dplyr::arrange(`Station ID`)
 
 if(NROW(t51.raws)>0){
   
@@ -309,7 +348,8 @@ if(NROW(t51.raws)>0){
 
 t51.agrimet <- t51 %>% 
   dplyr::filter(tbl=="agrimet") %>% 
-  dplyr::select(-c(`Available Data`,Agency,tbl))
+  dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::arrange(`Station ID`)
 
 if(NROW(t51.agrimet)>0){
   
@@ -321,7 +361,8 @@ if(NROW(t51.agrimet)>0){
 
 t51.hydromet <- t51 %>% 
   dplyr::filter(tbl=="hydromet") %>% 
-  dplyr::select(-c(`Available Data`,Agency,tbl))
+  dplyr::select(-c(`Available Data`,Agency,tbl))%>% 
+  dplyr::arrange(`Station ID`)
 
 if(NROW(t51.hydromet)>0){
   
@@ -333,7 +374,8 @@ if(NROW(t51.hydromet)>0){
 
 t51.mw <- t51 %>% 
   dplyr::filter(tbl=="mw") %>% 
-  dplyr::select(-c(`Available Data`,Agency,tbl))
+  dplyr::select(-c(`Available Data`,Agency,tbl))%>% 
+  dplyr::arrange(`Station ID`)
 
 if(NROW(t51.mw)>0){
   
@@ -414,7 +456,6 @@ st_model <- station_model %>%
 
 t53_1 <- rbind(st_awqms,st_model) %>% 
   dplyr::filter(!`Station ID` == "TIR") %>% 
-  dplyr::mutate(`Latitude, Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), ", ",round(Longitude,3)))) %>% 
   dplyr::mutate(Station = stringr::str_to_title(Station)) %>% 
   dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
   dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
@@ -426,12 +467,19 @@ t53_1 <- rbind(st_awqms,st_model) %>%
   dplyr::mutate(Organization = ifelse(Organization == "11NPSWRD_WQX", "EPA WQX", Organization)) %>% 
   dplyr::mutate(Organization = ifelse(Organization == "USFS(NOSTORETID)", "USFS", Organization)) %>%
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
-  dplyr::select(`Station ID`,Station,`Latitude, Longitude`, Organization, Org_order) %>% 
+  dplyr::left_join(df.stations,by = c("Station ID"="MLocID")) %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(Lat_DD,4), "/",round(Long_DD,3))) %>%
+  dplyr::mutate(`Latitude/Longitude`= ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization, Org_order) %>% 
   dplyr::arrange(`Station ID`)
+ 
 
-t53_1 <- t53_1[!duplicated(t53_1$`Latitude, Longitude`),] %>% 
+t53_1_na <- t53_1 %>% dplyr::filter(is.na(`Latitude/Longitude`))
+t53_1 <- t53_1[!duplicated(t53_1$`Latitude/Longitude`),] %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  rbind(t53_1_na) %>% 
   dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>% 
-  dplyr::select(`Station ID`,Station,`Latitude, Longitude`, Organization)
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization)
 
 if(NROW(t53_1)>0){
   
@@ -454,31 +502,48 @@ All available continuous stream temperature data were retrieved from DEQ’s Amb
 t54_usgs <- usgs.station.tbl %>% 
   dplyr::mutate(Station = station_nm,
                 `Station ID`= site_no,
-                `Latitude, Longitude` = paste0(round(dec_lat_va,4), ", ",round(dec_long_va,3))) %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`) %>% 
-  dplyr::arrange(`Station ID`)
+                `Latitude/Longitude` = paste0(round(dec_lat_va,4), "/",round(dec_long_va,3)),
+                `Data Source` = "USGS") %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
 
 t54_hydromet <- hydromet.station.tbl %>% 
   dplyr::filter(Parameter %in% c("Discharge", "Spillway Discharge", "Flow")) %>% 
-  dplyr::distinct(Lat, Long, .keep_all = TRUE) %>% 
   dplyr::mutate(Station = Station.Name,
                 `Station ID` = Station.ID,
-                `Latitude, Longitude` = paste0(round(as.numeric(Lat),4), ", ",round(as.numeric(Long),3))) %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`) %>% 
-  dplyr::arrange(`Station ID`)
+                `Latitude/Longitude` = paste0(round(as.numeric(Lat),4), "/",round(as.numeric(Long),3)),
+                `Data Source` = "hydromet") %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
 
 t54_sp <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
   dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
-  dplyr::filter(!`Data Source` == "USGS" & is.na(`Interpolated Data`)) %>% 
-  dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% 
+  dplyr::filter(!`Data Source` == "USGS") %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::mutate(Station = `Model Location Name`,
-                `Latitude, Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, ", ", Longitude))) %>% 
-  dplyr::select(`Station ID`,Station,`Latitude, Longitude`, `Data Source`) %>% 
-  dplyr::arrange(`Station ID`)
+                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, `Data Source`)
 
-t54_sp <- t54_sp[!duplicated(t54_sp$`Latitude, Longitude`),] %>% 
-  dplyr::arrange(`Station ID`)
+t54 <- rbind(t54_usgs,t54_hydromet,t54_sp)
+t54_na <- t54 %>% dplyr::filter(is.na(`Latitude/Longitude`))
+t54_no_station_id <- t54 %>% dplyr::filter(`Station ID` == "No Station ID")
+t54 <- t54[!duplicated(t54$`Latitude/Longitude`),]
+t54 <- t54[!duplicated(t54$`Station ID`),] %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  dplyr::filter(!`Station ID` == "No Station ID") %>% 
+  rbind(t54_na,t54_no_station_id) %>% 
+  dplyr::arrange(`Station ID`,Station)
+
+t54_usgs <- t54 %>% 
+  dplyr::filter(`Data Source` == "USGS") %>% 
+  dplyr::select(-`Data Source`)
+
+t54_hydromet <- t54 %>% 
+  dplyr::filter(`Data Source` == "hydromet") %>% 
+  dplyr::select(-`Data Source`)
+
+t54_sp <- t54 %>% 
+  dplyr::filter(!`Data Source` %in% c("USGS","hydromet")) %>% 
+  dplyr::arrange(`Data Source`,`Station ID`,Station)
 
 if(NROW(t54_usgs)>0){
   
@@ -512,7 +577,7 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_hydromet","t54_sp"),
 
 ```
 
-`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " - ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, Oregon DEQ, and other public databases.
+`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " - ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases.
 
 `r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
 `r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
@@ -527,17 +592,17 @@ section.npdes.ind <- npdes.ind %>%
   dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
-                `Latitude, Longitude` = paste0(round(Latitude,4), ", ",round(Longitude,3)),
+                `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
                 `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
-  dplyr::select(`Facility Name (Facility Number)`, `Latitude, Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
   dplyr::arrange(`Facility Name (Facility Number)`)
 
 if(NROW(section.npdes.ind)>0){
   
   t55_ind_tbl <- knitr::kable(section.npdes.ind, format = "pandoc", padding = 2,
                               caption = tbls(name = "t55_ind",
-                                             caption = paste0("Summary of individual NPDES permitted discharges on ", qapp_project_area, ".")))
+                                             caption = paste0("Summary of individual NPDES permitted discharges in the ", qapp_project_area, ".")))
   
 }
 
@@ -545,20 +610,20 @@ section.npdes.gen <- npdes.gen %>%
   dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
   dplyr::mutate(`Permit Type and Description` = paste0(PermitType, ": ", PermitDescription)) %>% 
   dplyr::group_by(`Permit Type and Description`) %>% 
-  dplyr::summarise(`Number of Permits` = n()) %>% 
+  dplyr::summarise(`Current Number of Registrants` = n()) %>% 
   dplyr::ungroup()
 
 if(NROW(section.npdes.gen)>0){
   
   t55_gen_tbl <- knitr::kable(section.npdes.gen, format = "pandoc", padding = 2,
                               caption = tbls(name = "t55_gen",
-                                             caption = paste0("Summary of general NPDES permitting types in the ", qapp_project_area, ".")))
+                                             caption = paste0("Summary of current general NPDES permit registrants in the ", qapp_project_area, ".")))
   
 }
 
 ```
 
-`r tbls(name = "t55_ind", display="cite")` identifies all the active individual NPDES permittees in the `r qapp_project_area`. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven day average daily maximum. When possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_gen", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
+`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_gen", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen)>0){t55_gen_tbl}`
@@ -569,7 +634,7 @@ Data on surface water diversion rates (usage) and the points of diversion (locat
 
 Estimates of water diversion rates and location of points of diversion can be derived from the following OWRD sources:
 
-* [Water Rights Information System][WRIS] (WRIS) – the WRIS database contains all permitted or certificated water rights. Data in the WRIS corresponding to quantities of water for use are expressed as maximum use allowable, generally as monthly, seasonal or annual rates or volumes. These maximum values may not correspond to actual usage, which will likely vary based on factors such as irrigation application rate or household consumer demand. Oregon DEQ may choose to incorporate the maximum amount allowable or some lesser quantity provided sufficient information is available to support those rates in the modeling.  Water rights information can also be accessed using their online mapping application (https://apps.wrd.state.or.us/apps/gis/wr/Default.aspx).
+* [Water Rights Information System][WRIS] (WRIS) – the WRIS database contains all permitted or certificated water rights. Data in the WRIS corresponding to quantities of water for use are expressed as maximum use allowable, generally as monthly, seasonal or annual rates or volumes. These maximum values may not correspond to actual usage, which will likely vary based on factors such as irrigation application rate or household consumer demand. DEQ may choose to incorporate the maximum amount allowable or some lesser quantity provided sufficient information is available to support those rates in the modeling.  Water rights information can also be accessed using their online mapping application (https://apps.wrd.state.or.us/apps/gis/wr/Default.aspx).
 
 * [Water Use Reports][Water Use Reports] – some, but not all, water rights holders must monitor and report the water they use to the state, typically on a monthly or yearly basis, as a requirement of their water rights. These water use reports will be used to develop withdrawal time series based on the information at hand.
 
@@ -583,14 +648,16 @@ Estimates of water diversion rates and location of points of diversion can be de
 t56 <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Effective Shade")) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
-  dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% 
   dplyr::mutate(Station = `Model Location Name`,
-                `Latitude, Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, ", ", Longitude))) %>% 
-  dplyr::select(`Station ID`, Station, `Latitude, Longitude`, `Data Source`) %>% 
+                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Data Source`) %>% 
   dplyr::arrange(`Station ID`)
 
-t56 <- t56[!duplicated(t56$`Latitude, Longitude`),] %>% 
-  dplyr::arrange(`Station ID`)
+t56_na <- t56 %>% dplyr::filter(is.na(`Latitude/Longitude`))
+t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  rbind(t56_na) %>% 
+  dplyr::arrange(`Data Source`,`Station ID`,Station)
 
 if(NROW(t56)>0){
   
@@ -602,7 +669,7 @@ if(NROW(t56)>0){
 
 ```
 
-Effective shade is the percent reduction of potential daily solar radiation load delivered to the stream surface. DEQ and/or partner agency staff used a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the stations for effective shade measurements that were available in the public and Oregon DEQ databases.")} else {paste0("There are no effective shade data that were available in the public and Oregon DEQ databases in ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the stations for effective shade measurements that were available in public and DEQ databases.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t56)>0){t56_tbl}`
 
@@ -611,13 +678,6 @@ Effective shade is the percent reduction of potential daily solar radiation load
 ## General Model Parameters
 
 ```{r, label=`chap6`, include=FALSE}
-
-# 6.1 summary table
-tmdl.mod.1<- model.info %>% 
-  dplyr::group_by(Model_version) %>% 
-  dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::rename(`Model Version` = Model_version)
 
 tmdl.mod.tbl <- knitr::kable(tmdl.mod.1, format = "pandoc", padding = 2,
                              caption = tbls(name = "tmdl.mod",
@@ -636,13 +696,22 @@ if(mod.check == "11"){
   modv <- tmdl.mod.2 %>% 
     dplyr::filter(!mod_rmd %in% c("hs6","hs7"))
   
-  for(mod in unique(sort(modv$mod_rmd))){
+  if(NROW(modv)>0){
     
-    mod.child <- paste0(mod,".Rmd")
+    for(mod in unique(sort(modv$mod_rmd))){
+      
+      mod.child <- paste0(mod,".Rmd")
+      
+      mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
+                 knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
+                 knitr::knit_child(input = mod.child, envir = globalenv()))
+      
+    }
+    
+  } else {
     
     mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
-               knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
-               knitr::knit_child(input = mod.child, envir = globalenv()))
+               knitr::knit_child(input = "hs67.Rmd", envir = globalenv()))
     
   }
   
@@ -653,13 +722,22 @@ if(mod.check == "11"){
     modv <- tmdl.mod.2 %>% 
       dplyr::filter(!mod_rmd %in% c("hs6","hs8"))
     
-    for(mod in unique(sort(modv$mod_rmd))){
+    if(NROW(modv)>0){
       
-      mod.child <- paste0(mod,".Rmd")
+      for(mod in unique(sort(modv$mod_rmd))){
+        
+        mod.child <- paste0(mod,".Rmd")
+        
+        mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
+                   knitr::knit_child(input = "hs68.Rmd", envir = globalenv()),
+                   knitr::knit_child(input = mod.child, envir = globalenv()))
+        
+      }
+      
+    } else {
       
       mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
-                 knitr::knit_child(input = "hs68.Rmd", envir = globalenv()),
-                 knitr::knit_child(input = mod.child, envir = globalenv()))
+                 knitr::knit_child(input = "hs68.Rmd", envir = globalenv()))
       
     }
     
@@ -670,14 +748,24 @@ if(mod.check == "11"){
       modv <- tmdl.mod.2 %>% 
         dplyr::filter(!mod_rmd %in% c("hs6","hs7","hs8"))
       
-      for(mod in unique(sort(modv$mod_rmd))){
+      if(NROW(modv)>0){
         
-        mod.child <- paste0(mod,".Rmd")
+        for(mod in unique(sort(modv$mod_rmd))){
+          
+          mod.child <- paste0(mod,".Rmd")
+          
+          mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
+                     knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
+                     knitr::knit_child(input = "hs68.Rmd", envir = globalenv()),
+                     knitr::knit_child(input = mod.child, envir = globalenv()))
+          
+        }
+        
+      } else {
         
         mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
                    knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
-                   knitr::knit_child(input = "hs68.Rmd", envir = globalenv()),
-                   knitr::knit_child(input = mod.child, envir = globalenv()))
+                   knitr::knit_child(input = "hs68.Rmd", envir = globalenv()))
         
       }
       
@@ -693,24 +781,51 @@ if(mod.check == "11"){
   }
 }
 
+```
+
+The following models were used in the development of the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` for the associated waterbodies (`r tbls(name = "tmdl.mod", display="cite")`).
+
+`r tmdl.mod.tbl`
+
+Model calibration was completed by DEQ and described in `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** If it is determined at a later date the calibration needs to be updated the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
+
+`r paste(mod.v, collapse = "\n")`
+
+## Data Gaps
+
+Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, so too does the amount of information needed to parameterize it. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
+
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the Model Parameters sections in the current Chapter 6  Model Development and Calibration.
+
+```{r, label=`data_gap`, echo=FALSE}
+
+# tdata.gap <- 
+  
+  print(knitr::kable(data.gap, format = "pandoc", padding = 2,
+                          caption = tbls(name = "data.gap",
+                                         caption = paste0("Methods to derive model parameters for data gaps."))))
+
+```
+
+```{r, label=`chap6x`, include=FALSE}
+
 # Note: SHADOW model streams were not included in Section 6 sub-sections of Model Waterbodies
 chap6 <- NULL
 
 for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHADOW",]$`Model Waterbody`))){
   
-  chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+  if(!qapp_project_area == "North Umpqua Subbasin"){
+    
+    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+    
+  } else {
+    
+    chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+  }
   
 }
 
 ```
-
-The following models were used in the development of the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` for the associated water bodies (`r tbls(name = "tmdl.mod", display="cite")`).
-
-`r tmdl.mod.tbl`
-
-Model calibration was completed by DEQ and described in `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`. It is unlikely that adjustments to the existing calibrated model will occur as part of this project. If it is determined at a later date the calibration needs to be updated the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
-
-`r paste(mod.v, collapse = "\n")`
 
 `r paste(chap6, collapse = "\n")`
 
@@ -730,15 +845,22 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 *	The sampling and laboratory analysis must follow widely accepted scientific methods and protocols. These may include DEQ-MOMs, USEPA, USGS and Standard Methods for the Examination of Water and Wastewater. All acceptable methods include applicable precision and accuracy checks.    
 
-*	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review. For continuous temperature data a data quality of A or B corresponds to an absolute accuracy <= 1.0 $^\circ C$ and absolute precision <= 2.0 $^\circ C$. Data of unknown quality lacking audit and prepost accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
+*	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review. For continuous temperature data a data quality of A or B corresponds to an absolute accuracy $\le$ 1.0 $^\circ C$ and absolute precision $\le$ 2.0 $^\circ C$. Data of unknown quality lacking audit and prepost accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
-The existing [A, B, and C] models were extensively evaluated to determine uncertainty in [X, and Y]. [A sensitivity analysis was also completed on Z]. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in [citation]. **[This paragraph should be manually edited for each QAPP with the relevant details.]**
+The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
 
 It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
 ## Model Acceptance
+
+```{r, echo=FALSE}
+me <- eqns(name = "me", display="cite")
+mae <- eqns(name = "mae", display="cite")
+rmse <- eqns(name = "rmse", display="cite")
+ns <- eqns(name = "ns", display="cite")
+```
 
 This section identifies the model acceptance criteria. Model acceptance relies on satisfying seven (7) conditions:
 
@@ -748,7 +870,7 @@ This section identifies the model acceptance criteria. Model acceptance relies o
 
 3)	Model predicted results have been compared with the associated observed measurements using graphical presentations. Visual comparisons are useful in evaluating model performance over the appropriate temporal or spatial scales.    
 
-4)	Calibration error statistics have been calculated comparing the model predicted results to the associated observed measurements. The calibration error statistics are shown in Equation 2 through Equation 5.    
+4)	Calibration error statistics have been calculated comparing the model predicted results to the associated observed measurements. The calibration error statistics are shown in `r eqns(name = "me", display="cite")` through `r eqns(name = "ns", display="cite")`.    
 
 5)	Calibration error statistics have been used to inform the appropriate use of the model. Where a model achieves an excellent fit it can generally assume a strong role in evaluating management options. Conversely, where a model achieves only a fair or poor fit it should assume a much less prominent role in the overall weight-of-evidence evaluation of management options. If a desired level of quality is not achieved on some or all measures, the model might still be useful; however, a detailed description of its potential range of applicability will be provided.    
 
@@ -756,23 +878,23 @@ This section identifies the model acceptance criteria. Model acceptance relies o
 
 7)	Peer review as described in Section 9.    
 
-Equation 2 through Equation 5 are the error statistics to be calculated for each calibrated model.
+`r eqns(name = "me", display="cite")` through `r eqns(name = "ns", display="cite")` are the error statistics to be calculated for each calibrated model.
 
 **Mean Error (ME)**: A mean error of zero indicates a perfect fit. A positive value indicates on average the model predicted values are less than the observed data. A negative value indicates on average the model predicted values are greater than the observed data. The mean error statistic may give a false ideal value of zero (or near zero) if the average of the positive deviations between predictions and observations is about equal to the average of the negative deviations in a data set. Because of this, the mean absolute error (MAE) statistic should be used in conjunction with mean error to evaluate model performance.
 
-$$ME = \frac{1}{n}\sum(X_{mod} - X_{obs}) \hspace{3em}\text{Equation 2}$$
+$ME = \frac{1}{n}\sum(X_{mod} - X_{obs}) \hspace{3em}$ `r eqns(name = "me", display="cite")` 
 
 **Mean Absolute Error (MAE)**: A mean absolute error of zero indicates a perfect fit. The magnitude of the mean absolute error indicates the average deviation between model predicted values and observed data. The mean absolute error cannot give a false zero.
 
-$$MAE = \frac{1}{n}\sum|X_{mod} - X_{obs}|  \hspace{3em}\text{Equation 3}$$
+$MAE = \frac{1}{n}\sum|X_{mod} - X_{obs}| \hspace{3em}$ `r eqns(name = "mae", display="cite")`
 
 **Root Mean Square Error (RMSE)**: A root mean square error of zero indicates a perfect fit. Root mean square error is a measure of the magnitude of the difference between model predicted values and observed data.
 
-$$RMSE = \sqrt{\frac{1}{n}\sum(X_{mod} - X_{obs})^2} \hspace{3em}\text{Equation 4}$$
+$RMSE = \sqrt{\frac{1}{n}\sum(X_{mod} - X_{obs})^2} \hspace{3em}$ `r eqns(name = "rmse", display="cite")`
 
 **Nash-Sutcliffe efficiency coefficient (NS)**: Nash-Sutcliffe efficiencies can range from -$\infty$ to 1. An efficiency of 1 corresponds to a perfect match of modeled predicted value to the observed data. An efficiency of 0 indicates that the model predictions are as accurate as the mean of the observed data, whereas an efficiency less than zero occurs when the observed mean is a better predictor than the model.
 
-$$NS = 1 - \frac {\sum (X_{mod} - X_{obs})^2}{\sum (X_{mod} - \overline{X_{obs}})^2}  \hspace{3em}\text{Equation 5}$$
+$NS = 1 - \frac {\sum (X_{mod} - X_{obs})^2}{\sum (X_{mod} - \overline{X_{obs}})^2} \hspace{3em}$ `r eqns(name = "ns", display="cite")`
 
 where,  
 $X_{mod}$ = The model predicted results;  
@@ -890,7 +1012,7 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 
 *	Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.    
 
-*	Model inputs for land cover height, density, overhang, boundary condition flow and temperature, bottom width, channel angle z, manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.    
+*	Model inputs for land cover height, density, overhang, boundary condition flow and temperature, bottom width, channel angle *z*, Manning’s *n*, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.    
 
 *	All other model inputs will be the same as the current calibrated model.    
 
@@ -921,7 +1043,6 @@ Project roles and responsibilities are described in `r tbls(name = "roles", disp
 Additional expertise or special training is not necessary at this time.
 
 DEQ staff involved in developing and configuring models, performing model calibration, running model scenarios, and analyzing and interpreting model results have experience in these tasks from numerous other modeling projects. The Project Manager has extensive experience managing large complex projects and will ensure strict adherence to the project protocols.
-
 
 ## Reports to Management
 
@@ -1017,61 +1138,61 @@ TMDL documents: At each key stage of TMDL and WQMP development copies of the fol
 
 *	Public Comment Draft:     
 
-+	Public Comment Draft TMDL and WQMP Report (Both Word and PDF)    
+    +	Public Comment Draft TMDL and WQMP Report (Both Word and PDF)    
 
-+	Draft TMDL Appendices (Both Word and PDF)    
+    +	Draft TMDL Appendices (Both Word and PDF)    
 
-+	Public Notice document    
+    +	Public Notice document    
 
-+	TMDL Summary Fact Sheet    
+    +	TMDL Summary Fact Sheet    
 
-+	News release    
+    +	News release    
 
-+	GovDelivery Notice and email    
+    +	GovDelivery Notice and email    
 
-+	Other public notification emails    
+    +	Other public notification emails    
 
-+	Mailing List (if used)    
+    +	Mailing List (if used)    
 
-+	Public Comments Errata    
+    +	Public Comments Errata    
 
 *	Public Comments Received: Copy of all public comments received    
 
 *	Final TMDL and WQMP documents:    
 
-+	TMDL signed Order (both Word and PDF)    
+    +	TMDL signed Order (both Word and PDF)    
 
-+	TMDL issuance letter to EPA (both Word and PDF)    
+    +	TMDL issuance letter to EPA (both Word and PDF)    
 
-+	EPA approval letter (EPA)    
+    +	EPA approval letter (EPA)    
 
-+	Response to Comment Document (both Word and PDF)    
+    +	Response to Comment Document (both Word and PDF)    
 
-+	TMDL and WQMP Report (both Word and PDF)    
+    +	TMDL and WQMP Report (both Word and PDF)    
 
-+	TMDL Appendices (both Word and PDF)    
+    +	TMDL Appendices (both Word and PDF)    
 
-+	TMDL Summary Fact Sheet    
+    +	TMDL Summary Fact Sheet    
 
-+	News release    
+    +	News release    
 
-+	GovDelivery Notice and email    
+    +	GovDelivery Notice and email    
 
-+	Other public notification emails    
+    +	Other public notification emails    
 
-+	DMA/RP notification letters (both Word and PDF)    
+    +	DMA/RP notification letters (both Word and PDF)    
 
-+	Addendums    
+    +	Addendums    
 
-+	Errata    
+    +	Errata    
 
-+	Petitions    
+    +	Petitions    
 
-+	Director’s Petition Action (acceptance or rejection of petition)    
+    +	Director’s Petition Action (acceptance or rejection of petition)    
 
-+	Response to Petition    
+    +	Response to Petition    
 
-+	Attains upload files    
+    +	Attains upload files    
 
 # QAPP Review and Approval
 
@@ -1099,8 +1220,7 @@ Should a situation arise that requires a significant change in the technical app
 
 ```{r, label=`qapp_ref`, echo=FALSE}
 
-tmdl.ref <- model.info %>% 
-  #dplyr::filter(`QAPP Project Area` %in% qapp_project_area) %>% 
+tmdl.ref <- model.info %>%
   dplyr::distinct(`TMDL Document`, `Abbreviated Reference`) %>% 
   dplyr::left_join(ref, by = "Abbreviated Reference") %>% 
   dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
@@ -1116,32 +1236,31 @@ mod.ref <- model.info %>%
   dplyr::select(reference)
 
 
-other.ref <- data.frame(reference = c('Beck, M.B. 1987. "Water Quality Modeling: A Review of the Analysis of Uncertainty". Water Resources Research 23(8), 1393',
-                                      'EPA (U.S. Environmental Protection Agency). 2009. "Guidance on the Development, Evaluation, and Application of Environmental Models". Council for Regulatory Environmental Modeling, Washington D.C., EPA/100/K-09/003.',
-                                      'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version5.0." http://www.oregon.gov/deq/FilterDocs/DataQualMatrix.pdf',
-                                      'Bond, R.M, Stubblefields, A.P., Van Kirk, R.W. 2015. “Sensitivity of summer stream temperatures to climate variability and riparian reforestation strategies.” Journal of Hydrology: Regional Studies. 4(B): 267-279.',
-                                      'Boyd, M., Kasper B. 2003. “Analytical Methods for Dynamic Open Channel Heat and Mass Transfer: Methodology for Heat Source Model Version 7.0.”',
-                                      'Boyd, M.S. 1996. “Heat Source: Stream, River, and Open Channel Temperature Prediction.” Oregon State University: Corvallis.',
-                                      'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” Accessed at http://www.deq.state.or.us/wq/tmdls/heatsource.htm.',
-                                      'Diabat, M., Haggerty, R., Wondzell, S.M., 2013. “Diurnal timing of warmer air under climate-change affects magnitude, timing and duration of stream temperature change.” Hydrological. Processes. 27(16): 2367–2.',
-                                      'Holzapfel, G., Weihs, P., Rauch, H.P. 2013. Use of the Shade-a-lator 6.2 model to assess the shading potential of riparian purple willow (Salix purpurea) coppices on small to medium sized rivers. Ecological Engineering. 61(B): 697–705.',
-                                      'IMST (Independent Multidisciplinary Science Team). 2004. “Oregon’s water temperature standard and its application: causes, consequences, and controversies associated with stream temperature.” Technical Report 2004-1 to the Oregon Plan for Salmon and Watersheds, Oregon Watershed Enhancement Board, Salem, OR.',
-                                      'Justice, C., White, S.M., McCullough, D.A. Graves, D.S., Blanchard, M.R. 2017. “Can Stream and riparian restoration offset climate change impacts to salmon populations?” Journal of Environmental Management. 188: 212-227.',
-                                      'Lawrence, D.J., Stewart-Koster, B., Olden, J.D., Ruesch, A.S., Torgersen, C.E., Lawler, J.J., Butcher, D.P., Crown, J.K. 2014. “The interactive effects of climate change, riparian management, and a nonnative predator on stream-rearing salmon.” Ecological Applications. 24(4): 895-912.',
-                                      'Loheide S.P., Gorelick, S.M. 2006. Quantifying stream−aquifer interactions through the analysis of remotely sensed thermographic profiles and in situ temperature histories.” Environmental Science and Technology. 40(10): 3336-3341.',
-                                      'Smesruda, J.K., Boyd, M.S., Cuencac, R.H., Eisnerd, S.L. 2014. “A mechanistic energy balance model for predicting water temperature in surface flow wetlands.” Ecological Engineering. 67:11-24.378.',
-                                      'Westhoff , M.C., Savenije, H.H.G., Luxemburg W.M.J., Stelling, G.S., van de Giesen, N.C., Selker , J.S., Pfister, L., and Uhlenbrook, S. 2007. “A distributed stream temperature model using high resolution temperature observations.” Hydrology and Earth Sciences. 11(4): 1469–1480.',
-                                      'Woltemeade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
-                                      'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
-                                      'Gianfagna, C. J. 2015. “Watershed area ratio accurately predicts daily streamflow in nested catchments in the Catskills, New York.” Journal of Hydrology, 583-594.',
-                                      'Risley, J. S. 2009. “Estimating flow-duration and low-flow frequency statistics for unregulated stream in Oregon.” Reston, VA: U.S. Geological Survey.',
-                                      'Bencala, K.E. and Walters, R.A. 1983. “Simulation of solute transport in a mountain pool‐and‐riffle stream: A transient storage model.” Water Resources Research. 19(3), 718-724.',
-                                      'Hart, D. R. 1995. “Parameter estimation and stochastic interpretation of the transient storage model for solute transport in streams.” Water Resources Research. 31(2), 323-328.',
-                                      'Pelletier, G.J., Chapra, C., Taob, H. 2006. “QUAL2Kw – A framework for modeling water quality in streams and rivers using a genetic algorithm for calibration.” Environmental Modelling & Software. 21(3), 419-425.',
-                                      'Sinokrot B.A. and Stefan H.G. 1993. “Stream Temperature Dynamics: Measurements and Modeling.” Water Resources Research. 29(7), 2299-2312.',
-                                      'Ries, K.G., III, Newson J.K., Smith, M.J., Guthrie, J.D., Steeves, P.A., Haluska, T.L., Kolb, K.R., Thompson, R.F., Santoro, R.D., and Vraga, H.W.. 2017. “StreamStats, version 4: U.S. Geological Survey Fact 2017–3046, 4 p.” https://doi.org/10.3133/fs20173046. [Supersedes USGS Fact Sheet 2008–3067.]',
-                                      'Lorenz, D.L. and Ziegeweid, J.R. 2016. “Methods to estimate historical daily streamflow for ungaged stream locations in Minnesota. No. 2015-5181.” US Geological Survey, 2016.',
-                                      'Risley, J., Stonewall, A. and Haluska, T. 2008. “Estimating flow-duration and low-flow frequency statistics for unregulated streams in Oregon. No. FHWA-OR-RD-09-03”. Geological Survey (US), 2008.'))
+other.ref <- data.frame(reference = c(
+  'Beck, M.B. 1987. "Water Quality Modeling: A Review of the Analysis of Uncertainty". Water Resources Research 23(8), 1393',
+  'EPA (U.S. Environmental Protection Agency). 2009. "Guidance on the Development, Evaluation, and Application of Environmental Models". Council for Regulatory Environmental Modeling, Washington D.C., EPA/100/K-09/003.',
+  'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version5.0." http://www.oregon.gov/deq/FilterDocs/DataQualMatrix.pdf',
+  'Bond, R.M, Stubblefields, A.P., Van Kirk, R.W. 2015. “Sensitivity of summer stream temperatures to climate variability and riparian reforestation strategies.” Journal of Hydrology: Regional Studies. 4(B): 267-279.',
+  'Boyd, M., Kasper B. 2003. “Analytical Methods for Dynamic Open Channel Heat and Mass Transfer: Methodology for Heat Source Model Version 7.0.”',
+  'Boyd, M.S. 1996. “Heat Source: Stream, River, and Open Channel Temperature Prediction.” Oregon State University: Corvallis.',
+  'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” Accessed at http://www.deq.state.or.us/wq/tmdls/heatsource.htm.',
+  'Diabat, M., Haggerty, R., Wondzell, S.M., 2013. “Diurnal timing of warmer air under climate-change affects magnitude, timing and duration of stream temperature change.” Hydrological. Processes. 27(16): 2367–2.',
+  'Holzapfel, G., Weihs, P., Rauch, H.P. 2013. Use of the Shade-a-lator 6.2 model to assess the shading potential of riparian purple willow (Salix purpurea) coppices on small to medium sized rivers. Ecological Engineering. 61(B): 697–705.',
+  'IMST (Independent Multidisciplinary Science Team). 2004. “Oregon’s water temperature standard and its application: causes, consequences, and controversies associated with stream temperature.” Technical Report 2004-1 to the Oregon Plan for Salmon and Watersheds, Oregon Watershed Enhancement Board, Salem, OR.',
+  'Justice, C., White, S.M., McCullough, D.A. Graves, D.S., Blanchard, M.R. 2017. “Can Stream and riparian restoration offset climate change impacts to salmon populations?” Journal of Environmental Management. 188: 212-227.',
+  'Lawrence, D.J., Stewart-Koster, B., Olden, J.D., Ruesch, A.S., Torgersen, C.E., Lawler, J.J., Butcher, D.P., Crown, J.K. 2014. “The interactive effects of climate change, riparian management, and a nonnative predator on stream-rearing salmon.” Ecological Applications. 24(4): 895-912.',
+  'Loheide S.P., Gorelick, S.M. 2006. Quantifying stream−aquifer interactions through the analysis of remotely sensed thermographic profiles and in situ temperature histories.” Environmental Science and Technology. 40(10): 3336-3341.',
+  'Woltemade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
+  'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
+  'Gianfagna, C. J. 2015. “Watershed area ratio accurately predicts daily streamflow in nested catchments in the Catskills, New York.” Journal of Hydrology, 583-594.',
+  'Risley, J. S. 2009. “Estimating flow-duration and low-flow frequency statistics for unregulated stream in Oregon.” Reston, VA: U.S. Geological Survey.',
+  'Bencala, K.E. and Walters, R.A. 1983. “Simulation of solute transport in a mountain pool‐and‐riffle stream: A transient storage model.” Water Resources Research. 19(3), 718-724.',
+  'Hart, D. R. 1995. “Parameter estimation and stochastic interpretation of the transient storage model for solute transport in streams.” Water Resources Research. 31(2), 323-328.',
+  'Pelletier, G.J., Chapra, C., Taob, H. 2006. “QUAL2Kw – A framework for modeling water quality in streams and rivers using a genetic algorithm for calibration.” Environmental Modelling & Software. 21(3), 419-425.',
+  'Sinokrot B.A. and Stefan H.G. 1993. “Stream Temperature Dynamics: Measurements and Modeling.” Water Resources Research. 29(7), 2299-2312.',
+  'Ries, K.G., III, Newson J.K., Smith, M.J., Guthrie, J.D., Steeves, P.A., Haluska, T.L., Kolb, K.R., Thompson, R.F., Santoro, R.D., and Vraga, H.W.. 2017. “StreamStats, version 4: U.S. Geological Survey Fact 2017–3046, 4 p.” https://doi.org/10.3133/fs20173046. [Supersedes USGS Fact Sheet 2008–3067.]',
+  'Lorenz, D.L. and Ziegeweid, J.R. 2016. “Methods to estimate historical daily streamflow for ungaged stream locations in Minnesota. No. 2015-5181.” US Geological Survey, 2016.',
+  'Risley, J., Stonewall, A. and Haluska, T. 2008. “Estimating flow-duration and low-flow frequency statistics for unregulated streams in Oregon. No. FHWA-OR-RD-09-03”. Geological Survey (US), 2008.'))
 
 qapp.ref <- rbind(tmdl.ref,tir.ref,mod.ref,other.ref) %>% 
   dplyr::arrange(reference)
@@ -1171,14 +1290,12 @@ if(NROW(t53_2)>0){
   t53_2_tbl <- knitr::kable(t53_2, format = "pandoc", padding = 2,
                             caption = tbls(name = "t53_2",
                                            caption = paste0("Summary of existing temperature data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month.")))
+  
 }
-
-save(t53_2_tbl,
-     file = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/t53_2_tbl.RData")
 
 ```
 \newpage
 
 # Appendix 1
 
-`r knitr::knit_child(input = "appendix_1.Rmd",envir = new.env(), quiet = TRUE)`
+`r t53_2_tbl`

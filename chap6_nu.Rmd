@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Applegate River"
+# for test: waterbody_name <- "North Umpqua River"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -34,15 +34,15 @@ model.extent <- na.omit(model.extent)
 
 ```
 
-## `r waterbody_name`
+## `r paste0(waterbody_name, " (Summer Period)")`
 
 ### Source Characteristics
 
 Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody (`r eqns(name = paste0("temp",waterbody_name), display="cite")`).   
 
-$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\times \Delta \text {Flow Volume}} \hspace{3em}$ `r eqns(name = paste0("temp",waterbody_name), display="cite")`
+$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\times \Delta \text {Flow Volume}}  \hspace{3em}$ `r eqns(name = paste0("temp",waterbody_name), display="cite")`
 
-Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of cold water inputs from groundwater. **[Update with any additional source details for this waterbody.]**
+Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of cold water inputs from groundwater.
 
 ### Model Domain
 
@@ -59,7 +59,7 @@ if(length(section.model.info$`Model Extent Text`)>1){
 } 
 ```
 
-The extents of the model domain is the `r model.domain`
+The extents of the model domain are/will be the `r model.domain`
 
 ### Spatial and Temporal Resolution
 
@@ -115,8 +115,7 @@ if(!model.extent == TRUE){
   
   t6x5 <- t6x5[,c(18,9,6,13)]
   
-  t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,
-                           caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
   
 }
 
@@ -144,7 +143,7 @@ if(!model.extent == TRUE){
 } else {
   
   t6x6_met <- section.model.input %>% 
-    dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>%
+    dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
     dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -166,7 +165,7 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>%  
+                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>%
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 
@@ -184,7 +183,7 @@ if(!model.extent == TRUE){
                                              caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
   
 }
-  
+
 ```
 
 `r if(!model.extent == TRUE){} else {paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
@@ -208,3 +207,19 @@ if(NROW(t6x6_2)>1){
   
 }
 ```
+
+## `r paste0(waterbody_name, " (Spawning Period)")`
+
+### Source Characteristics
+
+### Model Domain
+
+### Spatial and Temporal Resolution
+
+### Time Frame of Simulation
+
+### Important Assumptions
+
+### Model Calibration
+
+### Model Parameters
