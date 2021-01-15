@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Applegate River"
+# for test: waterbody_name <- "Bull Run River"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -97,7 +97,7 @@ if(!model.extent == TRUE){
     dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`),
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
                   Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
                   `Station ID` = ifelse(`Station ID` == "TIR",NA,`Station ID`),
                   `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
@@ -148,7 +148,7 @@ if(!model.extent == TRUE){
     dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>% 
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
     dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
     dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
                      Parameter = toString(unique(sort(Parameter))))%>% 
@@ -166,7 +166,7 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>%  
+                  `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`,paste0("Derived data. ",`Data Source`))) %>%  
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 

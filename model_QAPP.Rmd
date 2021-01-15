@@ -117,7 +117,7 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 ```{r, label=`cat5`, echo=FALSE}
 
-tcat5 <- pro.cat.45.rivers.tbl %>% 
+tcat5 <- pro.cat.45.tbl %>% 
   dplyr::filter(IR_categor == "Category 5") %>% 
   dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
   dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
@@ -140,9 +140,9 @@ if(NROW(tcat5)>0){
 
 ```
 
-`r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed for **[Update based on the project area: bacteria, aquatic weeds, biological criteria and temperature]**. The original temperature TMDLs were based on the Natural Conditions Criteria (NCC) identified in Oregon Administrative Rules (OAR), specifically OAR 340-041-0028(8). These criteria were invalidated by the Oregon U.S. District Court. The applicable numeric and narrative temperature criteria must be used. As required by court order, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards. **[Update with specific temperature criteria based on the project area]**.
+The `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed for **[Update based on the project area: bacteria, aquatic weeds, biological criteria and temperature]**. The original temperature TMDLs were based on the Natural Conditions Criteria (NCC) identified in Oregon Administrative Rules (OAR), specifically OAR 340-041-0028(8). These criteria were invalidated by the Oregon U.S. District Court. The applicable numeric and narrative temperature criteria must be used. As required by court order, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards. **[Update with specific temperature criteria based on the project area]**.
 
-The existing temperature TMDL addresses temperature on streams with **[Update both point and not point sources]** of thermal loads. 
+The existing temperature TMDL addresses temperature on streams with **[Update both point and nonpoint sources]** of thermal loads. 
 
 The TMDL will provide load and waste load allocations for sources of thermal loads. **[Update if any specific info is needed for certain listings, time periods, or sources. Eg. During the spawning period, there are three impaired segments on the XX River that are downstream of a hydro-electric project. Modeling analysis are needed to complete TMDLs for these waterbodies.]**
 
@@ -182,7 +182,7 @@ tmdl.mod.1<- model.info %>%
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Version` == "SHADOW", "Multiple streams (see Section 6.2)", `Model Waterbody`))
 ```
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin and include all perennial surface waters that have salmonid presence or that contribute to areas with salmonid presence. Since stream temperatures are affected by cumulative interactions between upstream and local sources, the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local source. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance/removal and channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
@@ -406,7 +406,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 
 ```
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from DEQ database, NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorologic Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 2 - Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`.
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from DEQ database, NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 2 - Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`.
 
 `r if(NROW(model.input[which(model.input$"Model Location Type" == "Meteorological"),])>0){t51_sp_tbl}`
 `r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
@@ -517,37 +517,42 @@ t54_hydromet <- hydromet.station.tbl %>%
 t54_sp <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
   dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
-  dplyr::filter(!`Data Source` == "USGS") %>% 
+  dplyr::filter(!`Data Source` == "USGS" | is.na(`Data Source`)) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::mutate(Station = `Model Location Name`,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, `Data Source`)
 
 t54 <- rbind(t54_usgs,t54_hydromet,t54_sp)
-t54_na <- t54 %>% dplyr::filter(is.na(`Latitude/Longitude`))
-t54_no_station_id <- t54 %>% dplyr::filter(`Station ID` == "No Station ID")
+t54_na_latlong <- t54 %>% dplyr::filter(is.na(`Latitude/Longitude`))
+t54_na_station_id <- t54 %>% dplyr::filter(`Station ID` == "No Station ID")
+t54_na <- rbind(t54_na_latlong,t54_na_station_id)
+t54_na <- t54_na[!duplicated(t54_na$Station),]
 t54 <- t54[!duplicated(t54$`Latitude/Longitude`),]
 t54 <- t54[!duplicated(t54$`Station ID`),] %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
   dplyr::filter(!`Station ID` == "No Station ID") %>% 
-  rbind(t54_na,t54_no_station_id) %>% 
+  rbind(t54_na) %>% 
   dplyr::arrange(`Station ID`,Station)
 
 t54_usgs <- t54 %>% 
   dplyr::filter(`Data Source` == "USGS") %>% 
   dplyr::select(-`Data Source`)
+row.names(t54_usgs) <- NULL
 
 t54_hydromet <- t54 %>% 
   dplyr::filter(`Data Source` == "hydromet") %>% 
   dplyr::select(-`Data Source`)
+row.names(t54_hydromet) <- NULL
 
 t54_sp <- t54 %>% 
   dplyr::filter(!`Data Source` %in% c("USGS","hydromet")) %>% 
   dplyr::arrange(`Data Source`,`Station ID`,Station)
+row.names(t54_sp) <- NULL
 
 if(NROW(t54_usgs)>0){
   
-  t54_usgs_tbl <- knitr::kable(t54_usgs, format = "pandoc", padding = 2,
+  t54_usgs_tbl <- knitr::kable(t54_usgs, format = "pandoc", padding = 2, row.names = NA,
                                caption = tbls(name = "t54_usgs",
                                               caption = paste0("Continuous flow measurements available from the USGS flow gaging stations in the ", qapp_project_area, ".")))
   
@@ -555,7 +560,7 @@ if(NROW(t54_usgs)>0){
 
 if(NROW(t54_hydromet)>0){
   
-  t54_hydromet_tbl <- knitr::kable(t54_hydromet, format = "pandoc", padding = 2,
+  t54_hydromet_tbl <- knitr::kable(t54_hydromet, format = "pandoc", padding = 2, row.names = NA,
                                    caption = tbls(name = "t54_hydromet",
                                                   caption = paste0("Continuous flow measurements available from the USBR Hydromet monitoring stations in the ", qapp_project_area, ".")))
   
@@ -563,7 +568,7 @@ if(NROW(t54_hydromet)>0){
 
 if(NROW(t54_sp)>0){
   
-  t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2,
+  t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2, row.names = NA,
                              caption = tbls(name = "t54_sp",
                                             caption = paste0("Flow measurements from DEQ and other public databases in the ", qapp_project_area, ".")))
   
@@ -589,11 +594,10 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_hydromet","t54_sp"),
 
 section.npdes.ind <- npdes.ind %>% 
   dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
-  dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
+                `River Mile` = round(`River Mile`,1),
                 `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
   dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
   dplyr::arrange(`Facility Name (Facility Number)`)
@@ -1208,7 +1212,7 @@ trisks <- knitr::kable(risks, format = "pandoc", padding = 2,
 
 ```
 
-DEQ plans to develop a Risk Management Plan to identify project constraints, the risks that may arise during project implementation, and potential solutions. Identified project constraints include the abbreviated project schedule with hard deadlines establish via court order, limited resources, uncertain funding from EPA, and a complex TMDL technical effort which may require additional time and public process. Projects risks from these constraints and proposed solutions are described in `r tbls(name = "risks", display="cite")`. 
+DEQ plans to develop a Risk Management Plan to identify project constraints, the risks that may arise during project implementation, and potential solutions. Identified project constraints include the abbreviated project schedule with hard deadlines established via court order, limited resources, uncertain funding from EPA, and a complex TMDL technical effort which may require additional time and public process. Projects risks from these constraints and proposed solutions are described in `r tbls(name = "risks", display="cite")`. 
 
 `r trisks`
 
