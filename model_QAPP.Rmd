@@ -50,7 +50,6 @@ eqns <- captioner::captioner(prefix="Equation")
 
 ```
 \newpage
-
 **[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
 
 This report prepared by:
@@ -78,12 +77,10 @@ Documents can be provided upon request in an alternate format for individuals wi
 **[Approval Page]**
 
 \newpage
-
 # Abbreviations
 `r abbr`
 
 \newpage
-
 # Introduction
 
 This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project.
@@ -112,7 +109,6 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 *	Aspects relating to this QAPP and its role in the project (Sections 14  and 15).    
 
-
 # Problem definition and management objectives
 
 ```{r, label=`cat5`, echo=FALSE}
@@ -132,8 +128,8 @@ tcat5 <- pro.cat.45.tbl %>%
 if(NROW(tcat5)>0){
   
   tcat5 <- knitr::kable(tcat5, format = "pandoc", padding = 2,
-                     caption = tbls(name = "tcat5",
-                                    caption = paste0("Waterbodies listed for temperature impairment based on Section 303(d) Category 5 in the 2018/20 Integrated Report.")))
+                        caption = tbls(name = "tcat5",
+                                       caption = paste0("Waterbodies listed for temperature impairment based on Section 303(d) Category 5 in the 2018/20 Integrated Report.")))
   
 }
 
@@ -296,9 +292,9 @@ t51_mw <- mw.station.tbl %>%
   dplyr::distinct(`Station`, .keep_all=TRUE)
 
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
-t51 <- rbind(t51_sp,t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)} else {
-t51 <- rbind(t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)  
-}
+  t51 <- rbind(t51_sp,t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)} else {
+    t51 <- rbind(t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)  
+  }
 
 t51_na <- t51 %>% dplyr::filter(is.na(`Latitude/Longitude`))
 t51 <- t51[!duplicated(t51$`Latitude/Longitude`),] %>% 
@@ -476,7 +472,7 @@ t53_1 <- rbind(st_awqms,st_model) %>%
   dplyr::mutate(`Latitude/Longitude`= ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization, Org_order)
- 
+
 t53_1_na <- t53_1 %>% dplyr::filter(is.na(`Latitude/Longitude`))
 t53_1 <- t53_1[!duplicated(t53_1$`Latitude/Longitude`),] %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
@@ -815,10 +811,10 @@ To the greatest extent possible, the method used to derive the model parameters 
 ```{r, label=`data_gap`, echo=FALSE}
 
 # tdata.gap <- 
-  
-  print(knitr::kable(data.gap, format = "pandoc", padding = 2,
-                          caption = tbls(name = "data.gap",
-                                         caption = paste0("Methods to derive model parameters for data gaps."))))
+
+print(knitr::kable(data.gap, format = "pandoc", padding = 2,
+                   caption = tbls(name = "data.gap",
+                                  caption = paste0("Methods to derive model parameters for data gaps."))))
 
 ```
 
@@ -852,8 +848,8 @@ if("SHADOW" %in% tmdl.mod.1$`Model Version`){
   cat(paste0("The SHADOW model domain includes all of the streams identified in ", tbls(name = "shadow", display="cite"), ". Typically the extent is the entire length of the stream from mouth to headwaters."))
   
   print(knitr::kable(shadow[,c(1:2)], format = "pandoc", padding = 2,
-                            caption = tbls(name = "shadow",
-                                           caption = paste0("SHADOW model waterbodies in the ", qapp_project_area,"."))))
+                     caption = tbls(name = "shadow",
+                                    caption = paste0("SHADOW model waterbodies in the ", qapp_project_area,"."))))
   
 } else {}
 
@@ -1182,61 +1178,61 @@ TMDL documents: At each key stage of TMDL and WQMP development copies of the fol
 
 *	Public Comment Draft:     
 
-    +	Public Comment Draft TMDL and WQMP Report (Both Word and PDF)    
++	Public Comment Draft TMDL and WQMP Report (Both Word and PDF)    
 
-    +	Draft TMDL Appendices (Both Word and PDF)    
++	Draft TMDL Appendices (Both Word and PDF)    
 
-    +	Public Notice document    
++	Public Notice document    
 
-    +	TMDL Summary Fact Sheet    
++	TMDL Summary Fact Sheet    
 
-    +	News release    
++	News release    
 
-    +	GovDelivery Notice and email    
++	GovDelivery Notice and email    
 
-    +	Other public notification emails    
++	Other public notification emails    
 
-    +	Mailing List (if used)    
++	Mailing List (if used)    
 
-    +	Public Comments Errata    
++	Public Comments Errata    
 
 *	Public Comments Received: Copy of all public comments received    
 
 *	Final TMDL and WQMP documents:    
 
-    +	TMDL signed Order (both Word and PDF)    
++	TMDL signed Order (both Word and PDF)    
 
-    +	TMDL issuance letter to EPA (both Word and PDF)    
++	TMDL issuance letter to EPA (both Word and PDF)    
 
-    +	EPA approval letter (EPA)    
++	EPA approval letter (EPA)    
 
-    +	Response to Comment Document (both Word and PDF)    
++	Response to Comment Document (both Word and PDF)    
 
-    +	TMDL and WQMP Report (both Word and PDF)    
++	TMDL and WQMP Report (both Word and PDF)    
 
-    +	TMDL Appendices (both Word and PDF)    
++	TMDL Appendices (both Word and PDF)    
 
-    +	TMDL Summary Fact Sheet    
++	TMDL Summary Fact Sheet    
 
-    +	News release    
++	News release    
 
-    +	GovDelivery Notice and email    
++	GovDelivery Notice and email    
 
-    +	Other public notification emails    
++	Other public notification emails    
 
-    +	DMA/RP notification letters (both Word and PDF)    
++	DMA/RP notification letters (both Word and PDF)    
 
-    +	Addendums    
++	Addendums    
 
-    +	Errata    
++	Errata    
 
-    +	Petitions    
++	Petitions    
 
-    +	Director’s Petition Action (acceptance or rejection of petition)    
++	Director’s Petition Action (acceptance or rejection of petition)    
 
-    +	Response to Petition    
++	Response to Petition    
 
-    +	Attains upload files    
++	Attains upload files    
 
 # QAPP review and approval
 
@@ -1259,7 +1255,6 @@ DEQ plans to develop a Risk Management Plan to identify project constraints, the
 Should a situation arise that requires a significant change in the technical approach, the project team will update the QAPP as needed through revisions or addenda.
 
 \newpage
-
 # References
 
 ```{r, label=`qapp_ref`, echo=FALSE}
@@ -1321,6 +1316,9 @@ for(r in unique(sort(qapp.ref$reference))) {
 
 ```
 
+\newpage
+# Appendix A Continuous temperature data summary
+
 ```{r, echo=FALSE}
 
 t53_2 <- data.sample.count %>%
@@ -1338,8 +1336,5 @@ if(NROW(t53_2)>0){
 }
 
 ```
-\newpage
-
-# Appendix A Continuous temperature data summary
 
 `r t53_2_tbl`
