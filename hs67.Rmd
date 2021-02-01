@@ -31,7 +31,7 @@ hs67.tbl <- knitr::kable(hs67, format = "pandoc", padding = 2,
 
 ```
 
-### Heat Source Version 7
+### Heat Source version 7
 
 The model parameters for Heat Source version 7 are similar to Heat Source version 6 with a few notable exceptions:
 

@@ -1,10 +1,15 @@
-library(tidyverse)
-library(readxl)
-library(rgdal)
-library(sf)
-library(ggplot2)
-library(odeqtmdl)
-library(tigris)
+# Install and/or load packages ----
+packages.cran = c("tidyverse","readxl","rgdal","sf","ggplot2","tigris","devtools")
+
+package.check.cran <- lapply(
+  packages.cran,
+  FUN = function(x) {
+    if (!require(x, character.only = TRUE)) {
+      install.packages(x, dependencies = TRUE)
+      library(x, character.only = TRUE)
+    }
+  }
+)
 options(tigris_use_cache = TRUE)
 
 # Functions ----
@@ -35,7 +40,7 @@ agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
 agrimet.parameters <- read.csv(paste0(data.dir, "download/agrimet_parameters.csv"))
 hydromet <- read.csv(paste0(data.dir, "download/hydromet.csv"))
 cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Model Setup Info") %>% 
-  dplyr::filter(!`QAPP Project Area` == "Upper Klamath and Lost Subbasins") %>% 
+  dplyr::filter(!`QAPP Project Area` %in%  c("Upper Klamath and Lost Subbasins")) %>% 
   # for Section 6.1 General Model Parameters
   dplyr::mutate(Model_version = ifelse(substr(`Model version`, 13,13) == "6", "Heat Source Version 6",
                                        ifelse(substr(`Model version`, 13,13) == "7", "Heat Source Version 7",
@@ -55,27 +60,78 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
                                  ifelse(mod_rmd == "sh", 'USFS (U.S. Forest Service). 1993. “SHADOW v. 2.3 - Stream Temperature Management Program. Prepared by Chris Park USFS, Pacific Northwest Region.”',
                                         NA)))
 cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Inputs") %>% 
-  dplyr::filter(!`QAPP Project Area` == "Upper Klamath and Lost Subbasins")
+  dplyr::filter(!`QAPP Project Area` %in% "Upper Klamath and Lost Subbasins")
 schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
 ref <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "References")
-roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "roles")
-risks <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "risks")
+roles <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "roles")
+risks <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "risks")
 abbr <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "abbr")
-data.gap <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx", sheet = "data_gap")
-# tmdl.temp <- odeqtmdl::tmdl_db %>% dplyr::filter(pollutant_name_TMDL == "Temperature")
-npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Individual_NDPES")
+data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
+# tmdl.temp <- odeqtmdl::tmdl_db %>% dplyr::filter(pollutant_name_TMDL %in% "Temperature")
+npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Individual_NDPES") %>% 
+  dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wrf", "WRF") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Ati ", "ATI ") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Bdc/", "BDC/") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "cmss", "CMSS") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Ms4", "MS4") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Mwmc", "MWMC") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Odc", "ODC") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Odfw", "ODFW") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Ohsu", "OHSU") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
+  dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS")
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Gen_NPDES")
 lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
 qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
 
 # _ IR2018/20 Cat 4 & 5 ----
-cat.45.rivers <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
-                             layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL") %>% 
+cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
+                             layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL")
+cat.45.waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL.shp",
+                                  layer = "2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL")
+cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
+                                  layer = "2018_2020_IR_Cat4_5_Temp_Watershed_FINAL") %>% 
+  dplyr::mutate(`AU_Name` = gsub(pattern = "HUC12 Name: ","",`AU_Name`))
+  
+cat.45 <- rbind(cat.45.rivers[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
+                cat.45.waterbodies[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
+                cat.45.watershed[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")]) %>% 
+  sf::st_zm() %>% 
   dplyr::left_join(lookup_huc, by = "HUC12")
-cat.45.rivers.tbl <- sf::st_transform(cat.45.rivers, 4326) %>% 
-  sf::st_drop_geometry()
+  
+cat.45.geom <- sf::st_transform(cat.45, 4326)
 
+colum_auid <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
+                          layer="Columbia_River_AU_IDs",
+                          stringsAsFactors=FALSE) %>% 
+  sf::st_drop_geometry() %>%
+  dplyr::distinct(AU_ID) %>%
+  dplyr::pull(AU_ID) 
+
+cat.45.tbl <- sf::st_drop_geometry(cat.45) %>% 
+  dplyr::filter(!AU_ID %in% c(colum_auid)) %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "R\\*", "River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Ri\\*", "River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Riv\\*", "River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "For\\*", "Fork Willamette River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Cre\\*", "Creek") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamet\\*", "Willamette River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Mill\\*", "Mill Creek") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "W\\*", "Willamette River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Joh\\*", "John Day River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "John\\*", "John Day River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River")
+  
 # _ NCDC met data ----
 ncei.stations <- ncei %>% 
   dplyr::mutate(lat = LAT_DEC,
@@ -101,7 +157,7 @@ mw.stations <- mw.meta$STATION %>%
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ HUC 8 ----
-wbd.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
+wbd.huc8 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
                         layer = "Study_Areas_v5_HUC8_scope")
 
 # QAPP Project Area Data ----
@@ -166,7 +222,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   model.input  <- cal.input %>% 
     dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
-    dplyr::mutate(Latitude = round(as.numeric(Latitude),4),
+    dplyr::mutate(#Latitude = round(as.numeric(Latitude),4),
+                  Latitude = round(Latitude,4),
                   Longitude = round(Longitude,3))
   
   pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
@@ -177,7 +234,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   qapp_project_area_huc8_union <- sf::st_union(qapp_project_area_huc8)
   
   # _ IR2018/20 Cat 4 & 5 ----
-  pro.cat.45.rivers.tbl <- cat.45.rivers.tbl %>% 
+  pro.cat.45.tbl <- cat.45.tbl %>% 
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
   
   # _ USGS flow data ----
@@ -335,7 +392,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
        data.gap,
        npdes.ind,
        npdes.gen,
-       pro.cat.45.rivers.tbl,
+       pro.cat.45.tbl,
        usgs.station.tbl,
        ncei.station.tbl,
        raws.station.tbl,
@@ -357,7 +414,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
 }
 
 # Leaflet Map Data ----
-pro.areas <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_extent_3.shp",
+pro.areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_extent_3.shp",
                          layer = "project_extent_3")
 
 pro.areas <- sf::st_transform(pro.areas, 4326)
@@ -380,7 +437,7 @@ pro.areas <- pro.areas %>%
   dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%m/%d/%Y"),"%b %d, %Y")) %>% 
   dplyr::mutate(map_link = paste0("<a href='http://192.168.0.12:8888/mQAPPrmd/maps/",file.name,".html'>",Project_Na,"</a>"))
 
-pro.reaches <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
+pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
                            layer = "project_reach_extent")
 
 # pro.reaches <- sf::st_zm(pro.reaches, drop = T, what = "ZM")
@@ -392,19 +449,19 @@ pro.reaches <- pro.reaches %>%
                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
 
 # _ Model Segments ----
-temp.model.streams <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/temp_model_streams_temp_projects.shp",
+temp.model.streams <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/temp_model_streams_temp_projects.shp",
                                   layer = "temp_model_streams_temp_projects")
 
 temp.model.streams <- sf::st_transform(temp.model.streams, 4326)
 
-shadow.model.streams <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_streams_temp_projects_clean.shp",
+shadow.model.streams <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_streams_temp_projects_clean.shp",
                                     layer = "shade_model_streams_temp_projects_clean") %>% 
   dplyr::select(-`Project_Na`) %>% 
   dplyr::rename(`Project_Na` = `Project__1`)
 
 shadow.model.streams <- sf::st_transform(shadow.model.streams, 4326)
 
-shadow.model.area <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_area_SWillamette_temp_projects.shp",
+shadow.model.area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_area_SWillamette_temp_projects.shp",
                                  layer = "shade_model_area_SWillamette_temp_projects")
 
 shadow.model.area <- sf::st_transform(shadow.model.area, 4326)
@@ -416,17 +473,17 @@ shadow.model.area <- sf::st_transform(shadow.model.area, 4326)
 #  geom_sf(data = shade.model.streams,color = "blue")
 
 # _ HUC 8,10,12 ----
-map.huc8 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
+map.huc8 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
                         layer = "Study_Areas_v5_HUC8_scope")
 
 map.huc8  <- sf::st_transform(map.huc8 , 4326)
 
-map.huc10 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v6_HUC10_scope.shp",
+map.huc10 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v6_HUC10_scope.shp",
                          layer = "Study_Areas_v6_HUC10_scope")
 
 map.huc10 <- sf::st_transform(map.huc10, 4326)
 
-map.huc12 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_huc12.shp",
+map.huc12 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_huc12.shp",
                          layer = "project_huc12") %>% 
   dplyr::select(HUC12,Name,geometry) %>% 
   dplyr::rename(HUC12_Name = Name)
@@ -453,7 +510,7 @@ temp.model <- cal.input %>%
   dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
 
 temp.awqms.model <- rbind(temp.awqms,temp.model) %>% 
-  dplyr::filter(!`Station ID` == "TIR") %>% 
+  dplyr::filter(!`Station ID` %in% "TIR") %>% 
   dplyr::filter(!is.na(Latitude)) %>%
   dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                `Station Description`,
@@ -524,7 +581,7 @@ flow.hydromet <- hydromet %>%
 
 flow.sp <- cal.input %>%
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
-  dplyr::filter(!`Data Source` == "USGS" & is.na(`Interpolated Data`)) %>% 
+  dplyr::filter(!`Data Source` %in% c("USGS") & is.na(`Interpolated Data`)) %>% 
   dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% 
   dplyr::mutate(Station = `Model Location Name`,
                 Station_Des = paste0(`Data Source`,": ",Station," (",`Station ID`,")")) %>%  

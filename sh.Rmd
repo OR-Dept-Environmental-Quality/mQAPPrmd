@@ -21,31 +21,6 @@ options(kableExtra.auto_format = F)
 
 ```
 
-```{r, "shadow", echo=FALSE}
-
-shadow <- model.info %>% 
-  dplyr::filter(`Model version` == "SHADOW") %>% 
-  dplyr::select(`Model Waterbody`,`Model Extent Distance`,`Model Extent Units`,`TMDL Document`) %>%
-  dplyr::arrange(as.numeric(`Model Extent Distance`))
-  
-
-names(shadow)[names(shadow) == "Model Extent Distance"] <- if(NROW(shadow)>0){paste0("Distance (",unique(shadow$`Model Extent Units`),")")}
-
-shadow_tbl <-  knitr::kable(shadow[,c(1:2)], format = "pandoc", padding = 2,
-                            caption = tbls(name = "shadow",
-                                           caption = paste0("SHADOW model waterbodies in the ", qapp_project_area,".")))
-```
-
 ### SHADOW
 
-The SHADOW model version 2.3 is a shade, solar input and stream temperature model developed by the U.S. Forest Service (USFS, 1993). 
-
-## SHADOW
-
-DEQ used USFS SHADOW modeling results in its development for the original `r knitr::combine_words(unique(sort(shadow$'TMDL Document')))`. DEQ does not intend to remodel any of the stream segments for the `r qapp_project_area`.  If the need arises to revisit some of the SHADOW modeling, this QAPP will be updated at that time to inform the project team on how to proceed. Complete documentation of the model methodology and inputs are discussed in the SHADOW user's manual (USFS, 1993).
-
-### Model Domain
-
-The SHADOW model domain includes all of the streams identified in `r tbls(name = "shadow", display="cite")`. Typically the extent is the entire length of the stream from mouth to headwaters.
-
-`r shadow_tbl`
+The SHADOW model version 2.3 is a shade, solar, and stream temperature model developed by the U.S. Forest Service (USFS, 1993). Complete documentation of the model methodology, model inputs, and model outputs are discussed in the SHADOW user’s manual (USFS, 1993).

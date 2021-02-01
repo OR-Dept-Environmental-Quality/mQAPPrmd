@@ -31,10 +31,10 @@ hs7.tbl <- knitr::kable(hs7, format = "pandoc", padding = 2,
 
 ```
 
-### Heat Source Version 7
+### Heat Source version 7
 
 `r tbls(name = "hs7", display="cite")` summarizes all of the user entered model inputs and input categories required to run Heat Source version 7; and identifies the subset of inputs that could possibly be modified to improve the calibration of the model. It should be noted, it is unlikely all of these will be used as calibration parameters; rather this list identifies the candidate model inputs that will be considered for adjustment through the calibration process.
-The following list of input categories and specific inputs describes the general form and function of the inputs, and why the inputs are candidates for adjustment during calibration:
+The following bulleted list of input categories and specific inputs describes the general form and function of the inputs, and why the inputs are candidates for adjustment during calibration:
 
 *	Morphology – The morphology inputs that could be used as calibration parameters fall into two categories: channel hydraulics and bed conduction. The reasons for inclusion as calibration parameters are described as follows:    
 
