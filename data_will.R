@@ -63,10 +63,10 @@ cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
   dplyr::filter(!`QAPP Project Area` %in% "Upper Klamath and Lost Subbasins")
 schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
 ref <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "References")
-roles <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "roles")
-risks <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "risks")
+roles <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "roles")
+risks <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "risks")
 abbr <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "abbr")
-data.gap <- readxl::read_xlsx("T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx", sheet = "data_gap")
+data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
 # tmdl.temp <- odeqtmdl::tmdl_db %>% dplyr::filter(pollutant_name_TMDL %in% "Temperature")
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Individual_NDPES") %>% 
   dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
@@ -85,18 +85,19 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx")
   dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA")
+  dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
+  dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS")
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Gen_NPDES")
 lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
 qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
 
 # _ IR2018/20 Cat 4 & 5 ----
-cat.45.rivers <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
+cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
                              layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL")
-cat.45.waterbodies <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL.shp",
+cat.45.waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL.shp",
                                   layer = "2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL")
-cat.45.watershed <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
+cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
                                 layer = "2018_2020_IR_Cat4_5_Temp_Watershed_FINAL") %>% 
   dplyr::mutate(`AU_Name` = gsub(pattern = "HUC12 Name: ","",`AU_Name`))
 
@@ -108,7 +109,28 @@ cat.45 <- rbind(cat.45.rivers[,c("IR_categor","AU_Name","AU_ID","Year_liste","Pe
 
 cat.45.geom <- sf::st_transform(cat.45, 4326)
 
-cat.45.tbl <- sf::st_drop_geometry(cat.45)
+colum_auid <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
+                          layer="Columbia_River_AU_IDs",
+                          stringsAsFactors=FALSE) %>% 
+  sf::st_drop_geometry() %>%
+  dplyr::distinct(AU_ID) %>%
+  dplyr::pull(AU_ID) 
+
+cat.45.tbl <- sf::st_drop_geometry(cat.45) %>% 
+  dplyr::filter(!AU_ID %in% c(colum_auid)) %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "R\\*", "River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Ri\\*", "River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Riv\\*", "River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "For\\*", "Fork Willamette River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Cre\\*", "Creek") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamet\\*", "Willamette River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Mill\\*", "Mill Creek") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "W\\*", "Willamette River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Joh\\*", "John Day River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "John\\*", "John Day River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River")
 
 # _ NCDC met data ----
 ncei.stations <- ncei %>% 

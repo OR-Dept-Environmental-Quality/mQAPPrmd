@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Bull Run River"
+# for test: waterbody_name <- "Salmon River"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -36,15 +36,7 @@ model.extent <- na.omit(model.extent)
 
 ## `r waterbody_name`
 
-### Source Characteristics
-
-Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Specifically, water temperature change is an expression of heat flux to waterbody (`r eqns(name = paste0("temp",waterbody_name), display="cite")`).   
-
-$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\times \Delta \text {Flow Volume}} \hspace{3em}$ `r eqns(name = paste0("temp",waterbody_name), display="cite")`
-
-Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of cold water inputs from groundwater. **[Update with any additional source details for this waterbody.]**
-
-### Model Domain
+### Model domain
 
 ```{r, label=`t6x1`, include=FALSE}
 
@@ -59,23 +51,23 @@ if(length(section.model.info$`Model Extent Text`)>1){
 } 
 ```
 
-The extents of the model domain is the `r model.domain`
+The extent of the model domain is the `r model.domain`
 
-### Spatial and Temporal Resolution
+### Spatial and temporal resolution
 
 The model input sampling rate (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
 
 A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
 
-### Time Frame of Simulation
+### Time frame of simulation
 
 The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
 
-### Important Assumptions
+### Important assumptions
 
-Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 
+**[Update this section]** Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. 
 
-### Model Calibration
+### Model calibration
 
 ```{r, label=`t6x5`, include=FALSE}
 options(knitr.kable.NA = '') # hide NAs in table
@@ -122,11 +114,11 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$"Abbreviated Reference")), "). It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized in the "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. If adjustments are made to the calibration model in the future, the QAPP will be amended to reflect the additional effort.")}`
+`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$"Abbreviated Reference")), "). It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized in the "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. We do not expect to update the current condition calibration. If adjustments are determinded to be needed for this project, we will use the approach described in Section 6.2.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
 
-### Model Parameters
+### Model parameters
 
 ```{r, label=`t6x6_1`, include=FALSE}
 options(knitr.kable.NA = '') # hide NAs in table
@@ -151,6 +143,7 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
     dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
     dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
+                     #`Model Location` = toString(unique(sort(round(as.numeric(`Model Location`),2)))),
                      Parameter = toString(unique(sort(Parameter))))%>% 
     dplyr::ungroup() %>% 
     #dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`, Note) %>% 
@@ -163,6 +156,7 @@ if(!model.extent == TRUE){
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (", `Station ID`, ")")),
                   `Model Location` = round(`Model Location`,2),
+                  #`Model Location` = as.character(`Model Location`),
                   `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -198,7 +192,7 @@ t6x6_2 <- section.model.input %>%
 
 if(NROW(t6x6_2)>1){
   
-  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". The data source for these inputs is the ", knitr::combine_words(sort(unique(paste0(t6x6_met$`Model Location Name (Station ID)`," of ", t6x6_met$`Data Source`)))), ". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
+  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". **[Update as needed:]** The data source for these inputs is the ", knitr::combine_words(sort(unique(paste0(t6x6_met$`Model Location Name (Station ID)`," of ", t6x6_met$`Data Source`)))), ". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
   
   # cat(unique(sort(t6x6_2$Note)))
   
