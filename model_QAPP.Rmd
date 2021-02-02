@@ -144,7 +144,7 @@ The existing temperature TMDL addresses temperature on streams with **[Update bo
 
 The TMDL will provide load and waste load allocations for sources of thermal loads. **[Update if any specific info is needed for certain listings, time periods, or sources. Eg. During the spawning period, there are three impaired segments on the XX River that are downstream of a hydro-electric project. Modeling analysis are needed to complete TMDLs for these waterbodies.]**
 
-Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon's 2018/2020 Section 303(d) Category 5 list has changed since the original TMDL was developed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
+Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon 2018/2020 Section 303(d) Category 5 list has changed since the original TMDL was developed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
 
 `r if(NROW(tcat5)>0){tcat5}`
 
