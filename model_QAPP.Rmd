@@ -491,7 +491,7 @@ if(NROW(t53_1)>0){
 
 ```
 
-All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). `r tbls(name = "t53_1", display="cite")` list all the locations where continuous stream temperature data were collected and the organizations that collected that data. Appendix 1 summarizes when data were collected at each station.
+All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). `r tbls(name = "t53_1", display="cite")` list all the locations where continuous stream temperature data were collected and the organizations that collected that data. Appendix A summarizes when data were collected at each station.
 
 `r if(NROW(t53_1)>0){t53_1_tbl}`
 
