@@ -14,7 +14,7 @@ qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv"))
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Mid Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
-# qapp_project_area = "North Umpqua Subbasin"
+qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
