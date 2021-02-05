@@ -852,7 +852,7 @@ if("SHADOW" %in% tmdl.mod.1$`Model Version`){
                      caption = tbls(name = "shadow",
                                     caption = paste0("SHADOW model waterbodies in the ", qapp_project_area,"."))))
   
-} else {}
+} else {cat("")}
 
 ```
 

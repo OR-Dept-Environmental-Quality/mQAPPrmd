@@ -164,7 +164,7 @@ if(!model.extent == TRUE){
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 
-    dplyr::arrange(Parameter,desc(`Model Location`))
+    dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
   
   t6x6_col <- t6x6_1 %>% 
     dplyr::filter(!is.na(`Location Units`))
