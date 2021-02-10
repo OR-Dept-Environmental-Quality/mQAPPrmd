@@ -36,6 +36,9 @@ for (qapp_project_area in qapp_project_areas$areas) {
   pro.area <- pro.areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
   
+  pro.reach <- pro.reaches %>% 
+    dplyr::filter(Project_Na == qapp_project_area)
+  
   pro.area.temp.model.streams <- temp.model.streams %>% 
     dplyr::filter(Project_Na == qapp_project_area)
   
@@ -63,7 +66,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   map.ind.npdes.pro.area <- map.ind.npdes.pro %>% 
     dplyr::filter(Project_Na == qapp_project_area)
   
-  results <- rbind(results,
+  # results <- rbind(results,
                    data.frame(proj_area = qapp_project_area,
                               temp_model = NROW(pro.area.temp.model.streams),
                               shadow_model = NROW(pro.area.shadow.model.streams),
