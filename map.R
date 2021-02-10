@@ -1,3 +1,4 @@
+# ____master____ ----
 library(tidyverse)
 library(stringr)
 library(leaflet)
@@ -44,8 +45,8 @@ pro.reaches <- pro.reaches %>%
                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
 
 # Model Segments ----
-model.streams <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/model_streams_temp_projects.shp",
-                         layer = "model_streams_temp_projects")
+model.streams <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/temp_model_streams_temp_projects.shp",
+                         layer = "temp_model_streams_temp_projects")
 
 model.streams <- sf::st_transform(model.streams, 4326)
 
