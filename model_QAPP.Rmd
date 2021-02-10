@@ -813,16 +813,42 @@ if(mod.check == "11"){
       
     } else {
       
-      for(mod in unique(sort(tmdl.mod.2$mod_rmd))){
+      if(mod.check == "30"){
         
-        mod.child <- paste0(mod,".Rmd")
-        mod.v <- c(mod.v, knitr::knit_child(input = mod.child, envir = globalenv()))
+        modv <- tmdl.mod.2 %>% 
+          dplyr::filter(!mod_rmd %in% c("hs7","hs8"))
         
+        if(NROW(modv)>0){
+          
+          for(mod in unique(sort(modv$mod_rmd))){
+            
+            mod.child <- paste0(mod,".Rmd")
+            
+            mod.v <- c(knitr::knit_child(input = "hs7.Rmd", envir = globalenv()),
+                       knitr::knit_child(input = "hs78.Rmd", envir = globalenv()),
+                       knitr::knit_child(input = mod.child, envir = globalenv()))
+            
+          }
+          
+        } else {
+          
+          mod.v <- c(knitr::knit_child(input = "hs7.Rmd", envir = globalenv()),
+                     knitr::knit_child(input = "hs78.Rmd", envir = globalenv()))
+          
+        }
+        
+      } else {
+        
+        for(mod in unique(sort(tmdl.mod.2$mod_rmd))){
+          
+          mod.child <- paste0(mod,".Rmd")
+          mod.v <- c(mod.v, knitr::knit_child(input = mod.child, envir = globalenv()))
+          
+        }
       }
     }
   }
-}
-
+  
 ```
 
 The following models were used in the development of the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` for the associated waterbodies (`r tbls(name = "tmdl.mod", display="cite")`).
@@ -871,8 +897,7 @@ if("SHADOW" %in% tmdl.mod.1$`Model Version`){
     dplyr::filter(`Model version` == "SHADOW") %>% 
     dplyr::select(`Model Waterbody`,`Model Extent Distance`,`Model Extent Units`,`TMDL Document`) %>%
     dplyr::arrange(as.numeric(`Model Extent Distance`))
-  
-  
+
   names(shadow)[names(shadow) == "Model Extent Distance"] <- if(NROW(shadow)>0){paste0("Model Extent (",unique(shadow$`Model Extent Units`),")")}
   
   shadow_tbl <-  knitr::kable(shadow[,c(1:2)], format = "pandoc", padding = 2,

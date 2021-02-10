@@ -1,4 +1,4 @@
-# master
+# ____master____ ----
 # Install and/or load packages ----
 packages.cran = c("tidyverse","readxl","rgdal","sf","ggplot2","tigris","devtools")
 
@@ -441,7 +441,7 @@ pro.areas <- pro.areas %>%
 pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
                            layer = "project_reach_extent")
 
-# pro.reaches <- sf::st_zm(pro.reaches, drop = T, what = "ZM")
+#pro.reaches <- sf::st_zm(pro.reaches, drop = T, what = "ZM")
 
 pro.reaches <- sf::st_transform(pro.reaches, 4326)
 
@@ -449,7 +449,7 @@ pro.reaches <- pro.reaches %>%
   dplyr::mutate(color = dplyr::case_when(Project_Na == "Willamette River Mainstem and Major Tributaries"~ "purple",
                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
 
-# _ Model Segments ----
+# _ Model Streams ----
 temp.model.streams <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/temp_model_streams_temp_projects.shp",
                                   layer = "temp_model_streams_temp_projects")
 
@@ -462,11 +462,10 @@ shadow.model.streams <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temp
 
 shadow.model.streams <- sf::st_transform(shadow.model.streams, 4326)
 
-shadow.model.area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_area_SWillamette_temp_projects.shp",
-                                 layer = "shade_model_area_SWillamette_temp_projects")
+#shadow.model.area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_area_SWillamette_temp_projects.shp",
+#                                 layer = "shade_model_area_SWillamette_temp_projects")
 
-shadow.model.area <- sf::st_transform(shadow.model.area, 4326)
-
+#shadow.model.area <- sf::st_transform(shadow.model.area, 4326)
 
 #ggplot() +
 #  geom_sf(data = shade.model.area) +
@@ -511,8 +510,10 @@ temp.model <- cal.input %>%
   dplyr::select(`Station Description`,`Station ID`, Organization, Latitude, Longitude)
 
 temp.awqms.model <- rbind(temp.awqms,temp.model) %>% 
-  dplyr::filter(!`Station ID` %in% "TIR") %>% 
-  dplyr::filter(!is.na(Latitude)) %>%
+  dplyr::distinct(`Station Description`, .keep_all=TRUE) %>% # 2/8 added
+  dplyr::left_join(df.stations,by = c("Station ID"="MLocID")) %>% # 2/8 added
+  dplyr::filter(!`Station ID` %in% "TIR") %>% # ?? 2/8 note: why?
+  dplyr::filter(!is.na(Latitude)) %>% # 2/8 note: QAPP may have sites that have no lat/long assoicated with but may sites must have lat/long
   dplyr::mutate(`Station Name and ID` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
                                                `Station Description`,
                                                paste0(`Station Description`, " (", `Station ID`, ")"))) %>% 
@@ -522,9 +523,12 @@ temp.awqms.model <- rbind(temp.awqms,temp.model) %>%
   dplyr::mutate_at("Station Name and ID", str_replace_all, "Lb", "LB") %>%
   dplyr::mutate_at("Station Name and ID", str_replace_all, "Nf", "NF") %>%
   dplyr::mutate_at("Station Name and ID", str_replace_all, "Sf", "SF") %>%
-  dplyr::distinct(`Station Name and ID`, .keep_all=TRUE) %>%
+  # dplyr::distinct(`Station Name and ID`, .keep_all=TRUE) %>% # 2/8 changed
   dplyr::mutate(Organization = ifelse(Organization == "OregonDEQ", "ODEQ", Organization)) %>% 
   dplyr::mutate(Organization = ifelse(Organization == "11NPSWRD_WQX", "EPA WQX", Organization)) %>% 
+  dplyr::mutate(Organization = ifelse(Organization == "CITY_SALEM(NOSTORETID)", "City of Salem", Organization)) %>%
+  dplyr::mutate(Organization = ifelse(Organization == "USFS(NOSTORETID)", "USFS", Organization)) %>%
+  dplyr::mutate(Organization = ifelse(Organization == "CTUIR_WQX", "CTUIR WQX", Organization)) %>%
   dplyr::select(`Station Name and ID`, Latitude, Longitude, Organization) %>%
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
@@ -535,11 +539,13 @@ map.temp.pro <-  sf::st_join(x = map.temp,
                              join = st_within,
                              left = TRUE)
 
-writeOGR(map.temp.pro, ".", "map_temp_pro", driver="ESRI Shapefile")
-
+# writeOGR(map.temp.pro, ".", "map_temp_pro", driver="ESRI Shapefile")
 
 # _ Flow ----
 flow.usgs <- usgs.stations.or %>%
+  dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
+  dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
+  #dplyr::filter(!is.na(dec_lat_va)) %>% # 2/8 changed
   dplyr::mutate_at("station_nm", str_replace_all, " R ", " RIVER ") %>% 
   dplyr::mutate_at("station_nm", str_replace_all, " @ ", " AT ") %>% 
   dplyr::mutate_at("station_nm", str_replace_all, " & ", " AND ") %>% 
@@ -547,7 +553,7 @@ flow.usgs <- usgs.stations.or %>%
   dplyr::mutate_at("station_nm", str_replace_all, " CR ", " CREEK ") %>% 
   dplyr::mutate_at("station_nm", str_replace_all, " NR ", " NEAR ") %>% 
   dplyr::mutate_at("station_nm", str_replace_all, "N\\.", "NORTH ") %>% 
-  dplyr::mutate_at("station_nm", str_replace_all, "N ", "NORTH ") %>% 
+  #dplyr::mutate_at("station_nm", str_replace_all, "N ", "NORTH ") %>% 
   dplyr::mutate_at("station_nm", str_replace_all, " ABV ", " ABOVE ") %>% 
   dplyr::mutate_at("station_nm", str_replace_all, " BLW ", " BELOW ") %>% 
   dplyr::mutate_at("station_nm", str_replace_all, " P ", " POWER ") %>% 
@@ -572,7 +578,7 @@ flow.usgs <- usgs.stations.or %>%
 
 flow.hydromet <- hydromet %>% 
   dplyr::filter(Parameter %in% c("Discharge", "Spillway Discharge", "Flow")) %>% 
-  dplyr::distinct(Lat, Long, .keep_all = TRUE) %>% 
+  # dplyr::distinct(Lat, Long, .keep_all = TRUE) %>% @ 2/8 changed
   dplyr::mutate(Station = Station.Name,
                 `Station ID` = Station.ID,
                 Station_Des = paste0("Hydromet: ",Station," (",`Station ID`,")")) %>% 
@@ -582,13 +588,28 @@ flow.hydromet <- hydromet %>%
 
 flow.sp <- cal.input %>%
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
-  dplyr::filter(!`Data Source` %in% c("USGS") & is.na(`Interpolated Data`)) %>% 
-  dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% 
+  dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% # 2/8 added
+  dplyr::filter(!`Data Source` == "USGS") %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  # dplyr::distinct(Latitude, Longitude, .keep_all = TRUE) %>% # 2/8 changed
   dplyr::mutate(Station = `Model Location Name`,
                 Station_Des = paste0(`Data Source`,": ",Station," (",`Station ID`,")")) %>%  
   dplyr::select(Station, `Station ID`, Latitude, Longitude, Station_Des)
 
-flow.pro <- rbind(flow.usgs,flow.hydromet,flow.sp) %>% 
+#flow.pro <- rbind(flow.usgs,flow.hydromet,flow.sp) %>% # 2/8 changed
+#  dplyr::filter(!is.na(Latitude)) %>% 
+#  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+
+flow.pro <- rbind(flow.usgs,flow.hydromet,flow.sp)
+#flow.pro_na_latlong <- flow.pro %>% dplyr::filter(is.na(Latitude)) # 2/8 changed
+flow.pro_na_station_id <- flow.pro %>% dplyr::filter(`Station ID` == "No Station ID")
+#flow.pro_na <- rbind(flow.pro_na_latlong,flow.pro_na_station_id) # 2/8 changed
+flow.pro_na <- flow.pro_na_station_id # 2/8 added
+flow.pro_na <- flow.pro_na[!duplicated(flow.pro_na$Station),]
+flow.pro <- flow.pro[!duplicated(flow.pro$Latitude),]
+flow.pro <- flow.pro[!duplicated(flow.pro$`Station ID`),] %>% 
+  dplyr::filter(!`Station ID` == "No Station ID") %>% 
+  rbind(flow.pro_na) %>% 
   dplyr::filter(!is.na(Latitude)) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
@@ -608,30 +629,33 @@ met.sp <- cal.input %>%
                                  paste0(`Station ID`, ", ", `Data Source`))) %>% 
   dplyr::select(Station, Latitude, Longitude)
 
-met.ncdc <- ncdc.stations %>% 
-  dplyr::filter(!str_detect(id,"COOP")) %>% 
+met.ncei <- ncei.stations %>% 
+  # dplyr::filter(!str_detect(id,"COOP")) %>%  # 2/8 changed
+  dplyr::distinct(NCDC, .keep_all=TRUE) %>% 
+  dplyr::distinct(STATION_NAME, .keep_all=TRUE) %>% 
   dplyr::rename(Latitude = lat,
-                Longitude = long,
-                `Station ID` = id) %>%
-  dplyr::mutate_at("name", str_replace_all, ", OR US", "") %>% 
-  dplyr::mutate(name = stringr::str_to_title(name)) %>% 
-  dplyr::mutate_at("name", str_replace_all, "Nw", "NW") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Ne", "NE") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Nnw", "NNW") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Se", "SE") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Ese", "ESE") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Wnw", "WNW") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Ssw", "SSW") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Ene", "ENE") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Sse", "SSE") %>% 
-  dplyr::mutate_at("name", str_replace_all, "Sw", "SW") %>% 
-  dplyr::mutate(`Station` = paste0(`Station ID`," at ",name," (NCDC)")) %>% 
+                Longitude = long) %>%
+  #dplyr::mutate_at("name", str_replace_all, ", OR US", "") %>% 
+  #dplyr::mutate(name = stringr::str_to_title(name)) %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Nw", "NW") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Ne", "NE") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Nnw", "NNW") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Se", "SE") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Ese", "ESE") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Wnw", "WNW") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Ssw", "SSW") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Ene", "ENE") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Sse", "SSE") %>% 
+  #dplyr::mutate_at("name", str_replace_all, "Sw", "SW") %>% 
+  dplyr::mutate(`Station` = paste0(NCDC," at ",STATION_NAME," (NCDC)")) %>% 
   dplyr::select(Station, Latitude, Longitude) %>% 
   sf::st_drop_geometry()
 
 #sf::st_geometry(met.ncdc) <- NULL
 
 met.raws <- raws.stations %>% 
+  dplyr::distinct(wrccID, .keep_all=TRUE) %>% 
+  dplyr::distinct(siteName, .keep_all=TRUE) %>% 
   dplyr::rename(Latitude = lat,
                 Longitude = long) %>% 
   dplyr::mutate(`Station` = paste0(agency," station ", wrccID, " at ", siteName, " (RAWS)")) %>% 
@@ -641,6 +665,8 @@ met.raws <- raws.stations %>%
 #sf::st_geometry(met.raws) <- NULL
 
 met.agrimet <- agrimet.stations.or %>%
+  dplyr::distinct(siteid, .keep_all=TRUE) %>% 
+  dplyr::distinct(description, .keep_all=TRUE) %>% 
   dplyr::rename(Latitude = lat,
                 Longitude = long) %>%
   dplyr::mutate(`Station` = paste0(siteid, " - ", description, " (AgriMet)")) %>% 
@@ -651,12 +677,16 @@ met.agrimet <- agrimet.stations.or %>%
 
 met.hydromet <- hydromet %>% 
   dplyr::filter(Parameter %in% c("Air Temperature","Precipitation")) %>% 
+  dplyr::distinct(Station.ID, .keep_all=TRUE) %>% 
+  dplyr::distinct(Station.Name, .keep_all=TRUE) %>% 
   dplyr::rename(Latitude = Lat,
                 Longitude = Long) %>%
   dplyr::mutate(`Station` = paste0(Station.ID, " - ", Station.Name, " (Hydromet)")) %>% 
   dplyr::select(Station, Latitude, Longitude)
 
 met.mw <- mw.stations %>% 
+  dplyr::distinct(STID, .keep_all=TRUE) %>% 
+  dplyr::distinct(NAME, .keep_all=TRUE) %>% 
   dplyr::rename(Latitude = lat,
                 Longitude = long) %>%
   dplyr::mutate(`Station` = paste0(STID, " - ", NAME, " (MesoWest)")) %>% 
@@ -665,7 +695,7 @@ met.mw <- mw.stations %>%
 
 #sf::st_geometry(met.mw) <- NULL
 
-met.pro <- rbind(met.sp, met.ncdc, met.raws, met.agrimet, met.hydromet, met.mw) %>% 
+met.pro <- rbind(met.sp, met.ncei, met.raws, met.agrimet, met.hydromet, met.mw) %>% 
   dplyr::filter(!is.na(Latitude)) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
@@ -683,6 +713,7 @@ ind.npdes.pro <- npdes.ind %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
   dplyr::mutate(`Facility Name and Number` = paste0(`Common Name`," (DEQ File #", `WQ File Nbr`,")"),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
+                `River Mile` = round(`River Mile`,1),
                 `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
   dplyr::select(`Facility Name and Number`, Latitude, Longitude) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
@@ -701,9 +732,10 @@ setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R
 save(lookup_huc,
      qapp_project_areas,
      pro.areas,
+     pro.reaches,
      temp.model.streams,
-     shade.model.streams,
-     shade.model.area,
+     shadow.model.streams,
+     #shadow.model.area,
      map.huc8,
      map.huc10,
      map.huc12,
