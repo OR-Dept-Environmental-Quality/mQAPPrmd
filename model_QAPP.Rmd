@@ -862,8 +862,6 @@ Additional Heat Source Version # models will be built to simulate stream tempera
 
 `r paste(mod.v, collapse = "\n")`
 
-`r knitr::knit_child(input = "hs8.Rmd", envir = globalenv())`
-
 ## Updating the Heat Source models
 
 Updating the Heat Source models will mainly involve the determination of inflows, water temperatures, and weather conditions. It appears that flow data are limited on the tributaries based on the preliminary review of the data that Tetra Tech received. In the case of limited availability of flow data, flow scaling with the gaged drainage area or other approaches such as the stream flow estimation tool that Tetra Tech is developing for DEQ may be used. Observed temperature probe data collected downstream of reservoirs will be used to configure the Heat Source models for North Umpqua River below the impoundments - Lemolo Lake, Toketee Lake, and Soda Springs Dam. 
