@@ -14,7 +14,7 @@ qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv"))
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Mid Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
-# qapp_project_area = "North Umpqua Subbasin"
+qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
@@ -23,14 +23,14 @@ qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv"))
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in qapp_project_areas$areas) {
-  
-  file.name <- qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$file.name
-  load(paste0(file.name,".RData"))
-  
-  rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/master/mQAPPrmd/model_QAPP.Rmd",
-                    output_format = "word_document",
-                    output_dir = output.dir,
-                    output_file=paste0("QAPP_",file.name, ".docx"))
-  
-}
+#for (qapp_project_area in qapp_project_areas$areas) {
+
+file.name <- qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$file.name
+load(paste0(file.name,".RData"))
+
+rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/North_Umpqua_Subbasin/mQAPPrmd/model_QAPP.Rmd",
+                  output_format = "word_document",
+                  output_dir = output.dir,
+                  output_file=paste0("QAPP_",file.name, ".docx"))
+
+#}
