@@ -1,5 +1,4 @@
 # ____master____ ----
-# this is a test
 # Install and/or load packages ----
 packages.cran = c("tidyverse","readxl","rgdal","sf","ggplot2","tigris","devtools")
 
@@ -132,7 +131,8 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "John\\*", "John Day River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River")
+  dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")
   
 # _ NCDC met data ----
 ncei.stations <- ncei %>% 
@@ -437,8 +437,8 @@ pro.areas <- pro.areas %>%
                                          Project_Na == "Willow Creek Subbasin" ~ "#78c679")) %>%  #green
   dplyr::left_join(qapp_project_areas, by = c("Project_Na" = "areas")) %>% 
   dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%m/%d/%Y"),"%b %d, %Y")) %>% 
-  dplyr::mutate(map_link = paste0("<a href='http://192.168.0.12:8888/mQAPPrmd/maps/",file.name,".html'>",Project_Na,"</a>"))
-
+  dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>"))
+  
 pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
                            layer = "project_reach_extent")
 
@@ -530,7 +530,7 @@ temp.awqms.model <- rbind(temp.awqms,temp.model) %>%
   dplyr::mutate(Organization = ifelse(Organization == "CITY_SALEM(NOSTORETID)", "City of Salem", Organization)) %>%
   dplyr::mutate(Organization = ifelse(Organization == "USFS(NOSTORETID)", "USFS", Organization)) %>%
   dplyr::mutate(Organization = ifelse(Organization == "CTUIR_WQX", "CTUIR WQX", Organization)) %>%
-  dplyr::select(`Station Name and ID`, Latitude, Longitude, Organization) %>%
+  dplyr::select(`Station Name and ID`, Latitude, Longitude, Organization, `Station Description`, `Station ID`) %>%
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
 map.temp <- sf::st_filter(temp.awqms.model, pro.areas, join = st_within)
@@ -542,6 +542,33 @@ map.temp.pro <-  sf::st_join(x = map.temp,
 
 # writeOGR(map.temp.pro, ".", "map_temp_pro", driver="ESRI Shapefile")
 
+# Temp table
+map.station_awqms <- df.stations.state %>% 
+  dplyr::rename(`Station ID` = MLocID)
+
+map.temp.tbl <- df.awqms.raw.state %>%
+  # QA/QC check:
+  dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
+  dplyr::filter(Statistical_Base == "Maximum") %>% 
+  dplyr::select(Org_Name, MLocID, SampleStartDate, Statistical_Base, Result_Numeric) %>% 
+  dplyr::mutate(date = lubridate::date(SampleStartDate),
+                month=lubridate::month(SampleStartDate, label=TRUE, abbr=TRUE),
+                year=lubridate::year(SampleStartDate)) %>% 
+  dplyr::distinct(Org_Name, MLocID, Statistical_Base, Result_Numeric, date, .keep_all=TRUE) %>% 
+  dplyr::group_by(MLocID, Statistical_Base, year, month) %>%
+  dplyr::summarize(Org_Names=paste0(unique(Org_Name), collapse=" ,"),n=n()) %>%
+  dplyr::ungroup() %>%
+  tidyr::pivot_wider(names_from = month, values_from=n) %>%
+  dplyr::rename(`Station ID` = MLocID) %>% 
+  dplyr::left_join(map.station_awqms[,c("Station ID", "StationDes")], by="Station ID") %>% 
+  dplyr::rename(Year = year) %>% 
+  dplyr::mutate(`StationDes` = stringr::str_to_title(`StationDes`)) %>% 
+  dplyr::mutate_at("StationDes", str_replace_all, "Or", "OR") %>% 
+  dplyr::filter(!`Station ID` == "TIR") %>% 
+  dplyr::mutate(Station = StationDes) %>% 
+  dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
+  dplyr::arrange(Year, `Station ID`)
+  
 # _ Flow ----
 flow.usgs <- usgs.stations.or %>%
   dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
@@ -741,6 +768,7 @@ save(lookup_huc,
      map.huc10,
      map.huc12,
      map.temp.pro,
+     map.temp.tbl,
      map.flow.pro,
      map.met.pro,
      map.ind.npdes.pro,
