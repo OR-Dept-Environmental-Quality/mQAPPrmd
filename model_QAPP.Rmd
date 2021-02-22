@@ -986,11 +986,11 @@ DEQ will review and respond to any public comments received on the model and mod
 
 # Management scenarios
 
-Management scenarios described in this section summarize means by which the current conditions and possible alternatives will be evaluated. Some or all of these scenarios will be executed and assessed in the modeling.
+Management scenarios described in this section summarize means by which the current conditions and possible alternatives will be evaluated. Some or all of these scenarios will be executed and assessed in the modeling if sufficient data and information exists.
 
 ## Current conditions
 
-This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario include:
+This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
 **[List specific changes that will be made]**
 
@@ -1000,7 +1000,7 @@ This scenario evaluates the stream temperature response from background sources 
 
 ## Restored vegetation
 
-This scenario evaluates the stream temperature response with streamside vegetation at restored conditions. The stream temperature warming or cooling contributed by removal of streamside vegetation is evaluated by comparing this scenario to the current condition model. Elements of this scenario include:
+This scenario evaluates the stream temperature response with streamside vegetation at restored conditions. The stream temperature warming or cooling contributed by removal of streamside vegetation is evaluated by comparing this scenario to the current condition model. Elements of this scenario or scenarios may include:
 
 * Restoring streamside vegetation in areas along the model extent that are currently characterized as lacking streamside vegetation because of anthropogenic disturbance. The restored vegetation type, height, density, and overhang are identified in the `r paste0( pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`.
 
@@ -1010,7 +1010,7 @@ This scenario evaluates the stream temperature response with streamside vegetati
 
 ## Protected vegetation
 
-This scenario evaluates the stream temperature response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the stream temperature warming or cooling contributed by removal of streamside vegetation in unprotected areas and if existing management strategies achieve surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The stream temperature warming or cooling is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets is evaluated by comparing this scenario to the background model scenario.  Elements of this scenario include:
+This scenario evaluates the stream temperature response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the stream temperature warming or cooling contributed by removal of streamside vegetation in unprotected areas and if existing management strategies achieve surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The stream temperature warming or cooling is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets is evaluated by comparing this scenario to the background model scenario.  Elements of this scenario or scenarios may include:
 
 *	Identifying streamside vegetation areas along the model extent that are protected and will not be removed. The exact definition of a protected area will be determined during the TMDL process.    
 
@@ -1022,7 +1022,7 @@ This scenario evaluates the stream temperature response from only streamside veg
 
 ## Restored stream flow
 
-This scenario evaluates stream temperature response by maintaining permitted water withdrawals as instream flow. The stream temperature warming or cooling from keeping permitted water withdrawals as instream flow is evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario include:
+This scenario evaluates stream temperature response by maintaining permitted water withdrawals as instream flow. The stream temperature warming or cooling from keeping permitted water withdrawals as instream flow is evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:
 
 *	Maintaining all currently permitted water withdrawals as instream flow in order to increase the thermal loading capacity and reduce stream warming.    
 
@@ -1032,7 +1032,7 @@ This scenario evaluates stream temperature response by maintaining permitted wat
 
 ## Tributary temperatures
 
-This scenario evaluates the stream temperature response from restoration actions on tributaries. The stream temperature warming or cooling contributed by removal of streamside vegetation on tributaries is evaluated by comparing this scenario to the current condition model. Elements of this scenario include:
+This scenario evaluates the stream temperature response from restoration actions on tributaries. The stream temperature warming or cooling contributed by removal of streamside vegetation on tributaries is evaluated by comparing this scenario to the current condition model. Elements of this scenario or scenarios may include:
 
 *	Tributary inputs will be set to reflect restored temperature and flow conditions. The tributary flow will reflect maintaining all currently permitted water withdrawals as instream flow.    
 
@@ -1040,7 +1040,7 @@ This scenario evaluates the stream temperature response from restoration actions
 
 ## Climate
 
-This scenario evaluates the stream temperature response from changes in air temperature and relative humidity connected to human caused changes to global or micro climate conditions. Warming or cooling from climate related impacts will be evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario include:
+This scenario evaluates the stream temperature response from changes in air temperature and relative humidity connected to human caused changes to global or micro climate conditions. Warming or cooling from climate related impacts will be evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:
 
 *	Model inputs for air temperature and relative humidity may be modified to reflect potential conditions or improved climate change scenarios if enough information exists that would allow downscaling to the site specific conditions in model extent.    
 
@@ -1050,17 +1050,17 @@ This scenario evaluates the stream temperature response from changes in air temp
 
 ## Channel morphology
 
-This scenario evaluates stream temperature response from improvements to channel morphology, including projects to restore cold water refuges. The warming or cooling from channel morphology improvements is evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario include:    
+This scenario evaluates stream temperature response from improvements to channel morphology, including projects to restore cold water refuges. The warming or cooling from channel morphology improvements is evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:    
 
-*	Modifying channel width and/or depth to reflect locations where improvements to channel morphology are needed. The location of channel morphology projects will be determine during the TMDL process.    
+*	Modifying channel width and/or depth to reflect locations where improvements to channel morphology are needed. The location of channel morphology projects will be determined during the TMDL process.    
 
-*	Model configurations for bottom width, channel angle z, manning’s n, gradient, elevation, porosity, percent hyporheic flow, hyporheic zone thickness, land cover height, density, and overhang may be modified in areas with improved channel morphology.    
+*	Model configurations for channel width, bank angle, channel position, Manning’s *n*, gradient, elevation, porosity, percent hyporheic flow, hyporheic zone thickness, land cover height, density, and overhang may be modified in areas with improved channel morphology.    
 
 * All other model inputs will be the same as the current condition model.    
 
 ## No point sources
 
-This scenario evaluates the stream temperature response from removing point source heat load. The stream temperature warming or cooling from permitted NPDES point sources is evaluated by comparing. This scenario to the current conditions model scenario. Elements of this scenario include:    
+This scenario evaluates the stream temperature response from removing point source heat load. The stream temperature warming or cooling from permitted NPDES point sources is evaluated by comparing. This scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:    
 
 *	Removal of all point sources from the model.    
 
@@ -1068,7 +1068,7 @@ This scenario evaluates the stream temperature response from removing point sour
 
 ## TMDL waste load allocations
 
-This scenario evaluates stream temperature warming or cooling from the TMDL Waste Load Allocations. These scenarios will be compared to the background model scenario to evaluating attainment of the human use allowance allocations. Elements of this scenario include:    
+This scenario evaluates stream temperature warming or cooling from the TMDL Waste Load Allocations. These scenarios will be compared to the background model scenario to evaluating attainment of the human use allowance allocations. Elements of this scenario or scenarios may include:    
 
 *	Modifying point source discharges to reflect proposed or existing TMDL Waste Load Allocations.    
 
@@ -1076,11 +1076,11 @@ This scenario evaluates stream temperature warming or cooling from the TMDL Wast
 
 ## TMDL implementation plans
 
-This set of scenarios evaluate the stream temperature response from proposed or existing DMA and responsible person TMDL implementation plans. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations. It is likely that multiple model scenarios will be developed evaluating a single implementation plan or multiple implementation plans together. Elements of this scenario include:    
+This set of scenarios evaluate the stream temperature response from proposed or existing DMA and responsible person TMDL implementation plans. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations. It is likely that multiple model scenarios will be developed evaluating a single implementation plan or multiple implementation plans together. Elements of this scenario or scenarios may include:    
 
 *	Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.    
 
-*	Model inputs for land cover height, density, overhang, boundary condition flow and temperature, bottom width, channel angle *z*, Manning’s *n*, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.    
+*	Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s *n*, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.    
 
 *	All other model inputs will be the same as the current calibrated model.    
 
