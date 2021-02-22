@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "North Umpqua River"
+# for test: waterbody_name <- "Canton Creek"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -35,6 +35,16 @@ model.extent <- na.omit(model.extent)
 ```
 
 ## `r paste0(waterbody_name, " (Summer Period)")`
+
+```{r, label = `sc`, echo=FALSE}
+
+sc <- section.model.info %>% 
+  dplyr::select(`Source Characteristics`) %>% 
+  pull()
+
+```
+
+`r if(is.na(unique(sc))){}else{sc}`
 
 ### Model domain
 
@@ -65,7 +75,7 @@ The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Mode
 
 ### Important assumptions
 
-**[Update this section]** Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration.
+Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration.
 
 ### Model calibration
 
