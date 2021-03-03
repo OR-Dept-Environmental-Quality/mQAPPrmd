@@ -964,11 +964,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 *	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review. For continuous temperature data a data quality of A or B corresponds to an absolute accuracy $\le$ 1.0 $^\circ C$ and absolute precision $\le$ 2.0 $^\circ C$. Data of unknown quality lacking audit and prepost accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
-Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
-
-The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
-
-It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
+Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated. It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
 ## Model acceptance
 
@@ -1034,7 +1030,11 @@ Management scenarios described in this section summarize means by which the curr
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-**[List specific changes that will be made]**
+* Updating the Little River model to include current discharges from the USFS-Wolf Creek Civilian Conservation Center.       
+
+*	Updating the North Umpqua River Model to include current discharges from the Glide-Idleyld Sanitary District.       
+
+*	Updating the North Umpqua Model to include Douglas County’s permitted water withdrawal of 7 cfs from the North Umpqua River below Steamboat Creek.        
 
 ## Background
 
@@ -1104,7 +1104,7 @@ This scenario evaluates stream temperature response from improvements to channel
 
 This scenario evaluates the stream temperature response from removing point source heat load. The stream temperature warming or cooling from permitted NPDES point sources is evaluated by comparing. This scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:    
 
-*	Removal of all point sources from the model.    
+*	Removal of all point sources from the North Umpqua and Little River models.    
 
 *	All other model inputs will be the same as the current condition model.     
 
@@ -1125,6 +1125,8 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 *	Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s *n*, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.    
 
 *	All other model inputs will be the same as the current calibrated model.    
+
+* Alternative management options for the North Umpqua hydroelectric project.        
 
 ## No Dams
 
