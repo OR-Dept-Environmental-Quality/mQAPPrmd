@@ -105,7 +105,7 @@ if(!model.extent == TRUE){
   
   names(t6x5)[names(t6x5) == "Model Location"] <- if(NROW(t6x5_col)>0){paste0("Model Location (",unique(t6x5_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x5 <- t6x5[,c(18,9,6,13)]
+  t6x5 <- t6x5[,c(19,9,6,13)]
   
   t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,
                            caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
