@@ -1,5 +1,4 @@
-update.date <- "2020-12-24"
-
+library(devtools)
 library(tidyverse)
 library(readxl)
 #install.packages("dataRetrieval")
@@ -14,9 +13,39 @@ library(RAWSmet) # RAWS
 library(mesowest) # MesoWest
 mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # MesoWest
 
+setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download")
+
 # USGS Flow Data ----
 ## Github: https://github.com/USGS-R/dataRetrieval
 usgs.stations.or <- dataRetrieval::whatNWISdata(stateCd="OR", parameterCd = "00060") # 00060	= Discharge [ft3/s]
+usgs.data.or <- dataRetrieval::readNWISdata(stateCd="OR", 
+                                            parameterCd = "00060", # and statCd = "00003" for daily mean which is default
+                                            startDate = "1990-01-01", # start and end dates match AWQMS data pull
+                                            endDate = "2020-12-31")
+save(usgs.stations.or, usgs.data.or, file="usgs.RData") # updated date: 2/27/2021
+
+# OWRI Temp and Flow Data ----
+devtools::source_gist("https://gist.github.com/DEQrmichie/835c7c8b3f373ed80e4b9e34c656951d")
+
+owrd.stations.or <- readxl::read_xlsx(paste0(data.dir, "wrd_nonUSGS_stations.xlsx"), sheet = "Non-USGS_stations")
+
+owrd.stations.nbr <- owrd.stations.or %>% 
+  dplyr::distinct(station_nbr) %>% 
+  dplyr::pull(station_nbr)
+
+owrd.data <- NULL
+for(station in owrd.stations.nbr) {
+owrd.data.ind <- owrd_data(station = station,
+                       startdate = "1/1/1990",
+                       enddate = "12/31/2020",
+                       char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
+owrd.data <- rbind(owrd.data,owrd.data.ind)
+}
+
+owrd.data.or <- owrd.data %>% 
+  dplyr::filter(published_status %in% c("Published"))
+
+save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 2/27/2021
 
 # NCEI Staion Meta ----
 # https://www.ncdc.noaa.gov/homr/reports
@@ -38,6 +67,8 @@ for(db in ncei.databases){
   
   ncei.datacats.or <- rbind(ncei.datacats.or,get$data)
 }
+
+save(ncei, ncei.datacats.or, file="ncei.RData") # updated date: 2/27/2021
 
 # _# NCDC Met Data ----
 ## NOAA National Climatic Data Center: https://www.ncdc.noaa.gov/
@@ -85,6 +116,8 @@ for(i in 1:length(raws.meta$wrccID)){
   }
 }
 
+save(raws.meta, raws.data.type, file="raws.RData") # updated date: 2/27/2021
+
 # AgriMet Data ----
 ## Bureau of Reclamation Columbia-Pacific Northwest Region: https://www.usbr.gov/pn/agrimet/
 ## Note: data spreadsheets were manually organized.
@@ -114,19 +147,4 @@ mw.variables.clean <- mw.variables %>%
   dplyr::ungroup()
 ## Edit mw.variables in Excel.
 # write.csv(mw.variables.clean, "mw_variables.csv") # 1. check setwd(); 2. use lookup table
-
-# SAVE DATA ----
-setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download")
-
-save(update.date,
-     usgs.stations.or,
-     ncei,
-     ncei.datacats.or,
-     #ncdc.station.or,
-     #ncdc.datacats.or,
-     raws.meta,
-     raws.data.type,
-     mw.meta,
-     mw.variables.list,
-     file = paste0("data_sources_",update.date,".RData"))
-
+save(mw.meta, mw.variables.list, file="mw.RData") # updated date: 2/27/2021
