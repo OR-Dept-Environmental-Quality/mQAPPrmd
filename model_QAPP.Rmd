@@ -220,8 +220,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
   t51_sp <- model.input %>% 
     dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
     dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>%
-    dplyr::mutate(Station = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
-                                   `Data Source`,
+    dplyr::mutate(Station = ifelse(is.na(`Station ID`),paste0("No Station ID, ", `Data Source`),
                                    paste0(`Station ID`, ", ", `Data Source`)),
                   `Station ID` = NA,
                   `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
