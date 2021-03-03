@@ -505,11 +505,14 @@ All available continuous stream temperature data were retrieved from DEQ’s Amb
 
 ```{r, label=`t54`, echo=FALSE}
 
-t54_usgs <- usgs.station.tbl %>% 
-  dplyr::mutate(Station = station_nm,
-                `Station ID`= site_no,
-                `Latitude/Longitude` = paste0(round(dec_lat_va,4), "/",round(dec_long_va,3)),
-                `Data Source` = "USGS") %>% 
+t54_usgs <- flow.stations %>% 
+  dplyr::filter(`Data Source` %in% c("USGS")) %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(Lat,4), "/",round(Long,3))) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
+
+t54_owrd <- flow.stations %>% 
+  dplyr::filter(`Data Source` %in% c("OWRD")) %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(Lat,4), "/",round(Long,3))) %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
 
 t54_hydromet <- hydromet.station.tbl %>% 
@@ -529,7 +532,7 @@ t54_sp <- model.input %>%
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, `Data Source`)
 
-t54 <- rbind(t54_usgs,t54_hydromet,t54_sp)
+t54 <- rbind(t54_usgs,t54_owrd,t54_hydromet,t54_sp)
 t54_na_latlong <- t54 %>% dplyr::filter(is.na(`Latitude/Longitude`))
 t54_na_station_id <- t54 %>% dplyr::filter(`Station ID` == "No Station ID")
 t54_na <- rbind(t54_na_latlong,t54_na_station_id)
@@ -546,6 +549,11 @@ t54_usgs <- t54 %>%
   dplyr::select(-`Data Source`)
 row.names(t54_usgs) <- NULL
 
+t54_owrd <- t54 %>% 
+  dplyr::filter(`Data Source` == "OWRD") %>% 
+  dplyr::select(-`Data Source`)
+row.names(t54_owrd) <- NULL
+
 t54_hydromet <- t54 %>% 
   dplyr::filter(`Data Source` == "hydromet") %>% 
   dplyr::select(-`Data Source`)
@@ -561,6 +569,14 @@ if(NROW(t54_usgs)>0){
   t54_usgs_tbl <- knitr::kable(t54_usgs, format = "pandoc", padding = 2, row.names = NA,
                                caption = tbls(name = "t54_usgs",
                                               caption = paste0("Continuous flow measurements available from the USGS flow gaging stations in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t54_owrd)>0){
+  
+  t54_owrd_tbl <- knitr::kable(t54_owrd, format = "pandoc", padding = 2, row.names = NA,
+                               caption = tbls(name = "t54_owrd",
+                                              caption = paste0("Continuous flow measurements available from the OWRD flow gaging stations in the ", qapp_project_area, ".")))
   
 }
 
@@ -582,8 +598,8 @@ if(NROW(t54_sp)>0){
   
 }
 
-t54.tbl.num <- data.frame(table = c("t54_usgs","t54_hydromet","t54_sp"),
-                          `nrow` = c(NROW(t54_usgs),NROW(t54_hydromet),NROW(t54_sp))) %>% 
+t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
+                          `nrow` = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp))) %>% 
   dplyr::filter(!`nrow` == 0)
 
 ```
@@ -591,6 +607,7 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_hydromet","t54_sp"),
 `r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases.
 
 `r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
+`r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
 `r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
 `r if(NROW(t54_sp)>0){t54_sp_tbl}`
 
@@ -1356,20 +1373,31 @@ for(r in unique(sort(qapp.ref$reference))) {
 
 ```{r, echo=FALSE}
 
-t53_2 <- data.sample.count %>%
-  dplyr::filter(!`Station ID` == "TIR") %>% 
-  dplyr::mutate(Station = StationDes) %>% 
-  dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
-  dplyr::arrange(Year, `Station ID`)
-
-if(NROW(t53_2)>0){
+if(NROW(temp.data.sample.count)>0){
   
-  t53_2_tbl <- knitr::kable(t53_2, format = "pandoc", padding = 2,
-                            caption = tbls(name = "t53_2",
+  app_a_tbl <- knitr::kable(temp.data.sample.count, format = "pandoc", padding = 2,
+                            caption = tbls(name = "temp.data.sample.count",
                                            caption = paste0("Summary of existing temperature data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month.")))
   
 }
 
 ```
 
-`r t53_2_tbl`
+`r app_a_tbl`
+
+\newpage
+# Appendix B Continuous flow data summary
+
+```{r, echo=FALSE}
+
+if(NROW(flow.data.sample.count)>0){
+  
+  app_b_tbl <- knitr::kable(flow.data.sample.count, format = "pandoc", padding = 2,
+                            caption = tbls(name = "flow.data.sample.count",
+                                           caption = paste0("Summary of existing flow data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily mean flow results in each month.")))
+  
+}
+
+```
+
+`r app_b_tbl`
