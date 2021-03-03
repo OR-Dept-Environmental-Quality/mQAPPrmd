@@ -397,7 +397,10 @@ owrd.data <- owrd.data.or %>%
   dplyr::select(`Station ID` = station_nbr,
                 `dateTime` = record_date,
                 `Result` = Result.Value) %>% 
-  dplyr::mutate(`Data Source` = "OWRD")
+  dplyr::mutate(`Data Source` = "OWRD") %>% 
+  tidyr::separate(dateTime, sep = "-", into = c("month","day","year")) %>% 
+  dplyr::mutate(dateTime = ymd(paste(year,month,day,sep="-"))) %>% 
+  dplyr::select(-c(month,day,year))
 
 flow.data <- rbind(usgs.data,owrd.data)
 
