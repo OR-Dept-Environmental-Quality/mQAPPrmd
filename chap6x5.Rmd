@@ -49,7 +49,7 @@ t6x5j_col <- t6x5j %>%
 
 names(t6x5j)[names(t6x5j) == "Model Location"] <- if(NROW(t6x5j_col)>0){paste0("Model Location (",unique(t6x5j_col$`Location Units`),")")}else{paste0("Model Location")}
 
-t6x5j <- t6x5j[,c(18,9,6,13)]
+t6x5j <- t6x5j[,c(19,9,6,13)]
 
 if(NROW(t6x5j)>0){
   
