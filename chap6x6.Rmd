@@ -52,8 +52,8 @@ t6x6j <- section.model.input %>%
                 `Model Location` = round(`Model Location`,2),
                 `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                 `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                #`Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                `Data Source` = ifelse(`Interpolated Data` == "T", paste0("Derived data. ",`Data Source`),`Data Source`)) %>%    
+                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`))) %>%   
   dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
   dplyr::rename(`Input Type` = `Model Location Type`) %>% 
   rbind(t6x6j_met) %>% 

@@ -33,7 +33,7 @@ t6x5j <- section.model.input %>%
   dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                 `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                 `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`)),
                 Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
                 `Station ID` = ifelse(`Station ID` == "TIR",NA,`Station ID`),
                 `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),

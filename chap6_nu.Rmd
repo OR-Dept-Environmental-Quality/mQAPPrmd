@@ -98,7 +98,7 @@ if(!model.extent == TRUE){
     dplyr::filter(`Model Location Type` == "Calibration Site") %>%
     dplyr::mutate(`Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                  #`Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
                   Parameter = ifelse(`Station ID` == "TIR", paste0(Parameter," (TIR)"), Parameter),
                   `Station ID` = ifelse(`Station ID` == "TIR",NA,`Station ID`),
@@ -166,8 +166,8 @@ if(!model.extent == TRUE){
                   `Model Location` = round(`Model Location`,2),
                   `Data Source` = ifelse(`Station ID` == "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` == "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                  #`Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>%
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`))) %>%
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 
