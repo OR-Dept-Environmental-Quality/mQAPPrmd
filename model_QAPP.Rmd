@@ -500,12 +500,12 @@ All available continuous stream temperature data were retrieved from DEQ’s Amb
 
 t54_usgs <- flow.stations %>% 
   dplyr::filter(`Data Source` %in% c("USGS")) %>% 
-  dplyr::mutate(`Latitude/Longitude` = paste0(round(Lat,4), "/",round(Long,3))) %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(as.numeric(Lat),4), "/",round(as.numeric(Long),3))) %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
 
 t54_owrd <- flow.stations %>% 
   dplyr::filter(`Data Source` %in% c("OWRD")) %>% 
-  dplyr::mutate(`Latitude/Longitude` = paste0(round(Lat,4), "/",round(Long,3))) %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(as.numeric(Lat),4), "/",round(as.numeric(Long),3))) %>%  
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
 
 t54_hydromet <- hydromet.station.tbl %>% 
