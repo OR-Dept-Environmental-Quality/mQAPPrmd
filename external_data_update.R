@@ -14,6 +14,7 @@ library(mesowest) # MesoWest
 mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # MesoWest
 
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download")
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 
 # USGS Flow Data ----
 ## Github: https://github.com/USGS-R/dataRetrieval
@@ -33,21 +34,18 @@ owrd.stations.nbr <- owrd.stations.or %>%
   dplyr::distinct(station_nbr) %>% 
   dplyr::pull(station_nbr)
 
-owrd.data <- NULL
+owrd.data.or <- NULL
 for(station in owrd.stations.nbr) {
 owrd.data.ind <- owrd_data(station = station,
                        startdate = "1/1/1990",
                        enddate = "12/31/2020",
                        char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
-owrd.data <- rbind(owrd.data,owrd.data.ind)
+owrd.data.or <- rbind(owrd.data.or,owrd.data.ind)
 }
 
-owrd.data.or <- owrd.data %>% 
-  dplyr::filter(published_status %in% c("Published"))
+save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 3/4/2021
 
-save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 2/27/2021
-
-# NCEI Staion Meta ----
+# NCEI Station Meta ----
 # https://www.ncdc.noaa.gov/homr/reports
 ncei <- read.delim("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/emshr_lite.txt")
 
