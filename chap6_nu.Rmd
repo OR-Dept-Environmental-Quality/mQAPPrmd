@@ -40,11 +40,12 @@ model.extent <- na.omit(model.extent)
 
 sc <- section.model.info %>% 
   dplyr::select(`Source Characteristics`) %>% 
+  dplyr::filter(!is.na(`Source Characteristics`)) %>% 
   pull()
 
 ```
 
-`r if(is.na(unique(sc))){}else{sc}`
+`r if(length(sc)>0){sc}else{cat("")}`
 
 ### Model domain
 

@@ -127,8 +127,48 @@ solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperatur
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 # _ USGS flow data ----
 load(paste0(data.dir,"/download/usgs.RData")) # usgs.stations.or & usgs.data.or
-# _ OWRD flow data ----
+# _ OWRD data ----
 load(paste0(data.dir,"/download/owrd.RData")) # owrd.stations.or & owrd.data.or
+owrd.data <- owrd.data.or %>% 
+  dplyr::filter(!published_status %in% c("Missing")) %>% 
+  tidyr::separate(record_date, sep = "-", into = c("month","day","year")) %>% 
+  dplyr::mutate(record_date = ymd(paste(year,month,day,sep="-"))) %>% 
+  dplyr::select(-c(month,day,year)) %>% 
+  dplyr::select(Char_Name = Characteristic.Name,
+                Result_status = published_status,
+                Result_Numeric = Result.Value,
+                MLocID = station_nbr,
+                SampleStartDate = record_date) %>% 
+  dplyr::mutate(Activity_Type = NA,
+                AU_ID = NA,
+                HUC8 = NA,
+                HUC8_Name = NA,
+                HUC10 = NA,
+                HUC12 = NA,
+                HUC12_Name = NA,
+                Lat_DD = NA,
+                Long_DD = NA,
+                Measure = NA,
+                Method_Code = NA,
+                MonLocType = NA,
+                Org_Name = NA,
+                OrganizationID = NA,
+                Project1 = NA,
+                QualifierAbbr = NA,
+                Reachcode = NA,
+                Result_Comment = NA,
+                Result_Depth = NA,
+                Result_Depth_Unit = NA,
+                Result_Operator = NA,
+                Result_Type = NA,
+                Result_Unit = NA,
+                SampleStartTime = NA,
+                SampleStartTZ = NA,
+                SamplingMethod = NA,
+                StationDes = NA,
+                Statistical_Base = NA,
+                Time_Basis = NA)
+
 # _ Worksheet ----
 cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Model Setup Info") %>% 
   dplyr::filter(!`QAPP Project Area` %in%  c("Upper Klamath and Lost Subbasins")) %>% 
@@ -272,7 +312,7 @@ subbasin <- unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project
 subbasin_num <- unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
 
 # _ Temp data ----
-# AWQMS and Solicitation Data
+# AWQMS, Solicitation Data and OWRD Temp Data
 station_awqms <- df.stations.state %>% 
   dplyr::select(AltLocID,AltLocName,AU_ID,BacteriaCode,ben_use_code,CollMethod,Comments,COUNTY,Created_Date,
                 Datum,DO_code,DO_SpawnCode,FishCode,GNIS_Name,HUC10,HUC10_Name,HUC12,HUC12_Name,HUC4_Name,
@@ -287,16 +327,30 @@ station_model <- cal.input %>%
   dplyr::filter(`QAPP Project Area` %in% qapp_project_area) %>% 
   dplyr::left_join(station_awqms[,c("Station ID", "StationDes", "OrgID")], by="Station ID")
 
+station_owrd <- owrd.stations.or %>%
+  dplyr::filter(HUC8 %in% unique(lookup_huc[which(lookup_huc$HUC10 %in%subbasin_num),]$HUC8)) %>% 
+  dplyr::select(`Data Source` = Operator,
+                `Station ID` = station_nbr,
+                `Station` = station_name,
+                Lat,
+                Long)
+
+owrd.data.temp <- owrd.data %>% 
+  dplyr::filter(Char_Name %in% c("daily_max_water_temp_C")) %>% 
+  dplyr::filter(MLocID %in% station_owrd$`Station ID`) %>% 
+  dplyr::mutate(Statistical_Base = "Maximum")
+
 temp.data <- df.awqms.raw.state %>% 
   dplyr::select(HUC8,MLocID,Org_Name,Project1,QualifierAbbr,Result_Numeric,Result_status,SampleStartDate,Statistical_Base,
                 Char_Name,Result_Unit,Result_Type,Time_Basis,Activity_Type,SamplingMethod,Result_Depth,Result_Depth_Unit,
                 SampleStartTime,SampleStartTZ,Method_Code,Result_Comment,HUC10,HUC12,HUC8_Name,HUC12_Name,Lat_DD,Long_DD,
                 OrganizationID,Result_Operator,StationDes,MonLocType,AU_ID,Measure,Reachcode) %>% 
-  rbind(solic.data) %>% 
+  rbind(solic.data, owrd.data.temp) %>% 
   dplyr::filter(!Project1 %in% c("TMDL Data Submission")) %>% 
   dplyr::filter(HUC10 %in% subbasin_num) %>% 
   # QA/QC check:
   dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
+
 
 # Temp data.sample.count will be used in the Appendix A
 temp.data.sample.count <- temp.data %>% 
@@ -351,16 +405,7 @@ usgs.stations <- usgs.stations.or %>%  # Discharge [ft3/s]
                 `Lat` = dec_lat_va, 
                 `Long` = dec_long_va)
 
-owrd.stations <- owrd.stations.or %>%
-  dplyr::filter(Operator %in% c("OWRD")) %>% 
-  dplyr::filter(HUC8 %in% unique(lookup_huc[which(lookup_huc$HUC10 %in%subbasin_num),]$HUC8)) %>% 
-  dplyr::select(`Data Source` = Operator,
-                `Station ID` = station_nbr,
-                `Station` = station_name,
-                Lat,
-                Long)
-
-flow.stations <- rbind(usgs.stations, owrd.stations) %>% 
+flow.stations <- rbind(usgs.stations, station_owrd) %>% 
   dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " & ", " AND ") %>% 
@@ -389,20 +434,18 @@ usgs.data <- usgs.data.or %>%
   dplyr::filter(site_no %in% usgs.stations$`Station ID`) %>% 
   dplyr::select(`Data Source` = agency_cd,
                 `Station ID` = site_no,
-                `dateTime`,
-                `Result` = X_00060_00003)
+                dateTime,
+                Result = X_00060_00003)
 
-owrd.data <- owrd.data.or %>% 
-  dplyr::filter(station_nbr %in% usgs.stations$`Station ID`) %>%
-  dplyr::select(`Station ID` = station_nbr,
-                `dateTime` = record_date,
-                `Result` = Result.Value) %>% 
-  dplyr::mutate(`Data Source` = "OWRD") %>% 
-  tidyr::separate(dateTime, sep = "-", into = c("month","day","year")) %>% 
-  dplyr::mutate(dateTime = ymd(paste(year,month,day,sep="-"))) %>% 
-  dplyr::select(-c(month,day,year))
+owrd.data.flow <- owrd.data %>% 
+  dplyr::filter(Char_Name %in% c("mean_daily_flow_cfs")) %>% 
+  dplyr::filter(MLocID %in% station_owrd$`Station ID`) %>% 
+  dplyr::select(`Station ID`= MLocID,
+                dateTime = SampleStartDate,
+                Result = Result_Numeric)%>% 
+  dplyr::mutate(`Data Source` = "OWRD")
 
-flow.data <- rbind(usgs.data,owrd.data)
+flow.data <- rbind(usgs.data,owrd.data.flow)
 
 # Flow data.sample.count will be used in the Appendix B
 flow.data.sample.count <- flow.data %>% 
@@ -512,37 +555,31 @@ mw.station.tbl <- mw.stations.subbasin %>%
 # _ Save Data ----
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
-save(df.stations.state,
-     df.stations,
-     will.huc10,
-     model.info,
-     model.input,
-     pro.area.tmdls,
-     station_awqms,
-     station_model,
-     temp.data.sample.count,
-     flow.data.sample.count,
+save(df.stations,
+     ref,
      roles,
      risks,
      abbr,
      data.gap,
      npdes.ind,
      npdes.gen,
+     qapp_project_areas,
+     qapp_project_area,
+     station_awqms,
+     station_model,
+     station_owrd,
+     temp.data.sample.count,
+     model.info,
+     model.input,
+     pro.area.tmdls,
      pro.cat.45.tbl,
      flow.stations,
+     flow.data.sample.count,
      ncei.station.tbl,
      raws.station.tbl,
      agrimet.station.tbl,
      hydromet.station.tbl,
      mw.station.tbl,
-     ref,
-     data.dir,
-     huc10.extent,
-     file.name,
-     qapp_project_area,
-     qapp_project_areas,
-     subbasin,
-     subbasin_num,
      strip_alpha,
      strip_tbl_num,
      file = paste0(file.name,".RData"))

@@ -454,7 +454,13 @@ st_model <- station_model %>%
                                       paste0(gsub(",.*$", "", Organization)," (",stringi::stri_sub(strip_alpha(Organization),-4),")"),Organization)) %>% 
   dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
 
-t53_1 <- rbind(st_awqms,st_model) %>% 
+st_owrd <- station_owrd %>% 
+  dplyr::mutate(Organization = "OWRD") %>% 
+  dplyr::rename(Latitude = Lat,
+                Longitude = Long) %>% 
+  dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
+
+t53_1 <- rbind(st_awqms,st_model,st_owrd) %>% 
   dplyr::distinct(Station, .keep_all=TRUE) %>%
   dplyr::left_join(df.stations,by = c("Station ID"="MLocID")) %>% 
   dplyr::mutate(Station = stringr::str_to_title(Station)) %>% 
