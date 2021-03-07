@@ -61,6 +61,6 @@ if(NROW(t6x5j)>0){
 
 ```
 
-`r if(NROW(t6x5j)>0){paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$"Abbreviated Reference")), "). It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized in the "),tbls(name = paste0("t6x5j", model_extent),display="cite")," to improve documentation of the TMDL approach. We do not expect to update the current condition calibration. If adjustments are determinded to be needed for this project, we will use the approach described in Section 6.1.")}`
+`r if(NROW(t6x5j)>0){paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$'Abbreviated Reference')), "). Temperature, flow, and effective shade calibration sites are summarized in "),tbls(name = paste0("t6x5j", model_extent),display="cite")," to improve documentation of the TMDL approach. The current condition calibration may be updated to reflect spawning period conditions. Potential model calibration adjustments are described in Section 6.2 General model parameters.")}`
 
 `r if(NROW(t6x5j)>0){t6x5j_tbl}`

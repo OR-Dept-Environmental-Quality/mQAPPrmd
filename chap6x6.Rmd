@@ -21,7 +21,6 @@ options(kableExtra.auto_format = F)
 
 # For testing: model_extent <- "Model 2: Lemolo Powerhouse #1 to Toketee Reservoir"
 
-
 ```
 
 ##### `r model_extent`
@@ -39,7 +38,6 @@ t6x6j_met <- section.model.input %>%
   dplyr::summarize(`Model Location` = toString(unique(sort(`Model Location`))),
                    Parameter = toString(unique(sort(Parameter))))%>% 
   dplyr::ungroup() %>% 
-  #dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`, Note) %>% 
   dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
                 `Input Type` = `Model Location Type`)
 
@@ -65,7 +63,8 @@ t6x6j_col <- t6x6j %>%
 
 names(t6x6j)[names(t6x6j) == "Model Location"] <- if(NROW(t6x6j_col)>0){paste0("Model Location (",unique(t6x6j_col$`Location Units`),")")}else{paste0("Model Location")}
 
-t6x6j <- t6x6j[,-c(3)]
+t6x6j <- t6x6j[,-c(3)]%>% 
+    dplyr::rename(`Model Input` = Parameter)
 
 if(NROW(t6x6j)>0){
   

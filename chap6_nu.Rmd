@@ -108,7 +108,6 @@ if(!model.extent == TRUE){
                                                               paste0(`Model Location Name`, " (",`Station ID`,")")),
                   `Model Location` = round(`Model Location`,2)) %>% 
     dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-    #dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Parameter`, `Data Source`) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
   
   t6x5_col <- t6x5 %>% 
@@ -124,11 +123,11 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$"Abbreviated Reference")), "). It is not anticipated that adjustments to the calibrated model will be made as part of this QAPP. Temperature, flow, and effective shade calibration sites are summarized in the "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. We do not expect to update the current condition calibration. If adjustments are determinded to be needed for this project, we will use the approach described in Section 6.2.")}`
+`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$'Abbreviated Reference')), "). Temperature, flow, and effective shade calibration sites are summarized in "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The current condition calibration may be updated to reflect spawning period conditions. Potential model calibration adjustments are described in Section 6.2 General model parameters.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
 
-### Model parameters
+### Model inputs
 
 ```{r, label=`t6x6_1`, include=FALSE}
 options(knitr.kable.NA = '') # hide NAs in table
@@ -155,7 +154,6 @@ if(!model.extent == TRUE){
     dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
                      Parameter = toString(unique(sort(Parameter))))%>% 
     dplyr::ungroup() %>% 
-    #dplyr::select(`Station ID`, `Model_Location`, `Model Location Type`, Parameter, `Data Source`, Note) %>% 
     dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
                   `Input Type` = `Model Location Type`)
   
@@ -179,7 +177,8 @@ if(!model.extent == TRUE){
   
   names(t6x6_1)[names(t6x6_1) == "Model Location"] <- if(NROW(t6x6_col)>0){paste0("Model Location (",unique(t6x6_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x6_1 <- t6x6_1[,-c(3)]
+  t6x6_1 <- t6x6_1[,-c(3)]%>% 
+    dplyr::rename(`Model Input` = Parameter)
   
   t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("t6x6_1", waterbody_name),
@@ -201,9 +200,7 @@ t6x6_2 <- section.model.input %>%
 if(NROW(t6x6_2)>1){
   
   cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". <B>[Update as needed:]</B> The data source for these inputs is the ", knitr::combine_words(sort(unique(paste0(t6x6_met$`Model Location Name (Station ID)`," of ", t6x6_met$`Data Source`)))), ". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
-  
-  # cat(unique(sort(t6x6_2$Note)))
-  
+
 } else {
   
   cat("There are no meteorology inputs into the model.")
@@ -212,8 +209,6 @@ if(NROW(t6x6_2)>1){
 ```
 
 ## `r paste0(waterbody_name, " (Spawning period)")`
-
-### Source characteristics
 
 ### Model domain
 
@@ -225,4 +220,4 @@ if(NROW(t6x6_2)>1){
 
 ### Model calibration
 
-### Model parameters
+### Model inputs
