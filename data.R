@@ -347,7 +347,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
                   `Station ID` = station_nbr,
                   `Station` = station_name,
                   Lat,
-                  Long)
+                  Long) %>% 
+    dplyr::distinct(`Station ID`,.keep_all=TRUE)
   
   owrd.data.temp <- owrd.data %>% 
     dplyr::filter(Char_Name %in% c("daily_max_water_temp_C")) %>% 
@@ -385,7 +386,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
     dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
     dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
-    dplyr::arrange(Year, `Station ID`)
+    dplyr::arrange(Year, `Station ID`) %>% 
+    dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
   
   model.info <- cal.model %>% 
     dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
@@ -417,9 +419,12 @@ for (qapp_project_area in qapp_project_areas$areas) {
                   `Station ID` = site_no, 
                   `Station` = station_nm, 
                   `Lat` = dec_lat_va, 
-                  `Long` = dec_long_va)
+                  `Long` = dec_long_va) %>% 
+    dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
+    dplyr::filter(!`Station ID` %in% station_owrd$`Station ID`)
 
   flow.stations <- rbind(usgs.stations, station_owrd) %>% 
+    dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
     dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
     dplyr::mutate_at("Station", str_replace_all, " & ", " AND ") %>% 
@@ -466,7 +471,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::mutate(date = lubridate::date(dateTime),
                   month=lubridate::month(dateTime, label=TRUE, abbr=TRUE),
                   year=lubridate::year(dateTime)) %>% 
-    dplyr::distinct(`Data Source`,`Station ID`,Result,date, .keep_all=TRUE) %>% 
+    dplyr::distinct(`Station ID`,Result,date, .keep_all=TRUE) %>% 
     dplyr::group_by(`Station ID`, year, month) %>%
     dplyr::summarize(n=n()) %>%
     dplyr::ungroup() %>%
@@ -474,7 +479,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::left_join(flow.stations[,c("Station ID", "Station")], by="Station ID") %>% 
     dplyr::rename(Year = year) %>% 
     dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
-    dplyr::arrange(Year, `Station ID`)
+    dplyr::arrange(Year, `Station ID`) %>% 
+    dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
 
   # _ NCDC met data ----
   ncei.stations.huc8 <- ncei.stations %>% 
