@@ -589,7 +589,7 @@ t54_hydromet <- t54 %>%
 row.names(t54_hydromet) <- NULL
 
 t54_sp <- t54 %>% 
-  dplyr::filter(!`Data Source` %in% c("USGS","hydromet")) %>% 
+  dplyr::filter(!`Data Source` %in% c("USGS","OWRD","hydromet")) %>% 
   dplyr::arrange(`Data Source`,`Station ID`,Station)
 row.names(t54_sp) <- NULL
 
