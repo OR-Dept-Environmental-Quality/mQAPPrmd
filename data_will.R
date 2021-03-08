@@ -333,7 +333,8 @@ station_owrd <- owrd.stations.or %>%
                 `Station ID` = station_nbr,
                 `Station` = station_name,
                 Lat,
-                Long)
+                Long) %>% 
+  dplyr::distinct(`Station ID`,.keep_all=TRUE)
 
 owrd.data.temp <- owrd.data %>% 
   dplyr::filter(Char_Name %in% c("daily_max_water_temp_C")) %>% 
@@ -350,7 +351,6 @@ temp.data <- df.awqms.raw.state %>%
   dplyr::filter(HUC10 %in% subbasin_num) %>% 
   # QA/QC check:
   dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
-
 
 # Temp data.sample.count will be used in the Appendix A
 temp.data.sample.count <- temp.data %>% 
@@ -372,7 +372,8 @@ temp.data.sample.count <- temp.data %>%
   dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
   dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
   dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
-  dplyr::arrange(Year, `Station ID`)
+  dplyr::arrange(Year, `Station ID`) %>% 
+  dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
 
 model.info <- cal.model %>% 
   dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
@@ -403,9 +404,12 @@ usgs.stations <- usgs.stations.or %>%  # Discharge [ft3/s]
                 `Station ID` = site_no, 
                 `Station` = station_nm, 
                 `Lat` = dec_lat_va, 
-                `Long` = dec_long_va)
+                `Long` = dec_long_va) %>% 
+  dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
+  dplyr::filter(!`Station ID` %in% station_owrd$`Station ID`)
 
 flow.stations <- rbind(usgs.stations, station_owrd) %>% 
+  dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
   dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " & ", " AND ") %>% 
@@ -460,7 +464,8 @@ flow.data.sample.count <- flow.data %>%
   dplyr::left_join(flow.stations[,c("Station ID", "Station")], by="Station ID") %>% 
   dplyr::rename(Year = year) %>% 
   dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
-  dplyr::arrange(Year, `Station ID`)
+  dplyr::arrange(Year, `Station ID`) %>% 
+  dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
 
 # _ NCDC met data ----
 ncei.stations.huc10 <- ncei.stations %>% 
