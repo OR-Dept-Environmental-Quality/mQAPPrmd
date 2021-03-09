@@ -131,7 +131,7 @@ tcat5 <- pro.cat.45.tbl %>%
                 `Assessment Unit ID` = AU_ID,
                 `Year Listed` = Year_liste,
                 `Use Period` = Period) %>% 
-  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Criterion Period`) %>% 
+  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
   dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
 
 if(NROW(tcat5)>0){
