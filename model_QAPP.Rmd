@@ -885,11 +885,11 @@ if(mod.check == "11"){
 
 ```
 
-The following models were used in the development of the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")` for the associated waterbodies (`r tbls(name = "tmdl.mod", display="cite")`).
+The following models were used in the development of the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")` for the associated waterbodies (`r tbls(name = "tmdl.mod", display="cite")`).
 
 `r tmdl.mod.tbl`
 
-Model calibration was completed by DEQ and described in `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models may occur as part of this project. If it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
+Model calibration was completed by DEQ and described in `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models may occur as part of this project. If it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified to improve model fit are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model Evaluation and Acceptance and generally represents improved agreement between measured observations and model predictions.
 
 Additional Heat Source Version # models will be built to simulate stream temperature during the spawning period for all water bodies that support spawning in the North Umpqua Subbasin.
 
