@@ -78,7 +78,7 @@ Documents can be provided upon request in an alternate format for individuals wi
 
 \newpage
 # Abbreviations
-```{r, label=`cat5`, echo=FALSE}
+```{r, label=`abbr`, echo=FALSE}
 
 abbr.pro <- abbr %>% 
   dplyr::filter(`Project Area` %in% c("All", qapp_project_area)) %>% 
@@ -130,7 +130,7 @@ tcat5 <- pro.cat.45.tbl %>%
   dplyr::rename(`Assessment Unit Name` = AU_Name,
                 `Assessment Unit ID` = AU_ID,
                 `Year Listed` = Year_liste,
-                `Criterion Period` = Period) %>% 
+                `Use Period` = Period) %>% 
   dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Criterion Period`) %>% 
   dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
 
