@@ -178,8 +178,6 @@ The applicable BBNCs in the North Umpqua Subbasin include:
 
 •	Salmon and Steelhead Migration Corridors: 20.0$^\circ C$/68.0$^\circ F$     
 
-•	Lahontan Cutthroat or Redband Trout Use: 20.0$^\circ C$/68.0$^\circ F$      
-
 The existing temperature TMDL addresses temperature on streams with both point and nonpoint sources of thermal loads. 
 
 The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2006 Umpqua Basin TMDL were developed for short time periods in July 2001 and July 2002, which do not coincide with the spawning season. The simulation years are also not well harmonized among the various waterbodies. Therefore, some Heat Source models need to be updated to cover the spawning season using data collected by DEQ during the 2009 spawning season to support the TMDL modeling.
