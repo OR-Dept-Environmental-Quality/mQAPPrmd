@@ -132,7 +132,7 @@ if(waterbody_name %in% "North Umpqua River"){
 
 ### Important assumptions
 
-Key assumptions made during collection, handling, transformation (harmonizing format and terms for compilation), and incorporation of data into the existing model was documented in the QAPP for the original modeling. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration.
+**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")` and model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))`.
 
 ### Model calibration
 
@@ -179,11 +179,11 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$'Abbreviated Reference')), "). Temperature, flow, and effective shade calibration sites are summarized in "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The current condition calibration may be updated to reflect spawning period conditions. Potential model calibration adjustments are described in Section 6.2 General model parameters.")}`
+`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info[is.na(section.model.info$'Reference Report'),]$'TMDL Document')," (",strip_alpha(unique(section.model.info[is.na(section.model.info$'Reference Report'),]$'Abbreviated Reference')), "). Temperature, flow, and effective shade calibration sites are summarized in "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The current condition calibration may be updated to reflect spawning period conditions. Potential model calibration adjustments are described in Section 6.2 General model parameters.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
 
-### Model inputs
+### Model inputs and parameters
 
 ```{r, label=`t6x6_1`, include=FALSE}
 options(knitr.kable.NA = '') # hide NAs in table
@@ -255,7 +255,7 @@ t6x6_2 <- section.model.input %>%
 
 if(NROW(t6x6_2)>1){
   
-  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". <B>[Update as needed:]</B> The data source for these inputs is the ", knitr::combine_words(sort(unique(paste0(t6x6_met$`Model Location Name (Station ID)`," of ", t6x6_met$`Data Source`)))), ". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
+  cat(paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area. "))
 
 } else {
   
@@ -276,4 +276,4 @@ if(NROW(t6x6_2)>1){
 
 ### Model calibration
 
-### Model inputs
+### Model inputs and parameters
