@@ -56,11 +56,17 @@ if(NROW(t6x5j)>0){
   t6x5j_tbl <- knitr::kable(t6x5j, format = "pandoc", padding = 2,
                      caption = tbls(name = paste0("t6x5j", model_extent),
                                     caption = paste0("Calibration sites and parameters used in the existing ", model_extent, " Heat Source Model.")))
+    
+  mod.loc <- ifelse(tmdl.mod.2$mod_rmd == "hs7" | tmdl.mod.2$mod_rmd == "hs8"| tmdl.mod.2$mod_rmd == "hs9",
+                    print("The model location in the table below describes the distance of each input from the most downstream model node."),
+                    ifelse(tmdl.mod.2$mod_rmd == "hs6",
+                           print("The model location in the table below describes the distance of each input from the most upstream model node."),
+                           print("")))
   
 }
 
 ```
 
-`r if(NROW(t6x5j)>0){paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$'Abbreviated Reference')), "). Temperature, flow, and effective shade calibration sites are summarized in "),tbls(name = paste0("t6x5j", model_extent),display="cite")," to improve documentation of the TMDL approach. The current condition calibration may be updated to reflect spawning period conditions. Potential model calibration adjustments are described in Section 6.2 General model parameters.")}`
+`r if(NROW(t6x5j)>0){paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info$'TMDL Document')," (",strip_alpha(unique(section.model.info$'Abbreviated Reference')), "). Temperature, flow, and effective shade calibration sites are summarized in "),tbls(name = paste0("t6x5j", model_extent),display="cite")," to improve documentation of the TMDL approach. The current condition calibration may be updated to reflect spawning period conditions. Potential model calibration adjustments are described in Section 6.2 General model parameters.", mod.loc[1])}`
 
 `r if(NROW(t6x5j)>0){t6x5j_tbl}`
