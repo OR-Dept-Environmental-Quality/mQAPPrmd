@@ -388,7 +388,7 @@ model.input  <- cal.input %>%
   dplyr::mutate(Latitude = round(as.numeric(Latitude),4),
                 Longitude = round(Longitude,3))
 
-pro.area.tmdls <- knitr::combine_words(unique(model.info[is.na(model.info$'Reference Report'),]$"TMDL Document"))
+pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
 
 qapp_project_area_huc10 <- will.huc10 %>% 
   dplyr::filter(HUC_10 %in% subbasin_num)
