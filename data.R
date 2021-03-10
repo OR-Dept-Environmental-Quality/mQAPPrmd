@@ -127,6 +127,8 @@ solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperatur
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 # _ USGS flow data ----
 load(paste0(data.dir,"/download/usgs.RData")) # usgs.stations.or & usgs.data.or
+usgs.stations <- usgs.stations.or %>% 
+  dplyr::filter(site_no %in% usgs.data.or$site_no) # filter out the stations that have data beyond the period of 1990-2020
 # _ OWRD data ----
 load(paste0(data.dir,"/download/owrd.RData")) # owrd.stations.or & owrd.data.or
 owrd.data <- owrd.data.or %>% 
@@ -168,6 +170,9 @@ owrd.data <- owrd.data.or %>%
                 StationDes = NA,
                 Statistical_Base = NA,
                 Time_Basis = NA)
+
+owrd.stations <- owrd.stations.or %>% 
+  dplyr::filter(station_nbr %in% owrd.data$MLocID) # filter out the stations that have data beyond the period of 1990-2020
 
 # _ Worksheet ----
 cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Model Setup Info") %>% 
@@ -347,7 +352,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
     dplyr::left_join(station_awqms[,c("Station ID", "StationDes", "OrgID")], by="Station ID")
   
-  station_owrd <- owrd.stations.or %>%
+  station_owrd <- owrd.stations %>%
     dplyr::filter(HUC8 %in% subbasin_num) %>% 
     dplyr::select(`Data Source` = Operator,
                   `Station ID` = station_nbr,
@@ -416,7 +421,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
   
   # _ Flow data ----
-  usgs.stations <- usgs.stations.or %>%  # Discharge [ft3/s]
+  station_usgs <- usgs.stations %>%  # Discharge [ft3/s]
     dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
     dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
     dplyr::filter(huc_cd %in% subbasin_num) %>%
@@ -429,7 +434,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::filter(!`Station ID` %in% station_owrd$`Station ID`)
 
-  flow.stations <- rbind(usgs.stations, station_owrd) %>% 
+  flow.stations <- rbind(station_usgs, station_owrd) %>% 
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
     dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
@@ -456,7 +461,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::mutate_at("Station", str_replace_all, "Suth", "South")
  
   usgs.data <- usgs.data.or %>% 
-    dplyr::filter(site_no %in% usgs.stations$`Station ID`) %>% 
+    dplyr::filter(site_no %in% station_usgs$`Station ID`) %>% 
     dplyr::select(`Data Source` = agency_cd,
                   `Station ID` = site_no,
                   dateTime,
@@ -766,7 +771,7 @@ map.temp.tbl <- df.awqms.raw.state %>%
   dplyr::arrange(Year, `Station ID`)
   
 # _ Flow ----
-flow.usgs <- usgs.stations.or %>%
+flow.usgs <- usgs.stations %>%
   dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
   dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
   #dplyr::filter(!is.na(dec_lat_va)) %>% # 2/8 changed
