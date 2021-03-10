@@ -404,7 +404,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
                   Latitude = round(Latitude,4),
                   Longitude = round(Longitude,3))
   
-  pro.area.tmdls <- knitr::combine_words(unique(model.info[is.na(model.info$'Reference Report'),]$"TMDL Document"))
+  pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
   
   qapp_project_area_huc8 <- wbd.huc8 %>% 
     dplyr::filter(HUC_8 %in% subbasin_num)
