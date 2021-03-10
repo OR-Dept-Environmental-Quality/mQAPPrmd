@@ -445,7 +445,7 @@ flow.stations <- rbind(station_usgs, station_owrd) %>%
   dplyr::mutate_at("Station", str_replace_all, "Suth", "South")
 
 usgs.data <- usgs.data.or %>% 
-  dplyr::filter(site_no %in% usgs.stations$`Station ID`) %>% 
+  dplyr::filter(site_no %in% station_usgs$`Station ID`) %>% 
   dplyr::select(`Data Source` = agency_cd,
                 `Station ID` = site_no,
                 dateTime,
