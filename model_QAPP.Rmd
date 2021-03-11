@@ -451,21 +451,10 @@ Meteorological data, including air temperature, cloudiness, relative humidity, a
 ## Thermal Infrared Radiometry (TIR) data
 
 ```{r, label=`t52`, echo=FALSE}
-
-t52 <- model.input %>% 
-  dplyr::filter(`Station ID` == "TIR") %>% 
-  dplyr::rename(`Abbreviated Reference` = `Data Source`) %>% 
-  dplyr::left_join(ref, by = "Abbreviated Reference") %>% 
-  dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
-  dplyr::mutate(Reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`)))
-
-waterbodies <- unique(sort(t52$`Model Waterbody`))
-
-citations <- unique(sort(t52$`Abbreviated Reference`))
-
 t52 <- tir %>% 
   dplyr::filter(`QAPP Project Area` == qapp_project_area) %>% 
-  dplyr::select(Stream, Date)
+  dplyr::select(Stream, Date) %>% 
+  dplyr::arrange(Stream)
 
 if(NROW(t52)>0){
   
