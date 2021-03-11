@@ -220,7 +220,9 @@ DEQ has developed Heat Source models (version 8) for the main stem, North Fork a
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-For these reasons, the Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was selected for stream temperature simulation. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+7)	**[Update as needed]**
+
+**[Update this paragraph where CE-QUAL-W2 is used].** For these reasons, the Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was selected for stream temperature simulation. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The heat source model has been used in numerous stream temperature related studies including Bond et al. (2015), Diabat et al. (2013), Holzapfel et al. (2013), Justice et al. (2017), Lawrence et al. (2014), Loheide and Gorelick (2006), Woltemade and Hawkins (2016), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
@@ -441,11 +443,29 @@ waterbodies <- unique(sort(t52$`Model Waterbody`))
 
 citations <- unique(sort(t52$`Abbreviated Reference`))
 
+t52 <- tir %>% 
+  dplyr::filter(`QAPP Project Area` == qapp_project_area) %>% 
+  dplyr::select(Stream, Date)
+
+if(NROW(t52)>0){
+  
+  t52_tbl <-  knitr::kable(t52, format = "pandoc", padding = 2,
+                             caption = tbls(name = "t52",
+                                            caption = paste0("Streams and the TIR collection dates in the ", qapp_project_area,".")))
+  
+}
+
+t52_ref <- tir %>% 
+  dplyr::filter(`QAPP Project Area` == qapp_project_area) %>% 
+  dplyr::left_join(ref, by = "Abbreviated Reference") %>% 
+  dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
+  dplyr::mutate(Reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`)))
+
 ```
 
-DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area`. TIR data is used to characterize the thermal regime of the streams and habitat quality.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
-`r if(NROW(t52)>0) {paste0("TIR data are available for ", knitr::combine_words(waterbodies), " (", knitr::combine_words(citations), ").")}`
+`r if(NROW(t52)>0){t52_tbl}`
 
 ## Continuous stream temperature data
 
@@ -468,7 +488,7 @@ st_model <- station_model %>%
                                       paste0(gsub(",.*$", "", Organization)," (",stringi::stri_sub(strip_alpha(Organization),-4),")"),Organization)) %>% 
   dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
 
-st_owrd <- station_owrd %>% 
+st_owrd <- station_owrd_temp %>% 
   dplyr::mutate(Organization = "OWRD") %>% 
   dplyr::rename(Latitude = Lat,
                 Longitude = Long) %>% 
@@ -510,7 +530,7 @@ if(NROW(t53_1)>0){
 
 ```
 
-All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). `r tbls(name = "t53_1", display="cite")` list all the locations where continuous stream temperature data were collected and the organizations that collected that data. Appendix A summarizes when data were collected at each station.
+All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). `r tbls(name = "t53_1", display="cite")` lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. Appendix A summarizes when data were collected at each station.
 
 `r if(NROW(t53_1)>0){t53_1_tbl}`
 
@@ -725,7 +745,7 @@ $$\Delta Temperature = \frac{\Delta Heat}{Density\times \text {Specific Heat}\ti
 
 Stream temperature is influenced by natural factors such as climate, geomorphology, hydrology, and vegetation. Human or anthropogenic heat sources may include discharges of heated water to surface waters, increases solar radiation heat flux on the water’s surface due to the removal of near-stream vegetation and reductions in stream shading, changes to stream channel form, reductions in natural stream flows, and the reduction of cold water inputs from groundwater.
 
-## General model parameters
+## General model inputs and parameters
 
 ```{r, label=`chap6`, include=FALSE}
 
@@ -1158,12 +1178,12 @@ DEQ staff involved in developing and configuring models, performing model calibr
 
 The DEQ Project Manager (or designee) will provide monthly progress reports to DEQ Management and USEPA. As appropriate, these reports will provide information on the following:
 
-*	Adherence to project schedule and/or budget
-*	Deviations from approved QAPP, as determined from project assessment and oversight activities
-*	The impact of any deviations on model application quality and uncertainty
-*	The need for and results of response actions to correct any deviations
-*	Potential uncertainties in decisions based on model predictions and data
-*	Data quality assessment findings regarding model input data and model outputs
+*	Adherence to project schedule and/or budget.
+*	Deviations from approved QAPP, as determined from project assessment and oversight activities.
+*	The impact of any deviations on model application quality and uncertainty.
+*	The need for and results of response actions to correct any deviations.
+*	Potential uncertainties in decisions based on model predictions and data.
+*	Data quality assessment findings regarding model input data and model outputs.
 
 ## Project schedule
 
@@ -1187,11 +1207,11 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **Task P2** Develop modeling Quality Assurance Project Plans (QAPPs).  The modeling QAPPs will identify the available data and overall technical approach to be taken for each TMDL project.     
 
-**Task P3** Mapping of Designated Management Agencies (DMAs) and Responsible Persons for counties that are within the project area. All Oregon counties are within the project area except Tillamook and Clatsop, and Deschutes counties.     
+**Task P3** Mapping of Designated Management Agencies (DMAs) and Responsible Persons for counties that are within the project area. All Oregon counties are within the project area except Tillamook, Clatsop, and Deschutes counties.     
 
 **Task P4** Development of computer code to streamline analysis tasks and TMDL document production.     
 
-**Task P5** Development of template TMDL and WQMP section outline and language.     
+**Task P5** Development of template TMDL and WQMP section outlines and language.     
 
 **Task P6** Implement Modeling QAPPs. This task a follow-up to Task P2. Gathering of new data and completion of new technical described in the modeling QAPPs.     
 
@@ -1205,7 +1225,7 @@ DEQ does not anticipate collecting additional field samples. Water quality data 
 
 The modeling software to be used for this project is available on DEQ’s TMDL program website (https://www.oregon.gov/deq/wq/tmdls/Pages/TMDLs-Tools.aspx). 
 
-Model-generated data resulting from testing, calibration, and scenarios will be stored in spreadsheets and text files by DEQ in TMDL project directory.  Metadata describing the content, date, and personnel involved in modeling will be documented alongside raw and summarized data.
+Model-generated data resulting from testing, calibration, and scenarios will be stored in spreadsheets and text files by DEQ in the TMDL project directory.  Metadata describing the content, date, and personnel involved in modeling will be documented alongside raw and summarized data.
 
 Secondary data developed as part of this task will be maintained as hardcopy only, both hardcopy and electronic, or electronic only, depending on their nature. 
 
@@ -1215,7 +1235,7 @@ Routine maintenance of DEQ’s computers and servers is performed by in-house co
 
 # Recordkeeping and archiving
 
-All data and documents generated during the course of the TMDL project will be achieved according to the current Oregon State Archives Records Retention Schedules. Generally TMDL documents will be retained until 15 years after the TMDL is no longer operational.
+All data and documents generated during the course of the TMDL project will be archived according to the current Oregon State Archives Records Retention Schedules. Generally TMDL documents will be retained until 15 years after the TMDL is no longer operational.
 
 The following information will be included in hard copy or electronic format in the TMDL project and Master TMDL folders located on DEQ’s TMDL server.
 
@@ -1335,8 +1355,9 @@ tmdl.ref <- model.info %>%
   dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::select(reference)
 
-tir.ref <- data.frame(unique(sort(t52$Reference))) %>% 
-  dplyr::rename(reference = "unique.sort.t52.Reference..")
+tir.ref <- t52_ref %>% 
+  dplyr::select(`Full Reference`) %>% 
+  dplyr::rename(reference = `Full Reference`)
 
 mod.ref <- model.info %>% 
   dplyr::filter(!is.na(mod_ref)) %>% 

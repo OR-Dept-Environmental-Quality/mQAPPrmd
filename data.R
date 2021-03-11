@@ -35,55 +35,10 @@ strip_tbl_num <- function(x) {
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
-# _ TMDL solicitation data ----
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave1_2021-01-08/Wave1_2021-01-08_SumStats.RData")
-wave1 <- sumstats
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave2_2021-02-04/Wave2_2021-02-04_SumStats.RData")
-wave2 <- sumstats
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave3_2021-02-23/Wave3_2021-02-23_SumStats.RData")
-wave3 <- sumstats
-solic.data <- rbind(wave1,wave2,wave3) %>% 
-  dplyr::filter(ResultStatusID == "Final") %>% 
-  dplyr::select(Monitoring.Location.ID,Project,Result,ResultStatusID,ActStartDate,StatisticalBasis,charID,r_units,RsltType,RsltTimeBasis,
-                ActivityType,SmplColMthd,SmplDepth,SmplDepthUnit,ActStartTime,ActStartTimeZone,Result.Analytical.Method.ID,cmnt) %>% 
-  dplyr::rename(MLocID = Monitoring.Location.ID,
-                Project1 = Project,
-                Result_Numeric = Result,
-                Result_status = ResultStatusID,
-                SampleStartDate = ActStartDate,
-                Statistical_Base = StatisticalBasis,
-                Char_Name = charID,
-                Result_Unit = r_units,
-                Result_Type = RsltType,
-                Time_Basis = RsltTimeBasis,
-                Activity_Type = ActivityType,
-                SamplingMethod = SmplColMthd,
-                Result_Depth = SmplDepth,
-                Result_Depth_Unit = SmplDepthUnit,
-                SampleStartTime = ActStartTime,
-                SampleStartTZ = ActStartTimeZone,
-                Method_Code = Result.Analytical.Method.ID,
-                Result_Comment = cmnt) %>% 
-  dplyr::mutate(HUC8 = NA,
-                Org_Name = NA,
-                QualifierAbbr = NA,
-                HUC10 = NA,
-                HUC12 = NA,
-                HUC8_Name = NA,
-                HUC12_Name = NA,
-                Lat_DD = NA,
-                Long_DD = NA,
-                OrganizationID = NA,
-                Result_Operator = NA,
-                StationDes = NA,
-                MonLocType = NA,
-                AU_ID = NA,
-                Measure = NA,
-                Reachcode = NA)
-
+# _ TMDL solicitation stations and data ----
 solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/MLocs_ALL_Waves_FINAL.xlsx", 
                                     sheet = "Monitoring_Locations") %>% 
-  dplyr::filter(Stations.DB.Status %in% c("New")) %>% 
+  #dplyr::filter(Stations.DB.Status %in% c("New")) %>% 
   dplyr::select(-c(Stations.DB.Status,Alternate.Context.2,Alternate.Context.3,Alternate.ID.2,Alternate.ID.3,
                    Monitoring.Location.Description,Monitoring.Location.Status.Comment,Monitoring.Location.Status.ID)) %>% 
   dplyr::rename(AltLocName = Alternate.Context.1,
@@ -122,7 +77,77 @@ solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperatur
                 HUC12_Name = NA,
                 HUC4_Name = NA,
                 HUC6_Name = NA,
-                HUC8_Name = NA)
+                HUC8_Name = NA,
+                Source = "solic")
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave1_2021-01-08/Wave1_2021-01-08_SumStats.RData")
+wave1 <- sumstats
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave2_2021-02-04/Wave2_2021-02-04_SumStats.RData")
+wave2 <- sumstats
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave3_2021-02-23/Wave3_2021-02-23_SumStats.RData")
+wave3 <- sumstats
+solic.data <- rbind(wave1,wave2,wave3) %>% 
+  dplyr::filter(ResultStatusID == "Final") %>% 
+  dplyr::select(Monitoring.Location.ID,Project,Result,ResultStatusID,ActStartDate,StatisticalBasis,charID,r_units,RsltType,RsltTimeBasis,
+                ActivityType,SmplColMthd,SmplDepth,SmplDepthUnit,ActStartTime,ActStartTimeZone,Result.Analytical.Method.ID,cmnt) %>% 
+  dplyr::rename(MLocID = Monitoring.Location.ID,
+                Project1 = Project,
+                Result_Numeric = Result,
+                Result_status = ResultStatusID,
+                SampleStartDate = ActStartDate,
+                Statistical_Base = StatisticalBasis,
+                Char_Name = charID,
+                Result_Unit = r_units,
+                Result_Type = RsltType,
+                Time_Basis = RsltTimeBasis,
+                Activity_Type = ActivityType,
+                SamplingMethod = SmplColMthd,
+                Result_Depth = SmplDepth,
+                Result_Depth_Unit = SmplDepthUnit,
+                SampleStartTime = ActStartTime,
+                SampleStartTZ = ActStartTimeZone,
+                Method_Code = Result.Analytical.Method.ID,
+                Result_Comment = cmnt) %>% 
+  dplyr::mutate(Org_Name = NA,
+                QualifierAbbr = NA,
+                HUC10 = NA,
+                HUC12 = NA,
+                HUC8_Name = NA,
+                HUC12_Name = NA,
+                Lat_DD = NA,
+                Long_DD = NA,
+                OrganizationID = NA,
+                Result_Operator = NA,
+                StationDes = NA,
+                MonLocType = NA,
+                AU_ID = NA,
+                Measure = NA,
+                Reachcode = NA,
+                Source = "solic") %>% 
+  dplyr::filter(Statistical_Base == "Daily Maximum") %>%  # match AWQMS Statistical_Base == "Maximum"
+  dplyr::mutate(Statistical_Base = "Maximum") %>% 
+  dplyr::left_join(solic.stations[,c("HUC8","MLocID")], by = "MLocID")
+
+# _ AWQMS + Solicitation data ----
+temp.data.sum <- df.awqms.raw.state %>% 
+  dplyr::select(HUC8,MLocID,Org_Name,Project1,QualifierAbbr,Result_Numeric,Result_status,SampleStartDate,Statistical_Base,
+                Char_Name,Result_Unit,Result_Type,Time_Basis,Activity_Type,SamplingMethod,Result_Depth,Result_Depth_Unit,
+                SampleStartTime,SampleStartTZ,Method_Code,Result_Comment,HUC10,HUC12,HUC8_Name,HUC12_Name,Lat_DD,Long_DD,
+                OrganizationID,Result_Operator,StationDes,MonLocType,AU_ID,Measure,Reachcode) %>% 
+  dplyr::mutate(Source = "awqms") %>% 
+  # AWQMS QA/QC check:
+  dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
+  dplyr::filter(!Project1 %in% c("TMDL Data Submission")) %>%
+  rbind(solic.data)
+
+temp.stations.sum <- df.stations.state %>% 
+  dplyr::select(AltLocID,AltLocName,AU_ID,BacteriaCode,ben_use_code,CollMethod,Comments,COUNTY,Created_Date,
+                Datum,DO_code,DO_SpawnCode,FishCode,GNIS_Name,HUC10,HUC10_Name,HUC12,HUC12_Name,HUC4_Name,
+                HUC6_Name,HUC8,HUC8_Name,Lat_DD,LLID,Long_DD,MapScale,Measure,MLocID,MonLocType,OrgID,
+                Permanent_Identifier,pH_code,Reachcode,RiverMile,SpawnCode,STATE,StationDes,TribalLand,
+                TribalName) %>%
+  dplyr::mutate(Source = "awqms") %>% 
+  rbind(solic.stations) %>% 
+  dplyr::distinct(MLocID, .keep_all = TRUE)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 # _ USGS flow data ----
@@ -182,12 +207,12 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
                                        ifelse(substr(`Model version`, 13,13) == "7", "Heat Source Version 7",
                                               ifelse(substr(`Model version`, 13,13) == "8", "Heat Source Version 8",
                                                      ifelse(substr(`Model version`, 13,13) == "9", "Heat Source Version 9",
-                                                            ifelse(substr(`Model version`, 1,2) == "CE", "CE-Qual-W2 Version 3","SHADOW")))))) %>% 
+                                                            ifelse(substr(`Model version`, 1,2) == "CE", "CE-QUAL-W2 Version 3","SHADOW")))))) %>% 
   dplyr::mutate(mod_rmd = ifelse(Model_version == "Heat Source Version 6", "hs6",
                                  ifelse(Model_version == "Heat Source Version 7", "hs7",
                                         ifelse(Model_version == "Heat Source Version 8", "hs8",
                                                ifelse(Model_version == "Heat Source Version 9", "hs9",
-                                                      ifelse(Model_version == "CE-Qual-W2 Version 3", "ce",
+                                                      ifelse(Model_version == "CE-QUAL-W2 Version 3", "ce",
                                                              "sh")))))) %>% 
   dplyr::mutate(mod_score = ifelse(mod_rmd == "hs6", "1",
                                    ifelse(mod_rmd == "hs7", "10",
@@ -201,6 +226,7 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
                                                NA))))
 cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Inputs") %>% 
   dplyr::filter(!`QAPP Project Area` %in% "Upper Klamath and Lost Subbasins")
+tir <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "TIR")
 schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
 ref <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "References")
 roles <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "roles")
@@ -338,14 +364,8 @@ for (qapp_project_area in qapp_project_areas$areas) {
   
   # _ Temp data ----
   # AWQMS, Solicitation Data and OWRD Temp Data
-  station_awqms <- df.stations.state %>% 
-    dplyr::select(AltLocID,AltLocName,AU_ID,BacteriaCode,ben_use_code,CollMethod,Comments,COUNTY,Created_Date,
-                  Datum,DO_code,DO_SpawnCode,FishCode,GNIS_Name,HUC10,HUC10_Name,HUC12,HUC12_Name,HUC4_Name,
-                  HUC6_Name,HUC8,HUC8_Name,Lat_DD,LLID,Long_DD,MapScale,Measure,MLocID,MonLocType,OrgID,
-                  Permanent_Identifier,pH_code,Reachcode,RiverMile,SpawnCode,STATE,StationDes,TribalLand,
-                  TribalName) %>%
-    rbind(solic.stations) %>% 
-    dplyr::filter(HUC8_Name %in% subbasin) %>% 
+  station_awqms <- temp.stations.sum %>% 
+    dplyr::filter(HUC8 %in% subbasin_num) %>% 
     dplyr::rename(`Station ID` = MLocID)
   
   station_model <- cal.input %>% 
@@ -364,18 +384,15 @@ for (qapp_project_area in qapp_project_areas$areas) {
   owrd.data.temp <- owrd.data %>% 
     dplyr::filter(Char_Name %in% c("daily_max_water_temp_C")) %>% 
     dplyr::filter(MLocID %in% station_owrd$`Station ID`) %>% 
-    dplyr::mutate(Statistical_Base = "Maximum")
+    dplyr::mutate(Statistical_Base = "Maximum") %>% 
+    dplyr::mutate(Source = "owrd")
   
-  temp.data <- df.awqms.raw.state %>% 
-    dplyr::select(HUC8,MLocID,Org_Name,Project1,QualifierAbbr,Result_Numeric,Result_status,SampleStartDate,Statistical_Base,
-                  Char_Name,Result_Unit,Result_Type,Time_Basis,Activity_Type,SamplingMethod,Result_Depth,Result_Depth_Unit,
-                  SampleStartTime,SampleStartTZ,Method_Code,Result_Comment,HUC10,HUC12,HUC8_Name,HUC12_Name,Lat_DD,Long_DD,
-                  OrganizationID,Result_Operator,StationDes,MonLocType,AU_ID,Measure,Reachcode) %>% 
-    rbind(solic.data, owrd.data.temp) %>% 
-    dplyr::filter(!Project1 %in% c("TMDL Data Submission")) %>% 
-    dplyr::filter(HUC8 %in% subbasin_num) %>% 
-    # QA/QC check:
-    dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
+  station_owrd_temp <- station_owrd %>% 
+    dplyr::filter(`Station ID` %in% owrd.data.temp$MLocID)
+  
+  temp.data <- temp.data.sum %>% 
+    rbind(owrd.data.temp) %>% 
+    dplyr::filter(HUC8 %in% subbasin_num)
   
   # Temp data.sample.count will be used in the Appendix A
   temp.data.sample.count <- temp.data %>% 
@@ -434,7 +451,27 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::filter(!`Station ID` %in% station_owrd$`Station ID`)
 
-  flow.stations <- rbind(station_usgs, station_owrd) %>% 
+  usgs.data <- usgs.data.or %>% 
+    dplyr::filter(site_no %in% station_usgs$`Station ID`) %>% 
+    dplyr::select(`Data Source` = agency_cd,
+                  `Station ID` = site_no,
+                  dateTime,
+                  Result = X_00060_00003)
+  
+  owrd.data.flow <- owrd.data %>% 
+    dplyr::filter(Char_Name %in% c("mean_daily_flow_cfs")) %>% 
+    dplyr::filter(MLocID %in% station_owrd$`Station ID`) %>% 
+    dplyr::select(`Station ID`= MLocID,
+                  dateTime = SampleStartDate,
+                  Result = Result_Numeric)%>% 
+    dplyr::mutate(`Data Source` = "OWRD")
+   
+  flow.data <- rbind(usgs.data,owrd.data.flow)
+  
+  station_owrd_flow <- station_owrd %>% 
+    dplyr::filter(`Station ID` %in% owrd.data.flow$`Station ID`)
+  
+  flow.stations <- rbind(station_usgs, station_owrd_flow) %>% 
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
     dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
@@ -459,23 +496,6 @@ for (qapp_project_area in qapp_project_areas$areas) {
     dplyr::mutate_at("Station", str_replace_all, "No", "N") %>% 
     dplyr::mutate_at("Station", str_replace_all, "Nrth", "North") %>% 
     dplyr::mutate_at("Station", str_replace_all, "Suth", "South")
- 
-  usgs.data <- usgs.data.or %>% 
-    dplyr::filter(site_no %in% station_usgs$`Station ID`) %>% 
-    dplyr::select(`Data Source` = agency_cd,
-                  `Station ID` = site_no,
-                  dateTime,
-                  Result = X_00060_00003)
-  
-  owrd.data.flow <- owrd.data %>% 
-    dplyr::filter(Char_Name %in% c("mean_daily_flow_cfs")) %>% 
-    dplyr::filter(MLocID %in% station_owrd$`Station ID`) %>% 
-    dplyr::select(`Station ID`= MLocID,
-                  dateTime = SampleStartDate,
-                  Result = Result_Numeric)%>% 
-    dplyr::mutate(`Data Source` = "OWRD")
-   
-  flow.data <- rbind(usgs.data,owrd.data.flow)
   
   # Flow data.sample.count will be used in the Appendix B
   flow.data.sample.count <- flow.data %>% 
@@ -585,6 +605,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
   setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
   
   save(df.stations,
+       tir,
        ref,
        roles,
        risks,
@@ -694,7 +715,7 @@ map.huc12 <- tigris::geo_join(map.huc12, lookup_huc, by_sp = "HUC12_Name", by_df
 map.huc12 <- sf::st_transform(map.huc12, 4326)
 
 # _ Stream Temperature ----
-temp.awqms <- df.stations.state %>% 
+temp.awqms <- temp.stations.sum %>% 
   dplyr::rename(`Station ID` = MLocID) %>% 
   dplyr::rename(`Station Description` = StationDes,
                 Organization = OrgID,
@@ -744,10 +765,10 @@ map.temp.pro <-  sf::st_join(x = map.temp,
 # writeOGR(map.temp.pro, ".", "map_temp_pro", driver="ESRI Shapefile")
 
 # Temp table
-map.station_awqms <- df.stations.state %>% 
+map.station_awqms <- temp.stations.sum %>% 
   dplyr::rename(`Station ID` = MLocID)
 
-map.temp.tbl <- df.awqms.raw.state %>%
+map.temp.tbl <- temp.data.sum %>%
   # QA/QC check:
   dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
   dplyr::filter(Statistical_Base == "Maximum") %>% 
