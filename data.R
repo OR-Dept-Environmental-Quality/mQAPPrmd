@@ -35,6 +35,10 @@ strip_tbl_num <- function(x) {
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
+
+df.stations.state <- df.stations.state %>% 
+  dplyr::filter(MLocID %in% df.awqms.raw.state$MLocID) # filter out the stations that have data beyond the period of 1990-2020
+
 # _ TMDL solicitation stations and data ----
 solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/MLocs_ALL_Waves_FINAL.xlsx", 
                                     sheet = "Monitoring_Locations") %>% 
