@@ -617,7 +617,7 @@ for (qapp_project_area in qapp_project_areas$areas) {
        qapp_project_area,
        station_awqms,
        station_model,
-       station_owrd,
+       station_owrd_temp,
        temp.data.sample.count,
        model.info,
        model.input,
