@@ -1126,6 +1126,8 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 
 *	All other model inputs will be the same as the current calibrated model.    
 
+## No dams
+
 # Project organization
 
 ## Project team/roles
