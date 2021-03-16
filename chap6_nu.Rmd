@@ -129,7 +129,7 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by DEQ and described in the ",paste0(unique(section.model.info[is.na(section.model.info$'Reference Report'),]$'TMDL Document')," (",strip_alpha(unique(section.model.info[is.na(section.model.info$'Reference Report'),]$'Abbreviated Reference')), "). Temperature, flow, and effective shade calibration sites are summarized in "),tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The current condition calibration may be updated to reflect spawning period conditions. Potential model calibration adjustments are described in Section 6.2 General model inputs and parameters. ", mod.loc[1])}`
+`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by ",knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (",knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). Temperature, flow, and effective shade calibration sites are summarized in ",tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The model location in the table describes the distance of each input from the most upstream model node. If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model file are described in Section 6.2 General model inputs and parameters. ", mod.loc[1])}`
 
 `r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
 
