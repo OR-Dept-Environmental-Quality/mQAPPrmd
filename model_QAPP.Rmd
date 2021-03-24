@@ -209,7 +209,7 @@ PacifiCorp’s hydroelectric project on the North Umpqua River is responsible fo
 ## Overview
 
 ```{r,label=`chap6-model`,echo=FALSE}
-# 6.1 summary table
+# 6.2 summary table
 tmdl.mod.1<- model.info %>% 
   dplyr::group_by(Model_version) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
@@ -454,6 +454,7 @@ Meteorological data, including air temperature, cloudiness, relative humidity, a
 t52 <- tir %>% 
   dplyr::filter(`QAPP Project Area` == qapp_project_area) %>% 
   dplyr::select(Stream, Date) %>% 
+  #dplyr::select(Stream, "Survey Extent","Survey Date") %>% 
   dplyr::arrange(Stream)
 
 if(NROW(t52)>0){
@@ -1388,14 +1389,14 @@ tmdl.ref <- model.info %>%
   dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::select(reference)
 
-tir.ref <- t52_ref %>% 
-  dplyr::select(`Full Reference`) %>% 
-  dplyr::rename(reference = `Full Reference`)
-
 mod.ref <- model.info %>% 
   dplyr::filter(!is.na(mod_ref)) %>% 
   dplyr::rename(reference = mod_ref) %>% 
   dplyr::select(reference)
+
+tir.ref <- t52_ref %>% 
+  dplyr::select(`Full Reference`) %>% 
+  dplyr::rename(reference = `Full Reference`)
 
 other.ref <- data.frame(reference = c(
   'Beck, M.B. 1987. "Water Quality Modeling: A Review of the Analysis of Uncertainty". Water Resources Research 23(8), 1393.',
@@ -1425,7 +1426,7 @@ other.ref <- data.frame(reference = c(
   'DEQ (Oregon Department of Environmental Quality). 2002. “Little River Watershed TMDL.” https://www.oregon.gov/deq/wq/tmdls/Pages/TMDLs-Umpqua-Basin.aspx.',
   'PacifiCorp. 2012. “Fish Creek Stream Temperature Modeling”. June 5, 2012.'))
 
-qapp.ref <- rbind(tmdl.ref,tir.ref,mod.ref,other.ref) %>% 
+qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
   dplyr::arrange(reference)
 
 for(r in unique(sort(qapp.ref$reference))) {
