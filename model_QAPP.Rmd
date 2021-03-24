@@ -180,7 +180,7 @@ PacifiCorp’s hydroelectric project on the **[Update project area]** River is r
 ## Overview
 
 ```{r,label=`chap6-model`,echo=FALSE}
-# 6.1 summary table
+# 6.2 summary table
 tmdl.mod.1<- model.info %>% 
   dplyr::group_by(Model_version) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
@@ -427,6 +427,7 @@ Meteorological data, including air temperature, cloudiness, relative humidity, a
 t52 <- tir %>% 
   dplyr::filter(`QAPP Project Area` == qapp_project_area) %>% 
   dplyr::select(Stream, Date) %>% 
+  #dplyr::select(Stream, "Survey Extent","Survey Date") %>% 
   dplyr::arrange(Stream)
 
 if(NROW(t52)>0){
@@ -1337,14 +1338,14 @@ tmdl.ref <- model.info %>%
   dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::select(reference)
 
-tir.ref <- t52_ref %>% 
-  dplyr::select(`Full Reference`) %>% 
-  dplyr::rename(reference = `Full Reference`)
-
 mod.ref <- model.info %>% 
   dplyr::filter(!is.na(mod_ref)) %>% 
   dplyr::rename(reference = mod_ref) %>% 
   dplyr::select(reference)
+
+tir.ref <- t52_ref %>% 
+  dplyr::select(`Full Reference`) %>% 
+  dplyr::rename(reference = `Full Reference`)
 
 other.ref <- data.frame(reference = c(
   'Beck, M.B. 1987. "Water Quality Modeling: A Review of the Analysis of Uncertainty". Water Resources Research 23(8), 1393',
@@ -1372,7 +1373,7 @@ other.ref <- data.frame(reference = c(
   'Lorenz, D.L. and Ziegeweid, J.R. 2016. “Methods to estimate historical daily streamflow for ungaged stream locations in Minnesota. No. 2015-5181.” US Geological Survey, 2016.',
   'Risley, J., Stonewall, A. and Haluska, T. 2008. “Estimating flow-duration and low-flow frequency statistics for unregulated streams in Oregon. No. FHWA-OR-RD-09-03”. Geological Survey (US), 2008.'))
 
-qapp.ref <- rbind(tmdl.ref,tir.ref,mod.ref,other.ref) %>% 
+qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
   dplyr::arrange(reference)
 
 for(r in unique(sort(qapp.ref$reference))) {
