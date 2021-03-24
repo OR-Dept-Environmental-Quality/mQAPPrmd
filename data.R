@@ -306,14 +306,14 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")
   
 # _ NCDC met data ----
-load(paste0(data.dir,"/download/ncei.RData"))
+load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
 ncei.stations <- ncei %>% 
   dplyr::mutate(lat = LAT_DEC,
                 long = LON_DEC) %>% 
   sf::st_as_sf(coords = c("LON_DEC", "LAT_DEC"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ RAWS met data ----
-load(paste0(data.dir,"/download/raws.RData"))
+load(paste0(data.dir,"/download/raws.RData")) # raws.meta & raws.data.type
 raws.stations <- raws.meta %>% 
   dplyr::mutate(lat = latitude,
                 long = longitude) %>%
@@ -332,7 +332,7 @@ agrimet.stations.or <- agrimet.stations %>%
 hydromet <- read.csv(paste0(data.dir, "download/hydromet.csv"))
 
 # _ MesoWest climate data ----
-load(paste0(data.dir,"/download/mw.RData"))
+load(paste0(data.dir,"/download/mw.RData")) # mw.meta & mw.variables.list
 mw.stations <- mw.meta$STATION %>%
   dplyr::mutate(lat = LATITUDE, long = LONGITUDE) %>% 
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
