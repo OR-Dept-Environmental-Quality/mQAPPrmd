@@ -3,9 +3,9 @@ library(rmarkdown)
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/20210308/"
+output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/20210327/"
 
-qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv"))
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 ## for test:
 qapp_project_area = "John Day River Basin"
@@ -23,9 +23,9 @@ qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for (qapp_project_area in qapp_project_areas$areas) {
+for (qapp_project_area in project.areas$areas) {
   
-  file.name <- qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$file.name
+  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   load(paste0(file.name,".RData"))
   
   rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/John_Day_River_Basin/mQAPPrmd/model_QAPP.Rmd",
