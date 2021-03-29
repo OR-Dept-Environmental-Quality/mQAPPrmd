@@ -35,6 +35,10 @@ strip_tbl_num <- function(x) {
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
+
+df.stations.state <- df.stations.state %>% 
+  dplyr::filter(MLocID %in% df.awqms.raw.state$MLocID) # filter out the stations that have data beyond the period of 1990-2020
+
 # _ TMDL solicitation stations and data ----
 solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/MLocs_ALL_Waves_FINAL.xlsx", 
                                     sheet = "Monitoring_Locations") %>% 
@@ -149,6 +153,7 @@ temp.stations.sum <- df.stations.state %>%
   rbind(solic.stations) %>% 
   dplyr::distinct(MLocID, .keep_all = TRUE)
 
+# _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 # _ USGS flow data ----
 load(paste0(data.dir,"/download/usgs.RData")) # usgs.stations.or & usgs.data.or
@@ -233,7 +238,6 @@ roles <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "roles")
 risks <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "risks")
 abbr <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "abbr")
 data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
-# tmdl.temp <- odeqtmdl::tmdl_db %>% dplyr::filter(pollutant_name_TMDL %in% "Temperature")
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Individual_NDPES") %>% 
   dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
@@ -254,8 +258,8 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx")
   dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS")
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Gen_NPDES")
-lookup_huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea_HUC10.xlsx"), sheet = "Lookup_QAPPProjectArea_HUC10")
-qapp_project_areas <- read.csv(paste0(data.dir,"qapp_project_area.csv")) %>% 
+lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"), sheet = "Lookup_QAPPProjectArea")
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
 
 # _ IR2018/20 Cat 4 & 5 ----
@@ -273,9 +277,7 @@ cat.45 <- rbind(cat.45.rivers[,c("IR_categor","AU_Name","AU_ID","Year_liste","Pe
                 cat.45.waterbodies[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
                 cat.45.watershed[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")]) %>% 
   sf::st_zm() %>% 
-  dplyr::left_join(lookup_huc, by = "HUC12")
-
-cat.45.geom <- sf::st_transform(cat.45, 4326)
+  dplyr::left_join(lookup.huc, by = "HUC12")
 
 colum_auid <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
                           layer="Columbia_River_AU_IDs",
@@ -302,14 +304,14 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")
 
 # _ NCDC met data ----
-load(paste0(data.dir,"/download/ncei.RData"))
+load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
 ncei.stations <- ncei %>% 
   dplyr::mutate(lat = LAT_DEC,
                 long = LON_DEC) %>% 
   sf::st_as_sf(coords = c("LON_DEC", "LAT_DEC"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ RAWS met data ----
-load(paste0(data.dir,"/download/raws.RData"))
+load(paste0(data.dir,"/download/raws.RData")) # raws.meta & raws.data.type
 raws.stations <- raws.meta %>% 
   dplyr::mutate(lat = latitude,
                 long = longitude) %>%
@@ -320,40 +322,48 @@ agrimet.stations <- read.csv(paste0(data.dir, "download/agrimet_stations.csv"))
 agrimet.parameters <- read.csv(paste0(data.dir, "download/agrimet_parameters.csv"))
 agrimet.stations.or <- agrimet.stations %>%
   dplyr::filter(state == "OR") %>% 
-  # dplyr::left_join(agrimet.parameters, by = "siteid") %>% 
   dplyr::mutate(lat = latitude, long = longitude) %>% 
   sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ USBR Hydromet ----
 hydromet <- read.csv(paste0(data.dir, "download/hydromet.csv"))
+hydromet.stations <- hydromet %>% 
+  dplyr::mutate(lat = Lat, long = Long) %>% 
+  sf::st_as_sf(coords = c("Long", "Lat"), crs = sf::st_crs("+init=EPSG:4269"))
+
+# _ MesoWest climate data ----
+load(paste0(data.dir,"/download/mw.RData")) # mw.meta & mw.variables.list
+mw.stations <- mw.meta$STATION %>%
+  dplyr::mutate(lat = LATITUDE, long = LONGITUDE) %>% 
+  sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # RUN BELOW IF AFTER data.R ----
-will.huc10 <- sf::read_sf(dsn = paste0(data.dir,"gis/project_reach_HUC10.shp"),
+pro_areas_huc10 <- sf::read_sf(dsn = paste0(data.dir,"gis/project_reach_HUC10.shp"),
                           layer = "project_reach_HUC10") %>% 
   dplyr::filter(!`HU_8_NAME` == "Middle Snake-Payette")
 
 # Willamette River Mainstem and Major Tributaries ----
 qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 
-huc10.extent <- qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$huc8.extent
-#HUC10 extent of "Willamette River Mainstem and Major Tributaries" was saved in the same in the column of qapp_project_areas$huc8.extent
-file.name <- qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$file.name
+huc10.extent <- project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent
+#HUC10 extent of "Willamette River Mainstem and Major Tributaries" was saved in the same in the column of project.areas$huc8.extent
+file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
-subbasin <- unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10_NAME)
-subbasin_num <- unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
+subbasin <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10_NAME)
+subbasin_num <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
 
 # _ Temp data ----
 # AWQMS, Solicitation Data and OWRD Temp Data
-station_awqms <- temp.stations.sum %>% 
-  dplyr::filter(HUC8 %in% unique(lookup_huc[which(lookup_huc$HUC10 %in%subbasin_num),]$HUC8)) %>% 
+station.awqms <- temp.stations.sum %>% 
+  dplyr::filter(HUC8 %in% unique(lookup.huc[which(lookup.huc$HUC10 %in%subbasin_num),]$HUC_8)) %>% 
   dplyr::rename(`Station ID` = MLocID)
 
-station_model <- cal.input %>% 
+station.model <- cal.input %>% 
   dplyr::filter(`QAPP Project Area` %in% qapp_project_area) %>% 
-  dplyr::left_join(station_awqms[,c("Station ID", "StationDes", "OrgID")], by="Station ID")
+  dplyr::left_join(station.awqms[,c("Station ID", "StationDes", "OrgID")], by="Station ID")
 
-station_owrd <- owrd.stations %>%
-  dplyr::filter(HUC8 %in% unique(lookup_huc[which(lookup_huc$HUC10 %in%subbasin_num),]$HUC8)) %>% 
+station.owrd <- owrd.stations %>%
+  dplyr::filter(HUC8 %in% unique(lookup.huc[which(lookup.huc$HUC10 %in%subbasin_num),]$HUC_8)) %>% 
   dplyr::select(`Data Source` = Operator,
                 `Station ID` = station_nbr,
                 `Station` = station_name,
@@ -363,15 +373,16 @@ station_owrd <- owrd.stations %>%
 
 owrd.data.temp <- owrd.data %>% 
   dplyr::filter(Char_Name %in% c("daily_max_water_temp_C")) %>% 
-  dplyr::filter(MLocID %in% station_owrd$`Station ID`) %>% 
-  dplyr::mutate(Statistical_Base = "Maximum")
+  dplyr::filter(MLocID %in% station.owrd$`Station ID`) %>% 
+  dplyr::mutate(Statistical_Base = "Maximum") %>% 
+  dplyr::mutate(Source = "owrd")
 
-station_owrd_temp <- station_owrd %>% 
+station.owrd.temp <- station.owrd %>% 
   dplyr::filter(`Station ID` %in% owrd.data.temp$MLocID)
 
 temp.data <- temp.data.sum %>% 
   rbind(owrd.data.temp) %>% 
-  dplyr::filter(HUC8 %in% unique(lookup_huc[which(lookup_huc$HUC10 %in%subbasin_num),]$HUC8))
+  dplyr::filter(HUC8 %in% unique(lookup.huc[which(lookup.huc$HUC10 %in%subbasin_num),]$HUC_8))
 
 # Temp data.sample.count will be used in the Appendix A
 temp.data.sample.count <- temp.data %>% 
@@ -387,7 +398,7 @@ temp.data.sample.count <- temp.data %>%
   dplyr::ungroup() %>%
   tidyr::pivot_wider(names_from = month, values_from=n) %>%
   dplyr::rename(`Station ID` = MLocID) %>% 
-  dplyr::left_join(station_awqms[,c("Station ID", "StationDes")], by="Station ID") %>% 
+  dplyr::left_join(station.awqms[,c("Station ID", "StationDes")], by="Station ID") %>% 
   dplyr::rename(Year = year,
                 Station = StationDes) %>% 
   dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
@@ -406,20 +417,20 @@ model.input  <- cal.input %>%
 
 pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
 
-qapp_project_area_huc10 <- will.huc10 %>% 
+pro_area_huc10 <- pro_areas_huc10 %>% 
   dplyr::filter(HUC_10 %in% subbasin_num)
 
-qapp_project_area_huc10_union <- sf::st_union(qapp_project_area_huc10)
+pro_area_huc10_union <- sf::st_union(pro_area_huc10)
 
 # _ IR2018/20 Cat 4 & 5 ----
 pro.cat.45.tbl <- cat.45.tbl %>% 
   dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
 
 # _ Flow data ----
-station_usgs <- usgs.stations %>%  # Discharge [ft3/s]
+station.usgs <- usgs.stations %>%  # Discharge [ft3/s]
   dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
   dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
-  dplyr::filter(huc_cd %in% unique(lookup_huc[which(lookup_huc$HUC10 %in%subbasin_num),]$HUC8)) %>%
+  dplyr::filter(huc_cd %in% unique(lookup.huc[which(lookup.huc$HUC10 %in%subbasin_num),]$HUC_8)) %>%
   dplyr::filter(!is.na(dec_lat_va)) %>% 
   dplyr::select(`Data Source` = agency_cd, 
                 `Station ID` = site_no, 
@@ -427,10 +438,10 @@ station_usgs <- usgs.stations %>%  # Discharge [ft3/s]
                 `Lat` = dec_lat_va, 
                 `Long` = dec_long_va) %>% 
   dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
-  dplyr::filter(!`Station ID` %in% station_owrd$`Station ID`)
+  dplyr::filter(!`Station ID` %in% station.owrd$`Station ID`)
 
 usgs.data <- usgs.data.or %>% 
-  dplyr::filter(site_no %in% station_usgs$`Station ID`) %>% 
+  dplyr::filter(site_no %in% station.usgs$`Station ID`) %>% 
   dplyr::select(`Data Source` = agency_cd,
                 `Station ID` = site_no,
                 dateTime,
@@ -438,7 +449,7 @@ usgs.data <- usgs.data.or %>%
 
 owrd.data.flow <- owrd.data %>% 
   dplyr::filter(Char_Name %in% c("mean_daily_flow_cfs")) %>% 
-  dplyr::filter(MLocID %in% station_owrd$`Station ID`) %>% 
+  dplyr::filter(MLocID %in% station.owrd$`Station ID`) %>% 
   dplyr::select(`Station ID`= MLocID,
                 dateTime = SampleStartDate,
                 Result = Result_Numeric)%>% 
@@ -446,10 +457,10 @@ owrd.data.flow <- owrd.data %>%
 
 flow.data <- rbind(usgs.data,owrd.data.flow)
 
-station_owrd_flow <- station_owrd %>% 
+station.owrd.flow <- station.owrd %>% 
   dplyr::filter(`Station ID` %in% owrd.data.flow$`Station ID`)
 
-flow.stations <- rbind(station_usgs, station_owrd_flow) %>% 
+flow.stations <- rbind(station.usgs, station.owrd.flow) %>% 
   dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
   dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
@@ -493,25 +504,15 @@ flow.data.sample.count <- flow.data %>%
 
 # _ NCDC met data ----
 ncei.stations.huc10 <- ncei.stations %>% 
-  filter(sf::st_contains(qapp_project_area_huc10_union, ., sparse = FALSE))
-
-ncei.stations.subbasin <-  sf::st_join(x = ncei.stations.huc10,
-                                       y = qapp_project_area_huc10,
-                                       join = st_within,
-                                       left = TRUE) %>% 
+  filter(sf::st_contains(pro_area_huc10_union, ., sparse = FALSE)) %>% 
   sf::st_drop_geometry()
 
-ncei.station.tbl <- ncei.stations.subbasin %>% 
+ncei.station.tbl <- ncei.stations.huc10 %>% 
   dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
 
 # _ RAWS met data ----
 raws.stations.huc10 <- raws.stations %>% 
-  filter(sf::st_contains(qapp_project_area_huc10_union, ., sparse = FALSE))
-
-raws.stations.subbasin <-  sf::st_join(x = raws.stations.huc10,
-                                       y = qapp_project_area_huc10,
-                                       join = st_within,
-                                       left = TRUE) %>% 
+  filter(sf::st_contains(pro_area_huc10_union, ., sparse = FALSE)) %>% 
   sf::st_drop_geometry()
 
 raws.station.data.type <- raws.data.type %>% 
@@ -525,25 +526,12 @@ raws.station.data.type <- raws.data.type %>%
 #dplyr::group_by(wrccID) %>% 
 #dplyr::summarise(Parameter = toString(sort(Parameter)))
 
-raws.station.tbl <- raws.stations.subbasin %>% 
+raws.station.tbl <- raws.stations.huc10 %>% 
   dplyr::left_join(raws.station.data.type, by = "wrccID")
 
 # _ USBR AgriMet ----
 agrimet.stations.huc10 <- agrimet.stations.or %>% 
-  filter(sf::st_contains(qapp_project_area_huc10_union, ., sparse = FALSE))
-
-#  ggplot() 
-#    geom_sf(data = wbd.huc8)
-#    geom_sf(data = qapp_project_area_huc10,
-#            colour = "blue") 
-#    geom_sf(data = agrimet.stations.or) 
-#    geom_sf_label(data = agrimet.stations.or,
-#                  aes(lat, long, label = siteid))
-
-agrimet.stations.subbasin <-  sf::st_join(x = agrimet.stations.huc10,
-                                          y = qapp_project_area_huc10,
-                                          join = st_within,
-                                          left = TRUE) %>% 
+  filter(sf::st_contains(pro_area_huc10_union, ., sparse = FALSE)) %>% 
   sf::st_drop_geometry()
 
 agrimet.station.data.type <- agrimet.parameters %>% 
@@ -551,24 +539,22 @@ agrimet.station.data.type <- agrimet.parameters %>%
 #dplyr::group_by(siteid) %>% 
 #dplyr::summarise(Type = toString(sort(Type)))
 
-agrimet.station.tbl <- agrimet.stations.subbasin %>% 
+agrimet.station.tbl <- agrimet.stations.huc10 %>% 
   dplyr::left_join(agrimet.station.data.type, by = "siteid")
 
 # _ USBR Hydromet ----
-hydromet.station.tbl <- hydromet %>% 
-  dplyr::filter(`QAPP.Project.Area` == qapp_project_area)
+hydromet.stations.huc10 <- hydromet.stations %>% 
+  filter(sf::st_contains(pro_area_huc10_union, ., sparse = FALSE)) %>% 
+  sf::st_drop_geometry()
+
+hydromet.station.tbl <- hydromet.stations.huc10
 
 # _ MesoWest climate data ----
 mw.stations.huc10 <- mw.stations %>% 
-  filter(sf::st_contains(qapp_project_area_huc10_union, ., sparse = FALSE))
-
-mw.stations.subbasin <-  sf::st_join(x = mw.stations.huc10,
-                                     y = qapp_project_area_huc10,
-                                     join = st_within,
-                                     left = TRUE) %>% 
+  filter(sf::st_contains(pro_area_huc10_union, ., sparse = FALSE)) %>% 
   sf::st_drop_geometry()
 
-mw.station.tbl <- mw.stations.subbasin %>% 
+mw.station.tbl <- mw.stations.huc10 %>% 
   dplyr::mutate(NAME = stringr::str_to_title(NAME))  
 #dplyr::mutate_at("NAME", str_replace_all, "Or", "OR") %>% 
 #dplyr::mutate_at("NAME", str_replace_all, "ese", "ESE") %>% 
@@ -593,11 +579,12 @@ save(df.stations,
      data.gap,
      npdes.ind,
      npdes.gen,
-     qapp_project_areas,
+     lookup.huc,
+     project.areas,
      qapp_project_area,
-     station_awqms,
-     station_model,
-     station_owrd_temp,
+     station.awqms,
+     station.model,
+     station.owrd.temp,
      temp.data.sample.count,
      model.info,
      model.input,
@@ -642,7 +629,7 @@ map.huc12 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMD
   dplyr::rename(HUC12_Name = Name) %>% 
   dplyr::filter(HUC12 %in% pro.reaches$HUC12)
 
-map.huc12 <- tigris::geo_join(map.huc12, lookup_huc, by_sp = "HUC12_Name", by_df = "HUC12_Name", how = "left")
+map.huc12 <- tigris::geo_join(map.huc12, lookup.huc, by_sp = "HUC12_Name", by_df = "HUC12_Name", how = "left")
 
 map.huc12 <- sf::st_transform(map.huc12, 4326)
 
@@ -885,8 +872,8 @@ map.ind.npdes.pro <- sf::st_join(x = map.ind.npdes,
 # _ Save Data ----
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
-save(lookup_huc,
-     qapp_project_areas,
+save(lookup.huc,
+     project.areas,
      pro.reaches,
      map.huc8,
      map.huc10,
