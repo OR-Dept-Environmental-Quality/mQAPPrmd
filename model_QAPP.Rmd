@@ -306,7 +306,7 @@ t51_hydromet <- hydromet.station.tbl %>%
   dplyr::filter(Parameter %in% c("Air Temperature","Precipitation")) %>% 
   dplyr::mutate(`Station` = Station.Name,
                 `Station ID` = Station.ID,
-                `Latitude/Longitude` = paste0(round(as.numeric(Lat),4), "/",round(as.numeric(Long),3)),
+                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), "/",round(as.numeric(long),3)),
                 `Available Data` = Parameter,
                 Agency = NA,
                 tbl = "hydromet") %>% 
@@ -342,13 +342,15 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
   t51.sp <- t51 %>% 
     dplyr::filter(tbl=="worksheet") %>% 
     dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
-    dplyr::arrange(`Station`)
+    dplyr::arrange(Station) %>% 
+    dplyr::rename(Source = Station) %>% 
+    dplyr::filter(!Source == "No Station ID, DEQ File")
   
   if(NROW(t51.sp)>0){
     
     t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
                                caption = tbls(name = "t51_sp",
-                                              caption = paste0("Meteorological stations and data available in DEQ files for the ", qapp_project_area, ".")))
+                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
     
   }
 }
@@ -441,12 +443,12 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 
 Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, NOAA National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC) Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 3 through Table 6 list available meteorological data from these sources in the `r qapp_project_area`.
 
-`r if(NROW(model.input[which(model.input$"Model Location Type" == "Meteorological"),])>0){t51_sp_tbl}`
 `r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
 `r if(NROW(t51.raws)>0){t51_raws_tbl}`
 `r if(NROW(t51.agrimet)>0){t51_agrimet_tbl}`
 `r if(NROW(t51.hydromet)>0){t51_hydromet_tbl}`
 `r if(NROW(t51.mw)>0){t51_mw_tbl}`
+`r if(NROW(model.input[which(model.input$"Model Location Type" == "Meteorological"),])>0){t51_sp_tbl}`
 
 ## Thermal Infrared Radiometry (TIR) data
 
@@ -481,14 +483,14 @@ DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrare
 
 ```{r, label=`t53`, echo=FALSE}
 
-st_awqms <- station_awqms %>% 
+st_awqms <- station.awqms %>% 
   dplyr::rename(Station = StationDes,
                 Organization = OrgID,
                 Latitude = Lat_DD,
                 Longitude = Long_DD) %>% 
   dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
 
-st_model <- station_model %>% 
+st_model <- station.model %>% 
   dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
   dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
   dplyr::filter(!`Station ID` == "TIR") %>% 
@@ -498,7 +500,7 @@ st_model <- station_model %>%
                                       paste0(gsub(",.*$", "", Organization)," (",stringi::stri_sub(strip_alpha(Organization),-4),")"),Organization)) %>% 
   dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
 
-st_owrd <- station_owrd_temp %>% 
+st_owrd <- station.owrd.temp %>% 
   dplyr::mutate(Organization = "OWRD") %>% 
   dplyr::rename(Latitude = Lat,
                 Longitude = Long) %>% 
@@ -564,7 +566,7 @@ t54_hydromet <- hydromet.station.tbl %>%
   dplyr::filter(Parameter %in% c("Discharge", "Spillway Discharge", "Flow")) %>% 
   dplyr::mutate(Station = Station.Name,
                 `Station ID` = Station.ID,
-                `Latitude/Longitude` = paste0(round(as.numeric(Lat),4), "/",round(as.numeric(Long),3)),
+                `Latitude/Longitude` = paste0(round(as.numeric(lat),4), "/",round(as.numeric(long),3)),
                 `Data Source` = "hydromet") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
 
@@ -1251,7 +1253,7 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **TMDL and WQMP development phase**    
 
-The TMDL and WQMP development phase is scheduled to begin on `r format(qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$Task.1.Start,"%B %d, %Y")` with EPA’s final agency action approving or disapproving of the TMDL no later than `r format(qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$EPA.Approval,"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to EPA for their action.
+The TMDL and WQMP development phase is scheduled to begin on `r format(project.areas[which(project.areas$areas == qapp_project_area),]$Task.1.Start,"%B %d, %Y")` with EPA’s final agency action approving or disapproving of the TMDL no later than `r format(project.areas[which(project.areas$areas == qapp_project_area),]$EPA.Approval,"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to EPA for their action.
 
 # Data management
 
