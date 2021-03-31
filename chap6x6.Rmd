@@ -41,7 +41,7 @@ t6x6j_met <- section.model.input %>%
   dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
                 `Input Type` = `Model Location Type`)
 
-t6x6j <- section.model.input %>% 
+t6x6j_1 <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
   dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
@@ -58,23 +58,23 @@ t6x6j <- section.model.input %>%
   dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
 
 
-t6x6j_col <- t6x6j %>% 
+t6x6j_col <- t6x6j_1 %>% 
   dplyr::filter(!is.na(`Location Units`))
 
-names(t6x6j)[names(t6x6j) == "Model Location"] <- if(NROW(t6x6j_col)>0){paste0("Model Location (",unique(t6x6j_col$`Location Units`),")")}else{paste0("Model Location")}
+names(t6x6j_1)[names(t6x6j_1) == "Model Location"] <- if(NROW(t6x6j_col)>0){paste0("Model Location (",unique(t6x6j_col$`Location Units`),")")}else{paste0("Model Location")}
 
-t6x6j <- t6x6j[,-c(3)]%>% 
+t6x6j_1 <- t6x6j_1[,-c(3)]%>% 
     dplyr::rename(`Model Input` = Parameter)
 
-if(NROW(t6x6j)>0){
+if(NROW(t6x6j_1)>0){
   
-  t6x6j_tbl <- knitr::kable(t6x6j, format = "pandoc", padding = 2,
-                            caption = tbls(name = paste0("t6x6j", model_extent),
+  t6x6j_tbl <- knitr::kable(t6x6j_1, format = "pandoc", padding = 2,
+                            caption = tbls(name = paste0("t6x6j_1", model_extent),
                                            caption = paste0("Boundary condition and tributary inputs to the existing ", model_extent, ".")))
   
 }
 
 ```
-`r if(NROW(t6x6j)>0){paste0(tbls(name = paste0("t6x6j", model_extent),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
+`r if(NROW(t6x6j_1)>0){paste0(tbls(name = paste0("t6x6j_1", model_extent),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
 
-`r if(NROW(t6x6j)>0){t6x6j_tbl}else{paste0("There were no boundary condition and tributary inputs to this model.")}`
+`r if(NROW(t6x6j_1)>0){t6x6j_tbl}else{paste0("There were no boundary condition and tributary inputs to this model.")}`
