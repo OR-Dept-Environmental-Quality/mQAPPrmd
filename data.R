@@ -83,13 +83,8 @@ solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperatur
                 HUC6_Name = NA,
                 HUC8_Name = NA,
                 Source = "solic")
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave1_2021-01-08/Wave1_2021-01-08_SumStats.RData")
-wave1 <- sumstats
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave2_2021-02-04/Wave2_2021-02-04_SumStats.RData")
-wave2 <- sumstats
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave3_2021-02-23/Wave3_2021-02-23_SumStats.RData")
-wave3 <- sumstats
-solic.data <- rbind(wave1,wave2,wave3) %>% 
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave4_2021-03-29/Wave4_2021-03-29_SumStats.RData")
+solic.data <- sumstats %>% 
   dplyr::filter(ResultStatusID == "Final") %>% 
   dplyr::select(Monitoring.Location.ID,Project,Result,ResultStatusID,ActStartDate,StatisticalBasis,charID,r_units,RsltType,RsltTimeBasis,
                 ActivityType,SmplColMthd,SmplDepth,SmplDepthUnit,ActStartTime,ActStartTimeZone,Result.Analytical.Method.ID,cmnt) %>% 
@@ -618,6 +613,11 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
 }
 
 # Leaflet Map Data ----
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
+  dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
+
 pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
                          layer = "project_areas")
 
@@ -643,14 +643,14 @@ pro_areas <- pro_areas %>%
   dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) %>% 
   dplyr::arrange(EPA.Approval)
 
-pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
+pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
                            layer = "project_reach_extent")
 
-#pro.reaches <- sf::st_zm(pro.reaches, drop = T, what = "ZM")
+#pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
 
-pro.reaches <- sf::st_transform(pro.reaches, 4326)
+pro_reaches <- sf::st_transform(pro_reaches, 4326)
 
-pro.reaches <- pro.reaches %>% 
+pro_reaches <- pro_reaches %>% 
   dplyr::mutate(color = dplyr::case_when(Project_Na == "Willamette River Mainstem and Major Tributaries"~ "purple",
                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
 
@@ -710,9 +710,9 @@ map.huc12 <- sf::st_transform(map.huc12, 4326)
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
 save(lookup.huc,
-     project.areas,
      pro_areas,
-     pro.reaches,
+     pro_areas,
+     pro_reaches,
      hs.model.extent,
      sh.model.extent,
      #shadow.model.area,
@@ -767,6 +767,8 @@ temp.awqms.model <- rbind(temp.awqms,temp.model) %>%
   dplyr::mutate(Organization = ifelse(Organization == "CTUIR_WQX", "CTUIR WQX", Organization)) %>%
   dplyr::mutate(Organization = ifelse(Organization == "PDX_WB(NOSTORETID)", "Portland Water Bureau", Organization)) %>%
   dplyr::mutate(Organization = ifelse(Organization == "WALLAWALLA_WC(NOSTORETID)", "Walla Walla Basin Watershed Council", Organization)) %>%
+  dplyr::mutate(Organization = ifelse(Organization == "CITY_GRESHAM(NOSTORETID)", "City of Gresham", Organization)) %>%
+  dplyr::mutate(Organization = ifelse(Organization == "EMSWCD(NOSTORETID)", "EMSWCD", Organization)) %>%
   dplyr::select(`Station Name and ID`, Latitude, Longitude, Organization, `Station Description`, `Station ID`) %>%
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
@@ -995,9 +997,9 @@ map.ind.npdes.pro <- sf::st_join(x = map.ind.npdes,
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
 save(lookup.huc,
-     project.areas,
      pro_areas,
-     pro.reaches,
+     pro_areas,
+     pro_reaches,
      hs.model.extent,
      sh.model.extent,
      #shadow.model.area,

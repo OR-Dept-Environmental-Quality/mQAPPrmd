@@ -83,13 +83,8 @@ solic.stations <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperatur
                 HUC6_Name = NA,
                 HUC8_Name = NA,
                 Source = "solic")
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave1_2021-01-08/Wave1_2021-01-08_SumStats.RData")
-wave1 <- sumstats
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave2_2021-02-04/Wave2_2021-02-04_SumStats.RData")
-wave2 <- sumstats
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave3_2021-02-23/Wave3_2021-02-23_SumStats.RData")
-wave3 <- sumstats
-solic.data <- rbind(wave1,wave2,wave3) %>% 
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/Data Solicitation/FINAL_Reviewed_Submissions/Wave4_2021-03-29/Wave4_2021-03-29_SumStats.RData")
+solic.data <- sumstats %>% 
   dplyr::filter(ResultStatusID == "Final") %>% 
   dplyr::select(Monitoring.Location.ID,Project,Result,ResultStatusID,ActStartDate,StatisticalBasis,charID,r_units,RsltType,RsltTimeBasis,
                 ActivityType,SmplColMthd,SmplDepth,SmplDepthUnit,ActStartTime,ActStartTimeZone,Result.Analytical.Method.ID,cmnt) %>% 

@@ -163,7 +163,7 @@ if(!model.extent == TRUE){
     dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
                   `Input Type` = `Model Location Type`)
   
-  t6x6_1 <- section.model.input %>% 
+  t6x6_1 <- section.model.input %>%
     dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
     dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
@@ -172,7 +172,7 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`))) %>%
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
     rbind(t6x6_met) %>% 
