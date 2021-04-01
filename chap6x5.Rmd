@@ -36,12 +36,14 @@ t6x5j <- section.model.input %>%
                 `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`)),
                 Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
                 `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+                `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                             `Model Location Name`,
                                                             paste0(`Model Location Name`, " (",`Station ID`,")")),
-                `Model Location` = round(`Model Location`,2)) %>%
-  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
-  #dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Parameter`, `Data Source`) %>% 
+                `Model Location` = round(`Model Location`,2)) %>% 
+  dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+  dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::arrange(desc(`Model Location`)) %>% 
   dplyr::rename(`Calibration Parameter` = `Parameter`)
 
 t6x5j_col <- t6x5j %>% 
@@ -49,7 +51,7 @@ t6x5j_col <- t6x5j %>%
 
 names(t6x5j)[names(t6x5j) == "Model Location"] <- if(NROW(t6x5j_col)>0){paste0("Model Location (",unique(t6x5j_col$`Location Units`),")")}else{paste0("Model Location")}
 
-t6x5j <- t6x5j[,c(19,9,6,13)]
+t6x5j <- t6x5j[,c(1,2,5,4)]
 
 if(NROW(t6x5j)>0){
   

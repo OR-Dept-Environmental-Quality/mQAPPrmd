@@ -96,7 +96,10 @@ if(!model.extent == TRUE){
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (",`Station ID`,")")),
                   `Model Location` = round(`Model Location`,2)) %>% 
-    dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+    dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+    dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::arrange(desc(`Model Location`)) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
   
   t6x5_col <- t6x5 %>% 
@@ -104,10 +107,9 @@ if(!model.extent == TRUE){
   
   names(t6x5)[names(t6x5) == "Model Location"] <- if(NROW(t6x5_col)>0){paste0("Model Location (",unique(t6x5_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x5 <- t6x5[,c(19,9,6,13)]
+  t6x5 <- t6x5[,c(1,2,5,4)]
   
-  t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,
-                           caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
   
   mod.loc <- ifelse(tmdl.mod.2$mod_rmd == "hs7" | tmdl.mod.2$mod_rmd == "hs8"| tmdl.mod.2$mod_rmd == "hs9",
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
@@ -121,7 +123,7 @@ if(!model.extent == TRUE){
 
 `r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by ",knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (",knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). Temperature, flow, and effective shade calibration sites are summarized in ",tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The model location in the table describes the distance of each input from the most upstream model node. If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model file are described in Section 6.2 General model inputs and parameters. ", mod.loc[1])}`
 
-`r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
+`r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5_1)>0){t6x5_tbl}}`
 
 ### Model inputs
 
