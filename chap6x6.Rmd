@@ -44,7 +44,7 @@ t6x6j_met <- section.model.input %>%
 t6x6j_1 <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
-  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID or unknown" | is.na(`Station ID`),
+  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                             `Model Location Name`,
                                                             paste0(`Model Location Name`, " (", `Station ID`, ")")),
                 `Model Location` = round(`Model Location`,2),
