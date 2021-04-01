@@ -1,0 +1,192 @@
+---
+title: "Untitled"
+author: "yg"
+date: "3/30/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(knitr)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars, results = 'asis'}
+summary(cars)
+
+a <- NULL
+for(i in unique(sort(cars$speed))) {
+  a_1 <- cars %>% 
+    filter(speed == i)
+  #a <- list(a,kable(a_1))
+  print(kable(a_1))
+}
+a
+```
+`r a`
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+#######33
+
+```{r, label=`t6x5`, echo=FALSE}
+options(knitr.kable.NA = '') # hide NAs in table
+
+if(!model.extent == TRUE){
+  
+  chap6x5 <- NULL
+  
+  for(model_extent in unique(sort(section.model.input$`Model Extent`))){
+    
+    chap6x5 <- c(chap6x5, knitr::knit_child(input = "chap6x5.Rmd", envir = globalenv()))
+    
+  }
+  
+} else {
+  
+  t6x5_1 <- section.model.input %>% 
+    dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+    dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                  Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model Location` = round(`Model Location`,2))
+  
+  t6x5_tbl <- NULL
+  for(source in sort(unique(t6x5_1$`Data Source`))) {
+    
+    #source <- "DEQ File"
+    t6x5 <- t6x5_1 %>% 
+      dplyr::filter(`Data Source` == source) %>% 
+      dplyr::group_by(`Model Location Name`,`Model Location`,`Location Units`) %>% 
+      dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+      dplyr::ungroup() %>% 
+      dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+      dplyr::rename(`Calibration Parameter` = `Parameter`) %>% 
+      dplyr::filter(!is.na(`Location Units`))
+    
+    #names(t6x5)[names(t6x5) == "Model Location"] <- if(NROW(t6x5_col)>0){paste0("Model Location (",unique(t6x5_col$`Location Units`),")")}else{paste0("Model Location")}
+    
+    names(t6x5)[names(t6x5) == "Model Location"] <- paste0("Model Location (",unique(t6x5$`Location Units`),")")
+    
+    #t6x5 <- t6x5[,c(19,9,6,13)]
+    
+    #t6x5_tbl <- list(t6x5_tbl, knitr::kable(t6x5, format = "pandoc", padding = 2,
+     #                        caption = tbls(name = paste0("t6x5", waterbody_name, source),
+      #                                      caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model. Data source: ", source,"."))))
+    
+    print(knitr::kable(t6x5, format = "pandoc", padding = 2,
+                       caption = tbls(name = paste0("t6x5", waterbody_name, source),
+                                      caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model. Data source: ", source,"."))))
+
+  }
+}
+```
+
+```{r, label=`mod`, include=FALSE}
+
+  mod.loc <- ifelse(tmdl.mod.2$mod_rmd == "hs7" | tmdl.mod.2$mod_rmd == "hs8"| tmdl.mod.2$mod_rmd == "hs9",
+                    print("The model location in the table below describes the distance of each input from the most downstream model node."),
+                    ifelse(tmdl.mod.2$mod_rmd == "hs6",
+                           print("The model location in the table below describes the distance of each input from the most upstream model node."),
+                           print("")))
+
+
+```
+
+`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by ",knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (",knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). Temperature, flow, and effective shade calibration sites are summarized in ",tbls(name = paste0("t6x5", waterbody_name, source),display="cite")," to improve documentation of the TMDL approach. The model location in the table describes the distance of each input from the most upstream model node. If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model file are described in Section 6.2 General model inputs and parameters. ", mod.loc[1])}`
+
+`r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5_1)>0){t6x5_tbl}}`
+
+
+##########3
+
+  t6x5 <- section.model.input %>% 
+    dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+    dplyr::filter(!Parameter %in% c("Depth","Average Wetted Depth","Effective Shade","Top Width","Velocity","Wetted Width","Flow")) %>% 
+    dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                  Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model Location` = round(`Model Location`,2)) %>% 
+    dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Data Source`, Parameter) %>% 
+    rbind(t6x5_1) %>% 
+    #dplyr::arrange(Parameter,desc(`Model Location`)) %>%
+    dplyr::arrange(desc(`Model Location`)) %>% 
+    dplyr::rename(`Calibration Parameter` = `Parameter`) %>% 
+    dplyr::filter(!is.na(`Location Units`))
+    
+    
+#######3
+ t6x5_1 <- section.model.input %>% 
+    dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+    dplyr::filter(Parameter %in% c("Depth","Average Wetted Depth","Effective Shade","Top Width","Velocity","Wetted Width","Flow")) %>% 
+    dplyr::mutate(Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model Location` = round(`Model Location`,2)) %>% 
+    dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+    dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+    dplyr::ungroup()
+  
+  t6x5 <- section.model.input %>% 
+    dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+    #dplyr::filter(!Parameter %in% c("Depth","Average Wetted Depth","Effective Shade","Top Width","Velocity","Wetted Width","Flow")) %>% 
+    dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                  Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model Location` = round(`Model Location`,2)) %>% 
+    #dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Data Source`, Parameter) %>% 
+    #rbind(t6x5_1) %>% 
+    #dplyr::arrange(Parameter,desc(`Model Location`)) %>%
+    dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+    dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::arrange(desc(`Model Location`)) %>% 
+    dplyr::rename(`Calibration Parameter` = `Parameter`) %>% 
+    dplyr::filter(!is.na(`Location Units`))
+  
+  names(t6x5)[names(t6x5) == "Model Location"] <- paste0("Model Location (",unique(t6x5$`Location Units`),")")
+  #names(t6x5)[names(t6x5) == "Model Location"] <- if(NROW(t6x5_col)>0){paste0("Model Location (",unique(t6x5_col$`Location Units`),")")}else{paste0("Model Location")}
+  
+  t6x5 <- t6x5 %>% 
+    dplyr::select(`Model Location Name (Station ID)`,`Model Location (kilometers)`,`Calibration Parameter`,`Data Source`)
+  
+  t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,
+                           caption = tbls(name = paste0("t6x5", waterbody_name, source),
+                                          caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+
+}    
+    

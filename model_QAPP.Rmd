@@ -1423,3 +1423,64 @@ if(NROW(flow.data.sample.count)>0){
 ```
 
 `r app_b_tbl`
+
+```{r, label=`area-map-data`,echo=FALSE}
+# Stream Temperature Stations
+temp_stations <- t53_1 %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Stream Temperature Calibration Sites
+temp_cal_sites <- model.input %>% 
+  dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+  dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                            `Model Location Name`,
+                                                            paste0(`Model Location Name`, " (",`Station ID`,")")),
+                `Model Location` = round(`Model Location`,2)) %>% 
+  dplyr::arrange(Parameter,desc(`Model Location`)) %>% 
+  dplyr::rename(`Calibration Parameter` = `Parameter`) %>% 
+  #dplyr::filter(`Calibration Parameter` == "Water Temperature") %>% 
+  dplyr::filter(!is.na(Latitude)) %>% 
+  dplyr::group_by(`Model Location Name`, `Model Location`, `Location Units`, `Data Source`, Latitude, Longitude) %>% 
+  dplyr::summarize(`Calibration Parameter` = toString(unique(sort(`Calibration Parameter`)))) %>% 
+  dplyr::ungroup() %>% 
+  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Stream Temperature Model Boundary Conditions
+temp_model_bc <- model.input %>% 
+  dplyr::filter(`Model Location Type` == "Boundary Condition") %>% 
+  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
+                                                            `Model Location Name`,
+                                                            paste0(`Model Location Name`, " (", `Station ID`, ")")),
+                `Model Location` = round(`Model Location`,2),
+                `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>% 
+  #dplyr::filter(`Calibration Parameter` == "Water Temperature") %>% 
+  dplyr::filter(!is.na(Latitude)) %>% 
+  dplyr::group_by(`Model Location Name`, `Model Location`, `Location Units`, `Data Source`, Latitude, Longitude) %>% 
+  dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+  dplyr::ungroup() %>% 
+  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Stream Temperature Model Tributary Inputs
+#temp_model_tri
+
+# Flow Stations
+#flow_stations
+
+# Meteorological Stations
+#met_stations
+
+# Individual NPDES Point Sources
+#ind_ps
+
+```

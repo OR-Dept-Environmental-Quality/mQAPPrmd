@@ -57,14 +57,14 @@ map <- leaflet::leaflet() %>% leaflet::addTiles() %>%
                         color = ~color,
                         opacity = 0.7,
                         weight = 2) %>% 
-  leaflet::addPolylines(data = temp.model.streams,
-                        group = "Temperature Model Streams",
+  leaflet::addPolylines(data = hs.model.temp.extent,
+                        group = "Heat Source Temperature Model Extent",
                         label = ~Stream,
                         color = "#6baed6",
                         opacity = 1,
                         weight = 3) %>% 
-  leaflet::addPolylines(data = shadow.model.streams,
-                        group = "SHADOW Model Streams",
+  leaflet::addPolylines(data = sh.model.extent,
+                        group = "SHADOW Model Extent",
                         label = ~Stream,
                         color = "green",
                         opacity = 1,
@@ -105,7 +105,7 @@ map <- leaflet::leaflet() %>% leaflet::addTiles() %>%
                                                            fillOpacity = 0.2,
                                                            weight = 3,
                                                            bringToFront = TRUE)) %>%
-  leaflet::addLayersControl(overlayGroups = c("Project Areas","Temperature Model Streams","SHADOW Model Streams","HUC 8", "HUC 10", "HUC 12", "Completion Schedule"),
+  leaflet::addLayersControl(overlayGroups = c("Project Areas","CE-EQAL-W2 Temperature Model Extent","Heat Source Temperature Model Extent","Heat Source Solar Only Model Extent","SHADOW Model Extent","HUC 8", "HUC 10", "HUC 12", "Completion Schedule"),
                             options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
   leaflet::hideGroup(c("HUC 8","HUC 10", "HUC 12", "Completion Schedule")) %>% 
   leaflet::addLegend(data = pro.areas,
@@ -122,7 +122,6 @@ map <- leaflet::leaflet() %>% leaflet::addTiles() %>%
 
 
 #map
-
 
 # Save Map ----
 dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/"
