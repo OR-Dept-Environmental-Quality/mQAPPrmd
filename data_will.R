@@ -296,7 +296,8 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")
+  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River") %>% 
+  dplyr::distinct(AU_ID, .keep_all = TRUE)
 
 # _ NCDC met data ----
 load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
@@ -563,8 +564,7 @@ mw.station.tbl <- mw.stations.huc10 %>%
 #dplyr::mutate_at("NAME", str_replace_all, "sse", "SSE")
 
 # _ Save Data ----
-setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
-
+#setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 save(df.stations,
      tir,
      ref,
@@ -594,7 +594,8 @@ save(df.stations,
      mw.station.tbl,
      strip_alpha,
      strip_tbl_num,
-     file = paste0(file.name,".RData"))
+     file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",
+                   file.name,".RData"))
 
 # Leaflet Map Data ----
 # _ Model Streams ----

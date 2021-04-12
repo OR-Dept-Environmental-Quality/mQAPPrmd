@@ -296,7 +296,8 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")
+  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River") %>% 
+  dplyr::distinct(AU_ID, .keep_all = TRUE)
 
 # _ NCDC met data ----
 load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
@@ -577,8 +578,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   #dplyr::mutate_at("NAME", str_replace_all, "sse", "SSE")
   
   # _ Save Data ----
-  setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
-  
+  #setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
   save(df.stations,
        tir,
        ref,
@@ -608,21 +608,21 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
        mw.station.tbl,
        strip_alpha,
        strip_tbl_num,
-       file = paste0(file.name,".RData"))
+       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",
+                     file.name,".RData"))
   
 }
 
 # Leaflet Map Data ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"), sheet = "Lookup_QAPPProjectArea")
 schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
 
 pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
                          layer = "project_areas")
-
 pro_areas <- sf::st_transform(pro_areas, 4326)
-
 pro_areas <- pro_areas %>% 
   dplyr::mutate(color = dplyr::case_when(Project_Na == "John Day River Basin" ~ "#df65b0", #pink
                                          Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins" ~ "yellow",
@@ -645,86 +645,84 @@ pro_areas <- pro_areas %>%
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
                            layer = "project_reach_extent")
-
 #pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
-
 pro_reaches <- sf::st_transform(pro_reaches, 4326)
-
 pro_reaches <- pro_reaches %>% 
   dplyr::mutate(color = dplyr::case_when(Project_Na == "Willamette River Mainstem and Major Tributaries"~ "purple",
                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
 
 # _ Model Extents ----
-hs.model.temp.extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/temp_model_streams_temp_projects.shp",
-                                    layer = "temp_model_streams_temp_projects")
+map.ce_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/ce_model_extent.shp",
+                               layer = "ce_model_extent")
 
-hs.model.temp.extent <- sf::st_transform(hs.model.temp.extent, 4326)
+map.ce_model_extent <- sf::st_transform(map.ce_model_extent, 4326)
 
-#hs.model.solar.extent
+map.hs_temp_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/hs_temp_model_extent.shp",
+                                    layer = "hs_temp_model_extent")
 
-sh.model.extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_streams_temp_projects_clean.shp",
+map.hs_temp_model_extent <- sf::st_transform(map.hs_temp_model_extent, 4326)
+
+#map.hs.model.solar.extent
+
+map.sh_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_streams_temp_projects_clean.shp",
                                layer = "shade_model_streams_temp_projects_clean") %>% 
   dplyr::select(-`Project_Na`) %>% 
   dplyr::rename(`Project_Na` = `Project__1`)
 
-sh.model.extent <- sf::st_transform(sh.model.extent, 4326)
+map.sh_model_extent <- sf::st_transform(map.sh_model_extent, 4326)
 
-#ce.model.extent
+# map.tir_extent
 
-#shadow.model.area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/shade_model_area_SWillamette_temp_projects.shp",
-#                                 layer = "shade_model_area_SWillamette_temp_projects")
+# _ HUC 8,10,12 ---- 
+# Codes for HUCs here are not used. HUCs are pulled from the REST server in the map_pro_areas.R.
+#map_huc8 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
+#                        layer = "Study_Areas_v5_HUC8_scope") %>% 
+#  dplyr::select(HUC_8,geometry)
+#map_huc8 <- tigris::geo_join(map_huc8, lookup.huc, by_sp = "HUC_8", by_df = "HUC_8", how = "left")
+#map_huc8  <- sf::st_transform(map_huc8 , 4326)
 
-#shadow.model.area <- sf::st_transform(shadow.model.area, 4326)
+#map_huc10 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v6_HUC10_scope.shp",
+#                         layer = "Study_Areas_v6_HUC10_scope")%>% 
+#  dplyr::select(HUC_10,geometry)
+#map_huc10 <- tigris::geo_join(map_huc10, lookup.huc, by_sp = "HUC_10", by_df = "HUC10", how = "left")
+#map_huc10 <- sf::st_transform(map_huc10, 4326)
 
-#ggplot() +
-#  geom_sf(data = shade.model.area) +
-#  geom_sf(data = hs.model.extent,color = "red") +
-#  geom_sf(data = shade.model.streams,color = "blue")
+#map_huc12 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_huc12.shp",
+#                         layer = "project_huc12") %>% 
+#  dplyr::select(HUC12,geometry)
+#map_huc12 <- tigris::geo_join(map_huc12, lookup.huc, by_sp = "HUC12", by_df = "HUC12", how = "left")
+#map_huc12 <- sf::st_transform(map_huc12, 4326)
 
-# _ HUC 8,10,12 ----
-map.huc8 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
-                        layer = "Study_Areas_v5_HUC8_scope") %>% 
-  dplyr::select(HUC_8,geometry)
+# _ IR2018/20 ----
+colum_auid <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
+                          layer="Columbia_River_AU_IDs",
+                          stringsAsFactors=FALSE) %>% 
+  sf::st_drop_geometry() %>%
+  dplyr::distinct(AU_ID) %>%
+  dplyr::pull(AU_ID) 
 
-map.huc8 <- tigris::geo_join(map.huc8, lookup.huc, by_sp = "HUC_8", by_df = "HUC_8", how = "left")
-
-map.huc8  <- sf::st_transform(map.huc8 , 4326)
-
-map.huc10 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v6_HUC10_scope.shp",
-                         layer = "Study_Areas_v6_HUC10_scope")
-
-map.huc10 <- tigris::geo_join(map.huc10, lookup.huc, by_sp = "HUC_10", by_df = "HUC10", how = "left")
-
-map.huc10 <- sf::st_transform(map.huc10, 4326)
-
-map.huc12 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_huc12.shp",
-                         layer = "project_huc12") %>% 
-  dplyr::select(HUC12,geometry)
-
-map.huc12 <- tigris::geo_join(map.huc12, lookup.huc, by_sp = "HUC12", by_df = "HUC12", how = "left")
-
-map.huc12 <- sf::st_transform(map.huc12, 4326)
+# _ Temperature WQS ----
+wqs <- sf::st_read(
+  dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Standards/GeoRef_Standards.gdb",
+  layer = "Oregon_Standards",
+  stringsAsFactors = FALSE) %>% 
+  sf::st_zm() %>%
+  sf::st_transform(4326)
 
 # test ----
 # _ Save Data ----
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
 save(lookup.huc,
-     pro_areas,
+     pro.areas,
      pro_areas,
      pro_reaches,
      hs.model.extent,
      sh.model.extent,
      #shadow.model.area,
-     map.huc8,
-     map.huc10,
-     map.huc12,
+     colum_auid,
+     wqs,
      file = "map.RData")
-
-
-
-
-
 
 # test end ----
 
