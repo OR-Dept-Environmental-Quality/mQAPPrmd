@@ -1451,34 +1451,20 @@ temp_cal_sites <- model.input %>%
                 `Model Location` = round(`Model Location`,2)) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
-# Stream Temperature Model Boundary Conditions
-temp_model_bc <- model.input %>% 
-  dplyr::filter(`Model Location Type` == "Boundary Condition") %>% 
+# Stream Temperature Model Boundary Conditions and Tributary inputs
+temp_model_bc_tri <- model.input %>% 
   dplyr::filter(Parameter == "Water Temperature") %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::filter(`Model Location Type` %in% c("Boundary Condition","Tributary")) %>% 
   dplyr::filter(!is.na(Latitude)) %>% 
-  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
-                                                            `Model Location Name`,
-                                                            paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                `Model Location` = round(`Model Location`,2),
-                `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
-# Stream Temperature Model Tributary Inputs
-temp_model_tri <- model.input %>% 
-  dplyr::filter(`Model Location Type` == "Tributary") %>% 
-  dplyr::filter(Parameter == "Water Temperature") %>% 
+# Stream Flow Model Boundary Conditions and Tributary inputs
+flow_model_bc_tri <- model.input %>% 
+  dplyr::filter(Parameter == "Flow") %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::filter(`Model Location Type` %in% c("Boundary Condition","Tributary")) %>% 
   dplyr::filter(!is.na(Latitude)) %>% 
-  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
-                                                            `Model Location Name`,
-                                                            paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                `Model Location` = round(`Model Location`,2),
-                `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
   
 # Flow Stations
@@ -1501,19 +1487,19 @@ ind_ps <- section.npdes.ind %>%
 
 save(temp_stations,
      temp_cal_sites,
-     temp_model_bc,
-     temp_model_tri,
+     temp_model_bc_tri,
+     flow_model_bc_tri,
      flow_stations,
      met_stations,
      ind_ps,
      file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
                    file.name,".RData"))
 
-sf::st_write(temp_model_bc, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
-                                   file.name,"_bc.shp"))
+#sf::st_write(temp_model_bc, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
+#                                   file.name,"_bc.shp"))
 
-sf::st_write(temp_model_tri, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
-                                   file.name,"_tri.shp"))
+#sf::st_write(temp_model_tri, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
+#                                   file.name,"_tri.shp"))
   
 ```
 

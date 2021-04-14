@@ -73,7 +73,7 @@ for (qapp_project_area in project.areas$areas) {
   # Shapefile layers ----
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name, ".RData")
-  subbasin_huc6 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_6)
+  #subbasin_huc6 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_6)
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
   subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
@@ -81,216 +81,228 @@ for (qapp_project_area in project.areas$areas) {
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
   
-  ce_model_extent
+  ce_model_extent <- map_ce_model_extent %>% 
+    dplyr::filter(Project_Na == qapp_project_area)%>% 
+    sf::st_zm() 
   
-  hs_temp_model_extent
+  hs_temp_model_extent <- map_hs_temp_model_extent %>% 
+    dplyr::filter(Project_Na == qapp_project_area)%>% 
+    sf::st_zm() 
   
-  hs_solar_model_extent
+  hs_solar_model_extent <- map_hs_solar_model_extent %>% 
+    dplyr::filter(Project_Na == qapp_project_area)%>% 
+    sf::st_zm() 
   
-  sh_model_extent
+  sh_model_extent <- map_sh_model_extent %>%
+    sf::st_zm() %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
   
-  tir_extent
+  #tir_extent
   
   # HUC8, 10, 12 ----
   url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1/query?"
-  request <- httr::GET(url = paste0(url,
-                                    "where=HUC8+LIKE+%27",subbasin_huc6,"%25%27&",
-                                    "geometryType=esriGeometryEnvelope&",
-                                    "inSR=4326&",
-                                    "spatialRel=esriSpatialRelIntersects&",
-                                    "outFields=*&",
-                                    "returnGeometry=true&",
-                                    "returnTrueCurves=false&",
-                                    "returnIdsOnly=false&",
-                                    "returnCountOnly=false&",
-                                    "returnZ=false&",
-                                    "returnM=false&",
-                                    "returnDistinctValues=false&",
-                                    "returnExtentOnly=false&",
-                                    "featureEncoding=esriDefault&",
-                                    "f=geojson"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  huc8 <- geojsonsf::geojson_sf(response) %>% 
-    dplyr::filter(HUC8 %in% subbasin_huc8)
+  huc8 <- NULL
+  for(huc_8 in subbasin_huc8){
+    request <- httr::GET(url = paste0(url,
+                                      "where=HUC8+LIKE+%27",huc_8,"%25%27&",
+                                      "geometryType=esriGeometryEnvelope&",
+                                      "inSR=4326&",
+                                      "spatialRel=esriSpatialRelIntersects&",
+                                      "outFields=*&",
+                                      "returnGeometry=true&",
+                                      "returnTrueCurves=false&",
+                                      "returnIdsOnly=false&",
+                                      "returnCountOnly=false&",
+                                      "returnZ=false&",
+                                      "returnM=false&",
+                                      "returnDistinctValues=false&",
+                                      "returnExtentOnly=false&",
+                                      "featureEncoding=esriDefault&",
+                                      "f=geojson"))
+    response <- httr::content(request, as = "text", encoding = "UTF-8")
+    huc8_pro_area <- geojsonsf::geojson_sf(response)
+    huc8 <- rbind(huc8,huc8_pro_area)
+  }
   
   url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2/query?"
-  request <- httr::GET(url = paste0(url,
-                                    "where=HUC10+LIKE+%27",subbasin_huc6,"%25%27&",
-                                    "geometryType=esriGeometryEnvelope&",
-                                    "inSR=4326&",
-                                    "spatialRel=esriSpatialRelIntersects&",
-                                    "outFields=*&",
-                                    "returnGeometry=true&",
-                                    "returnTrueCurves=false&",
-                                    "returnIdsOnly=false&",
-                                    "returnCountOnly=false&",
-                                    "returnZ=false&",
-                                    "returnM=false&",
-                                    "returnDistinctValues=false&",
-                                    "returnExtentOnly=false&",
-                                    "featureEncoding=esriDefault&",
-                                    "f=geojson"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  huc10 <- geojsonsf::geojson_sf(response) %>% 
-    dplyr::filter(HUC10 %in% subbasin_huc10)
+  huc10 <- NULL
+  for(huc_10 in subbasin_huc10){
+    request <- httr::GET(url = paste0(url,
+                                      "where=HUC10+LIKE+%27",huc_10,"%25%27&",
+                                      "geometryType=esriGeometryEnvelope&",
+                                      "inSR=4326&",
+                                      "spatialRel=esriSpatialRelIntersects&",
+                                      "outFields=*&",
+                                      "returnGeometry=true&",
+                                      "returnTrueCurves=false&",
+                                      "returnIdsOnly=false&",
+                                      "returnCountOnly=false&",
+                                      "returnZ=false&",
+                                      "returnM=false&",
+                                      "returnDistinctValues=false&",
+                                      "returnExtentOnly=false&",
+                                      "featureEncoding=esriDefault&",
+                                      "f=geojson"))
+    response <- httr::content(request, as = "text", encoding = "UTF-8")
+    huc10_pro_area <- geojsonsf::geojson_sf(response)
+    huc10 <- rbind(huc10,huc10_pro_area)
+  }
   
   url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/3/query?"
-  request <- httr::GET(url = paste0(url,
-                                    "where=HUC12+LIKE+%27",subbasin_huc6,"%25%27&",
-                                    "geometryType=esriGeometryEnvelope&",
-                                    "inSR=4326&",
-                                    "spatialRel=esriSpatialRelIntersects&",
-                                    "outFields=*&",
-                                    "returnGeometry=true&",
-                                    "returnTrueCurves=false&",
-                                    "returnIdsOnly=false&",
-                                    "returnCountOnly=false&",
-                                    "returnZ=false&",
-                                    "returnM=false&",
-                                    "returnDistinctValues=false&",
-                                    "returnExtentOnly=false&",
-                                    "featureEncoding=esriDefault&",
-                                    "f=geojson"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  huc12 <- geojsonsf::geojson_sf(response) %>% 
-    dplyr::filter(HUC12 %in% subbasin_huc12)
+  huc12 <- NULL
+  for(huc_12 in subbasin_huc12){
+    request <- httr::GET(url = paste0(url,
+                                      "where=HUC12+LIKE+%27",huc_12,"%25%27&",
+                                      "geometryType=esriGeometryEnvelope&",
+                                      "inSR=4326&",
+                                      "spatialRel=esriSpatialRelIntersects&",
+                                      "outFields=*&",
+                                      "returnGeometry=true&",
+                                      "returnTrueCurves=false&",
+                                      "returnIdsOnly=false&",
+                                      "returnCountOnly=false&",
+                                      "returnZ=false&",
+                                      "returnM=false&",
+                                      "returnDistinctValues=false&",
+                                      "returnExtentOnly=false&",
+                                      "featureEncoding=esriDefault&",
+                                      "f=geojson"))
+    response <- httr::content(request, as = "text", encoding = "UTF-8")
+    huc12_pro_area <- geojsonsf::geojson_sf(response)
+    huc12 <- rbind(huc12,huc12_pro_area)
+  }
   
   # IR2018/20 ----
   url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3/query?"
-  request <- httr::GET(url = paste0(url,
-                                    "where=HUC12+LIKE+%27",subbasin_huc6,"%25%27&",
-                                    "geometryType=esriGeometryEnvelope&",
-                                    "inSR=4326&",
-                                    "spatialRel=esriSpatialRelIntersects&",
-                                    "outFields=*&",
-                                    "returnGeometry=true&",
-                                    "returnTrueCurves=false&",
-                                    "returnIdsOnly=false&",
-                                    "returnCountOnly=false&",
-                                    "returnZ=false&",
-                                    "returnM=false&",
-                                    "returnDistinctValues=false&",
-                                    "returnExtentOnly=false&",
-                                    "featureEncoding=esriDefault&",
-                                    "f=geojson"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  ir_rivers <- geojsonsf::geojson_sf(response) %>% 
-    sf::st_zm() %>% 
-    dplyr::filter(HUC12 %in% subbasin_huc12) %>% 
+  ir_rivers <- NULL
+  for(huc_8 in subbasin_huc8){
+    request <- httr::GET(url = paste0(url,
+                                      "where=HUC12+LIKE+%27",huc_8,"%25%27&",
+                                      "geometryType=esriGeometryEnvelope&",
+                                      "inSR=4326&",
+                                      "spatialRel=esriSpatialRelIntersects&",
+                                      "outFields=*&",
+                                      "returnGeometry=true&",
+                                      "returnTrueCurves=false&",
+                                      "returnIdsOnly=false&",
+                                      "returnCountOnly=false&",
+                                      "returnZ=false&",
+                                      "returnM=false&",
+                                      "returnDistinctValues=false&",
+                                      "returnExtentOnly=false&",
+                                      "featureEncoding=esriDefault&",
+                                      "f=geojson"))
+    response <- httr::content(request, as = "text", encoding = "UTF-8")
+    ir_rivers_pro_area <- geojsonsf::geojson_sf(response)
+    ir_rivers <- rbind(ir_rivers,ir_rivers_pro_area)
+  }
+  ir_rivers <- ir_rivers %>% sf::st_zm() %>% 
     dplyr::filter(grepl("Temperature",Category_5_parameters)) %>% 
     dplyr::filter(!AU_ID %in% c(colum_auid))
   
   url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/2/query?"
-  request <- httr::GET(url = paste0(url,
-                                    "where=HUC12+LIKE+%27",subbasin_huc6,"%25%27&",
-                                    "geometryType=esriGeometryEnvelope&",
-                                    "inSR=4326&",
-                                    "spatialRel=esriSpatialRelIntersects&",
-                                    "outFields=*&",
-                                    "returnGeometry=true&",
-                                    "returnTrueCurves=false&",
-                                    "returnIdsOnly=false&",
-                                    "returnCountOnly=false&",
-                                    "returnZ=false&",
-                                    "returnM=false&",
-                                    "returnDistinctValues=false&",
-                                    "returnExtentOnly=false&",
-                                    "featureEncoding=esriDefault&",
-                                    "f=geojson"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  ir_waterbodies <-  geojsonsf::geojson_sf(response) %>% 
-    sf::st_zm() %>% 
-    dplyr::filter(HUC12 %in% subbasin_huc12) %>% 
+  ir_waterbodies <- NULL
+  for(huc_8 in subbasin_huc8){
+    request <- httr::GET(url = paste0(url,
+                                      "where=HUC12+LIKE+%27",huc_8,"%25%27&",
+                                      "geometryType=esriGeometryEnvelope&",
+                                      "inSR=4326&",
+                                      "spatialRel=esriSpatialRelIntersects&",
+                                      "outFields=*&",
+                                      "returnGeometry=true&",
+                                      "returnTrueCurves=false&",
+                                      "returnIdsOnly=false&",
+                                      "returnCountOnly=false&",
+                                      "returnZ=false&",
+                                      "returnM=false&",
+                                      "returnDistinctValues=false&",
+                                      "returnExtentOnly=false&",
+                                      "featureEncoding=esriDefault&",
+                                      "f=geojson"))
+    response <- httr::content(request, as = "text", encoding = "UTF-8")
+    ir_waterbodies_pro_area <- geojsonsf::geojson_sf(response)
+    ir_waterbodies <- rbind(ir_waterbodies,ir_waterbodies_pro_area)
+  }
+  ir_waterbodies <- ir_waterbodies %>% sf::st_zm() %>% 
     dplyr::filter(grepl("Temperature",Category_5_parameters)) %>% 
     dplyr::filter(!AU_ID %in% c(colum_auid))
-  
+
   url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/4/query?"
-  request <- httr::GET(url = paste0(url,
-                                    "where=HUC12+LIKE+%27",subbasin_huc6,"%25%27&",
-                                    "geometryType=esriGeometryEnvelope&",
-                                    "inSR=4326&",
-                                    "spatialRel=esriSpatialRelIntersects&",
-                                    "outFields=*&",
-                                    "returnGeometry=true&",
-                                    "returnTrueCurves=false&",
-                                    "returnIdsOnly=false&",
-                                    "returnCountOnly=false&",
-                                    "returnZ=false&",
-                                    "returnM=false&",
-                                    "returnDistinctValues=false&",
-                                    "returnExtentOnly=false&",
-                                    "featureEncoding=esriDefault&",
-                                    "f=geojson"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  ir_watershed <-  geojsonsf::geojson_sf(response) %>% 
-    sf::st_zm() %>% 
-    dplyr::filter(HUC12 %in% subbasin_huc12) %>% 
+  ir_watershed <- NULL
+  for(huc_8 in subbasin_huc8){
+    request <- httr::GET(url = paste0(url,
+                                      "where=HUC12+LIKE+%27",huc_8,"%25%27&",
+                                      "geometryType=esriGeometryEnvelope&",
+                                      "inSR=4326&",
+                                      "spatialRel=esriSpatialRelIntersects&",
+                                      "outFields=*&",
+                                      "returnGeometry=true&",
+                                      "returnTrueCurves=false&",
+                                      "returnIdsOnly=false&",
+                                      "returnCountOnly=false&",
+                                      "returnZ=false&",
+                                      "returnM=false&",
+                                      "returnDistinctValues=false&",
+                                      "returnExtentOnly=false&",
+                                      "featureEncoding=esriDefault&",
+                                      "f=geojson"))
+    response <- httr::content(request, as = "text", encoding = "UTF-8")
+    ir_watershed_pro_area <- geojsonsf::geojson_sf(response)
+    ir_watershed <- rbind(ir_watershed,ir_watershed_pro_area)
+  }
+  ir_watershed <- ir_watershed %>% sf::st_zm() %>% 
     dplyr::filter(grepl("Temperature",Category_5_parameters)) %>% 
     dplyr::filter(!AU_ID %in% c(colum_auid))
-  
+
   # Temp WQS ----
   url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0/query?"
-  request <- httr::GET(url = paste0(url,
-                                    "where=OBJECTID+<1000000&",
-                                    "geometryType=esriGeometryEnvelope&",
-                                    "inSR=4326&",
-                                    "spatialRel=esriSpatialRelIntersects&",
-                                    "outFields=*&",
-                                    "returnGeometry=true&",
-                                    "returnTrueCurves=false&",
-                                    "returnIdsOnly=false&",
-                                    "returnCountOnly=false&",
-                                    "returnZ=false&",
-                                    "returnM=false&",
-                                    "returnDistinctValues=false&",
-                                    "returnExtentOnly=false&",
-                                    "featureEncoding=esriDefault&",
-                                    "f=geojson"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  wqs <- geojsonsf::geojson_sf(response) %>% 
-    sf::st_zm() %>% 
-    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
-
-  # 
-  wqs <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Standards/GeoRef_Standards.gdb",
-    layer = "Oregon_Standards",
-    stringsAsFactors = FALSE) %>% 
-    sf::st_zm() %>%
-    sf::st_transform(4326)
+  wqs <- NULL
+  for(huc_8 in subbasin_huc8){
+    # test: huc_8 <- "17070204"
+    query_min <- paste0(huc_8,"000000")
+    query_max <- paste0(huc_8,"999999")
+    request <- httr::GET(url = paste0(url,
+                                      "where=ReachCode+%3E%3D+",query_min,"+AND+ReachCode+%3C%3D",query_max,"&",
+                                      "geometryType=esriGeometryEnvelope&",
+                                      "inSR=4326&",
+                                      "spatialRel=esriSpatialRelIntersects&",
+                                      "outFields=*&",
+                                      "returnGeometry=true&",
+                                      "returnTrueCurves=false&",
+                                      "returnIdsOnly=false&",
+                                      "returnCountOnly=false&",
+                                      "returnZ=false&",
+                                      "returnM=false&",
+                                      "returnDistinctValues=false&",
+                                      "returnExtentOnly=false&",
+                                      "featureEncoding=esriDefault&",
+                                      "f=geojson"))
+    response <- httr::content(request, as = "text", encoding = "UTF-8")
+    wqs_pro_area <- geojsonsf::geojson_sf(response)
+    wqs <- rbind(wqs,wqs_pro_area)
+  }
   
-  pro_area_wqs <- wqs %>% 
-    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
-    dplyr::filter(!TempCode == "99")
+  wqs <- sf::st_transform(wqs, 4326) %>% sf::st_zm()
   
+  # Fish Use Designations
+  wqs_fish_use <- wqs %>% 
+    dplyr::filter(!Temperature_Criteria == "No Salmonid Use/Out of State/Tribal Lands") %>% 
+    dplyr::mutate(Temperature_Criteria = gsub("Fish Use -","",Temperature_Criteria)) %>% 
+    dplyr::mutate(Temperature_Criteria = trimws(Temperature_Criteria, "left"))
   
-  temp_wqs_spawning
-  
-  temp_wqs_non_spawning
-  
-  ####
-  pro.area.hs.model.extent <- hs.model.extent %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.sh.model.extent <- sh.model.extent %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.map.huc8 <- map.huc8 %>% 
-    dplyr::filter(HUC_8 %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
-  
-  pro.area.map.huc10 <- map.huc10 %>% 
-    #dplyr::filter(Project_Na == qapp_project_area)
-    dplyr::filter(HUC_10 %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
-  
-  pro.area.map.huc12 <- map.huc12 %>% 
-    #dplyr::filter(QAPP_Project_Area == qapp_project_area)
-    dplyr::filter(HUC12 %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC12))
+  # Spawning Use Designations
+  wqs_spawning <- wqs %>% 
+    dplyr::filter(!Temperature_Spawn_dates %in% c("No Spawning - No Jurisdiction/Out of State/Tribal Lands","No Spawning - Not Designated")) %>% 
+    dplyr::mutate(Temperature_Spawn_dates = ifelse(Temperature_Spawn_dates=="X (No Spawning)", "No Spawning", Temperature_Spawn_dates)) %>% 
+    dplyr::mutate(Temperature_Spawn_dates = ifelse(Temperature_Spawn_dates=="Bull Trout Spawning - No designated spawning dates",
+                                                   "Bull Trout Spawning and Rearing Habitat", Temperature_Spawn_dates)) 
   
   # Data layers ----
   load(paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",map.file.name))
   
+    # Map ----
+  map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
   
-  # Map ----
   leaflet::leaflet() %>% addTiles() %>% 
     leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                        lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
@@ -301,52 +313,70 @@ for (qapp_project_area in project.areas$areas) {
                          group = "HUC10") %>% 
     leaflet::addPolygons(data = huc12,
                          group = "HUC12") %>% 
-    #leaflet::addPolylines(data = pro_area_wqs,
-    #                      group = "Temp Water Quality Standards (Polylines)") %>% 
-    leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
-                                      group = "Temp Water Quality Standards (REST)") %>% 
     leaflet::addPolylines(data = ir_rivers,
                           group = "2018/2020 IR Status - Streams") %>% 
     leaflet::addPolygons(data = ir_waterbodies,
                          group = "2018/2020 IR Status - Waterbodies") %>% 
     leaflet::addPolygons(data = ir_watershed,
                          group = "2018/2020 IR Status - Watershed") %>% 
+    #leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
+    #                                  group = "Temp Water Quality Standards (REST)") %>% 
+    leaflet::addPolylines(data = wqs_fish_use,
+                          group = "Fish Use Designations") %>% 
+    leaflet::addPolylines(data = wqs_spawning,
+                          group = "Salmon and Steelhead Spawning Use Designations") %>% 
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent") %>% 
     leaflet::addMarkers(data = temp_stations,
-                        group = "Stream Temperature Stations") %>% 
+                        group = "Stream Temperature Stations",
+                        clusterOptions = markerClusterOptions()) %>% 
     leaflet::addMarkers(data = temp_cal_sites,
-                        group = "Stream Temperature Calibration Sites") %>% 
-    leaflet::addMarkers(data = temp_model_bc,
-                        group = "Stream Temperature Model Boundary Conditions") %>% 
-    leaflet::addMarkers(data = temp_model_tri,
-                        group = "Stream Temperature Model Tributary Inputs") %>% 
+                        group = "Stream Temperature Calibration Sites",
+                        clusterOptions = markerClusterOptions()) %>% 
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        clusterOptions = markerClusterOptions()) %>% 
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        clusterOptions = markerClusterOptions()) %>% 
     leaflet::addMarkers(data = flow_stations,
-                        group = "Flow Stations") %>%
+                        group = "Flow Stations",
+                        clusterOptions = markerClusterOptions()) %>%
     leaflet::addMarkers(data = met_stations,
-                        group = "Meteorological Stations") %>% 
+                        group = "Meteorological Stations",
+                        clusterOptions = markerClusterOptions()) %>% 
     leaflet::addMarkers(data = ind_ps,
-                        group = "Individual NPDES Point Sources") %>% 
+                        group = "Individual NPDES Point Sources",
+                        clusterOptions = markerClusterOptions()) %>% 
     leaflet::addLayersControl(overlayGroups = c("HUC8","HUC10","HUC12",
-                                                "Temp Water Quality Standards (Polylines)",
-                                                "Temp Water Quality Standards (REST)",
                                                 "2018/2020 IR Status - Streams",
                                                 "2018/2020 IR Status - Waterbodies",
-                                                "2018/2020 IR Status - Watershed"),
+                                                "2018/2020 IR Status - Watershed",
+                                                "Fish Use Designations",
+                                                "Salmon and Steelhead Spawning Use Designations",
+                                                "Heat Source Temperature Model Extent"),
                               baseGroups = c("Stream Temperature Stations",
                                              "Stream Temperature Calibration Sites",
-                                             "Stream Temperature Model Boundary Conditions",
-                                             "Stream Temperature Model Tributary Inputs",
+                                             "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                             "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                              "Flow Stations",
                                              "Meteorological Stations",
                                              "Individual NPDES Point Sources"),
                               options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
     leaflet::hideGroup(c("HUC8","HUC10","HUC12",
-                         "Temp Water Quality Standards (Polylines)",
-                         "Temp Water Quality Standards (REST)",
                          "2018/2020 IR Status - Streams",
                          "2018/2020 IR Status - Waterbodies",
-                         "2018/2020 IR Status - Watershed"))
+                         "2018/2020 IR Status - Watershed",
+                         "Fish Use Designations",
+                         "Salmon and Steelhead Spawning Use Designations")) %>% 
+    leaflet::addMiniMap(position = "bottomleft",
+                        width = 260,
+                        height = 250,
+                        zoomLevelFixed = 5) %>% 
+    leaflet.extras::addResetMapButton() %>% 
+    leaflet::addControl(map.title, position = "topleft", className="map-title")
     
-    
+    # 
     
     save 
 }
