@@ -43,6 +43,7 @@ library(ggplot2)
 library(stringr);library(stringi)
 library(english)
 library(pacman)
+library(httr)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -262,7 +263,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
                   `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
                   `Available Data` = Parameter,
                   Agency = NA,
-                  tbl = "worksheet") %>% 
+                  tbl = "DEQ File") %>% 
     dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
     dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
     dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
@@ -275,7 +276,7 @@ t51_ncei <- ncei.station.tbl %>%
                 `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = NA,
-                tbl = "ncei") %>% 
+                tbl = "NCDC") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
   dplyr::distinct(Station, .keep_all=TRUE)
@@ -286,7 +287,7 @@ t51_raws <- raws.station.tbl %>%
                 `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = agency,
-                tbl = "raws") %>% 
+                tbl = "RAWS") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
   dplyr::distinct(`Station`, .keep_all=TRUE)
@@ -297,7 +298,7 @@ t51_agrimet <- agrimet.station.tbl %>%
                 `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = NA,
-                tbl = "agrimet") %>% 
+                tbl = "AgriMet") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
   dplyr::distinct(`Station`, .keep_all=TRUE)
@@ -309,7 +310,7 @@ t51_hydromet <- hydromet.station.tbl %>%
                 `Latitude/Longitude` = paste0(round(as.numeric(lat),4), "/",round(as.numeric(long),3)),
                 `Available Data` = Parameter,
                 Agency = NA,
-                tbl = "hydromet") %>% 
+                tbl = "Hydromet") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
   dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
   dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
@@ -321,7 +322,7 @@ t51_mw <- mw.station.tbl %>%
                 `Latitude/Longitude` = paste0(round(as.numeric(lat),4), "/",round(as.numeric(long),3)),
                 `Available Data` = NA,
                 Agency = NA,
-                tbl = "mw") %>% 
+                tbl = "MesoWest") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
   dplyr::distinct(`Station`, .keep_all=TRUE)
@@ -340,7 +341,7 @@ t51 <- t51[!duplicated(t51$`Station`),]
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   
   t51.sp <- t51 %>% 
-    dplyr::filter(tbl=="worksheet") %>% 
+    dplyr::filter(tbl=="DEQ File") %>% 
     dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
     dplyr::arrange(Station) %>% 
     dplyr::rename(Source = Station) %>% 
@@ -356,7 +357,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 }
 
 t51.ncei <- t51 %>% 
-  dplyr::filter(tbl=="ncei") %>% 
+  dplyr::filter(tbl=="NCDC") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
   dplyr::arrange(`Station ID`)
 
@@ -369,7 +370,7 @@ if(NROW(t51.ncei)>0){
 }
 
 t51.raws <- t51 %>% 
-  dplyr::filter(tbl=="raws") %>% 
+  dplyr::filter(tbl=="RAWS") %>% 
   dplyr::select(-c(`Available Data`,tbl)) %>% 
   dplyr::arrange(`Station ID`)
 
@@ -382,7 +383,7 @@ if(NROW(t51.raws)>0){
 }
 
 t51.agrimet <- t51 %>% 
-  dplyr::filter(tbl=="agrimet") %>% 
+  dplyr::filter(tbl=="AgriMet") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
   dplyr::arrange(`Station ID`)
 
@@ -395,7 +396,7 @@ if(NROW(t51.agrimet)>0){
 }
 
 t51.hydromet <- t51 %>% 
-  dplyr::filter(tbl=="hydromet") %>% 
+  dplyr::filter(tbl=="Hydromet") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl))%>% 
   dplyr::arrange(`Station ID`)
 
@@ -408,7 +409,7 @@ if(NROW(t51.hydromet)>0){
 }
 
 t51.mw <- t51 %>% 
-  dplyr::filter(tbl=="mw") %>% 
+  dplyr::filter(tbl=="MesoWest") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl))%>% 
   dplyr::arrange(`Station ID`)
 
@@ -510,6 +511,7 @@ t53_1 <- rbind(st_awqms,st_model,st_owrd) %>%
   dplyr::distinct(Station, .keep_all=TRUE) %>%
   dplyr::left_join(df.stations,by = c("Station ID"="MLocID")) %>% 
   dplyr::mutate(Station = stringr::str_to_title(Station)) %>% 
+  dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
   dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
   dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
   dplyr::mutate_at("Station", str_replace_all, "Lb", "LB") %>%
@@ -1478,3 +1480,84 @@ if(NROW(flow.data.sample.count)>0){
 ```
 
 `r app_b_tbl`
+
+```{r, label=`area-map-data`,echo=FALSE}
+# Stream Temperature Stations
+temp_stations <- t53_1 %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Stream Temperature Calibration Sites
+temp_cal_sites <- model.input %>% 
+  dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+  dplyr::filter(Parameter == "Water Temperature") %>% 
+  dplyr::filter(!is.na(Latitude)) %>% 
+  dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                            `Model Location Name`,
+                                                            paste0(`Model Location Name`, " (",`Station ID`,")")),
+                `Model Location` = round(`Model Location`,2)) %>% 
+  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Stream Temperature Model Boundary Conditions and Tributary inputs
+temp_model_bc_tri <- model.input %>% 
+  dplyr::filter(Parameter == "Water Temperature") %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::filter(`Model Location Type` %in% c("Boundary Condition","Tributary")) %>% 
+  dplyr::filter(!is.na(Latitude)) %>% 
+  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Stream Flow Model Boundary Conditions and Tributary inputs
+flow_model_bc_tri <- model.input %>% 
+  dplyr::filter(Parameter == "Flow") %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::filter(`Model Location Type` %in% c("Boundary Condition","Tributary")) %>% 
+  dplyr::filter(!is.na(Latitude)) %>% 
+  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+  
+# Flow Stations
+flow_stations <- t54 %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Meteorological Stations
+met_stations <- t51 %>%
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+# Individual NPDES Point Sources
+ind_ps <- section.npdes.ind %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+save(temp.data.sample.count,
+     flow.data.sample.count,
+     temp_stations,
+     temp_cal_sites,
+     temp_model_bc_tri,
+     flow_model_bc_tri,
+     flow_stations,
+     met_stations,
+     ind_ps,
+     file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
+                   file.name,"_qapp.RData"))
+
+#sf::st_write(temp_model_bc, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
+#                                   file.name,"_bc.shp"))
+
+#sf::st_write(temp_model_tri, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
+#                                   file.name,"_tri.shp"))
+  
+```
+
+
+
