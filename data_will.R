@@ -296,7 +296,8 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")
+  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River") %>% 
+  dplyr::distinct(AU_ID, .keep_all = TRUE)
 
 # _ NCDC met data ----
 load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
@@ -398,6 +399,11 @@ temp.data.sample.count <- temp.data %>%
                 Station = StationDes) %>% 
   dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
   dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
+  dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
+  dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Lb", "LB") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Nf", "NF") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Sf", "SF") %>%
   dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
   dplyr::arrange(Year, `Station ID`) %>% 
   dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
@@ -563,8 +569,7 @@ mw.station.tbl <- mw.stations.huc10 %>%
 #dplyr::mutate_at("NAME", str_replace_all, "sse", "SSE")
 
 # _ Save Data ----
-setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
-
+#setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 save(df.stations,
      tir,
      ref,
@@ -594,7 +599,8 @@ save(df.stations,
      mw.station.tbl,
      strip_alpha,
      strip_tbl_num,
-     file = paste0(file.name,".RData"))
+     file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",
+                   file.name,".RData"))
 
 # Leaflet Map Data ----
 # _ Model Streams ----
