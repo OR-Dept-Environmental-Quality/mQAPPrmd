@@ -399,6 +399,11 @@ temp.data.sample.count <- temp.data %>%
                 Station = StationDes) %>% 
   dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
   dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
+  dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
+  dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Lb", "LB") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Nf", "NF") %>%
+  dplyr::mutate_at("Station", str_replace_all, "Sf", "SF") %>%
   dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
   dplyr::arrange(Year, `Station ID`) %>% 
   dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
