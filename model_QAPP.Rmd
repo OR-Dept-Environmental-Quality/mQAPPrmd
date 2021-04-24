@@ -163,7 +163,7 @@ The existing temperature TMDL addresses temperature on streams with both point a
 
 The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2010 John Day River Basin TMDL were developed primarily to address summer (non-spawning) periods in 2002 for the Middle Fork and North Fork John Day Rivers, and summer periods in 2004 for the main stem John Day River. The Middle Fork John Day River model covers some periods during which Salmon and Steelhead spawning occur, however, neither the Main stem nor the North Fork John Day River models cover Salmon and Steelhead spawning periods. Nevertheless, DEQ has determined that it is appropriate to use the existing models to extrapolate results to develop waste load allocations for those time periods. It is not anticipated additional modeling or modeling updates will need to be made. 
 
-Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon 2018/2020 Section 303(d) Category 5 list has changed since the original TMDL was developed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
+Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon 2018/2020 Section 303(d) Category 5 list has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
 
 `r if(NROW(tcat5)>0){tcat5}`
 
@@ -320,24 +320,6 @@ t51 <- t51[!duplicated(t51$`Latitude/Longitude`),] %>%
   rbind(t51_na)
 t51 <- t51[!duplicated(t51$`Station`),]
 
-if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
-  
-  t51.sp <- t51 %>% 
-    dplyr::filter(tbl=="DEQ File") %>% 
-    dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
-    dplyr::arrange(Station) %>% 
-    dplyr::rename(Source = Station) %>% 
-    dplyr::filter(!Source == "No Station ID, DEQ File")
-  
-  if(NROW(t51.sp)>0){
-    
-    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_sp",
-                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
-    
-  }
-}
-
 t51.ncei <- t51 %>% 
   dplyr::filter(tbl=="NCDC") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
@@ -401,6 +383,24 @@ if(NROW(t51.mw)>0){
                              caption = tbls(name = "t51_mw",
                                             caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area, ".")))
   
+}
+
+if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
+  
+  t51.sp <- t51 %>% 
+    dplyr::filter(tbl=="DEQ File") %>% 
+    dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
+    dplyr::arrange(Station) %>% 
+    dplyr::rename(Source = Station) %>% 
+    dplyr::filter(!Source == "No Station ID, DEQ File")
+  
+  if(NROW(t51.sp)>0){
+    
+    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
+                               caption = tbls(name = "t51_sp",
+                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
+    
+  }
 }
 
 # Table NUM
@@ -755,7 +755,7 @@ tmdl.mod.tbl <- knitr::kable(tmdl.mod.1, format = "pandoc", padding = 2,
 
 # model versions
 tmdl.mod.2 <- model.info %>% 
-  dplyr::distinct(Model_version,`QAPP Project Area`,`Primary Model Parameter`,Model_version,mod_rmd,mod_ref_intext,mod_score)
+  dplyr::distinct(`Model Waterbody`,Model_version,`QAPP Project Area`,`Primary Model Parameter`,Model_version,mod_rmd,mod_ref_intext,mod_score)
 
 mod.check <- sum(as.numeric(tmdl.mod.2$mod_score))
 
