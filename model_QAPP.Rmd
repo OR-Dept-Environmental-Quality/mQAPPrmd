@@ -338,24 +338,6 @@ t51 <- t51[!duplicated(t51$`Latitude/Longitude`),] %>%
   rbind(t51_na)
 t51 <- t51[!duplicated(t51$`Station`),]
 
-if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
-  
-  t51.sp <- t51 %>% 
-    dplyr::filter(tbl=="DEQ File") %>% 
-    dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
-    dplyr::arrange(Station) %>% 
-    dplyr::rename(Source = Station) %>% 
-    dplyr::filter(!Source == "No Station ID, DEQ File")
-  
-  if(NROW(t51.sp)>0){
-    
-    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_sp",
-                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
-    
-  }
-}
-
 t51.ncei <- t51 %>% 
   dplyr::filter(tbl=="NCDC") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
@@ -419,6 +401,24 @@ if(NROW(t51.mw)>0){
                              caption = tbls(name = "t51_mw",
                                             caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area, ".")))
   
+}
+
+if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
+  
+  t51.sp <- t51 %>% 
+    dplyr::filter(tbl=="DEQ File") %>% 
+    dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
+    dplyr::arrange(Station) %>% 
+    dplyr::rename(Source = Station) %>% 
+    dplyr::filter(!Source == "No Station ID, DEQ File")
+  
+  if(NROW(t51.sp)>0){
+    
+    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
+                               caption = tbls(name = "t51_sp",
+                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
+    
+  }
 }
 
 # Table NUM
@@ -771,7 +771,7 @@ tmdl.mod.tbl <- knitr::kable(tmdl.mod.1, format = "pandoc", padding = 2,
 
 # model versions
 tmdl.mod.2 <- model.info %>% 
-  dplyr::distinct(Model_version,`QAPP Project Area`,`Primary Model Parameter`,Model_version,mod_rmd,mod_ref_intext,mod_score)
+  dplyr::distinct(`Model Waterbody`,Model_version,`QAPP Project Area`,`Primary Model Parameter`,Model_version,mod_rmd,mod_ref_intext,mod_score)
 
 mod.check <- sum(as.numeric(tmdl.mod.2$mod_score))
 

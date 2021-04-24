@@ -65,7 +65,7 @@ The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Mode
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")` and model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))`.
+**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
 
 ### Model calibration
 
@@ -111,9 +111,9 @@ if(!model.extent == TRUE){
   
   t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
   
-  mod.loc <- ifelse(tmdl.mod.2$mod_rmd == "hs7" | tmdl.mod.2$mod_rmd == "hs8"| tmdl.mod.2$mod_rmd == "hs9",
+  mod.loc <- ifelse((tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs7") | (tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs8") | (tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
-                    ifelse(tmdl.mod.2$mod_rmd == "hs6",
+                    ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs6",
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
   
