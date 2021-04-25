@@ -158,7 +158,7 @@ The applicable BBNCs in the Sandy Subbasin include:
 
 The existing temperature TMDL addresses temperature on streams with both point and nonpoint sources of thermal loads. 
 
-The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2005 Sandy Basin TMDL were developed before the removal of the Marmot Dam on the Sandy River, and the Little Sandy Dam on the Little Sandy River. Therefore, the Sandy River and Little Sandy River Heat Source models need to be updated to represent post dam conditions using data collected by DEQ and partner agencies in 2016.
+The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2005 Sandy Basin TMDL were developed before the removal of the Marmot Dam on the Sandy River, and the Little Sandy Dam on the Little Sandy River. Therefore, the Sandy River and Bull Run River Heat Source models need to be updated to represent post dam conditions using data collected by DEQ and partner agencies in 2016.
 
 Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon 2018/2020 Section 303(d) Category 5 list has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
 
@@ -1041,9 +1041,11 @@ Management scenarios described in this section summarize means by which the curr
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
+* Updating the Sandy River model boundary conditions and tributary inputs to reflect conditions in 2016.
+
 * Updating the Sandy River model to include current discharges from the City of Troutdale Water Pollution Control Facility and the WES Hoodland Sewage Treatment Plant.       
 
-* Updating the Bull Run River model to reflect boundary conditions at Bull Run Reservoir #1 in 2016. (Or do we recalibrate the Bull Run Model in addition to the Little River and Sandy River models? Could PWB cequal models be used to inform no dams scenario of a recalibrated Bull Run Model?)
+* Updating the Bull Run River model boundary conditions and tributary inputs to reflect conditions in 2016.
 
 ## Background
 
@@ -1136,6 +1138,8 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 *	All other model inputs will be the same as the current calibrated model.    
 
 ## No dams
+
+The no-dams scenario will require the development of a riverine Heat Source model in place of Bull Run Reservoir Number One and Bull Run Reservoir Number Two to evaluate the impacts of no dams along the system. A critical piece of information required for the development of the no-dams Heat Source model is the main channel information to identify the length, width, slope and manning’s roughness coefficient. Existing bathymetry if available will also be evaluated to identify the historic channel, if evident and/or channel shape.
 
 # Project organization
 
