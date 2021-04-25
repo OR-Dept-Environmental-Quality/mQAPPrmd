@@ -1151,7 +1151,7 @@ troles <- flextable::regulartable(roles) %>%
   flextable::set_table_properties(layout = "autofit") %>% 
   #flextable::merge_h(i = c(1,13)) %>% 
   #flextable::bold(i = c(1,13)) %>% 
-  flextable::bg(i = 1, bg = "#B52222", part = "body") %>% 
+  #flextable::bg(i = 1, bg = "#B52222", part = "body") %>% 
   flextable::valign(valign = "top") %>% 
   flextable::theme_box() %>% 
   flextable::set_caption(tbls(name = "roles",
