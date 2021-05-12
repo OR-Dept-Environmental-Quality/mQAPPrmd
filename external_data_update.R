@@ -12,6 +12,7 @@ library(RAWSmet) # RAWS
 #devtools::install_github('fickse/mesowest') # MesoWest
 library(mesowest) # MesoWest
 mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # MesoWest
+library(rvest)
 
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download")
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
@@ -127,10 +128,35 @@ save(raws.meta, raws.data.type, file="raws.RData") # updated date: 2/27/2021
 
 # Hydromet Data ----
 ## Bureau of Reclamation Columbia-Pacific Northwest Region:
-## Note: data spreadsheets were manually organized.
-## hydromet.csv: https://www.usbr.gov/pn/hydromet/decod_params.html
-## hydromet upload moved to data.R
-## hydromet <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/hydromet.csv")
+## Note: station and data spreadsheets were manually organized and uploaded in data.R
+## Stations: https://www.usbr.gov/pn/hydromet/decod_params.html (hydromet.csv)
+hydromet <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/hydromet.csv")
+## Data: https://www.usbr.gov/pn/hydromet/arcread.html
+## Parameter Codes: https://www.usbr.gov/pn/hydromet/data/hydromet_pcodes.html
+### QU: Unregulated Flow, Estimated Daily Average (Cubic Feet per Second)
+### QD: Discharge, Daily Average (Cubic Feet per Second)
+url <- "https://www.usbr.gov/pn-bin/daily.pl?"
+hydromet.data <- NULL
+for(stationID in unique(sort(hydromet$Station.ID))){
+  # test: stationID <- "WARO"
+  print(stationID)
+  request <- rvest::read_html(paste0(url,
+                                     "station=",stationID,"&",
+                                     "format=html&",
+                                     "year=1990&month=1&day=1&",
+                                     "year=2020&month=12&day=31&",
+                                     "pcode=qd"))
+  table <- request %>% 
+    rvest::html_nodes("table") %>% 
+    rvest::html_table((fill = TRUE))
+  dateTime <- unlist(table[[1]][1])
+  Result <- unlist(table[[1]][2]) # QD
+  df <- data.frame(dateTime,Result) %>% 
+    dplyr::mutate(`Data Source` = "Hydromet",
+                  `Station ID` = stationID)
+  hydromet.data <- rbind(hydromet.data,df)
+}
+save(hydromet,hydromet.data, file="hydromet.RData")# updated date: 5/8/2021
 
 # MesoWest Met Data ----
 ## Github: https://github.com/fickse/mesowest
