@@ -505,11 +505,20 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     sf::st_drop_geometry()
   
   mw.station.tbl <- mw.stations.pro.area %>% 
-    dplyr::mutate(NAME = stringr::str_to_title(NAME))  
+    dplyr::mutate(NAME = stringr::str_to_title(NAME)) %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Cw", "CW") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Dw", "DW") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Ew", "EW") %>%
+    dplyr::mutate_at("NAME", str_replace_all, "Fw", "FW") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Us26", "US26") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Us30", "US30") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Psu", "PSU") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "P.g.e.", "P.G.E.") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Kgw-Tv", "KGW-TV") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Bpa", "BPA")
   #dplyr::mutate_at("NAME", str_replace_all, "Or", "OR") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "ese", "ESE") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "es", "SE") %>%
-  #dplyr::mutate_at("NAME", str_replace_all, "Ew", "EW") %>%
   #dplyr::mutate_at("NAME", str_replace_all, "Sw", "SW") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "Mp", "MP") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "Nf", "NF") %>% 
@@ -567,7 +576,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
        strip_tbl_num,
        file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",
                      file.name,".RData"))
-  
 }
 
 # Leaflet Map Data ----
