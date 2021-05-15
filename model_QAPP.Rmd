@@ -155,15 +155,21 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 # Problem definition and management objectives
 
-The `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed to address Category 5 listings for **[Update based on the project area: bacteria, aquatic weeds, biological criteria and temperature]**. As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.
+The `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed to address Category 5 listings for temperature, bacteria and dissolved oxygen. As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.
 
 The applicable temperature criteria in the `r qapp_project_area` include:
 
-**[Update with specific temperature criteria based on the project area]**.
+The applicable BBNCs in the Sandy Subbasin include:       
 
-The existing temperature TMDL addresses temperature on streams with **[Update both point and nonpoint sources]** of thermal loads. 
+*   Salmon and Steelhead Spawning: 13.0 deg-C/55.4 deg-F    
 
-The TMDL will provide load and waste load allocations for sources of thermal loads. **[Update if any specific info is needed for certain listings, time periods, or sources. Eg. During the spawning period, there are three impaired segments on the XX River that are downstream of a hydro-electric project. Modeling analysis are needed to complete TMDLs for these waterbodies.]**
+*   Core Cold Water Habitat: 16.0 deg-C/60.8 deg-F    
+
+*   Salmon and Trout Rearing and Migration: 18.0 deg-C/64.4 deg-F   
+
+The existing temperature TMDL addresses temperature on streams with both point and nonpoint sources of thermal loads. 
+
+The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2005 Sandy Basin TMDL were developed before the removal of the Marmot Dam on the Sandy River, and the Little Sandy Dam on the Little Sandy River. Therefore, the Sandy River and Bull Run River Heat Source models need to be updated to represent post dam conditions using data collected by DEQ and partner agencies in 2016.
 
 Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon 2018/2020 Section 303(d) Category 5 list has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
 
@@ -182,6 +188,7 @@ $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
 Heat transfer relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich 1972, Jobson and Keefer 1979, Beschta and Weatherred 1984, Sinokrot and Stefan 1993, Boyd 1996, Hannah et al 2008, Benyahya et al 2012, Johnson 2004).
+
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 
@@ -229,6 +236,8 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 **Anthropogenic Point Sources**: Heat from warm water discharges of human origin, such as industrial outfalls, municipal waste-water treatment plants (WWTP), and other point sources.
 
+The City of Portland’s drinking water project on the Bull Run River is responsible for elevated stream temperatures between the spillway pool discharge at river mile 6.8 and Larson’s site at river mile 3.8.
+
 # Technical approach
 
 ## Overview
@@ -256,7 +265,7 @@ tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
 
 ```
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local source. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local source. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the Sandy River is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance, removal, or channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
@@ -280,9 +289,7 @@ The modeling framework needs for this project include:
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-7)	**[Update as needed]**
-
-**[Update this paragraph where CE-QUAL-W2 is used].** The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The heat source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
@@ -781,8 +788,6 @@ Estimates of water diversion rates and location of points of diversion can be de
 [WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
 [Water Use Reports]: https://apps.wrd.state.or.us/apps/wr/wateruse_query/
 
-## Effective shade measurements
-
 ```{r, label=`t56`, echo=FALSE}
 
 t56 <- model.input %>% 
@@ -808,10 +813,6 @@ if(NROW(t56)>0){
 }
 
 ```
-
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the stations for effective shade measurements that were available in public and DEQ databases.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
-
-`r if(NROW(t56)>0){t56_tbl}`
 
 # Model development and calibration
 
@@ -1205,7 +1206,7 @@ This scenario evaluates stream temperature response from improvements to channel
 
 This scenario evaluates the stream temperature response from removing point source heat load. The stream temperature warming or cooling from permitted NPDES point sources is evaluated by comparing. This scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:    
 
-*	Removal of all point sources from the model.    
+*	Removal of all point sources from the Sandy River model.    
 
 *	All other model inputs will be the same as the current condition model.     
 
@@ -1226,6 +1227,10 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 *	Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s *n*, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.    
 
 *	All other model inputs will be the same as the current calibrated model.    
+
+## No dams
+
+The no-dams scenario will require the development of a riverine Heat Source model in place of Bull Run Reservoir Number One and Bull Run Reservoir Number Two to evaluate the impacts of no dams along the system. A critical piece of information required for the development of the no-dams Heat Source model is the main channel information to identify the length, width, slope and manning’s roughness coefficient. Existing bathymetry if available will also be evaluated to identify the historic channel, if evident and/or channel shape.
 
 # Project organization
 
@@ -1604,6 +1609,3 @@ save(temp.data.sample.count,
 #                                   file.name,"_tri.shp"))
   
 ```
-
-
-
