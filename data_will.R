@@ -38,7 +38,13 @@ load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewi
 
 awqms.data.temp <- df.awqms.raw.state %>% 
   # AWQMS QA/QC check:
-  dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
+  dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
+  dplyr::mutate(Source = "AWQMS") %>% 
+  dplyr::select("Char_Name","Result_status","Result_Numeric","MLocID","SampleStartDate","Activity_Type","AU_ID","HUC8",             
+                "HUC8_Name","HUC10","HUC12","HUC12_Name","Lat_DD","Long_DD","Measure","Method_Code","MonLocType","Org_Name",
+                "OrganizationID","Project1","QualifierAbbr","Reachcode","Result_Comment","Result_Depth","Result_Depth_Unit",
+                "Result_Operator","Result_Type","Result_Unit","SampleStartTime","SampleStartTZ","SamplingMethod","StationDes",       
+                "Statistical_Base","Time_Basis","Source")
 
 awqms.stations.temp <- df.stations.state %>%
   dplyr::filter(MLocID %in% awqms.data.temp$MLocID) # filter out the stations that have data beyond the period of 1990-2020
@@ -227,6 +233,10 @@ load(paste0(data.dir,"/download/mw.RData")) # mw.meta & mw.variables.list
 mw.stations <- mw.meta$STATION %>%
   dplyr::mutate(lat = LATITUDE, long = LONGITUDE) %>% 
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
+
+# _ Project areas and HUCs ----
+pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
+                         layer = "project_areas")
 
 # RUN BELOW IF AFTER data.R ----
 pro_areas_huc10 <- sf::read_sf(dsn = paste0(data.dir,"gis/project_reach_HUC10.shp"),

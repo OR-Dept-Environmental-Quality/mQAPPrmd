@@ -1,17 +1,9 @@
 # ____master____ ----
-# Install and/or load packages ----
-packages.cran = c("tidyverse","readxl","rgdal","sf","ggplot2","tigris","devtools","lubridate")
-
-package.check.cran <- lapply(
-  packages.cran,
-  FUN = function(x) {
-    if (!require(x, character.only = TRUE)) {
-      install.packages(x, dependencies = TRUE)
-      library(x, character.only = TRUE)
-    }
-  }
-)
-options(tigris_use_cache = TRUE)
+library(tidyverse)
+library(readxl)
+library(rgdal)
+library(sf)
+library(lubridate)
 
 # Functions ----
 strip_alpha <- function(x) {
@@ -38,7 +30,14 @@ load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewi
 
 awqms.data.temp <- df.awqms.raw.state %>% 
   # AWQMS QA/QC check:
-  dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E"))
+  dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
+  dplyr::mutate(Source = "AWQMS",
+                SampleStartDate = as.Date(SampleStartDate)) %>% 
+  dplyr::select("Char_Name","Result_status","Result_Numeric","MLocID","SampleStartDate","Activity_Type","AU_ID","HUC8",             
+                "HUC8_Name","HUC10","HUC12","HUC12_Name","Lat_DD","Long_DD","Measure","Method_Code","MonLocType","Org_Name",
+                "OrganizationID","Project1","QualifierAbbr","Reachcode","Result_Comment","Result_Depth","Result_Depth_Unit",
+                "Result_Operator","Result_Type","Result_Unit","SampleStartTime","SampleStartTZ","SamplingMethod","StationDes",       
+                "Statistical_Base","Time_Basis","Source") 
 
 awqms.stations.temp <- df.stations.state %>%
   dplyr::filter(MLocID %in% awqms.data.temp$MLocID) # filter out the stations that have data beyond the period of 1990-2020
@@ -217,10 +216,10 @@ agrimet.stations.or <- agrimet.stations %>%
   sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ USBR Hydromet ----
-hydromet <- read.csv(paste0(data.dir, "download/hydromet.csv"))
+load(paste0(data.dir,"/download/hydromet.RData")) # hydromet & hydromet.data
 hydromet.stations <- hydromet %>% 
   dplyr::mutate(lat = Lat, long = Long) %>% 
-  sf::st_as_sf(coords = c("Long", "Lat"), crs = sf::st_crs("+init=EPSG:4269"))
+  sf::st_as_sf(coords = c("Long", "Lat"), crs = sf::st_crs("+init=EPSG:4269")) 
 
 # _ MesoWest climate data ----
 load(paste0(data.dir,"/download/mw.RData")) # mw.meta & mw.variables.list
@@ -261,6 +260,14 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   
   subbasin <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC8_NAME)
   subbasin_num <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
+  subbasin_num_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
+  
+  pro_area <- pro_areas %>% 
+    dplyr::filter(Project_Na == qapp_project_area) %>% 
+    sf::st_transform(4269)
+  
+  pro_area_huc8 <- pro_areas_huc8 %>% 
+    dplyr::filter(HUC_8 %in% subbasin_num)
   
   # _ Temp data ----
   # AWQMS, Solicitation Data and OWRD Temp Data
@@ -268,6 +275,27 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(HUC8 %in% subbasin_num) %>% 
     dplyr::rename(`Station ID` = MLocID)
   
+  station.awqms <-  station.awqms %>% 
+    dplyr::mutate(lat = Lat_DD,
+                  long = Long_DD) %>%
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
+    sf::st_drop_geometry()
+  
+  station.awqms_usgs_or <- station.awqms %>% 
+    dplyr::filter(OrgID == "USGS-OR") %>% 
+    dplyr::mutate(StationDes = stringr::str_to_title(StationDes)) %>% 
+    dplyr::mutate_at("StationDes", str_replace_all, "Or", "OR") %>% 
+    dplyr::mutate_at("StationDes", str_replace_all, "Ordeq", "ORDEQ") %>%
+    dplyr::mutate_at("StationDes", str_replace_all, " Rm", " RM") %>%
+    dplyr::mutate_at("StationDes", str_replace_all, "Lb", "LB") %>%
+    dplyr::mutate_at("StationDes", str_replace_all, "Nf", "NF") %>%
+    dplyr::mutate_at("StationDes", str_replace_all, "Sf", "SF")
+  
+  station.awqms <- station.awqms %>% 
+    dplyr::filter(!OrgID == "USGS-OR") %>% 
+    rbind(station.awqms_usgs_or)
+
   station.model <- cal.input %>% 
     dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
     dplyr::left_join(station.awqms[,c("Station ID", "StationDes", "OrgID")], by="Station ID")
@@ -292,16 +320,18 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   
   temp.data <- awqms.data.temp %>% 
     rbind(owrd.data.temp) %>% 
-    dplyr::filter(HUC8 %in% subbasin_num)
+    dplyr::left_join(df.stations, by="MLocID") %>% 
+    dplyr::mutate(HUC8.x = ifelse(is.na(HUC8.x),HUC8.y,HUC8.x)) %>% # add HUC8 to owrd data
+    dplyr::filter(HUC8.x %in% subbasin_num)
   
   # Temp data.sample.count will be used in the Appendix A
   temp.data.sample.count <- temp.data %>% 
     dplyr::filter(Statistical_Base == "Maximum") %>% 
     dplyr::filter(!MLocID == "TIR") %>% 
     dplyr::select(Org_Name, MLocID, SampleStartDate, Statistical_Base, Result_Numeric) %>% 
-    dplyr::mutate(date = lubridate::date(SampleStartDate),
-                  month=lubridate::month(SampleStartDate, label=TRUE, abbr=TRUE),
-                  year=lubridate::year(SampleStartDate)) %>% 
+    dplyr::mutate(date = lubridate::date(as.Date(SampleStartDate)),
+                  month=lubridate::month(as.Date(SampleStartDate), label=TRUE, abbr=TRUE),
+                  year=lubridate::year(as.Date(SampleStartDate))) %>% 
     dplyr::distinct(Org_Name, MLocID, Statistical_Base, Result_Numeric, date, .keep_all=TRUE) %>% 
     dplyr::group_by(MLocID, Statistical_Base, year, month) %>%
     dplyr::summarize(Org_Names=paste0(unique(Org_Name), collapse=" ,"),n=n()) %>%
@@ -311,13 +341,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::left_join(station.awqms[,c("Station ID", "StationDes")], by="Station ID") %>% 
     dplyr::rename(Year = year,
                   Station = StationDes) %>% 
-    dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
-    dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
-    dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
-    dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
-    dplyr::mutate_at("Station", str_replace_all, "Lb", "LB") %>%
-    dplyr::mutate_at("Station", str_replace_all, "Nf", "NF") %>%
-    dplyr::mutate_at("Station", str_replace_all, "Sf", "SF") %>%
     dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
     dplyr::arrange(Year, `Station ID`) %>% 
     dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
@@ -331,12 +354,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                   Longitude = round(Longitude,3))
   
   pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
-  
-  pro_area <- pro_areas %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro_area_huc8 <- pro_areas_huc8 %>% 
-    dplyr::filter(HUC_8 %in% subbasin_num)
   
   # _ IR2018/20 Cat 4 & 5 ----
   pro.cat.45.tbl <- cat.45.tbl %>% 
@@ -371,12 +388,26 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                   Result = Result_Numeric)%>% 
     dplyr::mutate(`Data Source` = "OWRD")
   
-  flow.data <- rbind(usgs.data,owrd.data.flow)
+  station.hydromet.flow <- hydromet.stations %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
+    sf::st_drop_geometry() %>% 
+    dplyr::mutate(`Data Source`= "Hydromet") %>% 
+    dplyr::rename(`Station ID` = Station.ID,
+                  Station = Station.Name,
+                  Lat = lat,
+                  Long = long) %>% 
+    dplyr::select(`Data Source`,`Station ID`,Station,Lat,Long) %>% 
+    dplyr::distinct(`Station ID`, .keep_all = TRUE)
+    
+  hydromet.data.flow <- hydromet.data %>%
+    dplyr::filter(`Station ID` %in% station.hydromet.flow$`Station ID`)
+  
+  flow.data <- rbind(usgs.data,owrd.data.flow,hydromet.data.flow)
   
   station.owrd.flow <- station.owrd %>% 
     dplyr::filter(`Station ID` %in% owrd.data.flow$`Station ID`)
   
-  flow.stations <- rbind(station.usgs, station.owrd.flow) %>% 
+  flow.stations.cmb <- rbind(station.usgs, station.owrd.flow,station.hydromet.flow) %>% 
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
     dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
@@ -401,6 +432,13 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::mutate_at("Station", str_replace_all, "No", "N") %>% 
     dplyr::mutate_at("Station", str_replace_all, "Nrth", "North") %>% 
     dplyr::mutate_at("Station", str_replace_all, "Suth", "South")
+  
+  flow.stations <- flow.stations.cmb %>% 
+    dplyr::mutate(lat = Lat,
+                  long = Long) %>%
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
+    sf::st_drop_geometry()
   
   # Flow data.sample.count will be used in the Appendix B
   flow.data.sample.count <- flow.data %>% 
@@ -456,7 +494,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   
   # _ USBR Hydromet ----
   hydromet.stations.pro.area <- hydromet.stations %>% 
-    filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
     sf::st_drop_geometry()
   
   hydromet.station.tbl <- hydromet.stations.pro.area
@@ -467,17 +505,43 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     sf::st_drop_geometry()
   
   mw.station.tbl <- mw.stations.pro.area %>% 
-    dplyr::mutate(NAME = stringr::str_to_title(NAME))  
+    dplyr::mutate(NAME = stringr::str_to_title(NAME)) %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Cw", "CW") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Dw", "DW") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Ew", "EW") %>%
+    dplyr::mutate_at("NAME", str_replace_all, "Fw", "FW") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Us26", "US26") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Us30", "US30") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Psu", "PSU") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "P.g.e.", "P.G.E.") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Kgw-Tv", "KGW-TV") %>% 
+    dplyr::mutate_at("NAME", str_replace_all, "Bpa", "BPA")
   #dplyr::mutate_at("NAME", str_replace_all, "Or", "OR") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "ese", "ESE") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "es", "SE") %>%
-  #dplyr::mutate_at("NAME", str_replace_all, "Ew", "EW") %>%
   #dplyr::mutate_at("NAME", str_replace_all, "Sw", "SW") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "Mp", "MP") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "Nf", "NF") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "Se", "SE") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "se", "SE") %>% 
   #dplyr::mutate_at("NAME", str_replace_all, "sse", "SSE")
+  
+  # _ NPEDES ----
+  npdes.ind.pro.area <- npdes.ind %>% 
+    dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
+    dplyr::filter(!is.na(Latitude)) %>% 
+    dplyr::mutate(lat = Latitude, long = Longitude) %>% 
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
+    sf::st_drop_geometry()
+  
+  npdes.gen.pro.area <- npdes.gen %>% 
+    dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
+    dplyr::filter(!is.na(Latitude)) %>% 
+    dplyr::mutate(lat = Latitude, long = Longitude) %>% 
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
+    sf::st_drop_geometry()
   
   # _ Save Data ----
   #setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
@@ -488,8 +552,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
        risks,
        abbr,
        data.gap,
-       npdes.ind,
-       npdes.gen,
+       npdes.ind.pro.area,
+       npdes.gen.pro.area,
        lookup.huc,
        project.areas,
        qapp_project_area,
@@ -512,7 +576,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
        strip_tbl_num,
        file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",
                      file.name,".RData"))
-  
 }
 
 # Leaflet Map Data ----
@@ -687,242 +750,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
        sh_model_extent,
        #tir_extent,
        file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",file.name,".RData"))
-}
-  
-  
-  # Codes hereuder are not used ----
-  
-  print(paste0(qapp_project_area,"...HUC8"))
-  # _ _ HUC8, 10, 12 ----
-  url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1/query?"
-  huc8 <- NULL
-  for(huc_8 in subbasin_huc8){
-    request <- httr::GET(url = paste0(url,
-                                      "where=HUC8+LIKE+%27",huc_8,"%25%27&",
-                                      "geometryType=esriGeometryEnvelope&",
-                                      "inSR=4326&",
-                                      "spatialRel=esriSpatialRelIntersects&",
-                                      "outFields=*&",
-                                      "returnGeometry=true&",
-                                      "returnTrueCurves=false&",
-                                      "returnIdsOnly=false&",
-                                      "returnCountOnly=false&",
-                                      "returnZ=false&",
-                                      "returnM=false&",
-                                      "returnDistinctValues=false&",
-                                      "returnExtentOnly=false&",
-                                      "featureEncoding=esriDefault&",
-                                      "f=geojson"))
-    response <- httr::content(request, as = "text", encoding = "UTF-8")
-    huc8_pro_area <- geojsonsf::geojson_sf(response)
-    huc8 <- rbind(huc8,huc8_pro_area)
-  }
-  
-  print(paste0(qapp_project_area,"...HUC10"))
-  url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2/query?"
-  huc10 <- NULL
-  for(huc_8 in subbasin_huc8){
-    request <- httr::GET(url = paste0(url,
-                                      "where=HUC10+LIKE+%27",huc_8,"%25%27&",
-                                      "geometryType=esriGeometryEnvelope&",
-                                      "inSR=4326&",
-                                      "spatialRel=esriSpatialRelIntersects&",
-                                      "outFields=*&",
-                                      "returnGeometry=true&",
-                                      "returnTrueCurves=false&",
-                                      "returnIdsOnly=false&",
-                                      "returnCountOnly=false&",
-                                      "returnZ=false&",
-                                      "returnM=false&",
-                                      "returnDistinctValues=false&",
-                                      "returnExtentOnly=false&",
-                                      "featureEncoding=esriDefault&",
-                                      "f=geojson"))
-    response <- httr::content(request, as = "text", encoding = "UTF-8")
-    huc10_pro_area <- geojsonsf::geojson_sf(response)
-    huc10 <- rbind(huc10,huc10_pro_area)
-  }
-  
-  print(paste0(qapp_project_area,"...HUC12"))
-  url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/3/query?"
-  huc12 <- NULL
-  for(huc_8 in subbasin_huc8){
-    request <- httr::GET(url = paste0(url,
-                                      "where=HUC12+LIKE+%27",huc_8,"%25%27&",
-                                      "geometryType=esriGeometryEnvelope&",
-                                      "inSR=4326&",
-                                      "spatialRel=esriSpatialRelIntersects&",
-                                      "outFields=*&",
-                                      "returnGeometry=true&",
-                                      "returnTrueCurves=false&",
-                                      "returnIdsOnly=false&",
-                                      "returnCountOnly=false&",
-                                      "returnZ=false&",
-                                      "returnM=false&",
-                                      "returnDistinctValues=false&",
-                                      "returnExtentOnly=false&",
-                                      "featureEncoding=esriDefault&",
-                                      "f=geojson"))
-    response <- httr::content(request, as = "text", encoding = "UTF-8")
-    huc12_pro_area <- geojsonsf::geojson_sf(response)
-    huc12 <- rbind(huc12,huc12_pro_area)
-  }
-  
-  print(paste0(qapp_project_area,"...IR_rivers"))
-  # _ _ IR2018/20 ----
-  url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3/query?"
-  ir_rivers <- NULL
-  for(huc_8 in subbasin_huc8){
-    request <- httr::GET(url = paste0(url,
-                                      "where=HUC12+LIKE+%27",huc_8,"%25%27&",
-                                      "geometryType=esriGeometryEnvelope&",
-                                      "inSR=4326&",
-                                      "spatialRel=esriSpatialRelIntersects&",
-                                      "outFields=*&",
-                                      "returnGeometry=true&",
-                                      "returnTrueCurves=false&",
-                                      "returnIdsOnly=false&",
-                                      "returnCountOnly=false&",
-                                      "returnZ=false&",
-                                      "returnM=false&",
-                                      "returnDistinctValues=false&",
-                                      "returnExtentOnly=false&",
-                                      "featureEncoding=esriDefault&",
-                                      "f=geojson"))
-    response <- httr::content(request, as = "text", encoding = "UTF-8")
-    ir_rivers_pro_area <- geojsonsf::geojson_sf(response)
-    ir_rivers <- rbind(ir_rivers,ir_rivers_pro_area)
-  }
-  ir_rivers <- ir_rivers %>% sf::st_zm() %>% 
-    dplyr::filter(grepl("Temperature",Category_5_parameters)) %>% 
-    dplyr::filter(!AU_ID %in% c(colum_auid))
-  
-  print(paste0(qapp_project_area,"...IR_waterbodies"))
-  url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/2/query?"
-  ir_waterbodies <- NULL
-  for(huc_8 in subbasin_huc8){
-    
-    if(huc_8 == "17100303"){print("17100303")} else {
-      #test: huc_8 <- "17100303"
-      request <- httr::GET(url = paste0(url,
-                                        "where=HUC12+LIKE+%27",huc_8,"%25%27&",
-                                        "geometryType=esriGeometryEnvelope&",
-                                        "inSR=4326&",
-                                        "spatialRel=esriSpatialRelIntersects&",
-                                        "outFields=*&",
-                                        "returnGeometry=true&",
-                                        "returnTrueCurves=false&",
-                                        "returnIdsOnly=false&",
-                                        "returnCountOnly=false&",
-                                        "returnZ=false&",
-                                        "returnM=false&",
-                                        "returnDistinctValues=false&",
-                                        "returnExtentOnly=false&",
-                                        "featureEncoding=esriDefault&",
-                                        "f=geojson"))
-      response <- httr::content(request, as = "text", encoding = "UTF-8")
-      ir_waterbodies_pro_area <- geojsonsf::geojson_sf(response)
-      ir_waterbodies <- rbind(ir_waterbodies,ir_waterbodies_pro_area)
-    }}
-  
-  if(huc_8 == "17100303"){print("17100303")} else {
-    
-    if(NROW(ir_waterbodies)==0){
-      print("ir_waterbodies - no data")
-    } else {
-      ir_waterbodies <- ir_waterbodies %>% sf::st_zm() %>% 
-        dplyr::filter(grepl("Temperature",Category_5_parameters)) %>% 
-        dplyr::filter(!AU_ID %in% c(colum_auid))
-    }
-  }
-  
-  print(paste0(qapp_project_area,"...IR_watershed"))
-  url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/4/query?"
-  ir_watershed <- NULL
-  for(huc_8 in subbasin_huc8){
-    request <- httr::GET(url = paste0(url,
-                                      "where=HUC12+LIKE+%27",huc_8,"%25%27&",
-                                      "geometryType=esriGeometryEnvelope&",
-                                      "inSR=4326&",
-                                      "spatialRel=esriSpatialRelIntersects&",
-                                      "outFields=*&",
-                                      "returnGeometry=true&",
-                                      "returnTrueCurves=false&",
-                                      "returnIdsOnly=false&",
-                                      "returnCountOnly=false&",
-                                      "returnZ=false&",
-                                      "returnM=false&",
-                                      "returnDistinctValues=false&",
-                                      "returnExtentOnly=false&",
-                                      "featureEncoding=esriDefault&",
-                                      "f=geojson"))
-    response <- httr::content(request, as = "text", encoding = "UTF-8")
-    ir_watershed_pro_area <- geojsonsf::geojson_sf(response)
-    ir_watershed <- rbind(ir_watershed,ir_watershed_pro_area)
-  }
-  ir_watershed <- ir_watershed %>% sf::st_zm() %>% 
-    dplyr::filter(grepl("Temperature",Category_5_parameters)) %>% 
-    dplyr::filter(!AU_ID %in% c(colum_auid))
-  
-  print(paste0(qapp_project_area,"...WQS"))
-  # _ _ Temp WQS ----
-  url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0/query?"
-  wqs <- NULL
-  for(huc_8 in subbasin_huc8){
-    # test: huc_8 <- "17070204"
-    query_min <- paste0(huc_8,"000000")
-    query_max <- paste0(huc_8,"999999")
-    request <- httr::GET(url = paste0(url,
-                                      "where=ReachCode+%3E%3D+",query_min,"+AND+ReachCode+%3C%3D",query_max,"&",
-                                      "geometryType=esriGeometryEnvelope&",
-                                      "inSR=4326&",
-                                      "spatialRel=esriSpatialRelIntersects&",
-                                      "outFields=*&",
-                                      "returnGeometry=true&",
-                                      "returnTrueCurves=false&",
-                                      "returnIdsOnly=false&",
-                                      "returnCountOnly=false&",
-                                      "returnZ=false&",
-                                      "returnM=false&",
-                                      "returnDistinctValues=false&",
-                                      "returnExtentOnly=false&",
-                                      "featureEncoding=esriDefault&",
-                                      "f=geojson"))
-    response <- httr::content(request, as = "text", encoding = "UTF-8")
-    wqs_pro_area <- geojsonsf::geojson_sf(response)
-    wqs <- rbind(wqs,wqs_pro_area)
-  }
-  
-  wqs <- sf::st_transform(wqs, 4326) %>% sf::st_zm()
-  
-  # Fish Use Designations
-  wqs_fish_use <- wqs %>% 
-    dplyr::filter(!Temperature_Criteria == "No Salmonid Use/Out of State/Tribal Lands") %>% 
-    dplyr::mutate(Temperature_Criteria = gsub("Fish Use -","",Temperature_Criteria)) %>% 
-    dplyr::mutate(Temperature_Criteria = trimws(Temperature_Criteria, "left"))
-  
-  # Spawning Use Designations
-  wqs_spawning <- wqs %>% 
-    dplyr::filter(!Temperature_Spawn_dates %in% c("No Spawning - No Jurisdiction/Out of State/Tribal Lands","No Spawning - Not Designated")) %>% 
-    dplyr::mutate(Temperature_Spawn_dates = ifelse(Temperature_Spawn_dates=="X (No Spawning)", "No Spawning", Temperature_Spawn_dates)) %>% 
-    dplyr::mutate(Temperature_Spawn_dates = ifelse(Temperature_Spawn_dates=="Bull Trout Spawning - No designated spawning dates",
-                                                   "Bull Trout Spawning and Rearing Habitat", Temperature_Spawn_dates)) 
-  print(paste0(qapp_project_area,"...Save the file"))
-  save(pro_area,
-       huc8,
-       huc10,
-       huc12,
-       ir_rivers,
-       ir_waterbodies,
-       ir_watershed,
-       wqs_fish_use,
-       wqs_spawning,
-       ce_model_extent,
-       hs_temp_model_extent,
-       hs_solar_model_extent,
-       sh_model_extent,
-       n_umpqua_model_nodes,
-       #tir_extent,
-       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",file.name,".RData"))
 
+}
 
