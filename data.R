@@ -145,7 +145,8 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx")
   dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
-  dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS")
+  dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS") %>% 
+  dplyr::mutate_at("Common Name", str_replace_all, "Usfw", "USFW")
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_communication_list.xlsx"), sheet = "Gen_NPDES")
 lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"), sheet = "Lookup_QAPPProjectArea")
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
@@ -295,7 +296,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   station.awqms <- station.awqms %>% 
     dplyr::filter(!OrgID == "USGS-OR") %>% 
     rbind(station.awqms_usgs_or)
-
+  
   station.model <- cal.input %>% 
     dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
     dplyr::left_join(station.awqms[,c("Station ID", "StationDes", "OrgID")], by="Station ID")
@@ -398,7 +399,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                   Long = long) %>% 
     dplyr::select(`Data Source`,`Station ID`,Station,Lat,Long) %>% 
     dplyr::distinct(`Station ID`, .keep_all = TRUE)
-    
+  
   hydromet.data.flow <- hydromet.data %>%
     dplyr::filter(`Station ID` %in% station.hydromet.flow$`Station ID`)
   
@@ -461,8 +462,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
     sf::st_drop_geometry()
   
-  ncei.station.tbl <- ncei.stations.pro.area %>%
-    dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
+  ncei.station.tbl <- ncei.stations.pro.area #%>%
+    #dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
   
   # _ RAWS met data ----
   raws.stations.pro.area <- raws.stations %>% 
@@ -504,27 +505,27 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
     sf::st_drop_geometry()
   
-  mw.station.tbl <- mw.stations.pro.area %>% 
-    dplyr::mutate(NAME = stringr::str_to_title(NAME)) %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Cw", "CW") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Dw", "DW") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Ew", "EW") %>%
-    dplyr::mutate_at("NAME", str_replace_all, "Fw", "FW") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Us26", "US26") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Us30", "US30") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Psu", "PSU") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "P.g.e.", "P.G.E.") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Kgw-Tv", "KGW-TV") %>% 
-    dplyr::mutate_at("NAME", str_replace_all, "Bpa", "BPA")
-  #dplyr::mutate_at("NAME", str_replace_all, "Or", "OR") %>% 
-  #dplyr::mutate_at("NAME", str_replace_all, "ese", "ESE") %>% 
-  #dplyr::mutate_at("NAME", str_replace_all, "es", "SE") %>%
-  #dplyr::mutate_at("NAME", str_replace_all, "Sw", "SW") %>% 
-  #dplyr::mutate_at("NAME", str_replace_all, "Mp", "MP") %>% 
-  #dplyr::mutate_at("NAME", str_replace_all, "Nf", "NF") %>% 
-  #dplyr::mutate_at("NAME", str_replace_all, "Se", "SE") %>% 
-  #dplyr::mutate_at("NAME", str_replace_all, "se", "SE") %>% 
-  #dplyr::mutate_at("NAME", str_replace_all, "sse", "SSE")
+  mw.station.tbl <- mw.stations.pro.area #%>% 
+    #dplyr::mutate(NAME = stringr::str_to_title(NAME)) %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Cw", "CW") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Dw", "DW") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Ew", "EW") %>%
+    #dplyr::mutate_at("NAME", str_replace_all, "Fw", "FW") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Us26", "US26") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Us30", "US30") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Psu", "PSU") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "P.g.e.", "P.G.E.") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Kgw-Tv", "KGW-TV") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Bpa", "BPA")
+    #dplyr::mutate_at("NAME", str_replace_all, "Or", "OR") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "ese", "ESE") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "es", "SE") %>%
+    #dplyr::mutate_at("NAME", str_replace_all, "Sw", "SW") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Mp", "MP") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Nf", "NF") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "Se", "SE") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "se", "SE") %>% 
+    #dplyr::mutate_at("NAME", str_replace_all, "sse", "SSE")
   
   # _ NPEDES ----
   npdes.ind.pro.area <- npdes.ind %>% 
@@ -632,7 +633,7 @@ map_hs_temp_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/
 map_hs_temp_model_extent <- sf::st_transform(map_hs_temp_model_extent, 4326) %>% sf::st_zm() %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Sandy River", "Sandy River (2001)",
                                 ifelse(Stream == "Bull Run River", "Bull Run River (2001)", Stream)))
-  
+
 
 map_hs_solar_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/hs_solar_model_extent.shp",
                                          layer = "hs_solar_model_extent")
@@ -750,6 +751,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
        sh_model_extent,
        #tir_extent,
        file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",file.name,".RData"))
-
+  
 }
 
