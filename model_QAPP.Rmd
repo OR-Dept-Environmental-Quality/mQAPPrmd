@@ -47,6 +47,7 @@ library(stringr);library(stringi)
 library(english)
 library(pacman)
 library(httr)
+library(scales)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -159,8 +160,6 @@ The `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort
 
 The applicable temperature criteria in the `r qapp_project_area` include:
 
-The applicable BBNCs in the Sandy Subbasin include:       
-
 *   Salmon and Steelhead Spawning: 13.0 deg-C/55.4 deg-F    
 
 *   Core Cold Water Habitat: 16.0 deg-C/60.8 deg-F    
@@ -235,8 +234,6 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 **Background Sources**: Background sources include all sources of pollution or pollutants not originating from human activities. In the context of a TMDL, background sources may also include anthropogenic sources of a pollutant that DEQ or another Oregon state agency does not have authority to regulate, such as pollutants emanating from another state, tribal lands, or sources otherwise beyond the jurisdiction of the state (OAR 340-042-0030(1)). Additionally, effective shade levels on smaller streams are more sensitive to riparian disturbances and so the differences between current condition solar flux and background solar flux can be larger.
 
 **Anthropogenic Point Sources**: Heat from warm water discharges of human origin, such as industrial outfalls, municipal waste-water treatment plants (WWTP), and other point sources.
-
-The City of Portland’s drinking water project on the Bull Run River is responsible for elevated stream temperatures between the spillway pool discharge at river mile 6.8 and Larson’s site at river mile 3.8.
 
 # Technical approach
 
@@ -722,6 +719,16 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp
                           `nrow` = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp))) %>% 
   dplyr::filter(!`nrow` == 0)
 
+# Sandy instantaneous flow
+t54_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "sandy_instantaneous_flow") %>% 
+  dplyr::left_join(df.stations, by = c("Station ID"="MLocID")) %>% 
+  dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Lat_DD), NA, paste0(round(Lat_DD,4), "/",round(Long_DD,3)))) %>% 
+  dplyr::select(`Station ID`, Station, Date, `Flow (cfs)`, `Latitude/Longitude`) 
+
+t54_sandy_tbl <- knitr::kable(t54_sandy, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t54_sandy",
+                                             caption = paste0("Instantaneous flow measurements made by DEQ in the ", qapp_project_area, ".")))
+
 ```
 
 `r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases.
@@ -730,6 +737,7 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp
 `r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
 `r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
 `r if(NROW(t54_sp)>0){t54_sp_tbl}`
+`r if(NROW(t54_sandy)>0){t54_sandy_tbl}`
 
 ## Point source discharges
 
@@ -788,6 +796,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 [WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
 [Water Use Reports]: https://apps.wrd.state.or.us/apps/wr/wateruse_query/
 
+## Effective shade measurements
 ```{r, label=`t56`, echo=FALSE}
 
 t56 <- model.input %>% 
@@ -813,6 +822,27 @@ if(NROW(t56)>0){
 }
 
 ```
+
+```{r, label=`t56_sandy`, echo=FALSE}
+
+t56_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "sandy_effective_shade") %>% 
+  #dplyr::mutate(`Effective Shade` = ifelse((`Effective Shade` %in% c("5-30%","15-40%","88-94%","88-100%","95-100%")),as.character(`Effective Shade`),scales::percent(as.numeric(`Effective Shade`)))) %>% 
+  dplyr::mutate(`Effective Shade` = ifelse((`Effective Shade` %in% c("5-30%","15-40%","88-94%","88-100%","95-100%")),as.character(`Effective Shade`),paste0(round(as.numeric(`Effective Shade`)*100),"%"))) %>% 
+  dplyr::left_join(df.stations, by = c("Station ID"="MLocID")) %>% 
+  dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Lat_DD), NA, paste0(round(Lat_DD,4), "/",round(Long_DD,3)))) %>% 
+  dplyr::mutate(`Latitude/Longitude` = ifelse(`Station ID` == "26397-ORDEQ", "45.5535/-122.387", `Latitude/Longitude`)) %>% 
+  dplyr::mutate(`Latitude/Longitude` = ifelse(Station == "Sandy R. @ Troutdale STP", "45.4982/-122.01", `Latitude/Longitude`)) %>% 
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`,`Effective Shade`,`Data Source`) 
+
+t56_sandy_tbl <- knitr::kable(t56_sandy, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t56_sandy",
+                                             caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
+
+```
+
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r tbls(name = "t56_sandy", display="cite")` lists the stations for effective shade measurements that were available in public and DEQ databases.
+
+`r t56_sandy_tbl`
 
 # Model development and calibration
 
@@ -1140,7 +1170,7 @@ Management scenarios described in this section summarize the means by which the 
 
 ## Background
 
-This scenario evaluates the stream temperature response from background sources only. Background sources include all sources of pollution or pollutants not originating from human activities. Background sources may also include anthropogenic sources of a pollutant that DEQ or another Oregon state agency does not have authority to regulate, such as pollutants emanating from another state, tribal lands, or sources otherwise beyond the jurisdiction of the state (OAR 340-042-0030(1)). This scenario essentially combines the following model scenarios: restored vegetation, restored stream flow, improvements to channel morphology, and potentially elements of the climate scenario. The background scenario will be compared to the current conditions model scenario to determine the point of maximum impact, and the amount of cumulative warming originating from human activities that DEQ or another Oregon state agency have authority to regulate.
+This scenario evaluates the stream temperature response from background sources only. Background sources include all sources of pollution or pollutants not originating from human activities. Background sources may also include anthropogenic sources of a pollutant that DEQ or another Oregon state agency does not have authority to regulate, such as pollutants emanating from another state, tribal lands, or sources otherwise beyond the jurisdiction of the state (OAR 340-042-0030(1)). This scenario essentially combines the following model scenarios: restored vegetation, restored stream flow, improvements to channel morphology, and potentially elements of the climate scenario. On the Bull Run River, the background scenario will incorporate the elements of the no dam scenario. The background scenario will be compared to the current conditions model scenario to determine the point of maximum impact, and the amount of cumulative warming originating from human activities that DEQ or another Oregon state agency have authority to regulate.
 
 ## Restored vegetation
 
@@ -1230,7 +1260,30 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 
 ## No dams
 
-The no-dams scenario will require the development of a riverine Heat Source model in place of Bull Run Reservoir Number One and Bull Run Reservoir Number Two to evaluate the impacts of no dams along the system. A critical piece of information required for the development of the no-dams Heat Source model is the main channel information to identify the length, width, slope and manning’s roughness coefficient. Existing bathymetry if available will also be evaluated to identify the historic channel, if evident and/or channel shape.
+```{r, label=`t1011`, echo=FALSE}
+
+t1011_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "sandy_nodam")
+
+t1011_sandy_tbl <- knitr::kable(t1011_sandy, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t1011_sandy",
+                                             caption = paste0("Boundary condition and tributary inputs to the no dam scenario on the Bull Run River.")))
+
+```
+
+This scenario is specific to the Bull Run River and Sandy River. This scenario estimates the stream temperatures on the Bull Run River without Bull Run Dam and Reservoir Number One and Bull Run Dam and Reservoir Number Two. The model extent will be from the Bull Run River mouth to just upstream of Bull Run Reservoir Number Two at USGS Gage 14138850. No changes are proposed on the Sandy River model except for setting the Bull Run River input to the no dam temperature outputs. The stream temperature warming or cooling caused by the dams is evaluated by comparing this results of this scenario to the current condition model run and data collected at the various temperature monitoring locations downstream of Bull Run Reservoir Number Two including the following:        
+
+* PWB_BR_DNSTM_PP: Bull Run River approximately 600 feet downstream of Bull Run Dam 2 spillway plunge pool        
+* USGS Gage 14140000: Bull Run River Near Bull Run (River Only), OR       
+* USGS Gage 14140020: Bull Run R at Larson's Bridge, Near Bull Run, OR        
+* PWB_BR_DODGE: Bull Run River approximately 500 feet upstream of Sandy River confluence        
+
+This scenario will also be used to estimate the background rate of warming that occurs within the reaches where the reservoirs and dams are currently located. This warming rate may be used, in conjunction with data collected at the various gages in the Bull Run and Little Sandy Rivers to develop management targets for the Bull Run Reservoirs similar to the current temperature target surrogate measures in the 2006 Sandy TMDL (DEQ, 2005).
+
+To complete this scenario, DEQ anticipates extending the 2016 current condition Heat Source model upstream through the reservoir reaches but may also consider using a CE-QUAL-W2 model developed by Portland State University for The City of Portland (Annear, et al 1999, City of Portland 2004). The CE-QUAL-W2 model was developed as a no dam scenario for the 2001 model year. The City of Portland has updated this model over time and currently uses it for management objectives. Use of this model at minimum would require updates to the boundary conditions and meteorological inputs. At the current time this model is not available to DEQ. Should this model become available DEQ will review the model to make a determination on its use considering the current model setup, data availability, and the amount of time and work required to update the model.
+
+Development of a riverine model in place of Bull Run Reservoir Number One and Bull Run Reservoir Number will require information about channel position, width, slope, substrate, and manning’s roughness coefficients. Existing bathymetry and any pre dam channel measurements, if available, will be used to develop the model setup. `r tbls(name = "t1011_sandy", display="cite")` summarizes the various data sources to be used for the boundary conditions, tributary, and meteorological inputs for the no dam scenario. All other inputs downstream of Bull Run Dam Number 1 will be the same as the current condition model.    
+
+`r t1011_sandy_tbl`
 
 # Project organization
 
@@ -1483,7 +1536,8 @@ other.ref <- data.frame(reference = c(
   'Sinokrot, B.A. and H.G. Stefan. 1993. “Stream temperature dynamics: measurement and modeling.” Water Resources Research. 29(7):2299-2312.',
   'Woltemade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
-  'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.'
+  'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
+  'Annear, Robert L., Scott A. Wells and David T. Evonuk. 1999. “Bull Run River – Reservoir Model: Boundary Conditions and Model Setup.” Portland State University Technical Report EWR-6-99.'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 

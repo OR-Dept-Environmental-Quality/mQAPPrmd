@@ -69,7 +69,11 @@ The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Mode
 
 ### Important assumptions
 
-`r if(waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)","Sandy River (2016)")){paste0("The effort currently described in the QAPP includes use of existing models and the development of new models to capture post-dam removal conditions. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ") or in Section 6 and Section 7 of this document.")}else{paste0("The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ") the model user guide ", knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))), " or in Section 6 and Section 7 of this document.")}`
+`r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("Model development for the ",gsub("\\s*\\([^\\)]+\\)","", waterbody_name)," relies on deriving flow or temperature inputs from a few small tributaries (",tbls(name = paste0("t6x6_1", waterbody_name),display="cite"),"). DEQ plans to use the direct surrogate or linear regression approaches described in Section 6.3 to derive stream temperature and a combination of a flow mass balance, drainage area ratio, and the flow-probability-probability-flow approaches to estimate stream flow. It assumed that these approaches do a reasonably good job of estimating the tributary temperature or flow. DEQ will assess the goodness of fit for these approaches where measured flow or temperature flow data are available.")}else{paste0("The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2005) and model user guide (Boyd and Kasper, 2003).")}`
+
+`r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("DEQ will review the vegetation conditions at sites where effective shade measurements were made in August of 2001 (",tbls(name = "t56_sandy", display="cite"),") and compare those conditions to site conditions in 2016. If the conditions do not appear to have changed significantly DEQ will use the effective shade measured in 2001 as a rough guide for model calibration purpose with the assumption that the shade will likely be about the same or have increased since 2001 if site conditions look similar.")}`
+
+`r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}`
 
 ### Model inputs
 
@@ -124,7 +128,7 @@ if(!model.extent == TRUE){
   t6x6_1 <- t6x6_1[,-c(3)] %>% 
     dplyr::rename(`Model Input` = Parameter)
   
-    if(waterbody_name %in% c("Bull Run River (2016)", "Sandy River (2016)")){
+    if(waterbody_name %in% c("Bull Run River (2016)", "Salmon River (2016)", "Sandy River (2016)")){
       
       if(NROW(t6x6_1)>0){
       
@@ -142,7 +146,7 @@ if(!model.extent == TRUE){
       
       t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                   caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                                 caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
+                                                 caption = paste0("Boundary condition and tributary inputs to the existing", waterbody_name, " Heat Source Model.")))
       
       }
       
