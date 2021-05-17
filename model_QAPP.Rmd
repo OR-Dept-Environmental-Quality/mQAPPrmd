@@ -377,7 +377,8 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 t51_na <- t51 %>% dplyr::filter(is.na(`Latitude/Longitude`))
 t51 <- t51[!duplicated(t51$`Latitude/Longitude`),] %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
-  rbind(t51_na)
+  rbind(t51_na) %>% 
+  dplyr::mutate(Station = toupper(Station))
 t51 <- t51[!duplicated(t51$`Station`),]
 
 t51.ncei <- t51 %>% 
@@ -452,7 +453,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
     dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
     dplyr::arrange(Station) %>% 
     dplyr::rename(Source = Station) %>% 
-    dplyr::filter(!Source == "No Station ID, DEQ File")
+    dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
   
   if(NROW(t51.sp)>0){
     
@@ -971,7 +972,7 @@ Waterbodies where model development was initiated for the `r paste0(pro.area.tmd
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model evaluation and acceptance generally represents improved agreement between measured observations and model predictions.
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model evaluation and acceptance generally represents improved agreement between measured observations and model predictions.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
@@ -1219,13 +1220,15 @@ This scenario evaluates stream temperature warming or cooling from the TMDL Wast
 
 ## TMDL implementation plans
 
-This set of scenarios evaluate the stream temperature response from proposed or existing Designated Management Agency (DMA) and responsible person TMDL implementation plans. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations. It is likely that multiple model scenarios will be developed evaluating a single implementation plan or multiple implementation plans together. Elements of this scenario or scenarios may include:    
+This set of scenarios evaluate the stream temperature response from proposed or existing DMA and responsible person land management plans, TMDL implementation plans, or rules. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations or surrogate measures. It is likely that multiple model scenarios will be developed evaluating a single implementation plan or multiple implementation plans together. Assumptions and methods used to develop this scenario will be documented in the TMDL. Elements of this scenario or scenarios may include:        
 
-*	Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.    
+* Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.       
 
-*	Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s *n*, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.    
+* Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.        
 
-*	All other model inputs will be the same as the current calibrated model.    
+*	All other model inputs will be the same as the current calibrated model.        
+
+DEQ may also rely upon the results of relevant studies, reports, or published articles to supplement the model scenario; or as the primary source of information for locations or situations where the model results are not applicable.
 
 # Project organization
 
