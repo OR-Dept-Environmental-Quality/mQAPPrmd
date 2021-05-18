@@ -1000,7 +1000,7 @@ if(mod.check == "11"){
 
 ```
 
-Waterbodies where model development was initiated for the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}`
+Waterbodies where model development was initiated for the 2005 Sandy River Basin TMDL (DEQ, 2005) are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}`
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
@@ -1009,6 +1009,8 @@ The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
+
+The models for the Little Sandy River and Zigzag River were originally developed for the Sandy River Basin TMDL (DEQ, 2005) will also be used to support the updated TMDL. The models for the Sandy River, Bull Run River, and Salmon River (`r tbls(name = "tmdl.mod.b", display="cite")`) are new and will supplement the models that were developed for the 2005 TMDL.
 
 `r paste(mod.v, collapse = "\n")`
 
@@ -1106,9 +1108,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
-The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
-
-It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
+It is not anticipated that any additional uncertainty or sensitivity analyses will be performed on the calibrated models originally developed for the 2005 Sandy Temperature TMDL (DEQ 2005). 
 
 ## Model acceptance
 
@@ -1283,7 +1283,7 @@ This scenario is specific to the Bull Run River and Sandy River. This scenario e
 
 This scenario will also be used to estimate the background rate of warming that occurs within the reaches where the reservoirs and dams are currently located. This warming rate may be used, in conjunction with data collected at the various gages in the Bull Run and Little Sandy Rivers to develop management targets for the Bull Run Reservoirs similar to the current temperature target surrogate measures in the 2006 Sandy TMDL (DEQ, 2005).
 
-To complete this scenario, DEQ anticipates extending the 2016 current condition Heat Source model upstream through the reservoir reaches but may also consider using a CE-QUAL-W2 model developed by Portland State University for The City of Portland (Annear, et al 1999, City of Portland 2004). The CE-QUAL-W2 model was developed as a no dam scenario for the 2001 model year. The City of Portland has updated this model over time and currently uses it for management objectives. Use of this model at minimum would require updates to the boundary conditions and meteorological inputs. At the current time this model is not available to DEQ. Should this model become available DEQ will review the model to make a determination on its use considering the current model setup, data availability, and the amount of time and work required to update the model.
+To complete this scenario, DEQ anticipates extending the 2016 current condition Heat Source model upstream through the reservoir reaches but may also consider using a CE-QUAL-W2 model developed by Portland State University for The City of Portland (Annear, et al., 1999, City of Portland, 2004). The CE-QUAL-W2 model was developed as a no dam scenario for the 2001 model year. The City of Portland has updated this model over time and currently uses it for management objectives. Use of this model at minimum would require updates to the boundary conditions and meteorological inputs. At the current time this model is not available to DEQ. Should this model become available DEQ will review the model to make a determination on its use considering the current model setup, data availability, and the amount of time and work required to update the model.
 
 Development of a riverine model in place of Bull Run Reservoir Number One and Bull Run Reservoir Number will require information about channel position, width, slope, substrate, and manning’s roughness coefficients. Existing bathymetry and any pre dam channel measurements, if available, will be used to develop the model setup. `r tbls(name = "t1011_sandy", display="cite")` summarizes the various data sources to be used for the boundary conditions, tributary, and meteorological inputs for the no dam scenario. All other inputs downstream of Bull Run Dam Number 1 will be the same as the current condition model.    
 
@@ -1541,7 +1541,8 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
-  'Annear, Robert L., Scott A. Wells and David T. Evonuk. 1999. “Bull Run River – Reservoir Model: Boundary Conditions and Model Setup.” Portland State University Technical Report EWR-6-99.'
+  'Annear, Robert L., Scott A. Wells and David T. Evonuk. 1999. “Bull Run River – Reservoir Model: Boundary Conditions and Model Setup.” Portland State University Technical Report EWR-6-99.',
+  'City of Portland. 2004. "Bull Run River Temperature Evaluation."'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
