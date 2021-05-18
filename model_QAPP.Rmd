@@ -268,7 +268,7 @@ An important step in the TMDL is to perform a source assessment which quantifies
 
 The pollutant addressed in the temperature TMDL is heat. Anthropogenic nonpoint and point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable criteria, cumulatively at the point of maximum impact. Allocated conditions are expressed as solar heat load and solar heat flux (watts, and watts per square meter, respectively). Nonpoint source heat allocations are translated into effective shade surrogate measures. Effective shade surrogate measures provide site-specific targets for land managers. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations. Point source waste load allocations are based on the applicable temperature criteria plus a portion of the 0.3 deg-C human use allowance. The portion of the human use allowance allocated to each point source will be determined in the TMDL. Generally, all human sources (point and nonpoint) combined cannot have a cumulative increase greater than 0.3 deg-C above the applicable temperature criteria.
 
-Stream temperatures were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.a$'Model Version')`) for the main rivers and their larger tributaries. Simulations focus on the larger streams that contain or influence primary fish habitat. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective shade.
+Stream temperatures for the 2005 Sandy River Basin TMDL (DEQ, 2005) were simulated using the computer model Heat Source Version 6. New models are proposed using Heat Source Version 8. The models extents include most of the main rivers and their larger tributaries that contain or influence primary fish habitat. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective shade.
 
 ## Model selection
 
@@ -716,10 +716,6 @@ if(NROW(t54_sp)>0){
   
 }
 
-t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
-                          `nrow` = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp))) %>% 
-  dplyr::filter(!`nrow` == 0)
-
 # Sandy instantaneous flow
 t54_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "sandy_instantaneous_flow") %>% 
   dplyr::left_join(df.stations, by = c("Station ID"="MLocID")) %>% 
@@ -729,6 +725,11 @@ t54_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMD
 t54_sandy_tbl <- knitr::kable(t54_sandy, format = "pandoc", padding = 2,
                               caption = tbls(name = "t54_sandy",
                                              caption = paste0("Instantaneous flow measurements made by DEQ in the ", qapp_project_area, ".")))
+
+
+t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp","t54_sandy"),
+                          `nrow` = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp),NROW(t54_sandy))) %>% 
+  dplyr::filter(!`nrow` == 0)
 
 ```
 
