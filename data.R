@@ -320,6 +320,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(`Station ID` %in% owrd.data.temp$MLocID)
   
   temp.data <- awqms.data.temp %>% 
+    dplyr::filter(MLocID %in% station.awqms$`Station ID`) %>%
     rbind(owrd.data.temp) %>% 
     dplyr::left_join(df.stations, by="MLocID") %>% 
     dplyr::mutate(HUC8.x = ifelse(is.na(HUC8.x),HUC8.y,HUC8.x)) %>% # add HUC8 to owrd data
