@@ -1000,7 +1000,7 @@ if(mod.check == "11"){
 
 ```
 
-Waterbodies where model development was initiated for the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` are listed in (`r tbls(name = "tmdl.mod.a", display="cite")`). `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}`
+Waterbodies where model development was initiated for the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}`
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
