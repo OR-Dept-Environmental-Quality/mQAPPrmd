@@ -462,7 +462,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE)) %>% 
     sf::st_drop_geometry()
   
-  ncei.station.tbl <- ncei.stations.pro.area #%>%
+  ncei.station.tbl <- ncei.stations.pro.area %>%
+    dplyr::mutate(STATION_NAME = ifelse(NCDC == "10009634","PORTLAND TROUTDALE AIRPORT",STATION_NAME))
     #dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
   
   # _ RAWS met data ----
