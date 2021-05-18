@@ -186,7 +186,7 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
-Heat transfer relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich 1972, Jobson and Keefer 1979, Beschta and Weatherred 1984, Sinokrot and Stefan 1993, Boyd 1996, Hannah et al 2008, Benyahya et al 2012, Johnson 2004).
+Heat transfer relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich 1972, Jobson and Keefer 1979, Beschta and Weatherred 1984, Sinokrot and Stefan 1993, Boyd 1996, Hannah et al., 2008, Benyahya et al., 2012, Johnson 2004).
 
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
@@ -241,7 +241,7 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 ```{r,label=`chap6-model`,echo=FALSE}
 
-# 6.2 summary table
+# 6.1 summary table
 tmdl.mod.a<- model.info %>% 
   dplyr::filter(is.na(`New Model`)) %>% 
   dplyr::group_by(Model_version) %>% 
