@@ -1004,11 +1004,9 @@ Waterbodies where model development was initiated for the 2005 Sandy River Basin
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model evaluation and acceptance generally represents improved agreement between measured observations and model predictions.
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model evaluation and acceptance generally represents improved agreement between measured observations and model predictions.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
-
-`r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
 
 The models for the Little Sandy River and Zigzag River were originally developed for the Sandy River Basin TMDL (DEQ, 2005) will also be used to support the updated TMDL. The models for the Sandy River, Bull Run River, and Salmon River (`r tbls(name = "tmdl.mod.b", display="cite")`) are new and will supplement the models that were developed for the 2005 TMDL.
 
@@ -1018,7 +1016,7 @@ The models for the Little Sandy River and Zigzag River were originally developed
 
 Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
 
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the Model Parameters sections in the current Chapter 6  Model Development and Calibration.
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the Model Parameters sections in the current Chapter 6  Model development and calibration.
 
 ```{r, label=`data_gap`, echo=FALSE}
 

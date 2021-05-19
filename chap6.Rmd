@@ -61,6 +61,19 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 ### Source characteristics
 
+```{r, label = `sc`, echo=FALSE}
+
+sc <- section.model.info %>% 
+  dplyr::select(`Source Characteristics`) %>% 
+  dplyr::filter(!is.na(`Source Characteristics`)) %>% 
+  pull()
+
+```
+
+In the Sandy Subbasin human activities have altered the stream morphology, hydrology, and decreased the amount of riparian vegetation in the basin. The subbasin includes urban, agricultural, and forested lands. Additionally, multiple points of diversion in the Sandy River Subbasin have altered stream flow levels.
+
+`r if(length(sc)>0){sc}else{cat("")}`
+
 **[Update: Source characteristics]**
 
 ### Time frame of simulation
@@ -146,7 +159,7 @@ if(!model.extent == TRUE){
       
       t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                   caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                                 caption = paste0("Boundary condition and tributary inputs to the existing", waterbody_name, " Heat Source Model.")))
+                                                 caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
       
       }
       
