@@ -1507,7 +1507,7 @@ tir.ref <- t52_ref %>%
   dplyr::rename(reference = `Full Reference`)
 
 other.ref <- data.frame(reference = c(
-  'Beck, M.B. 1987. "Water Quality Modeling: A Review of the Analysis of Uncertainty". Water Resources Research 23(8), 1393',
+  'Beck, M.B. 1987. "Water Quality Modeling: A Review of the Analysis of Uncertainty". Water Resources Research 23(8), 1393.',
   'Bencala, K.E. and Walters, R.A. 1983. “Simulation of solute transport in a mountain pool‐and‐riffle stream: A transient storage model.” Water Resources Research. 19(3), 718-724.',
   'Benyahya, L., Caissie, D., Satish, M.G., El-Jabi, N. 2012. “Long-wave radiation and the heat flux estimates within a small tributary in Catamaran Brook (New Brunswick, Canada).” Hydrological Processes. 26(4): 475-484.',
   'Beschta, R.L. and J. Weatherred. 1984. “A computer model for predicting stream temperatures resulting from the management of streamside vegetation.” USDA Forest Service. WSDG-AD-00009.',
