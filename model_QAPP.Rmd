@@ -725,6 +725,8 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp
 `r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
 `r if(NROW(t54_sp)>0){t54_sp_tbl}`
 
+`r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "water_level.Rmd", envir = globalenv())}`
+
 ## Point source discharges
 
 ```{r, label=`t55`, echo=FALSE}
@@ -1576,6 +1578,16 @@ flow_stations <- t54 %>%
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
+# Water Level Stations
+if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+  
+  water_level_stations <- twl.usgs %>% 
+    dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+    tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+    sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+                 
+}
+
 # Meteorological Stations
 met_stations <- t51 %>%
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
@@ -1588,17 +1600,35 @@ ind_ps <- section.npdes.ind %>%
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
-save(temp.data.sample.count,
-     flow.data.sample.count,
-     temp_stations,
-     temp_cal_sites,
-     temp_model_bc_tri,
-     flow_model_bc_tri,
-     flow_stations,
-     met_stations,
-     ind_ps,
-     file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
-                   file.name,"_qapp.RData"))
+if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+  
+  save(temp.data.sample.count,
+       flow.data.sample.count,
+       temp_stations,
+       temp_cal_sites,
+       temp_model_bc_tri,
+       flow_model_bc_tri,
+       flow_stations,
+       met_stations,
+       ind_ps,
+       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
+                     file.name,"_qapp.RData"))
+} else {
+  
+  save(temp.data.sample.count,
+       flow.data.sample.count,
+       temp_stations,
+       temp_cal_sites,
+       temp_model_bc_tri,
+       flow_model_bc_tri,
+       flow_stations,
+       water_level_stations,
+       met_stations,
+       ind_ps,
+       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
+                     file.name,"_qapp.RData"))
+  
+}
 
 #sf::st_write(temp_model_bc, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
 #                                   file.name,"_bc.shp"))

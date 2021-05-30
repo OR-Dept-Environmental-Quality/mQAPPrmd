@@ -45,9 +45,14 @@ awqms.stations.temp <- df.stations.state %>%
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 # _ USGS flow data ----
-load(paste0(data.dir,"/download/usgs.RData")) # usgs.stations.or & usgs.data.or
-usgs.stations <- usgs.stations.or %>% 
-  dplyr::filter(site_no %in% usgs.data.or$site_no) # filter out the stations that have data beyond the period of 1990-2020
+load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations.or & usgs.fl.data.or
+usgs.fl.stations <- usgs.fl.stations.or %>% 
+  dplyr::filter(site_no %in% usgs.fl.data.or$site_no) # filter out the stations that have data beyond the period of 1990-2020
+# _ USGS water level data ----
+# for Willamette mainstem only
+load(paste0(data.dir,"/download/usgs_wl.RData")) # usgs.wl.stations.or & usgs.wl.data.or
+usgs.wl.stations <- usgs.wl.stations.or %>% 
+  dplyr::filter(site_no %in% usgs.wl.data.or$site_no) # filter out the stations that have data beyond the period of 2010-2020
 # _ OWRD data ----
 load(paste0(data.dir,"/download/owrd.RData")) # owrd.stations.or & owrd.data.or
 owrd.data <- owrd.data.or %>% 
@@ -271,7 +276,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(HUC_8 %in% subbasin_num)
   
   # _ Temp data ----
-  # AWQMS, Solicitation Data and OWRD Temp Data
+  # AWQMS and OWRD Temp Data
   station.awqms <- awqms.stations.temp %>% 
     dplyr::filter(HUC8 %in% subbasin_num) %>% 
     dplyr::rename(`Station ID` = MLocID)
@@ -362,7 +367,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
   
   # _ Flow data ----
-  station.usgs <- usgs.stations %>%  # Discharge [ft3/s]
+  station.usgs.fl <- usgs.fl.stations %>%  # Discharge [ft3/s]
     dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
     dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
     dplyr::filter(huc_cd %in% subbasin_num) %>%
@@ -375,8 +380,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::filter(!`Station ID` %in% station.owrd$`Station ID`)
   
-  usgs.data <- usgs.data.or %>% 
-    dplyr::filter(site_no %in% station.usgs$`Station ID`) %>% 
+  usgs.fl.data <- usgs.fl.data.or %>% 
+    dplyr::filter(site_no %in% station.usgs.fl$`Station ID`) %>% 
     dplyr::select(`Data Source` = agency_cd,
                   `Station ID` = site_no,
                   dateTime,
@@ -404,12 +409,12 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   hydromet.data.flow <- hydromet.data %>%
     dplyr::filter(`Station ID` %in% station.hydromet.flow$`Station ID`)
   
-  flow.data <- rbind(usgs.data,owrd.data.flow,hydromet.data.flow)
+  flow.data <- rbind(usgs.fl.data,owrd.data.flow,hydromet.data.flow)
   
   station.owrd.flow <- station.owrd %>% 
     dplyr::filter(`Station ID` %in% owrd.data.flow$`Station ID`)
   
-  flow.stations.cmb <- rbind(station.usgs, station.owrd.flow,station.hydromet.flow) %>% 
+  flow.stations.cmb <- rbind(station.usgs.fl, station.owrd.flow,station.hydromet.flow) %>% 
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::mutate_at("Station", str_replace_all, " R ", " RIVER ") %>% 
     dplyr::mutate_at("Station", str_replace_all, " @ ", " AT ") %>% 
@@ -547,7 +552,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     sf::st_drop_geometry()
   
   # _ Save Data ----
-  #setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
   save(df.stations,
        tir,
        ref,
@@ -586,11 +590,16 @@ library(tidyverse)
 library(httr)
 library(geojsonsf)
 
+#
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"), sheet = "Lookup_QAPPProjectArea")
 schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
+save(lookup.huc,
+     project.areas,
+     file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/lookup.RData"))
+#
 
 pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
                          layer = "project_areas")
@@ -615,8 +624,8 @@ pro_areas <- pro_areas %>%
   dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) %>% 
   dplyr::arrange(EPA.Approval)
 
-pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_reach_extent.shp",
-                           layer = "project_reach_extent")
+pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
+                           layer = "TempTMDL_QAPP_Reaches")
 #pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
 pro_reaches <- sf::st_transform(pro_reaches, 4326)
 pro_reaches <- pro_reaches %>% 
@@ -745,7 +754,9 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
   
   #tir_extent
   
-  save(pro_area,
+  save(lookup.huc,
+       project.areas,
+       pro_area,
        ce_model_extent,
        hs_temp_model_extent,
        hs_solar_model_extent,

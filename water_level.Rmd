@@ -1,0 +1,44 @@
+---
+output: 
+  word_document:
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r, label=`setup-chap6`, include=FALSE}
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      autodep = TRUE)
+options(kableExtra.auto_format = F)
+options(knitr.kable.NA = '')
+
+```
+
+## Water level
+
+```{r, label=`twl`, echo=FALSE}
+
+twl.usgs <- station.usgs.wl %>% 
+  # dplyr::filter(`Data Source` %in% c("USGS")) %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(as.numeric(Lat),5), "/",round(as.numeric(Long),4))) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`)
+
+if(NROW(twl.usgs)>0){
+  
+  twl_usgs_tbl <- knitr::kable(twl.usgs, format = "pandoc", padding = 2, row.names = NA,
+                                   caption = tbls(name = "twl.usgs",
+                                                  caption = paste0("Water level elevation (or gage height) data available from the USGS monitoring stations in the ", qapp_project_area, ".")))
+  
+}
+
+```
+
+`r if(NROW(twl.usgs)>0){paste0(tbls(name="twl.usgs", display="cite")," lists the stations for water level elevation (or gage height) data that were available in USGS databases.")}`
+
+`r if(NROW(twl.usgs)>0){twl_usgs_tbl}`
