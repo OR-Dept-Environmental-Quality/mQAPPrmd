@@ -14,8 +14,7 @@ library(mesowest) # MesoWest
 mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # MesoWest
 library(rvest)
 
-setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download")
-data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+file.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/"
 
 # USGS Flow Data ----
 ## Github: https://github.com/USGS-R/dataRetrieval
@@ -24,23 +23,23 @@ usgs.fl.data.or <- dataRetrieval::readNWISdata(stateCd="OR",
                                             parameterCd = "00060", # and statCd = "00003" for daily mean which is default
                                             startDate = "1990-01-01", # start and end dates match AWQMS data pull
                                             endDate = "2020-12-31")
-save(usgs.fl.stations.or, usgs.fl.data.or, file="usgs_fl.RData") # updated date: 5/24/2021
+save(usgs.fl.stations.or, usgs.fl.data.or, file=paste0(file.dir,"usgs_fl.RData")) # updated date: 5/24/2021
 
-# USGS Water Level Data ----
+# USGS Gage Height (Water Level) Data ----
 # for Willamette Mainstem QAPP only
 usgs.wl.stations.or <- dataRetrieval::whatNWISdata(stateCd="OR", parameterCd = "00065") # 00065 = Stream stage, the height of the water surface, in feet, above an established altitude where the stage is zero
 usgs.wl.data.or <- dataRetrieval::readNWISdata(stateCd="OR", 
                                                parameterCd = "00065",
                                                startDate = "2010-01-01", # as Ryan's suggestion
                                                endDate = "2020-12-31")
-save(usgs.wl.stations.or, usgs.wl.data.or, file="usgs_wl.RData") # updated date: 5/24/2021
+save(usgs.wl.stations.or, usgs.wl.data.or, file=paste0(file.dir,"usgs_wl.RData")) # updated date: 5/24/2021
 
 usgs.wl.stations.wa <- dataRetrieval::whatNWISdata(stateCd="WA", parameterCd = "00065")
 
 # OWRI Temp and Flow Data ----
 devtools::source_gist("https://gist.github.com/DEQrmichie/835c7c8b3f373ed80e4b9e34c656951d")
 
-owrd.stations.or <- readxl::read_xlsx(paste0(data.dir, "wrd_nonUSGS_stations.xlsx"), sheet = "Non-USGS_stations")
+owrd.stations.or <- readxl::read_xlsx(paste0(file.dir,"wrd_nonUSGS_stations.xlsx"), sheet = "Non-USGS_stations")
 
 owrd.stations.nbr <- owrd.stations.or %>% 
   dplyr::distinct(station_nbr) %>% 
@@ -59,7 +58,7 @@ save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 3/4/2021
 
 # NCEI Station Meta ----
 # https://www.ncdc.noaa.gov/homr/reports
-ncei <- read.delim("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/emshr_lite.txt")
+ncei <- read.delim(paste0(file.dir,"emshr_lite.txt"))
 
 ncei.databases <- c("NCDC","COOP","WBAN","ICAO","FAA","NWSLI","WMO   TRANS","GHCND") 
 
@@ -78,7 +77,7 @@ for(db in ncei.databases){
   ncei.datacats.or <- rbind(ncei.datacats.or,get$data)
 }
 
-save(ncei, ncei.datacats.or, file="ncei.RData") # updated date: 2/27/2021
+save(ncei, ncei.datacats.or, file=paste0(file.dir,"ncei.RData")) # updated date: 2/27/2021
 
 # _# NCDC Met Data ----
 ## NOAA National Climatic Data Center: https://www.ncdc.noaa.gov/
@@ -126,7 +125,7 @@ for(i in 1:length(raws.meta$wrccID)){
   }
 }
 
-save(raws.meta, raws.data.type, file="raws.RData") # updated date: 2/27/2021
+save(raws.meta, raws.data.type, file=paste0(file.dir,"raws.RData")) # updated date: 2/27/2021
 
 # AgriMet Data ----
 ## Bureau of Reclamation Columbia-Pacific Northwest Region: https://www.usbr.gov/pn/agrimet/
@@ -141,7 +140,7 @@ save(raws.meta, raws.data.type, file="raws.RData") # updated date: 2/27/2021
 ## Bureau of Reclamation Columbia-Pacific Northwest Region:
 ## Note: station and data spreadsheets were manually organized and uploaded in data.R
 ## Stations: https://www.usbr.gov/pn/hydromet/decod_params.html (hydromet.csv)
-hydromet <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/hydromet.csv")
+hydromet <- read.csv(paste0(file.dir,"hydromet.csv"))
 ## Data: https://www.usbr.gov/pn/hydromet/arcread.html
 ## Parameter Codes: https://www.usbr.gov/pn/hydromet/data/hydromet_pcodes.html
 ### QU: Unregulated Flow, Estimated Daily Average (Cubic Feet per Second)
@@ -167,7 +166,7 @@ for(stationID in unique(sort(hydromet$Station.ID))){
                   `Station ID` = stationID)
   hydromet.data <- rbind(hydromet.data,df)
 }
-save(hydromet,hydromet.data, file="hydromet.RData")# updated date: 5/8/2021
+save(hydromet,hydromet.data, file=paste0(file.dir,"hydromet.RData"))# updated date: 5/8/2021
 
 # MesoWest Met Data ----
 ## Github: https://github.com/fickse/mesowest
@@ -182,11 +181,15 @@ mw.variables.clean <- mw.variables %>%
   dplyr::ungroup()
 ## Edit mw.variables in Excel.
 # write.csv(mw.variables.clean, "mw_variables.csv") # 1. check setwd(); 2. use lookup table
-save(mw.meta, mw.variables.list, file="mw.RData") # updated date: 2/27/2021
+save(mw.meta, mw.variables.list, file=paste0(file.dir,"mw.RData")) # updated date: 2/27/2021
 
-# DOE, WA ----
-# Department of Ecology
-doe.stations <- read.csv("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/doe_temp_stations.csv") %>% 
+# DOE Water Temp Data ----
+# Department of Ecology, WA
+# Data for Willamette Maintem project area only
+# Ryan downloaded doe_temp_stations.csv from https://apps.ecology.wa.gov/eim/search/default.aspx
+doe.stations <- read.csv(paste0(file.dir,"doe_temp_stations.csv")) %>% 
+  dplyr::mutate(Latitude = Calculated_Latitude_Decimal_Degrees_NAD83HARN,
+                Longitude = Calculated_Longitude_Decimal_Degrees_NAD83HARN) %>% 
   sf::st_as_sf(coords = c("Calculated_Longitude_Decimal_Degrees_NAD83HARN","Calculated_Latitude_Decimal_Degrees_NAD83HARN"),
                crs = sf::st_crs("+init=EPSG:4269"))
 
@@ -196,76 +199,22 @@ will_pro_area <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature
   dplyr::group_by(Project_Na) %>%
   dplyr::summarise(geometry = sf::st_union(geometry)) %>%
   ungroup() %>% 
-  sf::st_transform(crs = sf::st_crs("+init=EPSG:4269")) #4326
+  sf::st_transform(4269) #4326
 
 doe_stations_pro_area <- doe.stations %>% 
-  filter(sf::st_contains(will_pro_area, ., sparse = FALSE)) #%>% 
-  #sf::st_drop_geometry()
+  filter(sf::st_contains(will_pro_area, ., sparse = FALSE)) %>% 
+  sf::st_drop_geometry()
 
-sf::st_write(doe_stations_pro_area, "doe_stations_pro_area.shp")
+# write.csv(doe_stations_pro_area, "doe_stations_pro_area.csv")
+# sf::st_write(doe_stations_pro_area, "doe_stations_pro_area.shp")
 
-url.doe <- "https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?"
-data.doe <- NULL
-for(stationID in unique(sort(doe_stations_pro_area$Location_ID))){
-  # test: stationID <- "25G060"
-  print(stationID)
-  request <- rvest::read_html(paste0(url.doe,
-                                    "ResultType=EIMTabs&",
-                                    "LocationUserIds=25G060&",
-                                    "LocationUserIdSearchType=Contains&",
-                                    "LocationUserIDAliasSearchFlag=True&",
-                                    "ResultParameterGroupIds=848&",
-                                    "ResultParameterGroupNames=Temperature"))
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  data.doe.station <- geojsonsf::geojson_sf(response)
-  data.doe <- rbind(data.doe,data.doe.station)
-}
+# Note: 
+# _ 34 DOE station info is saved as doe_stations_pro_area.xlsx in \\deqhq1\tmdl\Planning statewide\Temperature_TMDL_Revisions\model_QAPPs\R\data\download
+# _ Data of these stations were downloaded manually via URL queries (See query links in doe_stations_pro_area.xlsx tab [data_download_link])
+# _ Downloaded data were saved in doe_data_pro_area.xlsx in \deqhq1\tmdl\Planning statewide\Temperature_TMDL_Revisions\model_QAPPs\R\data\download
 
-###
-url.doe <- "https://apps.ecology.wa.gov/eim/search/SMP/RiverStreamSearch.aspx?&"
-data.doe <- NULL
-for(stationID in unique(sort(doe_stations_pro_area$Location_ID))){
-  # test: stationID <- "25G060"
-  print(stationID)
-  request <- rvest::read_html(paste0(url.doe,
-                                     "StudyMonitoringProgramUserId=RiverStream&",
-                                     "StudyMonitoringProgramUserIdSearchType=Equals&",
-                                     "ResultParameterName=Temperature%2c+water&",
-                                     "ResultParameterNameSearchType=Equals&",
-                                     "ResultParameterNameAliasSearchFlag=True"))
-  
-  response <- httr::content(request, as = "text", encoding = "UTF-8")
-  data.doe.station <- geojsonsf::geojson_sf(response)
-  data.doe <- rbind(data.doe,data.doe.station)
-}
+doe.stations.pro.area <- readxl::read_xlsx(paste0(file.dir,"doe_stations_pro_area.xlsx"), sheet = "doe_stations_pro_area")
+doe.data.pro.area <- readxl::read_xlsx(paste0(file.dir,"doe_data_pro_area.xlsx"), sheet = "data")
 
-###
-https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMTabs&LocationUserIds=25G060&LocationUserIdSearchType=Contains&LocationUserIDAliasSearchFlag=True&ResultParameterGroupIds=848&ResultParameterGroupNames=Temperature
-https://apps.ecology.wa.gov/eim/search/SMP/RiverStreamSearch.aspx?&StudyMonitoringProgramUserId=RiverStream&StudyMonitoringProgramUserIdSearchType=Equals&ResultParameterName=Temperature%2c+water&ResultParameterNameSearchType=Equals&ResultParameterNameAliasSearchFlag=True
-https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMTabs&LocationUserIds=25G060&LocationUserIdSearchType=Contains&LocationUserIDAliasSearchFlag=True&FieldActivityDateRangeBeginning=1%2f1%2f2010+12%3a00%3a00+AM&FieldActivityDateRangeEnding=12%2f31%2f2020+12%3a00%3a00+AM
-https://apps.ecology.wa.gov/eim/search/Download/Download.aspx?DownloadType=RiverStream&LocationUserIds=25G060&LocationUserIdSearchType=Contains&LocationUserIDAliasSearchFlag=True&FieldActivityDateRangeBeginning=1%2f1%2f2010+12%3a00%3a00+AM&FieldActivityDateRangeEnding=12%2f31%2f2020+12%3a00%3a00+AM
+save(doe.stations.pro.area, doe.data.pro.area, file=paste0(file.dir,"doe.RData")) # updated date: 6/2/2021
 
-
-###
-url <- "https://www.usbr.gov/pn-bin/daily.pl?"
-hydromet.data <- NULL
-for(stationID in unique(sort(hydromet$Station.ID))){
-  # test: stationID <- "WARO"
-  print(stationID)
-  request <- rvest::read_html(paste0(url,
-                                     "station=",stationID,"&",
-                                     "format=html&",
-                                     "year=1990&month=1&day=1&",
-                                     "year=2020&month=12&day=31&",
-                                     "pcode=qd"))
-  table <- request %>% 
-    rvest::html_nodes("table") %>% 
-    rvest::html_table((fill = TRUE))
-  dateTime <- unlist(table[[1]][1])
-  Result <- unlist(table[[1]][2]) # QD
-  df <- data.frame(dateTime,Result) %>% 
-    dplyr::mutate(`Data Source` = "Hydromet",
-                  `Station ID` = stationID)
-  hydromet.data <- rbind(hydromet.data,df)
-}
-save(hydromet,hydromet.data, file="hydromet.RData")# updated date: 5/8/2021

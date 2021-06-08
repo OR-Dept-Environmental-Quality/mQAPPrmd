@@ -14,6 +14,9 @@ library(rmarkdown)
 library(httr)
 library(geojsonsf)
 
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+load(paste0(data.dir,"RData/lookup.RData"))
+
 dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
 
 tag.map.title <- tags$style(HTML("
@@ -109,8 +112,8 @@ for (qapp_project_area in project.areas$areas) {
   print(qapp_project_area)
   
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",map.file.name,".RData")) # data.R
-  load(paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
+  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
@@ -742,11 +745,11 @@ for (qapp_project_area in project.areas$areas) {
                             color = "#8c510a",
                             opacity = 1,
                             weight = 4) %>% 
-      leaflet::addMarkers(data = water_level_stations,
-                          group = "Water Level Stations",
+      leaflet::addMarkers(data = gage_height_stations,
+                          group = "Gage Height Stations",
                           options = leaflet::leafletOptions(pane="marker"),
                           clusterOptions = markerClusterOptions(),
-                          label = paste0("USGS: ", water_level_stations$Station, " (", water_level_stations$`Station ID`,")"),
+                          label = paste0("USGS: ", gage_height_stations$Station, " (", gage_height_stations$`Station ID`,")"),
                           labelOptions = labelOptions(textsize = "15px")) %>% 
       leaflet::addLayersControl(overlayGroups = c("CE-QUAL-W2 Temperature Model Extent",
                                                   "HUC8","HUC10","HUC12",
@@ -761,7 +764,7 @@ for (qapp_project_area in project.areas$areas) {
                                                #"Stream Temperature Model Boundary Conditions and Tributary Inputs",
                                                #"Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                "Stream Flow Stations",
-                                               "Water Level Stations",
+                                               "Gage Height Stations",
                                                "Meteorological Stations",
                                                "Individual NPDES Point Sources"),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
