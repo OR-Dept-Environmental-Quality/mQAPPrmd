@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "North Umpqua"
+# for test: waterbody_name <- "North Umpqua River"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -38,7 +38,7 @@ model.extent <- na.omit(model.extent)
 
 ### Model domain
 
-```{r, label=`t6x1`, include=FALSE}
+```{r, label=`t6x1`, echo=FALSE}
 
 if(length(section.model.info$`Model Extent Text`)>1){
   
@@ -49,9 +49,48 @@ if(length(section.model.info$`Model Extent Text`)>1){
   model.domain <- section.model.info$`Model Extent Text`
   
 } 
-```
 
-The extent of the model domain is the `r model.domain`
+if(waterbody_name %in% "North Umpqua River"){
+  
+  cat("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek. Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 1: Lemolo Reservoir to Lemolo Powerhouse #1")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 2: Lemolo Powerhouse #1 to Toketee Reservoir")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 3: Toketee Reservoir to Slide Powerhouse")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 4: Slide Powerhouse to Soda Springs Reservoir")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 5: Soda Springs Reservoir to Steamboat Creek")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 6: Steamboat Creek to Mouth")
+  
+} else {
+  
+  cat("The extent of the model domain is the ", model.domain)
+  
+}
+
+```
 
 ### Spatial and temporal resolution
 
@@ -65,7 +104,24 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 ### Time frame of simulation
 
-The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
+```{r, label=`timeframe`, echo=FALSE}
+
+if(waterbody_name %in% "North Umpqua River"){
+  
+  cat("The model period for North Umpqua Models 1-5 is July 8-11, 2001.")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("The model period for North Umpqua Model 6 is July 12-31, 2002.")
+  
+} else {
+  
+  cat(paste0("The model period is ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), "."))
+  
+}
+
+```
 
 ### Important assumptions
 
