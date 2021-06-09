@@ -120,6 +120,7 @@ if(NROW(tcat5)>0){
 
 
 ```
+The `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed for temperature, dissolved oxygen, bacteria, sedimentation, and biological criterion. The original temperature TMDLs were based on the Natural Conditions Criteria (NCC) identified in Oregon Administrative Rules (OAR), specifically OAR 340-041-0028(8). These criteria were invalidated by the Oregon U.S. District Court. The applicable numeric and narrative temperature criteria must be used. As required by court order, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.
 
 This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project.
 
@@ -159,11 +160,19 @@ The `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort
 
 The applicable temperature criteria in the `r qapp_project_area` include:
 
-**[Update with specific temperature criteria based on the project area]**.
+•	Bull Trout spawning and juvenile rearing, 12.0$^\circ C$/53.6$^\circ F$     
 
-The existing temperature TMDL addresses temperature on streams with **[Update both point and nonpoint sources]** of thermal loads. 
+•	Salmon and Steelhead spawning, 13.0$^\circ C$/55.4$^\circ F$      
 
-The TMDL will provide load and waste load allocations for sources of thermal loads. **[Update if any specific info is needed for certain listings, time periods, or sources. Eg. During the spawning period, there are three impaired segments on the XX River that are downstream of a hydro-electric project. Modeling analysis are needed to complete TMDLs for these waterbodies.]**
+•	Core cold-water habitat, 16.0$^\circ C$/60.8$^\circ F$      
+
+•	Salmon and trout rearing and migration, 18.0$^\circ C$/64.4$^\circ F$     
+
+•	Salmon and Steelhead migration corridors, 20.0$^\circ C$/68.0$^\circ F$     
+
+The existing temperature TMDL addresses temperature on streams with both point and not point sources of thermal loads.
+
+The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2010 John Day River Basin TMDL were developed primarily to address summer (non-spawning) periods in 2002 for the Middle Fork and North Fork John Day Rivers, and summer periods in 2004 for the main stem John Day River. The Middle Fork John Day River model covers some periods during which Salmon and Steelhead spawning occur, however, neither the Main stem nor the North Fork John Day River models cover Salmon and Steelhead spawning periods. Nevertheless, DEQ has determined that it is appropriate to use the existing models to extrapolate results to develop waste load allocations for those time periods. It is not anticipated additional modeling or modeling updates will need to be made. 
 
 Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon 2018/2020 Section 303(d) Category 5 list has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")`.
 
@@ -178,10 +187,12 @@ Temperature is an intensive property and much like concentration measures the �
 
 Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Water temperature change ($\Delta Tw$) is a function of the heat transfer in a discrete volume and may be described in terms of changes in heat per unit volume. Conversely, a change in volume can result in water temperature change for a defined amount of heat exchange. With this basic conceptual framework of water temperature change it is possible to discuss stream temperature change as a function of two variables: heat and mass transfer.  
 
+
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
 Heat transfer relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich 1972, Jobson and Keefer 1979, Beschta and Weatherred 1984, Sinokrot and Stefan 1993, Boyd 1996, Hannah et al., 2008, Benyahya et al., 2012, Johnson 2004).
+
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 
@@ -229,6 +240,8 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 **Anthropogenic Point Sources**: Heat from warm water discharges of human origin, such as industrial outfalls, municipal waste-water treatment plants (WWTP), and other point sources.
 
+**[Update: Check if this paragraph should be kept - Yuan]**There are four WWTPs within the basin that were addressed and allocated thermal waste loads: City of John Day WWTP, Mount Vernon WWTP, Dayville WWTP, and the Long Creek WWTP. Other point sources within the basin but not specifically allocated thermal waste loads include confined animal feed operations (CAFO), general stormwater permits and storage facilities.
+
 # Technical approach
 
 ## Overview
@@ -256,7 +269,7 @@ tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
 
 ```
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local source. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local source. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the North Fork John Day River is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance, removal, or channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
@@ -266,7 +279,7 @@ Stream temperatures were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the c
 
 ## Model selection
 
-The modeling framework needs for this project include:
+DEQ has developed Heat Source models (version 8) for the main stem, North Fork and Middle Fork John Day Rivers for the 2010 temperature TMDL. It is anticipated those models will be carried forward into this scope of work, and will define the technical basis of the TMDL and thermal load and waste load allocations. The modeling framework needs for this project include:
 
 1)	Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.  
 
@@ -726,6 +739,8 @@ if(NROW(section.npdes.gen)>0){
 
 `r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_gen", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
 
+In addition to the NPDES point sources, one additional point source, the City of John Day WWTP maintains a water pollution control facility (WPCF) permit (File No. #43569) that has a wasteload allocation in the TMDL as part of the reserve capacity. The John Day WWTP discharges to lagoons north of the main stem John Day River. These lagoons rapidly infiltrate wastewater into underlying substrate, which is believed to convey water directly to the River, and is considered a point source discharge.
+
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen)>0){t55_gen_tbl}`
 
@@ -1034,7 +1049,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
-The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
+Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
 It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
