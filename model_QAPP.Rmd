@@ -531,20 +531,12 @@ DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrare
 ## Continuous stream temperature data
 
 ```{r, label=`t53`, echo=FALSE}
-
-st_awqms <- station.awqms %>% 
-  dplyr::rename(Station = StationDes,
-                Organization = OrgID,
-                Latitude = Lat_DD,
-                Longitude = Long_DD) %>% 
-  dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
-
 st_model <- station.model %>% 
   dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
   dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
   dplyr::filter(!`Station ID` == "TIR") %>% 
-  dplyr::mutate(Station = ifelse(is.na(StationDes),`Model Location Name`,StationDes),
-                Organization = ifelse(is.na(OrgID),`Data Source`,OrgID),
+  dplyr::mutate(Station = ifelse(is.na(Station),`Model Location Name`,Station),
+                Organization = ifelse(is.na(Organization),`Data Source`,Organization),
                 Organization = ifelse(substr(Organization,1,18) == "Watershed Sciences",
                                       paste0(gsub(",.*$", "", Organization)," (",stringi::stri_sub(strip_alpha(Organization),-4),")"),Organization)) %>% 
   dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
@@ -553,46 +545,12 @@ st_model_nodata <- station.model %>%
   dplyr::filter(Note == "Data not in AWQMS.") %>% 
   dplyr::pull(`Station ID`)
 
-st_owrd <- station.owrd.temp %>% 
-  dplyr::mutate(Organization = "OWRD") %>% 
-  dplyr::rename(Latitude = Lat,
-                Longitude = Long) %>% 
-  dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
-
-t53_1 <- rbind(st_awqms,st_model,st_owrd) %>% 
+t53_1 <- rbind(temp.stations,st_model) %>% 
   dplyr::distinct(Station,`Station ID`, .keep_all=TRUE) %>%
-  #dplyr::left_join(df.stations,by = c("Station ID"="MLocID")) %>% 
-  dplyr::mutate(Organization = ifelse(Organization == "OregonDEQ", "DEQ", Organization)) %>% 
-  dplyr::mutate(Organization = ifelse(Organization == "11NPSWRD_WQX", "EPA WQX", Organization)) %>% 
-  dplyr::mutate(Organization = ifelse(Organization == "CITY_SALEM(NOSTORETID)", "City of Salem", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "USFS(NOSTORETID)", "USFS", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "CTUIR_WQX", "CTUIR WQX", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "PDX_WB(NOSTORETID)", "Portland Water Bureau", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "WALLAWALLA_WC(NOSTORETID)", "Walla Walla Basin Watershed Council", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "CITY_GRESHAM(NOSTORETID)", "City of Gresham", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "EMSWCD(NOSTORETID)", "EMSWCD", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "PSU(NOSTORETID)", "Portland State University", Organization)) %>%
-  dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization)) %>%
-  #dplyr::mutate(`Latitude/Longitude` = paste0(round(Lat_DD,4), "/",round(Long_DD,3))) %>%
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3))) %>%
   dplyr::mutate(`Latitude/Longitude`= ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization, Org_order)
-
-t53_1_usgs_or <- t53_1 %>% 
-  dplyr::filter(Organization == "USGS-OR") %>% 
-  dplyr::mutate(Station = stringr::str_to_title(Station)) %>% 
-  dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
-  dplyr::mutate_at("Station", str_replace_all, "ORegon", "Oregon") %>% 
-  dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
-  dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
-  dplyr::mutate_at("Station", str_replace_all, "Lb", "LB") %>%
-  dplyr::mutate_at("Station", str_replace_all, "Nf", "NF") %>%
-  dplyr::mutate_at("Station", str_replace_all, "Sf", "SF")
-
-t53_1 <- t53_1 %>% 
-  dplyr::filter(!Organization == "USGS-OR") %>% 
-  rbind(t53_1_usgs_or)
 
 t53_1_na <- t53_1 %>% dplyr::filter(is.na(`Latitude/Longitude`))
 t53_1 <- t53_1 %>% 
@@ -644,7 +602,7 @@ t54_hydromet <- flow.stations %>%
 t54_sp <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
   dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
-  dplyr::filter(!`Data Source` == "USGS") %>% 
+  dplyr::filter(!`Data Source` == "USGS" & !is.na(`Data Source`)) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::mutate(Station = `Model Location Name`,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
@@ -740,6 +698,8 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp
 `r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
 `r if(NROW(t54_sp)>0){t54_sp_tbl}`
 `r if(NROW(t54_sandy)>0){t54_sandy_tbl}`
+
+`r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
 ## Point source discharges
 
@@ -1539,6 +1499,7 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
+  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.'
   'Annear, Robert L., Scott A. Wells and David T. Evonuk. 1999. “Bull Run River – Reservoir Model: Boundary Conditions and Model Setup.” Portland State University Technical Report EWR-6-99.',
   'City of Portland. 2004. "Bull Run River Temperature Evaluation."'
 ))
@@ -1592,6 +1553,13 @@ if(NROW(flow.data.sample.count)>0){
 
 `r app_b_tbl`
 
+\newpage
+
+`r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "appendixC.Rmd", envir = globalenv())}`
+
+
+
+
 ```{r, label=`area-map-data`,echo=FALSE}
 # Stream Temperature Stations
 temp_stations <- t53_1 %>% 
@@ -1635,6 +1603,16 @@ flow_stations <- t54 %>%
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
+# Gage Height Stations
+if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+  
+  gage_height_stations <- tgh.usgs %>% 
+    dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+    tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+    sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+                 
+}
+
 # Meteorological Stations
 met_stations <- t51 %>%
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
@@ -1647,17 +1625,35 @@ ind_ps <- section.npdes.ind %>%
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
-save(temp.data.sample.count,
-     flow.data.sample.count,
-     temp_stations,
-     temp_cal_sites,
-     temp_model_bc_tri,
-     flow_model_bc_tri,
-     flow_stations,
-     met_stations,
-     ind_ps,
-     file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
-                   file.name,"_qapp.RData"))
+if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+  
+  save(temp.data.sample.count,
+       flow.data.sample.count,
+       temp_stations,
+       temp_cal_sites,
+       temp_model_bc_tri,
+       flow_model_bc_tri,
+       flow_stations,
+       met_stations,
+       ind_ps,
+       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
+                     file.name,"_qapp.RData"))
+} else {
+  
+  save(temp.data.sample.count,
+       flow.data.sample.count,
+       temp_stations,
+       temp_cal_sites,
+       temp_model_bc_tri,
+       flow_model_bc_tri,
+       flow_stations,
+       gage_height_stations,
+       met_stations,
+       ind_ps,
+       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
+                     file.name,"_qapp.RData"))
+  
+}
 
 #sf::st_write(temp_model_bc, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
 #                                   file.name,"_bc.shp"))

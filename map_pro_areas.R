@@ -15,10 +15,8 @@ library(httr)
 library(geojsonsf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"), sheet = "Lookup_QAPPProjectArea")
-schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
-project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
-  dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
+load(paste0(data.dir,"RData/lookup.RData"))
+
 dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
 
 tag.map.title <- tags$style(HTML("
@@ -107,13 +105,15 @@ popupTable.flow <- function(station_name = NULL){
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas %in% c("Willamette River Mainstem and Major Tributaries")),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas %in% c("Willamette River Mainstem and Major Tributaries")),]$areas) {
+  
+for (qapp_project_area in project.areas$areas) {
   
   print(qapp_project_area)
   
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",map.file.name,".RData")) # data.R
-  load(paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
+  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
@@ -733,6 +733,43 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% c("Willa
   }
   
   # _ ce.areas ----
+  if(qapp_project_area %in% ce.areas) {
+    
+    map_pro_area <- map %>% 
+      leaflet::addPolylines(data = pro_reaches,
+                            group = "CE-QUAL-W2 Temperature Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~GNIS_Name,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#8c510a",
+                            opacity = 1,
+                            weight = 4) %>% 
+      leaflet::addMarkers(data = gage_height_stations,
+                          group = "Gage Height Stations",
+                          options = leaflet::leafletOptions(pane="marker"),
+                          clusterOptions = markerClusterOptions(),
+                          label = paste0("USGS: ", gage_height_stations$Station, " (", gage_height_stations$`Station ID`,")"),
+                          labelOptions = labelOptions(textsize = "15px")) %>% 
+      leaflet::addLayersControl(overlayGroups = c("CE-QUAL-W2 Temperature Model Extent",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Status - Streams",
+                                                  "2018/2020 IR Status - Waterbodies",
+                                                  "2018/2020 IR Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                baseGroups = c("Stream Temperature Stations",
+                                               #"Stream Temperature Calibration Sites",
+                                               #"Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                               #"Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Stations",
+                                               "Gage Height Stations",
+                                               "Meteorological Stations",
+                                               "Individual NPDES Point Sources"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+    
+  }
   
   # _ hs.temp.sh.areas ----
   if(qapp_project_area %in% hs.temp.sh.areas) {
@@ -780,3 +817,4 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% c("Willa
                           background = "grey", selfcontained = FALSE)
   
 }
+
