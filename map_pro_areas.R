@@ -11,13 +11,20 @@ library(htmlwidgets)
 library(knitr)
 library(kableExtra)
 library(rmarkdown)
+library(httr)
+library(geojsonsf)
+
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+load(paste0(data.dir,"RData/lookup.RData"))
+
+dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
 
 tag.map.title <- tags$style(HTML("
   .leaflet-control.map-title { 
     transform: translate(-50%,20%);
     position: fixed !important;
-    left: 50%;
-    text-align: center;
+    left: 40%;
+    text-align: left;
     padding-left: 10px; 
     padding-right: 10px; 
     background: rgba(255,255,255,0.75);
@@ -26,882 +33,788 @@ tag.map.title <- tags$style(HTML("
   }
 "))
 
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map.RData") # RData created in data.R
-
-# Available data check ----
-# Don't need to run data check for the leaflet map
-# For leaflet map, go direct to the "QAPP Project Area Data" section
-results <- NULL
-
-for (qapp_project_area in qapp_project_areas$areas) {
+popupTable.temp <- function(station_name = NULL){
   
-  pro.area.extent <- unlist(strsplit(qapp_project_areas[which(qapp_project_areas$areas == qapp_project_area),]$huc8.extent, split = ","))
-  
-  pro.area <- pro.areas %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.reach <- pro.reaches %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.temp.model.streams <- temp.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.shadow.model.streams <- shadow.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.map.huc8 <- map.huc8 %>% 
-    dplyr::filter(HU_8_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC8_NAME))
-  
-  pro.area.map.huc10 <- map.huc10 %>% 
-    dplyr::filter(HU_10_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10_NAME))
-  
-  pro.area.map.huc12 <- map.huc12 %>% 
-    dplyr::filter(HUC12_Name %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC12_Name))
-  
-  map.temp.pro.area <- map.temp.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.flow.pro.area <- map.flow.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.met.pro.area <- map.met.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.ind.npdes.pro.area <- map.ind.npdes.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  results <- rbind(results,
-                   data.frame(proj_area = qapp_project_area,
-                              temp_model = NROW(pro.area.temp.model.streams),
-                              shadow_model = NROW(pro.area.shadow.model.streams),
-                              huc8 = NROW(pro.area.map.huc8),
-                              huc10 = NROW(pro.area.map.huc10),
-                              huc12 = NROW(pro.area.map.huc12),
-                              temp = NROW(map.temp.pro.area),
-                              flow = NROW(map.flow.pro.area),
-                              met = NROW(map.met.pro.area),
-                              ind = NROW(map.ind.npdes.pro.area)))
-  
-}
-write.csv(results, "results.csv")
-
-# Available data check END ----
-
-# Generate area maps for most of the project areas ----
-# __Data ----
-qapp_project_areas_sub <- qapp_project_areas %>% 
-  dplyr::filter(areas %in% c("John Day River Basin",                       
-                             "Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
-                             "Lower Willamette and Clackamas Subbasins",
-                             "Mid Willamette Subbasins",                         
-                             "Middle Columbia-Hood, Miles Creeks",
-                             "North Umpqua Subbasin",
-                             "Rogue River Basin",
-                             "Sandy Subbasin",
-                             "South Umpqua and Umpqua Subbasins",
-                             "Southern Willamette Subbasins",
-                             "Willow Creek Subbasin"))
-
-# qapp_project_area <- "John Day River Basin"
-
-for (qapp_project_area in qapp_project_areas_sub$areas) {
-  
-  pro.area.extent <- unlist(strsplit(qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$huc8.extent, split = ","))
-  map.file.name <- qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$file.name
-  
-  pro.area <- pro.areas %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.temp.model.streams <- temp.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.shadow.model.streams <- shadow.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.map.huc8 <- map.huc8 %>% 
-    dplyr::filter(HU_8_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC8_NAME))
-  
-  pro.area.map.huc10 <- map.huc10 %>% 
-    dplyr::filter(HU_10_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10_NAME))
-  
-  pro.area.map.huc12 <- map.huc12 %>% 
-    dplyr::filter(HUC12_Name %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC12_Name))
-  
-  map.temp.pro.area <- map.temp.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.flow.pro.area <- map.flow.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.met.pro.area <- map.met.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.ind.npdes.pro.area <- map.ind.npdes.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  popupTable.temp <- function(station_name = NULL){
+  # test: station_name <- "Bull Run River Near Bull Run (River Only), OR"
+  if(station_name %in% unique(sort(temp_stations$Station))){
     
-    if(station_name %in% map.temp.tbl$Station){
-      
-      mapTempTbl <- map.temp.tbl %>% 
-        dplyr::filter(Station == station_name) %>% 
-        dplyr::select(-c(`Station ID`, Station))
-      
-      table <- knitr::kable(mapTempTbl,
-                            format = "html", row.names = FALSE,
-                            caption = tags$h5("Summary of existing temperature data at this site:")) %>% 
-        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
-                                  full_width = TRUE, font_size = 12,
-                                  position = "left")
-      return(table)
-      
-    } else {
-      
-      print("")
-      
-    }
+    #station_name <- gsub(pattern=",[[:space:]]*OR$", replacement="", x=station_name, ignore.case = TRUE)
     
-  }
-  
-  
-  # __Leaflet Map ----
-  map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
-  
-  if(NROW(pro.area.shadow.model.streams)>0){
-    map.pro.area <- leaflet::leaflet() %>% leaflet::addTiles() %>% 
-      #leaflet.esri::addEsriBasemapLayer(esriBasemapLayers$Imagery) %>%
-      leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
-                         lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>% 
-      #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
-      #                                  #group = "Oregon Imagery",
-      #                                 options = leaflet::leafletOptions(pane="Aerial2")) %>%
-      #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
-      #                                   group = "Oregon Imagery",
-      #                                   options = leaflet::leafletOptions(pane="Aerial2")) %>%
-      
-      leaflet::addPolygons(data = pro.area,
-                           label = ~Project_Na,
-                           labelOptions = labelOptions(style = list("color" = "blue",
-                                                                    "font-size" = "20px")),
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           weight = 3,
-                           color = "black",
-                           opacity = 1) %>% 
-      leaflet::addPolylines(data = pro.area.temp.model.streams,
-                            group = "Temperature Model Extent",
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#6baed6",
-                            opacity = 1,
-                            weight = 4) %>% 
-      leaflet::addPolylines(data = pro.area.shadow.model.streams,
-                            group = "Shadown Model Extent",
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#2ca25f",
-                            opacity = 1,
-                            weight = 4) %>% 
-      leaflet::addPolygons(data = pro.area.map.huc8,
-                           group = "HUC 8",
-                           label = ~HU_8_NAME,
-                           labelOptions = labelOptions(style = list("color" = "red",
-                                                                    "font-size" = "20px")),
-                           weight = 3,
-                           color = "red",
-                           opacity = 1,
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           highlightOptions = highlightOptions(fillColor = "red",
-                                                               fillOpacity = 0.2,
-                                                               weight = 3,
-                                                               bringToFront = TRUE)) %>% 
-      leaflet::addPolygons(data = pro.area.map.huc10,
-                           group = "HUC 10",
-                           label = ~HU_10_NAME,
-                           labelOptions = labelOptions(style = list("color" = "orange",
-                                                                    "font-size" = "20px")),
-                           weight = 2,
-                           color = "orange",
-                           opacity = 1,
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           highlightOptions = highlightOptions(fillColor = "orange",
-                                                               fillOpacity = 0.2,
-                                                               weight = 3,
-                                                               bringToFront = TRUE)) %>%
-      leaflet::addPolygons(data = pro.area.map.huc12,
-                           group = "HUC 12",
-                           label = ~HUC12_Name,
-                           labelOptions = labelOptions(style = list("color" = "grey",
-                                                                    "font-size" = "20px")),
-                           weight = 1,
-                           color = "grey",
-                           opacity = 1,
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           highlightOptions = highlightOptions(fillColor = "grey",
-                                                               fillOpacity = 0.2,
-                                                               weight = 3,
-                                                               bringToFront = TRUE)) %>%
-      leaflet::addMarkers(data = map.temp.pro.area,
-                          group = "Stream Temperature Stations",
-                          clusterOptions = markerClusterOptions(),
-                          label = paste0(map.temp.pro.area$Organization, ": ", map.temp.pro.area$`Station Name and ID`),
-                          labelOptions = labelOptions(textsize = "15px"),
-                          popup = ~paste0("<b>", 
-                                          map.temp.pro.area$Organization," Station Name: ",
-                                          map.temp.pro.area$`Station Description`,"<br>",
-                                          "Station ID: ", map.temp.pro.area$`Station ID`,
-                                          #"<br>",
-                                          #"<br>",
-                                          sapply(unique(map.temp.pro.area$`Station Description`), 
-                                                 popupTable.temp, USE.NAMES = FALSE)),
-                          popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300)) %>% 
-      leaflet::addMarkers(data = map.flow.pro.area,
-                          group = "Flow Stations",
-                          clusterOptions = markerClusterOptions(),
-                          label = ~Station_Des,
-                          labelOptions = labelOptions(textsize = "15px")) %>% 
-      leaflet::addMarkers(data = map.met.pro.area,
-                          group = "Meteorological Stations",
-                          clusterOptions = markerClusterOptions(),
-                          label = ~Station,
-                          labelOptions = labelOptions(textsize = "15px")) %>%
-      leaflet::addMarkers(data = map.ind.npdes.pro.area,
-                          group = "Individual NPDES Point Sources",
-                          clusterOptions = markerClusterOptions(),
-                          label = ~`Facility Name and Number`,
-                          labelOptions = labelOptions(textsize = "15px")) %>%
-      leaflet::addLayersControl(overlayGroups = c("Temperature Model Streams","Shadown Model Streams","HUC 8", "HUC 10", "HUC 12","Oregon Imagery"),
-                                baseGroups = c("Stream Temperature Stations","Flow Stations","Meteorological Stations","Individual NPDES Point Sources"),
-                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-      leaflet::hideGroup(c("HUC 8","HUC 10", "HUC 12")) %>% 
-      leaflet::addMiniMap(position = "topright",
-                          width = 210,
-                          height = 200,
-                          zoomLevelFixed = 5) %>% 
-      leaflet.extras::addResetMapButton() %>% 
-      leaflet::addControl(map.title, position = "topleft", className="map-title")
+    mapTempTbl <- temp.data.sample.count %>% 
+      dplyr::filter(Station == station_name) %>% 
+      #dplyr::filter(grepl(paste0(station_name,"?"), Station, ignore.case = TRUE)) %>% 
+      dplyr::select(-c(`Station ID`, Station))
+    
+    table <- knitr::kable(mapTempTbl,
+                          format = "html", row.names = FALSE,
+                          caption = tags$h5("Summary of existing temperature data at this site:")) %>% 
+      kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
+                                full_width = TRUE, font_size = 12,
+                                position = "left")
+    return(table)
     
   } else {
     
-    map.pro.area <- leaflet::leaflet() %>% leaflet::addTiles() %>% 
-      #leaflet.esri::addEsriBasemapLayer(esriBasemapLayers$Imagery) %>%
-      leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
-                         lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>% 
-      #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
-      #                                  #group = "Oregon Imagery",
-      #                                 options = leaflet::leafletOptions(pane="Aerial2")) %>%
-      #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
-      #                                   group = "Oregon Imagery",
-      #                                   options = leaflet::leafletOptions(pane="Aerial2")) %>%
+    print("")
+    
+  }
+  
+}
+
+popupTable.flow <- function(station_name = NULL){
+  
+  if(station_name %in% unique(sort(flow_stations$Station))){
+    
+    #station_name <- gsub(pattern=",[[:space:]]*OR$", replacement="", x=station_name, ignore.case = TRUE)
+    
+    mapFlowTbl <- flow.data.sample.count %>% 
+      dplyr::filter(Station == station_name) %>% 
+      #dplyr::filter(grepl(paste0(station_name,"?"), Station, ignore.case = TRUE)) %>% 
+      dplyr::select(-c(`Station ID`, Station))
+    
+    table <- knitr::kable(mapFlowTbl,
+                          format = "html", row.names = FALSE,
+                          caption = tags$h5("Summary of existing flow data at this site:")) %>% 
+      kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
+                                full_width = TRUE, font_size = 12,
+                                position = "left")
+    return(table)
+    
+  } else {
+    
+    print("")
+    
+  }
+  
+}
+
+# project area map ----
+## for test:
+# qapp_project_area = "John Day River Basin"
+# qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
+# qapp_project_area = "Lower Willamette and Clackamas Subbasins"
+# qapp_project_area = "Malheur River Subbasins"
+# qapp_project_area = "Mid Willamette Subbasins"
+# qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
+# qapp_project_area = "North Umpqua Subbasin"
+# qapp_project_area = "Rogue River Basin"
+# qapp_project_area = "Sandy Subbasin"
+# qapp_project_area = "South Umpqua and Umpqua Subbasins"
+# qapp_project_area = "Southern Willamette Subbasins"
+# qapp_project_area = "Walla Walla Subbasin"
+# qapp_project_area = "Willamette River Mainstem and Major Tributaries"
+# qapp_project_area = "Willow Creek Subbasin"
+
+#for (qapp_project_area in project.areas[which(!project.areas$areas %in% c("Willamette River Mainstem and Major Tributaries")),]$areas) {
+  
+for (qapp_project_area in project.areas$areas) {
+  
+  print(qapp_project_area)
+  
+  map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
+  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
+  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
+  subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
+  subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
+  subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
+  
+  # where clause used in querying the feature layers from the REST Server
+  where_huc8 <- ""
+  where_huc10 <- ""
+  where_huc12 <- ""
+  reachcode <- ""
+  for(huc_8 in sort(subbasin_huc8)){
+    query_min <- paste0(huc_8,"000000")
+    query_max <- paste0(huc_8,"999999")
+    if(huc_8 == last(sort(subbasin_huc8))){
+      where_last_8 <- paste0("HUC8 LIKE '", huc_8, "'")
+      where_huc8 <- paste0(where_huc8,where_last_8)
+      where_last_10 <- paste0("HUC10 LIKE '", huc_8, "%'")
+      where_huc10 <- paste0(where_huc10,where_last_10)
+      where_last_12 <- paste0("HUC12 LIKE '", huc_8, "%'")
+      where_huc12 <- paste0(where_huc12,where_last_12)
+      reachcode_last <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ")")
+      reachcode <- paste0(reachcode,reachcode_last)
+    } else {
+      where_next_8 <- paste0("HUC8 LIKE '", huc_8, "' OR ")
+      where_huc8 <- paste0(where_huc8, where_next_8)
+      where_next_10 <- paste0("HUC10 LIKE '", huc_8, "%' OR ")
+      where_huc10 <- paste0(where_huc10, where_next_10)
+      where_next_12 <- paste0("HUC12 LIKE '", huc_8, "%' OR ")
+      where_huc12 <- paste0(where_huc12, where_next_12)
+      reachcode_next <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ") OR ")
+      reachcode <- paste0(reachcode,reachcode_next)
+    }
+  }
+  
+  map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
+  # basic ----
+  # _ map_walla ----
+  # No ind. NPDES stations
+  map_basic <- leaflet::leaflet() %>%
+    leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
+                       lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
+    leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>% 
+    leaflet::addMapPane("aerial", zIndex = -1100) %>% 
+    leaflet::addMapPane("area", zIndex = -1000) %>%
+    leaflet::addMapPane("huc8", zIndex = -900) %>%
+    leaflet::addMapPane("huc10", zIndex = -800) %>%
+    leaflet::addMapPane("huc12", zIndex = -700) %>%
+    leaflet::addMapPane("wqs1", zIndex = -600) %>%
+    leaflet::addMapPane("wqs2", zIndex = -500) %>%
+    leaflet::addMapPane("ir", zIndex = -400) %>%
+    leaflet::addMapPane("mod", zIndex = -300) %>%
+    leaflet::addMapPane("mod2016", zIndex = -200) %>%
+    leaflet::addMapPane("mod2009", zIndex = -200) %>%
+    leaflet::addMapPane("node", zIndex = -100) %>%
+    leaflet::addMapPane("marker", zIndex = 100) %>%
+    leaflet::addProviderTiles("OpenStreetMap",group = "OpenStreetMap",
+                              options = pathOptions(pane = "OpenStreetMap")) %>% 
+    # __ Oregon Imagery ----
+    leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
+                                       group = "Oregon Imagery",
+                                       options = leaflet::leafletOptions(pane="aerial")) %>%
+    leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
+                                       group = "Oregon Imagery",
+                                       options = leaflet::leafletOptions(pane="aerial")) %>%
+    # __ Project area outline ----
+    leaflet::addPolygons(data = pro_area,
+                         options = leaflet::leafletOptions(pane="area"),
+                         fillColor = "transparent",
+                         fillOpacity = 0,
+                         weight = 3,
+                         color = "black",
+                         opacity = 1) %>% 
+    # __ HUCs ----
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc8),
+                                      group = "HUC8",
+                                      pathOptions = leaflet::pathOptions(pane="huc8"),
+                                      labelProperty = "Name",
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "red",
+                                                                                        "font-size" = "20px")),
+                                      weight = 3,
+                                      color = "red",
+                                      opacity = 3,
+                                      fillColor = "transparent",
+                                      fillOpacity = 0) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc10),
+                                      group = "HUC10",
+                                      pathOptions = leaflet::pathOptions(pane="huc10"),
+                                      labelProperty = "Name",
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "orange",
+                                                                                        "font-size" = "20px")),
+                                      weight = 2,
+                                      color = "orange",
+                                      opacity = 1,
+                                      fillColor = "transparent",
+                                      fillOpacity = 0) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/3",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      group = "HUC12",
+                                      pathOptions = leaflet::pathOptions(pane="huc12"),
+                                      labelProperty = "Name",
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "grey",
+                                                                                        "font-size" = "20px")),
+                                      weight = 1,
+                                      color = "grey",
+                                      opacity = 1,
+                                      fillColor = "transparent",
+                                      fillOpacity = 0) %>% 
+    # __ IR ----
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      group = "2018/2020 IR Status - Streams",
+                                      pathOptions = leaflet::pathOptions(pane="ir")) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/2",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      group = "2018/2020 IR Status - Waterbodies",
+                                      pathOptions = leaflet::pathOptions(pane="ir")) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/4",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      group = "2018/2020 IR Status - Watershed",
+                                      pathOptions = leaflet::pathOptions(pane="ir")) %>% 
+    # __ WQS ----
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
+                                      options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                      group = "Fish Use Designations",
+                                      pathOptions = leaflet::pathOptions(pane="huc8")) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
+                                      options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                      group = "Salmon and Steelhead Spawning Use Designations",
+                                      pathOptions = leaflet::pathOptions(pane="huc8")) %>% 
+    # __ Stations ----
+    leaflet::addMarkers(data = temp_stations,
+                        group = "Stream Temperature Stations",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_stations$Organization, ": ", temp_stations$Station, " (", temp_stations$`Station ID`,")"),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("<b>", 
+                                        temp_stations$Organization," Station Name: ",
+                                        temp_stations$Station,"<br>",
+                                        "Station ID: ", temp_stations$`Station ID`,
+                                        #"<br>",
+                                        #"<br>",
+                                        sapply(unique(temp_stations$Station), 
+                                               popupTable.temp, USE.NAMES = FALSE)),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+    leaflet::addMarkers(data = flow_stations,
+                        group = "Stream Flow Stations",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        clusterOptions = markerClusterOptions(),
+                        label = paste0(flow_stations$`Data Source`, ": ", flow_stations$Station, " (", flow_stations$`Station ID`,")"),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("<b>", 
+                                        flow_stations$`Data Source`," Station Name: ",
+                                        flow_stations$Station,"<br>",
+                                        "Station ID: ", flow_stations$`Station ID`,
+                                        #"<br>",
+                                        #"<br>",
+                                        sapply(unique(flow_stations$Station), 
+                                               popupTable.flow, USE.NAMES = FALSE)),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+    leaflet::addMarkers(data = met_stations,
+                        group = "Meteorological Stations",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        clusterOptions = markerClusterOptions(),
+                        label = paste0(met_stations$tbl, ": ", met_stations$Station, " (", met_stations$`Station ID`, ")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+    leaflet::hideGroup(c("HUC8","HUC10","HUC12",
+                         "2018/2020 IR Status - Streams",
+                         "2018/2020 IR Status - Waterbodies",
+                         "2018/2020 IR Status - Watershed",
+                         "Fish Use Designations",
+                         "Salmon and Steelhead Spawning Use Designations",
+                         "Oregon Imagery")) %>% 
+    leaflet::addMiniMap(position = "bottomright",
+                        width = 405,
+                        height = 250,
+                        zoomLevelFixed = 5) %>% 
+    leaflet.extras::addResetMapButton() %>% 
+    leaflet::addControl(map.title, position = "topleft", className="map-title")%>% 
+    leaflet.extras::addSearchFeatures(targetGroups = c("Stream Temperature Stations","Stream Flow Stations"),
+                                      options = searchFeaturesOptions(openPopup = TRUE)) %>% 
+    htmlwidgets::onRender(jsCode = "function(el, x){
+    var elements = document.getElementsByClassName('Station');
+    var index;
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+    if (isElementHidden(element)) {
+      element.style.display = '';
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+  var layerToggle = document.getElementsByClassName('leaflet-bar easy-button-container leaflet-control')[4];
+  layerToggle.style.float = 'none';
+  layerToggle.style.backgroundColor = 'white';
+               }")
+  
+  if(qapp_project_area %in% c("Walla Walla Subbasin")) {} else {
+    
+  # _ map ----
+    map <- map_basic %>% 
+      leaflet::addMarkers(data = ind_ps,
+                          group = "Individual NPDES Point Sources",
+                          options = leaflet::leafletOptions(pane="marker"),
+                          clusterOptions = markerClusterOptions(),
+                          label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                          labelOptions = labelOptions(textsize = "15px"),
+                          popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                          "<br>", 
+                                          "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                          "<br>",
+                                          "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                          popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) 
+    
+  }
+
+  # models ----
+  hs.temp.areas <- c("John Day River Basin",
+                     "Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
+                     "Mid Willamette Subbasins",
+                     "North Umpqua Subbasin",
+                     "Sandy Subbasin",
+                     "South Umpqua and Umpqua Subbasins",
+                     "Willow Creek Subbasin")
+  
+  hs.solar.areas <- c("Malheur River Subbasins")
+  
+  hs.temp.solar.areas <- c("Middle Columbia-Hood, Miles Creeks",
+                           "Walla Walla Subbasin")
+  
+  hs.temp.solar.ce.areas <- c("Southern Willamette Subbasins")
+  
+  hs.temp.ce.areas <- c("Lower Willamette and Clackamas Subbasins")
+  
+  ce.areas <- c("Willamette River Mainstem and Major Tributaries")
+  
+  hs.temp.sh.areas <- c("Rogue River Basin")
+  
+  # _ hs.temp.areas ----
+  if(qapp_project_area %in% hs.temp.areas) {
+    
+    # __ North Umpqua Subbasin ----
+    if (qapp_project_area == "North Umpqua Subbasin"){
+      # Fish Creek 2009
+      fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
+                                     layer = "fish_creek_2009")
+      fish_creek_2009 <- sf::st_transform(fish_creek_2009, 4326) %>% sf::st_zm()
       
-      leaflet::addPolygons(data = pro.area,
-                           label = ~Project_Na,
-                           labelOptions = labelOptions(style = list("color" = "blue",
-                                                                    "font-size" = "20px")),
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           weight = 3,
-                           color = "black",
-                           opacity = 1) %>% 
-      leaflet::addPolylines(data = pro.area.temp.model.streams,
-                            group = "Temperature Model Extent",
+      # North Umpqua River model nodes
+      n_umpqua_model_nodes <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/n_umpqua_river_model_nodes.shp",
+                                          layer = "n_umpqua_river_model_nodes")
+      
+      n_umpqua_model_nodes <- sf::st_transform(n_umpqua_model_nodes, 4326) %>%sf::st_zm()
+      
+      map_pro_area <- map %>% 
+        leaflet::addPolylines(data = hs_temp_model_extent,
+                              group = "Heat Source Temperature Model Extent",
+                              options = leaflet::leafletOptions(pane="mod"),
+                              label = ~Stream,
+                              labelOptions = labelOptions(style = list("color" = "black",
+                                                                       "font-size" = "20px")),
+                              color = "#045a8d",
+                              opacity = 1,
+                              weight = 4) %>% 
+        leaflet::addPolylines(data = fish_creek_2009,
+                              group = "Fish Creek 2009 Heat Source Model Extent",
+                              options = leaflet::leafletOptions(pane="mod2009"),
+                              label = ~Stream,
+                              labelOptions = labelOptions(style = list("color" = "black",
+                                                                       "font-size" = "20px")),
+                              color = "#993404",
+                              opacity = 0.5,
+                              weight = 10) %>% 
+        leaflet::addCircleMarkers(data = n_umpqua_model_nodes,
+                                  group = "North Umpqua River Model Nodes",
+                                  options = leaflet::leafletOptions(pane="node"),
+                                  color = "#e34a33", #red orange
+                                  stroke = FALSE, 
+                                  fillOpacity = 0.5,
+                                  label = ~Location,
+                                  labelOptions = labelOptions(textsize = "15px"))%>% 
+        leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                    "Fish Creek 2009 Heat Source Model Extent",
+                                                    "North Umpqua River Model Nodes",
+                                                    "HUC8","HUC10","HUC12",
+                                                    "2018/2020 IR Status - Streams",
+                                                    "2018/2020 IR Status - Waterbodies",
+                                                    "2018/2020 IR Status - Watershed",
+                                                    "Fish Use Designations",
+                                                    "Salmon and Steelhead Spawning Use Designations",
+                                                    "Oregon Imagery"),
+                                  baseGroups = c("Stream Temperature Stations",
+                                                 "Stream Temperature Calibration Sites",
+                                                 "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                 "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                 "Stream Flow Stations",
+                                                 "Meteorological Stations",
+                                                 "Individual NPDES Point Sources"),
+                                  options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+    } else {
+      
+      # __ Sandy Subbasin ----
+      if (qapp_project_area == "Sandy Subbasin"){
+        
+        # Sandy River 2016 Heat Source Model Extent
+        sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/sandy_2016.shp",
+                                  layer = "sandy_2016")
+        
+        sandy_2016 <- sf::st_transform(sandy_2016, 4326) %>% sf::st_zm()
+        
+        map_pro_area <- map %>% 
+          leaflet::addPolylines(data = hs_temp_model_extent,
+                                group = "Heat Source Temperature Model Extent",
+                                options = leaflet::leafletOptions(pane="mod"),
+                                label = ~Stream,
+                                labelOptions = labelOptions(style = list("color" = "black",
+                                                                         "font-size" = "20px")),
+                                color = "#045a8d",
+                                opacity = 1,
+                                weight = 4) %>% 
+          leaflet::addPolylines(data = sandy_2016,
+                                group = "Sandy River 2016 Heat Source Model Extent",
+                                options = leaflet::leafletOptions(pane="mod2016"),
+                                label = ~Name,
+                                labelOptions = labelOptions(style = list("color" = "black",
+                                                                         "font-size" = "20px")),
+                                color = "#993404",
+                                opacity = 0.5,
+                                weight = 10) %>% 
+          leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                      "Sandy River 2016 Heat Source Model Extent",
+                                                      "HUC8","HUC10","HUC12",
+                                                      "2018/2020 IR Status - Streams",
+                                                      "2018/2020 IR Status - Waterbodies",
+                                                      "2018/2020 IR Status - Watershed",
+                                                      "Fish Use Designations",
+                                                      "Salmon and Steelhead Spawning Use Designations",
+                                                      "Oregon Imagery"),
+                                    baseGroups = c("Stream Temperature Stations",
+                                                   "Stream Temperature Calibration Sites",
+                                                   "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                   "Stream Flow Stations",
+                                                   "Meteorological Stations",
+                                                   "Individual NPDES Point Sources"),
+                                    options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+        
+      } else {
+        
+        # __ other hs.temp basins ----
+        map_pro_area <- map %>% 
+          leaflet::addPolylines(data = hs_temp_model_extent,
+                                group = "Heat Source Temperature Model Extent",
+                                options = leaflet::leafletOptions(pane="mod"),
+                                label = ~Stream,
+                                labelOptions = labelOptions(style = list("color" = "black",
+                                                                         "font-size" = "20px")),
+                                color = "#045a8d",
+                                opacity = 1,
+                                weight = 4) %>% 
+          leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                      "HUC8","HUC10","HUC12",
+                                                      "2018/2020 IR Status - Streams",
+                                                      "2018/2020 IR Status - Waterbodies",
+                                                      "2018/2020 IR Status - Watershed",
+                                                      "Fish Use Designations",
+                                                      "Salmon and Steelhead Spawning Use Designations",
+                                                      "Oregon Imagery"),
+                                    baseGroups = c("Stream Temperature Stations",
+                                                   "Stream Temperature Calibration Sites",
+                                                   "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                   "Stream Flow Stations",
+                                                   "Meteorological Stations",
+                                                   "Individual NPDES Point Sources"),
+                                    options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+      }
+      
+    }
+    
+  }
+  
+  # _ hs.solar.areas ----
+  if(qapp_project_area %in% hs.solar.areas) {
+    
+    map_pro_area <- map %>% 
+      leaflet::addPolylines(data = hs_solar_model_extent,
+                            group = "Heat Source Solar Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
                             label = ~Stream,
                             labelOptions = labelOptions(style = list("color" = "black",
                                                                      "font-size" = "20px")),
-                            color = "#6baed6",
+                            color = "#3690c0 ",
                             opacity = 1,
                             weight = 4) %>% 
-      leaflet::addPolygons(data = pro.area.map.huc8,
-                           group = "HUC 8",
-                           label = ~HU_8_NAME,
-                           labelOptions = labelOptions(style = list("color" = "red",
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Solar Model Extent",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Status - Streams",
+                                                  "2018/2020 IR Status - Waterbodies",
+                                                  "2018/2020 IR Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                baseGroups = c("Stream Temperature Stations",
+                                               "Stream Temperature Calibration Sites",
+                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Stations",
+                                               "Meteorological Stations",
+                                               "Individual NPDES Point Sources"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+  }
+  
+  # _ hs.temp.solar.areas ----
+  if(qapp_project_area %in% hs.temp.solar.areas) {
+    
+    if(qapp_project_area == "Walla Walla Subbasin") {
+      
+      map_pro_area <- map_basic %>% 
+        leaflet::addPolylines(data = hs_temp_model_extent,
+                              group = "Heat Source Temperature Model Extent",
+                              options = leaflet::leafletOptions(pane="mod"),
+                              label = ~Stream,
+                              labelOptions = labelOptions(style = list("color" = "black",
+                                                                       "font-size" = "20px")),
+                              color = "#045a8d",
+                              opacity = 1,
+                              weight = 4) %>% 
+        leaflet::addPolylines(data = hs_solar_model_extent,
+                              group = "Heat Source Solar Model Extent",
+                              options = leaflet::leafletOptions(pane="mod"),
+                              label = ~Stream,
+                              labelOptions = labelOptions(style = list("color" = "black",
+                                                                       "font-size" = "20px")),
+                              color = "#3690c0",
+                              opacity = 1,
+                              weight = 4) %>% 
+        leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                    "Heat Source Solar Model Extent",
+                                                    "HUC8","HUC10","HUC12",
+                                                    "2018/2020 IR Status - Streams",
+                                                    "2018/2020 IR Status - Waterbodies",
+                                                    "2018/2020 IR Status - Watershed",
+                                                    "Fish Use Designations",
+                                                    "Salmon and Steelhead Spawning Use Designations",
+                                                    "Oregon Imagery"),
+                                  baseGroups = c("Stream Temperature Stations",
+                                                 "Stream Temperature Calibration Sites",
+                                                 "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                 "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                 "Stream Flow Stations",
+                                                 "Meteorological Stations"),
+                                  options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+      
+    } else {
+      
+      map_pro_area <- map %>% 
+        leaflet::addPolylines(data = hs_temp_model_extent,
+                              group = "Heat Source Temperature Model Extent",
+                              options = leaflet::leafletOptions(pane="mod"),
+                              label = ~Stream,
+                              labelOptions = labelOptions(style = list("color" = "black",
+                                                                       "font-size" = "20px")),
+                              color = "#045a8d",
+                              opacity = 1,
+                              weight = 4) %>% 
+        leaflet::addPolylines(data = hs_solar_model_extent,
+                              group = "Heat Source Solar Model Extent",
+                              options = leaflet::leafletOptions(pane="mod"),
+                              label = ~Stream,
+                              labelOptions = labelOptions(style = list("color" = "black",
+                                                                       "font-size" = "20px")),
+                              color = "#3690c0",
+                              opacity = 1,
+                              weight = 4) %>% 
+        leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                    "Heat Source Solar Model Extent",
+                                                    "HUC8","HUC10","HUC12",
+                                                    "2018/2020 IR Status - Streams",
+                                                    "2018/2020 IR Status - Waterbodies",
+                                                    "2018/2020 IR Status - Watershed",
+                                                    "Fish Use Designations",
+                                                    "Salmon and Steelhead Spawning Use Designations",
+                                                    "Oregon Imagery"),
+                                  baseGroups = c("Stream Temperature Stations",
+                                                 "Stream Temperature Calibration Sites",
+                                                 "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                 "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                 "Stream Flow Stations",
+                                                 "Meteorological Stations",
+                                                 "Individual NPDES Point Sources"),
+                                  options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+    }
+    
+  }
+  
+  # _ hs.temp.solar.ce.areas ----
+  if(qapp_project_area %in% hs.temp.solar.ce.areas) {
+    
+    map_pro_area <- map %>% 
+      leaflet::addPolylines(data = hs_temp_model_extent,
+                            group = "Heat Source Temperature Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~Stream,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#045a8d",
+                            opacity = 1,
+                            weight = 4) %>% 
+      leaflet::addPolygons(data = hs_solar_model_area,
+                           group = "Heat Source Solar Model Extent",
+                           options = leaflet::leafletOptions(pane="mod"),
+                           label = ~Name,
+                           labelOptions = labelOptions(style = list("color" = "black",
                                                                     "font-size" = "20px")),
+                           fillColor = "#3690c0",
+                           fillOpacity = 0.8,
                            weight = 3,
-                           color = "red",
-                           opacity = 1,
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           highlightOptions = highlightOptions(fillColor = "red",
-                                                               fillOpacity = 0.2,
-                                                               weight = 3,
-                                                               bringToFront = TRUE)) %>% 
-      leaflet::addPolygons(data = pro.area.map.huc10,
-                           group = "HUC 10",
-                           label = ~HU_10_NAME,
-                           labelOptions = labelOptions(style = list("color" = "orange",
-                                                                    "font-size" = "20px")),
-                           weight = 2,
-                           color = "orange",
-                           opacity = 1,
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           highlightOptions = highlightOptions(fillColor = "orange",
-                                                               fillOpacity = 0.2,
-                                                               weight = 3,
-                                                               bringToFront = TRUE)) %>%
-      leaflet::addPolygons(data = pro.area.map.huc12,
-                           group = "HUC 12",
-                           label = ~HUC12_Name,
-                           labelOptions = labelOptions(style = list("color" = "grey",
-                                                                    "font-size" = "20px")),
-                           weight = 1,
-                           color = "grey",
-                           opacity = 1,
-                           fillColor = "transparent",
-                           fillOpacity = 0,
-                           highlightOptions = highlightOptions(fillColor = "grey",
-                                                               fillOpacity = 0.2,
-                                                               weight = 3,
-                                                               bringToFront = TRUE)) %>%
-      leaflet::addMarkers(data = map.temp.pro.area,
-                          group = "Stream Temperature Stations",
+                           color = "#3690c0",
+                           opacity = 1) %>% 
+      leaflet::addPolylines(data = ce_model_extent,
+                            group = "CE-QUAL-W2 Temperature Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~Stream,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#8c510a",
+                            opacity = 1,
+                            weight = 4) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Heat Source Solar Model Extent",
+                                                  "CE-QUAL-W2 Temperature Model Extent",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Status - Streams",
+                                                  "2018/2020 IR Status - Waterbodies",
+                                                  "2018/2020 IR Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                baseGroups = c("Stream Temperature Stations",
+                                               "Stream Temperature Calibration Sites",
+                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Stations",
+                                               "Meteorological Stations",
+                                               "Individual NPDES Point Sources"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+  }
+  
+  # _ hs.temp.ce.areas ----
+  if(qapp_project_area %in% hs.temp.ce.areas) {
+    
+    map_pro_area <- map %>% 
+      leaflet::addPolylines(data = hs_temp_model_extent,
+                            group = "Heat Source Temperature Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~Stream,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#045a8d",
+                            opacity = 1,
+                            weight = 4) %>%
+      leaflet::addPolylines(data = ce_model_extent,
+                            group = "CE-QUAL-W2 Temperature Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~Stream,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#8c510a",
+                            opacity = 1,
+                            weight = 4) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "CE-QUAL-W2 Temperature Model Extent",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Status - Streams",
+                                                  "2018/2020 IR Status - Waterbodies",
+                                                  "2018/2020 IR Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                baseGroups = c("Stream Temperature Stations",
+                                               "Stream Temperature Calibration Sites",
+                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Stations",
+                                               "Meteorological Stations",
+                                               "Individual NPDES Point Sources"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+  }
+  
+  # _ ce.areas ----
+  if(qapp_project_area %in% ce.areas) {
+    
+    map_pro_area <- map %>% 
+      leaflet::addPolylines(data = pro_reaches,
+                            group = "CE-QUAL-W2 Temperature Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~GNIS_Name,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#8c510a",
+                            opacity = 1,
+                            weight = 4) %>% 
+      leaflet::addMarkers(data = gage_height_stations,
+                          group = "Gage Height Stations",
+                          options = leaflet::leafletOptions(pane="marker"),
                           clusterOptions = markerClusterOptions(),
-                          label = paste0(map.temp.pro.area$Organization, ": ", map.temp.pro.area$`Station Name and ID`),
-                          labelOptions = labelOptions(textsize = "15px"),
-                          popup = ~paste0("<b>", 
-                                          map.temp.pro.area$Organization," Station Name: ",
-                                          map.temp.pro.area$`Station Description`,"<br>",
-                                          "Station ID: ", map.temp.pro.area$`Station ID`,
-                                          #"<br>",
-                                          #"<br>",
-                                          sapply(unique(map.temp.pro.area$`Station Description`), 
-                                                 popupTable.temp, USE.NAMES = FALSE)),
-                          popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300)) %>% 
-      leaflet::addMarkers(data = map.flow.pro.area,
-                          group = "Flow Stations",
-                          clusterOptions = markerClusterOptions(),
-                          label = ~Station_Des,
+                          label = paste0("USGS: ", gage_height_stations$Station, " (", gage_height_stations$`Station ID`,")"),
                           labelOptions = labelOptions(textsize = "15px")) %>% 
-      leaflet::addMarkers(data = map.met.pro.area,
-                          group = "Meteorological Stations",
-                          clusterOptions = markerClusterOptions(),
-                          label = ~Station,
-                          labelOptions = labelOptions(textsize = "15px")) %>%
-      leaflet::addMarkers(data = map.ind.npdes.pro.area,
-                          group = "Individual NPDES Point Sources",
-                          clusterOptions = markerClusterOptions(),
-                          label = ~`Facility Name and Number`,
-                          labelOptions = labelOptions(textsize = "15px")) %>%
-      leaflet::addLayersControl(overlayGroups = c("Temperature Model Streams","HUC 8", "HUC 10", "HUC 12","Oregon Imagery"),
-                                baseGroups = c("Stream Temperature Stations","Flow Stations","Meteorological Stations","Individual NPDES Point Sources"),
-                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-      leaflet::hideGroup(c("HUC 8","HUC 10", "HUC 12")) %>% 
-      leaflet::addMiniMap(position = "topright",
-                          width = 210,
-                          height = 200,
-                          zoomLevelFixed = 5) %>% 
-      leaflet.extras::addResetMapButton() %>% 
-      leaflet::addControl(map.title, position = "topleft", className="map-title")
-    
-    #map.pro.area
+      leaflet::addLayersControl(overlayGroups = c("CE-QUAL-W2 Temperature Model Extent",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Status - Streams",
+                                                  "2018/2020 IR Status - Waterbodies",
+                                                  "2018/2020 IR Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                baseGroups = c("Stream Temperature Stations",
+                                               #"Stream Temperature Calibration Sites",
+                                               #"Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                               #"Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Stations",
+                                               "Gage Height Stations",
+                                               "Meteorological Stations",
+                                               "Individual NPDES Point Sources"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
     
   }
   
-  # __Save Map ----
-  dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
-  htmlwidgets::saveWidget(map.pro.area, paste0(dir,map.file.name,".html"), 
+  # _ hs.temp.sh.areas ----
+  if(qapp_project_area %in% hs.temp.sh.areas) {
+    
+    map_pro_area <- map %>% 
+      leaflet::addPolylines(data = hs_temp_model_extent,
+                            group = "Heat Source Temperature Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~Stream,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#045a8d",
+                            opacity = 1,
+                            weight = 4) %>% 
+      leaflet::addPolylines(data = sh_model_extent,
+                            group = "SHADOW Model Extent",
+                            options = leaflet::leafletOptions(pane="mod"),
+                            label = ~Stname,
+                            labelOptions = labelOptions(style = list("color" = "black",
+                                                                     "font-size" = "20px")),
+                            color = "#8c510a",
+                            opacity = 1,
+                            weight = 4) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "SHADOW Model Extent",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Status - Streams",
+                                                  "2018/2020 IR Status - Waterbodies",
+                                                  "2018/2020 IR Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                baseGroups = c("Stream Temperature Stations",
+                                               "Stream Temperature Calibration Sites",
+                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                               "Stream Flow Stations",
+                                               "Meteorological Stations",
+                                               "Individual NPDES Point Sources"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+  }
+  
+  print(paste0(qapp_project_area,"...Save the map"))
+  htmlwidgets::saveWidget(map_pro_area, paste0(dir,map.file.name,".html"), 
                           background = "grey", selfcontained = FALSE)
   
 }
 
-# Malheur River Subbasins ----
-# No temperature models were used in the Malheur River Subbasins
-# __Data ----
-qapp_project_areas_sub <- qapp_project_areas %>% 
-  dplyr::filter(areas %in% c("Malheur River Subbasins"))
-
-for (qapp_project_area in qapp_project_areas_sub$areas) {
-  
-  pro.area.extent <- unlist(strsplit(qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$huc8.extent, split = ","))
-  map.file.name <- qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$file.name
-  
-  pro.area <- pro.areas %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.temp.model.streams <- temp.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.shadow.model.streams <- shadow.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.map.huc8 <- map.huc8 %>% 
-    dplyr::filter(HU_8_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC8_NAME))
-  
-  pro.area.map.huc10 <- map.huc10 %>% 
-    dplyr::filter(HU_10_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10_NAME))
-  
-  pro.area.map.huc12 <- map.huc12 %>% 
-    dplyr::filter(HUC12_Name %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC12_Name))
-  
-  map.temp.pro.area <- map.temp.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.flow.pro.area <- map.flow.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.met.pro.area <- map.met.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.ind.npdes.pro.area <- map.ind.npdes.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  popupTable.temp <- function(station_name = NULL){
-    
-    if(station_name %in% map.temp.tbl$Station){
-      
-      mapTempTbl <- map.temp.tbl %>% 
-        dplyr::filter(Station == station_name) %>% 
-        dplyr::select(-c(`Station ID`, Station))
-      
-      table <- knitr::kable(mapTempTbl,
-                            format = "html", row.names = FALSE,
-                            caption = "Summary of existing temperature data at this site:") %>% 
-        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
-                                  full_width = TRUE, font_size = 10,
-                                  position = "left")
-      return(table)
-      
-    } else {
-      
-      print("")
-      
-    }
-    
-  }
-  
-  # __Leaflet Map ----
-  map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
-  
-  map.pro.area <- leaflet::leaflet() %>% leaflet::addTiles() %>% 
-    #leaflet.esri::addEsriBasemapLayer(esriBasemapLayers$Imagery) %>%
-    leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
-                       lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>% 
-    #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
-    #                                  #group = "Oregon Imagery",
-    #                                 options = leaflet::leafletOptions(pane="Aerial2")) %>%
-    #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
-    #                                   group = "Oregon Imagery",
-    #                                   options = leaflet::leafletOptions(pane="Aerial2")) %>%
-    
-    leaflet::addPolygons(data = pro.area,
-                         label = ~Project_Na,
-                         labelOptions = labelOptions(style = list("color" = "blue",
-                                                                  "font-size" = "20px")),
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         weight = 3,
-                         color = "black",
-                         opacity = 1) %>% 
-    leaflet::addPolylines(data = pro.area.shadow.model.streams,
-                          group = "Shadown Model Extent",
-                          label = ~Stream,
-                          labelOptions = labelOptions(style = list("color" = "black",
-                                                                   "font-size" = "20px")),
-                          color = "#2ca25f",
-                          opacity = 1,
-                          weight = 4) %>% 
-    leaflet::addPolygons(data = pro.area.map.huc8,
-                         group = "HUC 8",
-                         label = ~HU_8_NAME,
-                         labelOptions = labelOptions(style = list("color" = "red",
-                                                                  "font-size" = "20px")),
-                         weight = 3,
-                         color = "red",
-                         opacity = 1,
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         highlightOptions = highlightOptions(fillColor = "red",
-                                                             fillOpacity = 0.2,
-                                                             weight = 3,
-                                                             bringToFront = TRUE)) %>% 
-    leaflet::addPolygons(data = pro.area.map.huc10,
-                         group = "HUC 10",
-                         label = ~HU_10_NAME,
-                         labelOptions = labelOptions(style = list("color" = "orange",
-                                                                  "font-size" = "20px")),
-                         weight = 2,
-                         color = "orange",
-                         opacity = 1,
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         highlightOptions = highlightOptions(fillColor = "orange",
-                                                             fillOpacity = 0.2,
-                                                             weight = 3,
-                                                             bringToFront = TRUE)) %>%
-    leaflet::addPolygons(data = pro.area.map.huc12,
-                         group = "HUC 12",
-                         label = ~HUC12_Name,
-                         labelOptions = labelOptions(style = list("color" = "grey",
-                                                                  "font-size" = "20px")),
-                         weight = 1,
-                         color = "grey",
-                         opacity = 1,
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         highlightOptions = highlightOptions(fillColor = "grey",
-                                                             fillOpacity = 0.2,
-                                                             weight = 3,
-                                                             bringToFront = TRUE)) %>%
-    leaflet::addMarkers(data = map.temp.pro.area,
-                        group = "Stream Temperature Stations",
-                        clusterOptions = markerClusterOptions(),
-                        label = paste0(map.temp.pro.area$Organization, ": ", map.temp.pro.area$`Station Name and ID`),
-                        labelOptions = labelOptions(textsize = "15px"),
-                        popup = ~paste0("<b>", 
-                                        map.temp.pro.area$Organization," Station Name: ",
-                                        map.temp.pro.area$`Station Description`,"<br>",
-                                        "Station ID: ", map.temp.pro.area$`Station ID`,
-                                        #"<br>",
-                                        #"<br>",
-                                        sapply(unique(map.temp.pro.area$`Station Description`), 
-                                               popupTable.temp, USE.NAMES = FALSE)),
-                        popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300)) %>% 
-    leaflet::addMarkers(data = map.flow.pro.area,
-                        group = "Flow Stations",
-                        clusterOptions = markerClusterOptions(),
-                        label = ~Station_Des,
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
-    leaflet::addMarkers(data = map.met.pro.area,
-                        group = "Meteorological Stations",
-                        clusterOptions = markerClusterOptions(),
-                        label = ~Station,
-                        labelOptions = labelOptions(textsize = "15px")) %>%
-    leaflet::addMarkers(data = map.ind.npdes.pro.area,
-                        group = "Individual NPDES Point Sources",
-                        clusterOptions = markerClusterOptions(),
-                        label = ~`Facility Name and Number`,
-                        labelOptions = labelOptions(textsize = "15px")) %>%
-    leaflet::addLayersControl(overlayGroups = c("Temperature Model Streams","Shadown Model Streams","HUC 8", "HUC 10", "HUC 12","Oregon Imagery"),
-                              baseGroups = c("Stream Temperature Stations","Flow Stations","Meteorological Stations","Individual NPDES Point Sources"),
-                              options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-    leaflet::hideGroup(c("HUC 8","HUC 10", "HUC 12")) %>% 
-    leaflet::addMiniMap(position = "topright",
-                        width = 210,
-                        height = 200,
-                        zoomLevelFixed = 5) %>% 
-    leaflet.extras::addResetMapButton() %>% 
-    leaflet::addControl(map.title, position = "topleft", className="map-title")
-  
-  #map.pro.area
-  
-  # __Save Map ----
-  dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
-  htmlwidgets::saveWidget(map.pro.area, paste0(dir,map.file.name,".html"), 
-                          background = "grey", selfcontained = FALSE)
-  
-}
-
-# Walla Walla Subbasin ----
-# No individual NPEDS in the Walla Walla Subbasin
-# __Data ----
-qapp_project_areas_sub <- qapp_project_areas %>% 
-  dplyr::filter(areas %in% c("Walla Walla Subbasin"))
-
-for (qapp_project_area in qapp_project_areas_sub$areas) {
-  
-  pro.area.extent <- unlist(strsplit(qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$huc8.extent, split = ","))
-  map.file.name <- qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$file.name
-  
-  pro.area <- pro.areas %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.temp.model.streams <- temp.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.shadow.model.streams <- shadow.model.streams %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  pro.area.map.huc8 <- map.huc8 %>% 
-    dplyr::filter(HU_8_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC8_NAME))
-  
-  pro.area.map.huc10 <- map.huc10 %>% 
-    dplyr::filter(HU_10_NAME %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC10_NAME))
-  
-  pro.area.map.huc12 <- map.huc12 %>% 
-    dplyr::filter(HUC12_Name %in% unique(lookup_huc[which(lookup_huc$QAPP_Project_Area == qapp_project_area),]$HUC12_Name))
-  
-  map.temp.pro.area <- map.temp.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.flow.pro.area <- map.flow.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.met.pro.area <- map.met.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  map.ind.npdes.pro.area <- map.ind.npdes.pro %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
-  popupTable.temp <- function(station_name = NULL){
-    
-    if(station_name %in% map.temp.tbl$Station){
-      
-      mapTempTbl <- map.temp.tbl %>% 
-        dplyr::filter(Station == station_name) %>% 
-        dplyr::select(-c(`Station ID`, Station))
-      
-      table <- knitr::kable(mapTempTbl,
-                            format = "html", row.names = FALSE,
-                            caption = "Summary of existing temperature data at this site:") %>% 
-        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
-                                  full_width = TRUE, font_size = 10,
-                                  position = "left")
-      return(table)
-      
-    } else {
-      
-      print("")
-      
-    }
-    
-  }
-  
-  # __Leaflet Map ----
-  map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
-  
-  map.pro.area <- leaflet::leaflet() %>% leaflet::addTiles() %>% 
-    #leaflet.esri::addEsriBasemapLayer(esriBasemapLayers$Imagery) %>%
-    leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
-                       lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>% 
-    #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
-    #                                  #group = "Oregon Imagery",
-    #                                 options = leaflet::leafletOptions(pane="Aerial2")) %>%
-    #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
-    #                                   group = "Oregon Imagery",
-    #                                   options = leaflet::leafletOptions(pane="Aerial2")) %>%
-    
-    leaflet::addPolygons(data = pro.area,
-                         label = ~Project_Na,
-                         labelOptions = labelOptions(style = list("color" = "blue",
-                                                                  "font-size" = "20px")),
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         weight = 3,
-                         color = "black",
-                         opacity = 1) %>% 
-    leaflet::addPolylines(data = pro.area.temp.model.streams,
-                          group = "Temperature Model Extent",
-                          label = ~Stream,
-                          labelOptions = labelOptions(style = list("color" = "black",
-                                                                   "font-size" = "20px")),
-                          color = "#6baed6",
-                          opacity = 1,
-                          weight = 4) %>%
-    leaflet::addPolygons(data = pro.area.map.huc8,
-                         group = "HUC 8",
-                         label = ~HU_8_NAME,
-                         labelOptions = labelOptions(style = list("color" = "red",
-                                                                  "font-size" = "20px")),
-                         weight = 3,
-                         color = "red",
-                         opacity = 1,
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         highlightOptions = highlightOptions(fillColor = "red",
-                                                             fillOpacity = 0.2,
-                                                             weight = 3,
-                                                             bringToFront = TRUE)) %>% 
-    leaflet::addPolygons(data = pro.area.map.huc10,
-                         group = "HUC 10",
-                         label = ~HU_10_NAME,
-                         labelOptions = labelOptions(style = list("color" = "orange",
-                                                                  "font-size" = "20px")),
-                         weight = 2,
-                         color = "orange",
-                         opacity = 1,
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         highlightOptions = highlightOptions(fillColor = "orange",
-                                                             fillOpacity = 0.2,
-                                                             weight = 3,
-                                                             bringToFront = TRUE)) %>%
-    leaflet::addPolygons(data = pro.area.map.huc12,
-                         group = "HUC 12",
-                         label = ~HUC12_Name,
-                         labelOptions = labelOptions(style = list("color" = "grey",
-                                                                  "font-size" = "20px")),
-                         weight = 1,
-                         color = "grey",
-                         opacity = 1,
-                         fillColor = "transparent",
-                         fillOpacity = 0,
-                         highlightOptions = highlightOptions(fillColor = "grey",
-                                                             fillOpacity = 0.2,
-                                                             weight = 3,
-                                                             bringToFront = TRUE)) %>%
-    leaflet::addMarkers(data = map.temp.pro.area,
-                        group = "Stream Temperature Stations",
-                        clusterOptions = markerClusterOptions(),
-                        label = paste0(map.temp.pro.area$Organization, ": ", map.temp.pro.area$`Station Name and ID`),
-                        labelOptions = labelOptions(textsize = "15px"),
-                        popup = ~paste0("<b>", 
-                                        map.temp.pro.area$Organization," Station Name: ",
-                                        map.temp.pro.area$`Station Description`,"<br>",
-                                        "Station ID: ", map.temp.pro.area$`Station ID`,
-                                        #"<br>",
-                                        #"<br>",
-                                        sapply(unique(map.temp.pro.area$`Station Description`), 
-                                               popupTable.temp, USE.NAMES = FALSE)),
-                        popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300)) %>% 
-    leaflet::addMarkers(data = map.flow.pro.area,
-                        group = "Flow Stations",
-                        clusterOptions = markerClusterOptions(),
-                        label = ~Station_Des,
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
-    leaflet::addMarkers(data = map.met.pro.area,
-                        group = "Meteorological Stations",
-                        clusterOptions = markerClusterOptions(),
-                        label = ~Station,
-                        labelOptions = labelOptions(textsize = "15px")) %>%
-    leaflet::addLayersControl(overlayGroups = c("Temperature Model Streams","Shadown Model Streams","HUC 8", "HUC 10", "HUC 12","Oregon Imagery"),
-                              baseGroups = c("Stream Temperature Stations","Flow Stations","Meteorological Stations","Individual NPDES Point Sources"),
-                              options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-    leaflet::hideGroup(c("HUC 8","HUC 10", "HUC 12")) %>% 
-    leaflet::addMiniMap(position = "topright",
-                        width = 210,
-                        height = 200,
-                        zoomLevelFixed = 5) %>% 
-    leaflet.extras::addResetMapButton() %>% 
-    leaflet::addControl(map.title, position = "topleft", className="map-title")
-  
-  #map.pro.area
-  
-  # __Save Map ----
-  dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
-  htmlwidgets::saveWidget(map.pro.area, paste0(dir,map.file.name,".html"), 
-                          background = "grey", selfcontained = FALSE)
-  
-}
-
-# Willamette River Mainstem and Major Tributaries ----
-# __Data ----
-load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/will_map.RData") # RData created in data_will.R
-qapp_project_areas_sub <- qapp_project_areas %>% 
-  dplyr::filter(areas %in% c("Willamette River Mainstem and Major Tributaries"))
-qapp_project_area <- qapp_project_areas_sub$areas
-pro.area.extent <- unlist(strsplit(qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$huc8.extent, split = ","))
-map.file.name <- qapp_project_areas_sub[which(qapp_project_areas_sub$areas == qapp_project_area),]$file.name
-
-pro.area.map.huc8 <- map.huc8
-pro.area.map.huc10 <- map.huc10
-pro.area.map.huc12 <- map.huc12
-
-map.temp.pro.area <- map.temp.pro
-map.flow.pro.area <- map.flow.pro 
-map.met.pro.area <- map.met.pro
-map.ind.npdes.pro.area <- map.ind.npdes.pro
-
-# __Leaflet Map ----
-map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
-
-map.pro.area <- leaflet::leaflet() %>% leaflet::addTiles() %>% 
-  #leaflet.esri::addEsriBasemapLayer(esriBasemapLayers$Imagery) %>%
-  leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
-                     lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>% 
-  #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
-  #                                  #group = "Oregon Imagery",
-  #                                 options = leaflet::leafletOptions(pane="Aerial2")) %>%
-  #leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
-  #                                   group = "Oregon Imagery",
-  #                                   options = leaflet::leafletOptions(pane="Aerial2")) %>%
-  leaflet::addPolylines(data = pro.reaches,
-                        group = "Temperature Model Extent",
-                        label = ~HU_10_NAME,
-                        labelOptions = labelOptions(style = list("color" = "black",
-                                                                 "font-size" = "20px")),
-                        color = "#6baed6",
-                        opacity = 1,
-                        weight = 4) %>% 
-  leaflet::addPolygons(data = pro.area.map.huc8,
-                       group = "HUC 8",
-                       label = ~HU_8_NAME,
-                       labelOptions = labelOptions(style = list("color" = "red",
-                                                                "font-size" = "20px")),
-                       weight = 3,
-                       color = "red",
-                       opacity = 1,
-                       fillColor = "transparent",
-                       fillOpacity = 0,
-                       highlightOptions = highlightOptions(fillColor = "red",
-                                                           fillOpacity = 0.2,
-                                                           weight = 3,
-                                                           bringToFront = TRUE)) %>% 
-  leaflet::addPolygons(data = pro.area.map.huc10,
-                       group = "HUC 10",
-                       label = ~HU_10_NAME,
-                       labelOptions = labelOptions(style = list("color" = "orange",
-                                                                "font-size" = "20px")),
-                       weight = 2,
-                       color = "orange",
-                       opacity = 1,
-                       fillColor = "transparent",
-                       fillOpacity = 0,
-                       highlightOptions = highlightOptions(fillColor = "orange",
-                                                           fillOpacity = 0.2,
-                                                           weight = 3,
-                                                           bringToFront = TRUE)) %>% 
-  leaflet::addPolygons(data = pro.area.map.huc12,
-                       group = "HUC 12",
-                       label = ~HUC12_Name,
-                       labelOptions = labelOptions(style = list("color" = "grey",
-                                                                "font-size" = "20px")),
-                       weight = 1,
-                       color = "grey",
-                       opacity = 1,
-                       fillColor = "transparent",
-                       fillOpacity = 0,
-                       highlightOptions = highlightOptions(fillColor = "grey",
-                                                           fillOpacity = 0.2,
-                                                           weight = 3,
-                                                           bringToFront = TRUE)) %>% 
-  leaflet::addMarkers(data = map.temp.pro.area,
-                      group = "Stream Temperature Stations",
-                      clusterOptions = markerClusterOptions(),
-                      label = paste0(map.temp.pro.area$Organization, ": ", map.temp.pro.area$`Station Name and ID`),
-                      labelOptions = labelOptions(textsize = "15px"),
-                      popup = ~paste0("<b>", 
-                                      map.temp.pro.area$Organization," Station Name: ",
-                                      map.temp.pro.area$`Station Description`,"<br>",
-                                      "Station ID: ", map.temp.pro.area$`Station ID`,
-                                      #"<br>",
-                                      #"<br>",
-                                      sapply(unique(map.temp.pro.area$`Station Description`), 
-                                             popupTable.temp, USE.NAMES = FALSE)),
-                      popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300)) %>% ) %>% 
-  leaflet::addMarkers(data = map.flow.pro.area,
-                      group = "Flow Stations",
-                      clusterOptions = markerClusterOptions(),
-                      label = ~Station_Des,
-                      labelOptions = labelOptions(textsize = "15px")) %>% 
-  leaflet::addMarkers(data = map.met.pro.area,
-                      group = "Meteorological Stations",
-                      clusterOptions = markerClusterOptions(),
-                      label = ~Station,
-                      labelOptions = labelOptions(textsize = "15px")) %>%
-  leaflet::addMarkers(data = map.ind.npdes.pro.area,
-                      group = "Individual NPDES Point Sources",
-                      clusterOptions = markerClusterOptions(),
-                      label = ~`Facility Name and Number`,
-                      labelOptions = labelOptions(textsize = "15px")) %>%
-  leaflet::addLayersControl(overlayGroups = c("Temperature Model Streams","HUC 8", "HUC 10", "HUC 12","Oregon Imagery"),
-                            baseGroups = c("Stream Temperature Stations","Flow Stations","Meteorological Stations","Individual NPDES Point Sources"),
-                            options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-  leaflet::hideGroup(c("HUC 8","HUC 10", "HUC 12")) %>% 
-  leaflet::addMiniMap(position = "topright",
-                      width = 210,
-                      height = 200,
-                      zoomLevelFixed = 5) %>% 
-  leaflet.extras::addResetMapButton() %>% 
-  leaflet::addControl(map.title, position = "topleft", className="map-title")
-
-map.pro.area
-
-# __Save Map ----
-dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
-htmlwidgets::saveWidget(map.pro.area, paste0(dir,map.file.name,".html"), 
-                        background = "grey", selfcontained = FALSE)

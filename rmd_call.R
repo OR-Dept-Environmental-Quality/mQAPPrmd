@@ -3,7 +3,7 @@ library(rmarkdown)
 setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/20210413/"
+output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/20210605"
 
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
@@ -24,6 +24,8 @@ qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
 # for (qapp_project_area in project.areas$areas) {
+  
+  print(qapp_project_area)
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   load(paste0(file.name,".RData"))
