@@ -57,7 +57,95 @@ The extent of the model domain is the `r model.domain`
 
 The model input sampling rate (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
 
-A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will also allow evaluation of vegetation multiple vegetation management scenarios for each designated management agency.
+A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.
+
+### Source characteristics
+
+```{r, label=`sc`, include=FALSE}
+
+# test: waterbody_name <- "Sandy River (2016)"
+
+# NPDES
+npdes.ind.waterbody <- npdes.ind.pro.area %>%
+  dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name), x=`Stream Name`, ignore.case = TRUE)) %>% 
+  dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
+                `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
+                `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
+                `River Mile` = round(`River Mile`,1),
+                `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
+  dplyr::arrange(`Facility Name (Facility Number)`)
+
+npdes.ind.n <- nrow(npdes.ind.waterbody)
+
+if(npdes.ind.n>0){
+  
+  npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
+                              caption = tbls(name = "npdes.ind.waterbody",
+                                             caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+  
+}
+
+if(npdes.ind.n == 0) {
+  npdes.txt <- "There are no permitted individual NPDES point sources along the model extent."
+} 
+
+if(npdes.ind.n == 1) {
+  npdes.txt <- paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = "npdes.ind.waterbody",display="cite"), ".")
+}
+
+if(npdes.ind.n > 1) {
+  npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = "npdes.ind.waterbody",display="cite"),".")
+} 
+
+# NLCD
+nlcd.waterbody <- nlcd.pro.area %>% 
+  dplyr::filter(Stream == waterbody_name) %>% 
+  dplyr::select(NLCD_Land,Acres,Percentage) %>% 
+  dplyr::arrange(desc(Percentage)) %>% 
+  dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
+                "Percent of Total Acres" = Percentage)
+
+if(NROW(nlcd.waterbody)>0){
+  
+  nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
+                              caption = tbls(name = "nlcd.waterbody",
+                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
+  
+}
+
+nlcd.text.waterbody <- nlcd.text.pro.area %>% 
+  dplyr::filter(Stream == waterbody_name)
+
+# DMA
+dma.waterbody <- dma.pro.area %>% 
+  dplyr::filter(Stream == waterbody_name) %>% 
+    dplyr::select(DMA_RP,Acres,Percentage) %>% 
+    dplyr::arrange(desc(Percentage)) %>% 
+    dplyr::rename("DMA or Responsible Person" = DMA_RP,
+                  "Percent of Total Acres" = Percentage) 
+
+if(NROW(dma.waterbody)>0){
+  
+  dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
+                              caption = tbls(name = "dma.waterbody",
+                                             caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+  
+}
+
+```
+
+The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include, channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these later sources will be investigated as part of the model scenarios. `r npdes.txt`
+
+`r if(npdes.ind.n > 0){npdes.ind.tbl}`
+
+The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percentage of the near stream area. `r tbls(name = "nlcd.waterbody",display="cite")` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+
+`r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
+
+A designated management agency is defined in OAR 340-042-0030(2) as a federal, state or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agency that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r tbls(name = "dma.waterbody",display="cite")` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
+
+`r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
 
 ### Time frame of simulation
 
@@ -65,65 +153,7 @@ The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Mode
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
-
-### Model calibration
-
-```{r, label=`t6x5`, include=FALSE}
-options(knitr.kable.NA = '') # hide NAs in table
-
-if(!model.extent == TRUE){
-  
-  chap6x5 <- NULL
-  
-  for(model_extent in unique(sort(section.model.input$`Model Extent`))){
-    
-    chap6x5 <- c(chap6x5, knitr::knit_child(input = "chap6x5.Rmd", envir = globalenv()))
-    
-  }
-  
-} else {
-  
-  t6x5 <- section.model.input %>% 
-    dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-    dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
-                  Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
-                  `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
-                                                              `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
-                  `Model Location` = round(`Model Location`,2)) %>% 
-    dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
-    dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::arrange(desc(`Model Location`)) %>% 
-    dplyr::rename(`Calibration Parameter` = `Parameter`)
-  
-  t6x5_col <- t6x5 %>% 
-    dplyr::filter(!is.na(`Location Units`))
-  
-  names(t6x5)[names(t6x5) == "Model Location"] <- if(NROW(t6x5_col)>0){paste0("Model Location (",unique(t6x5_col$`Location Units`),")")}else{paste0("Model Location")}
-  
-  t6x5 <- t6x5[,c(1,2,5,4)]
-  
-  t6x5_tbl <- knitr::kable(t6x5, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x5", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
-  
-  mod.loc <- ifelse((tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs7") | (tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs8") | (tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs9"),
-                    print("The model location in the table below describes the distance of each input from the most downstream model node."),
-                    ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd == "hs6",
-                           print("The model location in the table below describes the distance of each input from the most upstream model node."),
-                           print("")))
-  
-}
-
-```
-
-`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by ",knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (",knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). Temperature, flow, and effective shade calibration sites are summarized in ",tbls(name = paste0("t6x5", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The model location in the table describes the distance of each input from the most upstream model node. If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model file are described in Section 6.2 General model inputs and parameters. ", mod.loc[1])}`
-
-`r if(!model.extent == TRUE) {paste(chap6x5, collapse = "\n")} else {if(NROW(t6x5)>0){t6x5_tbl}}`
+**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models and the development of new models to capture post-dam removal conditions. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
 
 ### Model inputs
 
@@ -178,15 +208,21 @@ if(!model.extent == TRUE){
   t6x6_1 <- t6x6_1[,-c(3)] %>% 
     dplyr::rename(`Model Input` = Parameter)
   
-  t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
+  if(NROW(t6x6_1)>0){
+    
+      t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("t6x6_1", waterbody_name),
                                              caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
+    
+  }
+  
+  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
   
 ```
 
-`r if(!model.extent == TRUE){} else {paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
@@ -205,3 +241,61 @@ if(NROW(t6x6_2)>1){
   
 }
 ```
+
+### Model calibration
+
+```{r, label=`t6x7`, include=FALSE}
+options(knitr.kable.NA = '') # hide NAs in table
+
+if(!model.extent == TRUE){
+  
+  chap6x7 <- NULL
+  
+  for(model_extent in unique(sort(section.model.input$`Model Extent`))){
+    
+    chap6x7 <- c(chap6x7, knitr::knit_child(input = "chap6x7.Rmd", envir = globalenv()))
+    
+  }
+  
+} else {
+  
+  t6x7 <- section.model.input %>% 
+    dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+    dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                  Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                              `Model Location Name`,
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
+                  `Model Location` = round(`Model Location`,2)) %>% 
+    dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+    dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::arrange(desc(`Model Location`)) %>% 
+    dplyr::rename(`Calibration Parameter` = `Parameter`)
+  
+  t6x7_col <- t6x7 %>% 
+    dplyr::filter(!is.na(`Location Units`))
+  
+  names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
+  
+  t6x7 <- t6x7[,c(1,2,5,4)]
+  
+  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  
+  mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
+                    print("The model location in the table below describes the distance of each input from the most downstream model node."),
+                    ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs6"),
+                           print("The model location in the table below describes the distance of each input from the most upstream model node."),
+                           print("")))
+  
+}
+
+```
+
+`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model file are described in Section 6.2 General model inputs and parameters.")}`
+
+`r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
