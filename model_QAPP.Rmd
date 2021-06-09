@@ -158,13 +158,13 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.
 
-*   Salmon and Steelhead Spawning: 13.0 deg-C/55.4 deg-F    
+*   Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))   
 
-*   Core Cold Water Habitat: 16.0 deg-C/60.8 deg-F    
+*   Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))   
 
-*   Salmon and Trout Rearing and Migration: 18.0 deg-C/64.4 deg-F   
+*   Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))   
 
-Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r project.areas[which(project.areas$areas == qapp_project_area)]$"OAR 340-041"` `r project.areas[which(project.areas$areas == qapp_project_area)]$"OAR 340-041 Figure"`.
+Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`.
 
 In addition, the temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
@@ -174,45 +174,31 @@ Since the issuance of the original TMDL, the extent and number of waterbodies th
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
-1)	Complete a source assessment and cumulative effects analysis,
+1)	Complete a source assessment and cumulative effects analysis.
 
-|     a.	Identify anthropogenic sources of stream temperature warming.
-
-|     b.	Characterize how much warming comes from background sources.
-
-|     c.	Characterize how much warming comes from each anthropogenic source or source category.
-
-|     d.	Characterize the cumulative warming from all anthropogenic sources combined.
-
-|     e.	Identify where along the stream anthropogenic warming occurs.
-
-|     f.	Identify where the point of maximum stream warming is located.
-
-|     g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.
+    a.	Identify anthropogenic sources of stream temperature warming.
+    b.	Characterize how much warming comes from background sources.
+    c.	Characterize how much warming comes from each anthropogenic source or source category.
+    d.	Characterize the cumulative warming from all anthropogenic sources combined.
+    e.	Identify where along the stream anthropogenic warming occurs.
+    f.	Identify where the point of maximum stream warming is located.
+    g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
 
 2)	Determine TMDL elements and allocations that attain the applicable temperature criteria.
 
-|   a.	Identify the thermal loading capacity for each temperature listed waterbody.
-
-|   b.	Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
-
-|   c.	Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
-
-|   d.	Identify any surrogate measures.
-
-|   e.	Identify any reserve capacity.
-
-|   f.	Identify any margin of safety.
-
-|   g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.
+    a.	Identify the thermal loading capacity for each temperature listed waterbody.
+    b.	Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
+    c.	Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
+    d.	Identify any surrogate measures.
+    e.	Identify any reserve capacity.
+    f.	Identify any margin of safety.
+    g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
 
 3)	Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.
 
-|   a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations. 
-
-|   b.	Identify additional management strategies or surrogate measures.
-
-|   c.	Identify under what timeline and where management strategies need to be implemented.
+    a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
+    b.	Identify additional management strategies or surrogate measures.
+    c.	Identify under what timeline and where management strategies need to be implemented.        
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
@@ -829,9 +815,12 @@ if(NROW(t56)>0){
 
 ```{r, label=`t56_sandy`, echo=FALSE}
 
-t56_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "sandy_effective_shade") %>% 
+t56_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",
+                               sheet = "sandy_effective_shade") %>% 
   #dplyr::mutate(`Effective Shade` = ifelse((`Effective Shade` %in% c("5-30%","15-40%","88-94%","88-100%","95-100%")),as.character(`Effective Shade`),scales::percent(as.numeric(`Effective Shade`)))) %>% 
-  dplyr::mutate(`Effective Shade` = ifelse((`Effective Shade` %in% c("5-30%","15-40%","88-94%","88-100%","95-100%")),as.character(`Effective Shade`),paste0(round(as.numeric(`Effective Shade`)*100),"%"))) %>% 
+  dplyr::mutate(`Effective Shade` = ifelse((`Effective Shade` %in% c("5-30%","15-40%","88-94%","88-100%","95-100%")),
+                                           as.character(`Effective Shade`),
+                                           paste0(round(as.numeric(`Effective Shade`)*100),"%"))) %>% 
   dplyr::left_join(df.stations, by = c("Station ID"="MLocID")) %>% 
   dplyr::mutate(`Latitude/Longitude` = ifelse(is.na(Lat_DD), NA, paste0(round(Lat_DD,4), "/",round(Long_DD,3)))) %>% 
   dplyr::mutate(`Latitude/Longitude` = ifelse(`Station ID` == "26397-ORDEQ", "45.5535/-122.387", `Latitude/Longitude`)) %>% 
@@ -1541,7 +1530,7 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
-  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.'
+  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
   'Annear, Robert L., Scott A. Wells and David T. Evonuk. 1999. “Bull Run River – Reservoir Model: Boundary Conditions and Model Setup.” Portland State University Technical Report EWR-6-99.',
   'City of Portland. 2004. "Bull Run River Temperature Evaluation."'
 ))
