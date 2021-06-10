@@ -78,9 +78,9 @@ awqms.stations.temp <- df.stations.state %>%
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 # _ USGS flow data ----
-load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations.or & usgs.fl.data.or
-usgs.fl.stations <- usgs.fl.stations.or %>% 
-  dplyr::filter(site_no %in% usgs.fl.data.or$site_no) # filter out the stations that have data beyond the period of 1990-2020
+load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations & usgs.fl.data
+usgs.flow.stations <- usgs.fl.stations %>% 
+  dplyr::filter(site_no %in% usgs.fl.data$site_no) # filter out the stations that have data beyond the period of 1990-2020
 # _ OWRD data ----
 load(paste0(data.dir,"/download/owrd.RData")) # owrd.stations.or & owrd.data.or
 owrd.stations.or <- owrd.stations.or %>% 
@@ -478,7 +478,7 @@ pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
 
 # _ Flow data ----
 ## _ (1) USGS ----
-station.usgs.flow <- usgs.fl.stations %>%  # Discharge [ft3/s]
+station.usgs.flow <- usgs.flow.stations %>%  # Discharge [ft3/s]
   dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
   dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
   dplyr::mutate(lat = dec_lat_va,
@@ -495,7 +495,7 @@ station.usgs.flow <- usgs.fl.stations %>%  # Discharge [ft3/s]
   dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
   dplyr::filter(!`Station ID` %in% station.owrd$`Station ID`)
 
-usgs.data.flow <- usgs.fl.data.or %>% 
+usgs.data.flow <- usgs.fl.data %>% 
   dplyr::filter(site_no %in% station.usgs.flow$`Station ID`) %>% 
   dplyr::select(`Data Source` = agency_cd,
                 `Station ID` = site_no,
@@ -587,9 +587,9 @@ flow.data.sample.count <- flow.data %>%
 
 # _ Gage Height data ----
 # Gage height or water level data are for Willamette mainstem only.
-load(paste0(data.dir,"/download/usgs_wl.RData")) # usgs.wl.stations.or & usgs.wl.data.or
-station.usgs.gh <- usgs.wl.stations.or %>% 
-  dplyr::filter(site_no %in% usgs.wl.data.or$site_no) %>% # filter out the stations that have data beyond the period of 2010-2020
+load(paste0(data.dir,"/download/usgs_wl.RData")) # usgs.gh.stations & usgs.gh.data
+station.usgs.gh <- usgs.gh.stations %>% 
+  dplyr::filter(site_no %in% usgs.gh.data$site_no) %>% # filter out the stations that have data beyond the period of 2010-2020
   dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>%
   dplyr::mutate(lat = dec_lat_va,
                 long = dec_long_va) %>%
@@ -610,7 +610,7 @@ station.usgs.gh <- usgs.wl.stations.or %>%
   dplyr::mutate_at("Station", str_replace_all, " Crk ", " Creek ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " R ", " River ")
 
-usgs.data.gh <- usgs.wl.data.or %>% 
+usgs.data.gh <- usgs.gh.data %>% 
   dplyr::filter(site_no %in% station.usgs.gh$`Station ID`) %>% 
   dplyr::select(`Data Source` = agency_cd,
                 `Station ID` = site_no,
