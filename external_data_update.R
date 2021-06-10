@@ -15,26 +15,95 @@ mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # 
 library(rvest)
 
 file.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/"
+### for Willamette Mainstem QAPP: 
+willamette_huc12 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches_data_query_HUC12s.shp",
+                                layer = "TempTMDL_QAPP_Reaches_data_query_HUC12s") %>% 
+  dplyr::filter(Project_Na == "Willamette River Mainstem and Major Tributaries") %>% 
+  sf::st_transform(4269) #4326
+willamette_huc12_union <- sf::st_union(willamette_huc12)
 
 # USGS Flow Data ----
 ## Github: https://github.com/USGS-R/dataRetrieval
+## Stations:
+### OR stations:
 usgs.fl.stations.or <- dataRetrieval::whatNWISdata(stateCd="OR", parameterCd = "00060") # 00060	= Discharge [ft3/s]
-usgs.fl.data.or <- dataRetrieval::readNWISdata(stateCd="OR", 
-                                            parameterCd = "00060", # and statCd = "00003" for daily mean which is default
-                                            startDate = "1990-01-01", # start and end dates match AWQMS data pull
-                                            endDate = "2020-12-31")
-save(usgs.fl.stations.or, usgs.fl.data.or, file=paste0(file.dir,"usgs_fl.RData")) # updated date: 5/24/2021
+### WA stations for Willamette Mainstem QAPP: 
+usgs.fl.stations.wa <- dataRetrieval::whatNWISdata(stateCd="WA", parameterCd = "00060")
+usgs.fl.stations.wa.will <- usgs.fl.stations.wa %>% 
+  dplyr::mutate(lat = dec_lat_va,
+                long = dec_long_va) %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+  dplyr::filter(sf::st_intersects(willamette_huc12_union, ., sparse = FALSE)) %>% 
+  sf::st_drop_geometry()
+usgs.fl.stations <- rbind(usgs.fl.stations.or,usgs.fl.stations.wa.will)
+## Data:
+usgs.fl.data <- NULL
+for (id in unique(sort(usgs.fl.stations$site_no))) {
+  
+  print(id)
+  usgs.fl.data.i <- dataRetrieval::readNWISdata(siteNumber = id,
+                                                parameterCd = "00060", # and statCd = "00003" for daily mean which is default
+                                                startDate = "1990-01-01", # start and end dates match AWQMS data pull
+                                                endDate = "2020-12-31")
+  usgs.fl.data <- dplyr::bind_rows(usgs.fl.data,usgs.fl.data.i)
+  
+}
+
+save(usgs.fl.stations,usgs.fl.data, file=paste0(file.dir,"usgs_fl.RData")) # updated date: 6/9/2021
 
 # USGS Gage Height (Water Level) Data ----
 # for Willamette Mainstem QAPP only
-usgs.wl.stations.or <- dataRetrieval::whatNWISdata(stateCd="OR", parameterCd = "00065") # 00065 = Stream stage, the height of the water surface, in feet, above an established altitude where the stage is zero
-usgs.wl.data.or <- dataRetrieval::readNWISdata(stateCd="OR", 
-                                               parameterCd = "00065",
-                                               startDate = "2010-01-01", # as Ryan's suggestion
-                                               endDate = "2020-12-31")
-save(usgs.wl.stations.or, usgs.wl.data.or, file=paste0(file.dir,"usgs_wl.RData")) # updated date: 5/24/2021
+## stations:
+### OR stations:
+usgs.gh.stations.or <- dataRetrieval::whatNWISdata(stateCd="OR", parameterCd = "00065") # 00065 = Stream stage, the height of the water surface, in feet, above an established altitude where the stage is zero
+### WA stations:
+usgs.gh.stations.wa <- dataRetrieval::whatNWISdata(stateCd="WA", parameterCd = "00065")
+usgs.gh.stations.wa.will <- usgs.gh.stations.wa %>% 
+  dplyr::mutate(lat = dec_lat_va,
+                long = dec_long_va) %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+  dplyr::filter(sf::st_intersects(willamette_huc12_union, ., sparse = FALSE)) %>% 
+  sf::st_drop_geometry()
+usgs.gh.stations <- rbind(usgs.gh.stations.or,usgs.gh.stations.wa.will)
+## Data:
+usgs.gh.data <- NULL
+for (id in unique(sort(usgs.gh.stations$site_no))) {
+  
+  print(id)
+  usgs.gh.data.i <- dataRetrieval::readNWISdata(siteNumber = id,
+                                                   parameterCd = "00065",
+                                                   startDate = "2010-01-01", # Ryan's suggestion
+                                                   endDate = "2020-12-31")
+  usgs.gh.data <- dplyr::bind_rows(usgs.gh.data,usgs.gh.data.i)
+  
+}
 
-usgs.wl.stations.wa <- dataRetrieval::whatNWISdata(stateCd="WA", parameterCd = "00065")
+# Station 14211720 doesn't have daily mean data, instead it has 30 min data. Data were retrieved through the REST service.
+url <- paste0("https://nwis.waterdata.usgs.gov/usa/nwis/uv/?",
+              "cb_00065=on&",
+              "format=html&",
+              "site_no=14211720&",
+              "period=&",
+              "begin_date=2010-01-01&",
+              "end_date=2020-12-31")
+request <- rvest::read_html(url)
+table <- request %>% 
+  rvest::html_nodes("table") %>% 
+  rvest::html_table((fill = TRUE))
+data14211720 <- data.frame(table[3][1]) %>% 
+  dplyr::rename(dateTime = `Date...Time`,
+                gageHeight = `Gageheight...feet.MorrisonBridge`) %>% 
+  dplyr::mutate(gageHeight = substr(gageHeight, 1, nchar(gageHeight)-1),
+                date = as.Date(dateTime, "%m/%d/%Y")) %>% 
+  dplyr::group_by(date) %>% 
+  dplyr::summarise(X_00065_00003 = mean(as.numeric(gageHeight))) %>% 
+  dplyr::rename(dateTime = date) %>% 
+  dplyr::mutate(agency_cd = "USGS",
+                site_no = "14211720")
+
+usgs.gh.data <-  dplyr::bind_rows(usgs.gh.data,data14211720)
+
+save(usgs.gh.stations, usgs.gh.data, file=paste0(file.dir,"usgs_wl.RData")) # updated date: 6/9/2021
 
 # OWRI Temp and Flow Data ----
 devtools::source_gist("https://gist.github.com/DEQrmichie/835c7c8b3f373ed80e4b9e34c656951d")
