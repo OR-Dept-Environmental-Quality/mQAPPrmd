@@ -182,7 +182,7 @@ To the extent existing data and information allow, the primary analysis and mode
     d.	Characterize the cumulative warming from all anthropogenic sources combined.
     e.	Identify where along the stream anthropogenic warming occurs.
     f.	Identify where the point of maximum stream warming is located.
-    g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
+    g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.               
 
 2)	Determine TMDL elements and allocations that attain the applicable temperature criteria.
 
@@ -192,13 +192,15 @@ To the extent existing data and information allow, the primary analysis and mode
     d.	Identify any surrogate measures.
     e.	Identify any reserve capacity.
     f.	Identify any margin of safety.
-    g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
+    g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.                
+
 
 3)	Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.
 
     a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
     b.	Identify additional management strategies or surrogate measures.
-    c.	Identify under what timeline and where management strategies need to be implemented.        
+    c.	Identify under what timeline and where management strategies need to be implemented.                
+
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
