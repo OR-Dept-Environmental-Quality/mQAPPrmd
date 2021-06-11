@@ -159,7 +159,7 @@ Multiple waterbodies in the `r qapp_project_area` do not meet the water quality 
 
 **[Update with specific temperature criteria based on the project area]**.
 
-Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r project.areas[which(project.areas$areas == qapp_project_area)]$"OAR 340-041"` `r project.areas[which(project.areas$areas == qapp_project_area)]$"OAR 340-041 Figure"`.
+Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`.
 
 In addition, the temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
@@ -171,29 +171,29 @@ To the extent existing data and information allow, the primary analysis and mode
 
 1)	Complete a source assessment and cumulative effects analysis.
 
-    a.	Identify anthropogenic sources of stream temperature warming.
-    b.	Characterize how much warming comes from background sources.
-    c.	Characterize how much warming comes from each anthropogenic source or source category.
-    d.	Characterize the cumulative warming from all anthropogenic sources combined.
-    e.	Identify where along the stream anthropogenic warming occurs.
-    f.	Identify where the point of maximum stream warming is located.
-    g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
+a.	Identify anthropogenic sources of stream temperature warming.
+b.	Characterize how much warming comes from background sources.
+c.	Characterize how much warming comes from each anthropogenic source or source category.
+d.	Characterize the cumulative warming from all anthropogenic sources combined.
+e.	Identify where along the stream anthropogenic warming occurs.
+f.	Identify where the point of maximum stream warming is located.
+g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
 
 2)	Determine TMDL elements and allocations that attain the applicable temperature criteria.
 
-    a.	Identify the thermal loading capacity for each temperature listed waterbody.
-    b.	Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
-    c.	Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
-    d.	Identify any surrogate measures.
-    e.	Identify any reserve capacity.
-    f.	Identify any margin of safety.
-    g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
+a.	Identify the thermal loading capacity for each temperature listed waterbody.
+b.	Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
+c.	Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
+d.	Identify any surrogate measures.
+e.	Identify any reserve capacity.
+f.	Identify any margin of safety.
+g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
 
 3)	Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.
 
-    a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
-    b.	Identify additional management strategies or surrogate measures.
-    c.	Identify under what timeline and where management strategies need to be implemented.        
+a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
+b.	Identify additional management strategies or surrogate measures.
+c.	Identify under what timeline and where management strategies need to be implemented.        
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
@@ -220,7 +220,7 @@ knitr::include_graphics(path = "./fig/Heat_Transfer_Diagram.jpg")
 ```
 
 <br>
-      
+
 $$\Phi_{total} = \Phi_{solar} + \Phi_{longwave} + \Phi_{streambed} + \Phi_{convection} + \Phi_{evaporation}   \hspace{3em}\text{Equation 3}$$
 Where,        
 $\Phi_{total}$ = Net heat energy flux (+/-)       
@@ -535,8 +535,8 @@ t52 <- tir %>%
 if(NROW(t52)>0){
   
   t52_tbl <-  knitr::kable(t52, format = "pandoc", padding = 2,
-                             caption = tbls(name = "t52",
-                                            caption = paste0("Streams and the TIR collection dates in the ", qapp_project_area,".")))
+                           caption = tbls(name = "t52",
+                                          caption = paste0("Streams and the TIR collection dates in the ", qapp_project_area,".")))
   
 }
 
@@ -809,8 +809,8 @@ if(NROW(t56)>0){
 ```{r, label=`chap6`, include=FALSE}
 
 tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
-                             caption = tbls(name = "tmdl.mod.a",
-                                            caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+                               caption = tbls(name = "tmdl.mod.a",
+                                              caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
 
 if(NROW(tmdl.mod.b)>0){
   
@@ -992,7 +992,7 @@ if("SHADOW" %in% tmdl.mod.1$`Model Version`){
     dplyr::filter(`Model version` == "SHADOW") %>% 
     dplyr::select(`Model Waterbody`,`Model Extent Distance`,`Model Extent Units`,`TMDL Document`) %>%
     dplyr::arrange(as.numeric(`Model Extent Distance`))
-
+  
   names(shadow)[names(shadow) == "Model Extent Distance"] <- if(NROW(shadow)>0){paste0("Model Extent (",unique(shadow$`Model Extent Units`),")")}
   
   shadow_tbl <-  knitr::kable(shadow[,c(1:2)], format = "pandoc", padding = 2,
@@ -1564,7 +1564,7 @@ flow_model_bc_tri <- model.input %>%
   dplyr::filter(!`Station ID` %in% c("TIR")) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
-  
+
 # Flow Stations
 flow_stations <- t54 %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
@@ -1575,11 +1575,11 @@ flow_stations <- t54 %>%
 # Gage Height Stations
 if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
-  gage_height_stations <- tgh.usgs %>% 
+  gage_height_stations_map <- tgh.usgs %>% 
     dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
     tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
     sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
-                 
+  
 }
 
 # Meteorological Stations
@@ -1616,7 +1616,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        temp_model_bc_tri,
        flow_model_bc_tri,
        flow_stations,
-       gage_height_stations,
+       gage_height_stations_map,
        met_stations,
        ind_ps,
        file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
@@ -1629,7 +1629,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
 
 #sf::st_write(temp_model_tri, paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/pro_areas/", 
 #                                   file.name,"_tri.shp"))
-  
+
 ```
 
 

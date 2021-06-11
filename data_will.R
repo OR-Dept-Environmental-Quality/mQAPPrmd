@@ -811,8 +811,9 @@ station.worksheet.temp <- station.model %>%
                 Organization = ifelse(is.na(Organization),`Data Source`,Organization),
                 Organization = ifelse(substr(Organization,1,18) == "Watershed Sciences",
                                       paste0(gsub(",.*$", "", Organization)," (",stringi::stri_sub(strip_alpha(Organization),-4),")"),Organization),
-                Data = "Temp",
-                Track = "WORKSHEET") %>% 
+                Data = "Temp_Worksheet",
+                Track = "TRUE") %>% 
+  dplyr::distinct(Station, .keep_all = TRUE) %>% 
   dplyr::select(`Station ID`,Station,Latitude,Longitude,Organization,Data,Track)
 
 station.worksheet.flow <- cal.input %>% 
@@ -823,8 +824,9 @@ station.worksheet.flow <- cal.input %>%
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::mutate(Station = `Model Location Name`,
                 Organization = `Data Source`,
-                Data = "Flow",
-                Track = "WORKSHEET") %>% 
+                Data = "Flow_Worksheet",
+                Track = "TRUE") %>% 
+  dplyr::distinct(Station, .keep_all = TRUE) %>% 
   dplyr::select(`Station ID`,Station,Latitude,Longitude,Organization,Data,Track)
 
 station.output <- rbind(station.output.temp,
@@ -868,4 +870,5 @@ file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$fil
 
 save(pro_area,
      pro_reaches,
+     gh.data.sample.count,
      file = paste0(data.dir,"RData/map_",file.name,".RData"))

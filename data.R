@@ -78,9 +78,9 @@ awqms.stations.temp <- df.stations.state %>%
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 # _ USGS flow data ----
-load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations.or & usgs.fl.data.or
-usgs.fl.stations <- usgs.fl.stations.or %>% 
-  dplyr::filter(site_no %in% usgs.fl.data.or$site_no) # filter out the stations that have data beyond the period of 1990-2020
+load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations & usgs.fl.data
+usgs.flow.stations <- usgs.fl.stations %>% 
+  dplyr::filter(site_no %in% usgs.fl.data$site_no) # filter out the stations that have data beyond the period of 1990-2020
 # _ OWRD data ----
 load(paste0(data.dir,"/download/owrd.RData")) # owrd.stations.or & owrd.data.or
 owrd.stations.or <- owrd.stations.or %>% 
@@ -455,7 +455,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   
   # _ Flow data ----
   ## _ (1) USGS ----
-  station.usgs.flow <- usgs.fl.stations %>%  # Discharge [ft3/s]
+  station.usgs.flow <- usgs.flow.stations %>%  # Discharge [ft3/s]
     dplyr::filter(!(site_tp_cd %in% c("SP","GW"))) %>% # ST = Stream
     dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
     dplyr::mutate(lat = dec_lat_va,
@@ -472,7 +472,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::filter(!`Station ID` %in% station.owrd$`Station ID`)
   
-  usgs.data.flow <- usgs.fl.data.or %>% 
+  usgs.data.flow <- usgs.fl.data %>% 
     dplyr::filter(site_no %in% station.usgs.flow$`Station ID`) %>% 
     dplyr::select(`Data Source` = agency_cd,
                   `Station ID` = site_no,
@@ -752,10 +752,10 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                           station.worksheet.temp,
                           station.worksheet.flow) %>% 
     tidyr::pivot_wider(names_from = Data, values_from = Track)  
-    #dplyr::mutate(Temp = as.character(Temp),
-    #              Flow = as.character(Flow),
-    #              Temp_Worksheet = as.character(Temp_Worksheet),
-    #              Flow_Worksheet = as.character(Flow_Worksheet))
+  #dplyr::mutate(Temp = as.character(Temp),
+  #              Flow = as.character(Flow),
+  #              Temp_Worksheet = as.character(Temp_Worksheet),
+  #              Flow_Worksheet = as.character(Flow_Worksheet))
   
   writexl::write_xlsx(list(Temp= temp.data.sample.count, 
                            Flow = flow.data.sample.count,
