@@ -174,32 +174,32 @@ Since the issuance of the original TMDL, the extent and number of waterbodies th
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
-1)	Complete a source assessment and cumulative effects analysis.
+1)	Complete a source assessment and cumulative effects analysis.       
+    
+    a.	Identify anthropogenic sources of stream temperature warming.
+    b.	Characterize how much warming comes from background sources.
+    c.	Characterize how much warming comes from each anthropogenic source or source category.
+    d.	Characterize the cumulative warming from all anthropogenic sources combined.
+    e.	Identify where along the stream anthropogenic warming occurs.
+    f.	Identify where the point of maximum stream warming is located.
+    g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
 
-a.	Identify anthropogenic sources of stream temperature warming.
-b.	Characterize how much warming comes from background sources.
-c.	Characterize how much warming comes from each anthropogenic source or source category.
-d.	Characterize the cumulative warming from all anthropogenic sources combined.
-e.	Identify where along the stream anthropogenic warming occurs.
-f.	Identify where the point of maximum stream warming is located.
-g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
+2)	Determine TMDL elements and allocations that attain the applicable temperature criteria.        
+    
+    a.	Identify the thermal loading capacity for each temperature listed waterbody.
+    b.	Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
+    c.	Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
+    d.	Identify any surrogate measures.
+    e.	Identify any reserve capacity.
+    f.	Identify any margin of safety.
+    g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
 
-2)	Determine TMDL elements and allocations that attain the applicable temperature criteria.
+3)	Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.       
 
-a.	Identify the thermal loading capacity for each temperature listed waterbody.
-b.	Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
-c.	Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
-d.	Identify any surrogate measures.
-e.	Identify any reserve capacity.
-f.	Identify any margin of safety.
-g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
-
-3)	Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.
-
-a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
-b.	Identify additional management strategies or surrogate measures.
-c.	Identify under what timeline and where management strategies need to be implemented.         
-
+    a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
+    b.	Identify additional management strategies or surrogate measures.
+    c.	Identify under what timeline and where management strategies need to be implemented.        
+    
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
 `r if(NROW(tcat5)>0){tcat5}`
@@ -257,11 +257,11 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 ```
 
-**Anthropogenic Nonpoint Sources**: Heat from human-caused nonpoint sources are caused by increases in solar radiation loading to the stream network from the disturbance or removal of near-stream vegetation, channel modification and widening, reductions to the stream flow rate or volume, changes in hyporheic flows and channel connectivity, reductions in cold groundwater inflows, and changes to meteorological conditions, such as those caused by climate change.
+**Anthropogenic Nonpoint Sources**: Temperature increases from human-caused nonpoint sources are caused by increases in solar radiation loading to the stream network from the disturbance or removal of near-stream vegetation, channel modification and widening, reductions to the stream flow rate or volume, changes in hyporheic flows and channel connectivity, reductions in cold groundwater inflows, and changes to meteorological conditions, such as those caused by climate change.
 
 **Background Sources**: Background sources include all sources of pollution or pollutants not originating from human activities. In the context of a TMDL, background sources may also include anthropogenic sources of a pollutant that DEQ or another Oregon state agency does not have authority to regulate, such as pollutants emanating from another state, tribal lands, or sources otherwise beyond the jurisdiction of the state (OAR 340-042-0030(1)). Additionally, effective shade levels on smaller streams are more sensitive to riparian disturbances and so the differences between current condition solar flux and background solar flux can be larger.
 
-**Anthropogenic Point Sources**: Heat from warm water discharges of human origin, such as industrial outfalls, municipal waste-water treatment plants (WWTP), and other point sources.
+**Anthropogenic Point Sources**: Temperature increases from point sources are those caused by warm water discharges from NPDES permitted facilities, such as industrial outfalls, municipal waste-water treatment plants (WWTP), and other point sources.
 
 # Technical approach
 
@@ -306,7 +306,7 @@ The modeling framework needs for this project include:
 
 2)	Prediction of hourly solar radiation flux and daily effective shade at a no greater than 100 meter longitudinal resolution.  
 
-3)	Ability to evaluate hourly stream temperature response from changes in streamside vegetation within the upstream catchment.  
+3)	Ability to evaluate hourly stream temperature response from changes in streamside vegetation.  
 
 4)	Ability to evaluate hourly stream temperature response from changes in water withdrawals and tributary stream flow within the upstream catchment.  
 
@@ -839,8 +839,6 @@ Effective shade is the percent of potential daily solar radiation flux delivered
 
 # Model development and calibration
 
-## General model inputs and parameters
-
 ```{r, label=`chap6`, include=FALSE}
 
 tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
@@ -995,11 +993,13 @@ Waterbodies where model development was initiated for the 2005 Sandy River Basin
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in this section. An improved model fit is defined as an improvement to the model fit statistics described in Section 7 Model evaluation and acceptance generally represents improved agreement between measured observations and model predictions.
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
 The models for the Little Sandy River and Zigzag River were originally developed for the Sandy River Basin TMDL (DEQ, 2005) will also be used to support the updated TMDL. The models for the Sandy River, Bull Run River, and Salmon River (`r tbls(name = "tmdl.mod.b", display="cite")`) are new and will supplement the models that were developed for the 2005 TMDL.
+
+## General model inputs and parameters
 
 `r paste(mod.v, collapse = "\n")`
 
@@ -1283,8 +1283,11 @@ Development of a riverine model in place of Bull Run Reservoir Number One and Bu
 ## Project team/roles
 
 ```{r, label=`roles`, echo=FALSE}
+roles.pro.area <- roles %>% 
+  dplyr::filter(Area %in% c("All",qapp_project_area)) %>% 
+  dplyr::select(Name,Position,`Role and Responsibilities`)
 
-troles <- flextable::regulartable(roles) %>% 
+troles <- flextable::regulartable(roles.pro.area) %>% 
   flextable::set_table_properties(layout = "autofit") %>% 
   #flextable::merge_h(i = c(1,13)) %>% 
   #flextable::bold(i = c(1,13)) %>% 
@@ -1293,6 +1296,7 @@ troles <- flextable::regulartable(roles) %>%
   flextable::theme_box() %>% 
   flextable::set_caption(tbls(name = "roles",
                               caption = paste0("The roles and responsibilities of each team member involved in the temperature TMDL replacement project.")))
+
 
 ```
 
