@@ -711,20 +711,22 @@ mw.station.tbl <- mw.stations.pro.area #%>%
 
 # _ NPEDES ----
 npdes.ind.pro.area <- npdes.ind %>% 
-  dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
-  dplyr::filter(!is.na(Latitude)) %>% 
-  dplyr::mutate(lat = Latitude, long = Longitude) %>% 
-  sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-  dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-  sf::st_drop_geometry()
+  dplyr::filter(`Project Area` == qapp_project_area)
+#dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
+#dplyr::filter(!is.na(Latitude)) %>% 
+#dplyr::mutate(lat = Latitude, long = Longitude) %>% 
+#sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+#dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
+#sf::st_drop_geometry()
 
 npdes.gen.pro.area <- npdes.gen %>% 
-  dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
-  dplyr::filter(!is.na(Latitude)) %>% 
-  dplyr::mutate(lat = Latitude, long = Longitude) %>% 
-  sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-  dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-  sf::st_drop_geometry()
+  dplyr::filter(`Project Area` == qapp_project_area)
+#dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
+#dplyr::filter(!is.na(Latitude)) %>% 
+#dplyr::mutate(lat = Latitude, long = Longitude) %>% 
+#sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+#dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
+#sf::st_drop_geometry()
 
 # _ NLCD ----
 nlcd.pro.area <- nlcd.tbl %>% 
