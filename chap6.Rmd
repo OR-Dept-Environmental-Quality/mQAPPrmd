@@ -99,6 +99,7 @@ if(npdes.ind.n > 1) {
 } 
 
 # NLCD
+# test: waterbody_name <- "Bull Run River (2016)"
 nlcd.waterbody <- nlcd.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
