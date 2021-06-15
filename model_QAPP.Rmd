@@ -155,9 +155,17 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 # Problem definition and management objectives
 
-Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.
+Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.        
 
-**[Update with specific temperature criteria based on the project area]**.
+*   Bull Trout spawning and juvenile rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
+
+*   Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
+
+*   Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
+
+*   Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
+
+*   Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
 
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`.
 
@@ -284,7 +292,7 @@ tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
 
 ```
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the Lower Willamette River is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance, removal, or channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
@@ -308,11 +316,15 @@ The modeling framework needs for this project include:
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-7)	**[Update as needed]**
+7)	Ability to incorporate weirs, culverts, levees, dikes, and other water level control structures used to manage flow in the Columbia Slough into the model domain.       
 
-**[Update this paragraph where CE-QUAL-W2 is used].** The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+8)  Ability to evaluate thermally stratified lakes along the Columbia Slough, including Fairview Lake, and Smith and Bybee Lakes.       
+
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets the model framework needs for non-stratified waterbodies without water level control structures and was selected for stream temperature simulation in the project area except for in the Columbia Slough. Due to model framework needs 7 and 8, a CE-QUAL-W2 model was used to evaluate temperature in the Columbia Slough and is described below. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
+
+CE-QUAL-W2 is a laterally averaged U.S. Army Corps of Engineers model that consists of directly coupled hydrodynamic and water quality transport algorithms. Developed for reservoirs and narrow, stratified estuaries, CE-QUAL-W2 can handle a branched and/or looped system with flow and/or head boundary conditions. CE-QUAL-W2 simulates temperature, phytoplankton, dissolved oxygen, pH, organic matter, nutrients and residence time.  
 
 ## Software Development Quality Assessment
 We do not anticipate any new software development or model code changes as part of this project.
@@ -770,38 +782,6 @@ Estimates of water diversion rates and location of points of diversion can be de
 [WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
 [Water Use Reports]: https://apps.wrd.state.or.us/apps/wr/wateruse_query/
 
-## Effective shade measurements
-
-```{r, label=`t56`, echo=FALSE}
-
-t56 <- model.input %>% 
-  dplyr::filter(`Parameter` %in% c("Effective Shade")) %>% 
-  dplyr::filter(is.na(`Interpolated Data`)) %>% 
-  dplyr::mutate(Station = `Model Location Name`,
-                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Data Source`) %>% 
-  dplyr::arrange(`Station ID`)
-
-t56_na <- t56 %>% dplyr::filter(is.na(`Latitude/Longitude`))
-t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>% 
-  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
-  rbind(t56_na) %>% 
-  dplyr::arrange(`Data Source`,`Station ID`,Station)
-
-if(NROW(t56)>0){
-  
-  t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
-                          caption = tbls(name = "t56",
-                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
-  
-}
-
-```
-
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the stations for effective shade measurements that were available in public and DEQ databases.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
-
-`r if(NROW(t56)>0){t56_tbl}`
-
 # Model development and calibration
 
 ```{r, label=`chap6`, include=FALSE}
@@ -1125,6 +1105,10 @@ DEQ will review and respond to any public comments received on the model and mod
 # Management scenarios
 
 Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information or because the management scenario is not applicable to the specific waterbody. DEQ will review all available data and information during model development and revise this QAPP if it is determined a model scenario will is not feasible.
+
+## Current Conditions
+
+**[Update:] Add descriptions of changes to Columbia Slough point sources, punp stations, etc described in Columbia Slough model report. Describe how these have changed and model accordingly.**
 
 ## Background
 
@@ -1474,7 +1458,8 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
-  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.'
+  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
+  'Berger, C. and S. Wells. 2005. “Technical Report EWR-04-05: Columbia Slough Hydrodynamic and Water Quality Model Version 3.2.” Prepared for City of Portland Bureau of Environmental Services.'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
