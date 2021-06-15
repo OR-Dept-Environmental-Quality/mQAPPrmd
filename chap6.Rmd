@@ -85,7 +85,6 @@ tbl.col.slough <- flextable::regulartable(col.slough) %>%
   flextable::set_caption(tbls(name = "col.slough",
                               caption = paste0("Model characteristics of the Columbia Slough CE-QUAL-W2 grids.")))
 
-
 ```
 
 `r if(waterbody_name == "Columbia Slough"){paste0("The Columbia Slough model is composed of 397 longitudinal segments (25-231 m) and 17 vertical layers (layer height of 0.30-0.61 m) and 41 branches (separate water bodies or branches off the main stem), many of which are segregated by culverts. The number of model time step intervals (NDT) is 2 and the minimum time step (DLTMIN) is 0.025 seconds. The characteristics of the Columbia Slough model regions are shown in ", tbls(name = "col.slough", display="cite"), ". For additional details regarding model setup and resolution, see Berger and Wells 2005.")}`
@@ -99,8 +98,6 @@ tbl.col.slough <- flextable::regulartable(col.slough) %>%
 ### Source characteristics
 
 ```{r, label=`sc`, include=FALSE}
-
-# test: waterbody_name <- "Sandy River (2016)"
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
@@ -118,8 +115,8 @@ npdes.ind.n <- nrow(npdes.ind.waterbody)
 if(npdes.ind.n>0){
   
   npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
-                              caption = tbls(name = "npdes.ind.waterbody",
-                                             caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+                                caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
+                                               caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
   
 }
 
@@ -146,7 +143,7 @@ nlcd.waterbody <- nlcd.pro.area %>%
 if(NROW(nlcd.waterbody)>0){
   
   nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
-                              caption = tbls(name = "nlcd.waterbody",
+                              caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
                                              caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
   
 }
@@ -157,30 +154,32 @@ nlcd.text.waterbody <- nlcd.text.pro.area %>%
 # DMA
 dma.waterbody <- dma.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
-    dplyr::select(DMA_RP,Acres,Percentage) %>% 
-    dplyr::arrange(desc(Percentage)) %>% 
-    dplyr::rename("DMA or Responsible Person" = DMA_RP,
-                  "Percent of Total Acres" = Percentage) 
+  dplyr::select(DMA_RP,Acres,Percentage) %>% 
+  dplyr::arrange(desc(Percentage)) %>% 
+  dplyr::rename("DMA or Responsible Person" = DMA_RP,
+                "Percent of Total Acres" = Percentage) 
 
 if(NROW(dma.waterbody)>0){
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
-                              caption = tbls(name = "dma.waterbody",
-                                             caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                             caption = tbls(name = paste0("dma.waterbody",waterbody_name),
+                                            caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
   
 }
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include, channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these later sources will be investigated as part of the model scenarios. `r npdes.txt`
+The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include, channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these later sources will be investigated as part of the model scenarios. 
+
+`r npdes.txt`
 
 `r if(npdes.ind.n > 0){npdes.ind.tbl}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percentage of the near stream area. `r tbls(name = "nlcd.waterbody",display="cite")` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r tbls(name = "nlcd.waterbody",display="cite")` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
 
 `r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agency that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r tbls(name = "dma.waterbody",display="cite")` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
+A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r tbls(name = "dma.waterbody",display="cite")` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
 
 `r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
 
@@ -249,16 +248,16 @@ if(!model.extent == TRUE){
   
   if(NROW(t6x6_1)>0){
     
-      t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
-                              caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                             caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
+    t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
+                                caption = tbls(name = paste0("t6x6_1", waterbody_name),
+                                               caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
     
   }
   
   t6x6_1.txt <- "For a description of model setup and inputs, see Berger and Wells 2005."
   
 }
-  
+
 ```
 
 `r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
@@ -313,15 +312,16 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
                   Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Model Location` = round(`Model Location`,2),
+                  `Model Location` = ifelse(`Station ID` %in% "TIR","Mouth to Boundary Condition",`Model Location`),
                   `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
                   `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
-                  `Model Location` = round(`Model Location`,2)) %>% 
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
     dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
     dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
     dplyr::ungroup() %>% 
-    dplyr::arrange(desc(`Model Location`)) %>% 
+    dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
   
   t6x7_col <- t6x7 %>% 
@@ -331,7 +331,9 @@ if(!model.extent == TRUE){
   
   t6x7 <- t6x7[,c(1,2,5,4)]
   
-  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                           caption = tbls(name = paste0("t6x7", waterbody_name),
+                                          caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
