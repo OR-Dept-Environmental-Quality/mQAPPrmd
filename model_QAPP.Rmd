@@ -214,7 +214,7 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
-Heat transfer relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich 1972, Jobson and Keefer 1979, Beschta and Weatherred 1984, Sinokrot and Stefan 1993, Boyd 1996, Hannah et al., 2008, Benyahya et al., 2012, Johnson 2004).
+Heat transfer relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
 
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
@@ -1099,7 +1099,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
-It is not anticipated that any additional uncertainty or sensitivity analyses will be performed on the calibrated models originally developed for the 2005 Sandy Temperature TMDL (DEQ 2005). 
+It is not anticipated that any additional uncertainty or sensitivity analyses will be performed on the calibrated models originally developed for the 2005 Sandy Temperature TMDL (DEQ, 2005). 
 
 ## Model acceptance
 
@@ -1333,15 +1333,15 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **Task P1** Data gathering and project organization.
 
-|       **P1.1** Organize and gather effluent data from all active NPDES permittees in the temperature TMDL replacement project area.     
+    **P1.1** Organize and gather effluent data from all active NPDES permittees in the temperature TMDL replacement project area.     
 
-|       **P1.2** Organize and gather all available and relevant river temperature, stream flow, habitat, effective shade, and channel morphology.       
+    **P1.2** Organize and gather all available and relevant river temperature, stream flow, habitat, effective shade, and channel morphology.       
 
-|       **P1.3** Complete an open data solicitation.  During the solicitation period, the public may submit continuous stream temperature data and NPDES effluent data to DEQ in the watersheds subject to the temperature TMDL replacements.     
+    **P1.3** Complete an open data solicitation.  During the solicitation period, the public may submit continuous stream temperature data and NPDES effluent data to DEQ in the watersheds subject to the temperature TMDL replacements.     
 
-|       **P1.4** Review data collected. Data submitted to DEQ will be screened for completeness and quality, and whether the results are within the typical range expected for that season and time of day.     
+    **P1.4** Review data collected. Data submitted to DEQ will be screened for completeness and quality, and whether the results are within the typical range expected for that season and time of day.     
 
-|       **P1.5** Stream temperature data will be made available in DEQ’s Ambient Water Quality Monitoring System database (AWQMS).     
+    **P1.5** Stream temperature data will be made available in DEQ’s Ambient Water Quality Monitoring System database (AWQMS).     
 
 **Task P2** Develop modeling Quality Assurance Project Plans (QAPPs).  The modeling QAPPs will identify the available data and overall technical approach to be taken for each TMDL project.     
 
