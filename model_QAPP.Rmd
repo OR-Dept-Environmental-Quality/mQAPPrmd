@@ -1332,15 +1332,15 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **Task P1** Data gathering and project organization.
 
-    **P1.1** Organize and gather effluent data from all active NPDES permittees in the temperature TMDL replacement project area.     
+|    **P1.1** Organize and gather effluent data from all active NPDES permittees in the temperature TMDL replacement project area.  
 
-    **P1.2** Organize and gather all available and relevant river temperature, stream flow, habitat, effective shade, and channel morphology.       
+|    **P1.2** Organize and gather all available and relevant river temperature, stream flow, habitat, effective shade, and channel morphology.       
 
-    **P1.3** Complete an open data solicitation.  During the solicitation period, the public may submit continuous stream temperature data and NPDES effluent data to DEQ in the watersheds subject to the temperature TMDL replacements.     
+|    **P1.3** Complete an open data solicitation.  During the solicitation period, the public may submit continuous stream temperature data and NPDES effluent data to DEQ in the watersheds subject to the temperature TMDL replacements.     
 
-    **P1.4** Review data collected. Data submitted to DEQ will be screened for completeness and quality, and whether the results are within the typical range expected for that season and time of day.     
+|    **P1.4** Review data collected. Data submitted to DEQ will be screened for completeness and quality, and whether the results are within the typical range expected for that season and time of day.     
 
-    **P1.5** Stream temperature data will be made available in DEQ’s Ambient Water Quality Monitoring System database (AWQMS).     
+|    **P1.5** Stream temperature data will be made available in DEQ’s Ambient Water Quality Monitoring System database (AWQMS).     
 
 **Task P2** Develop modeling Quality Assurance Project Plans (QAPPs).  The modeling QAPPs will identify the available data and overall technical approach to be taken for each TMDL project.     
 
