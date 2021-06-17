@@ -47,7 +47,7 @@ dmaLU <- list(
   "Wasco"="Wasco",
   "Wheeler"="Wheeler",
   "Yamhill"="Yamhill"
-  )
+)
 
 # Read in 2016 NLCD raster
 nlcd_lay <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/NLCD_2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif"
@@ -81,14 +81,14 @@ map_hs_solar_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide
   dplyr::select(Stream, Project_Na)
 
 map_hs_sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/sandy_2016.shp",
-                                            layer = "sandy_2016") %>% 
+                                 layer = "sandy_2016") %>% 
   sf::st_transform(2992) %>% 
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
 
 
 map_hs_fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
-                               layer = "fish_creek_2009")  %>% 
+                                      layer = "fish_creek_2009")  %>% 
   sf::st_transform(2992) %>% 
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
@@ -255,7 +255,7 @@ dma_summary <- function(stream_buffer, dmaLU=dmaLU) {
   
   # Convert area to Acres
   dma_buff$Acres=round(as.numeric(set_units(dma_buff$area, "acres")), 1)
-
+  
   return(dma_buff)
   
 }
