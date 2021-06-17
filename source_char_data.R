@@ -19,7 +19,7 @@ output_gis_dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/m
 output_rdata_dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/"
 
 # List of County DMA shapefiles
-dmaLU <- list(
+dmaGIS <- list(
   "Baker"="//deqhq1/TMDL/DMA_Mapping/Final/Baker_DMAs_2019-1",
   "Benton"="//deqhq1/TMDL/DMA_Mapping/Final/Benton_DMAs_2019-1",
   "Clackamas"="//deqhq1/TMDL/DMA_Mapping/Final/Clackamas_DMAs_2019-1",
@@ -50,11 +50,11 @@ dmaLU <- list(
 )
 
 # Read in 2016 NLCD raster
-nlcd_lay <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/NLCD_2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif"
+nlcd_lay <- "C:/workspace/GIS_Features/NLCD/2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif"
 nlcd <- raster::raster(nlcd_lay)
 
 # Read attribute table with values and landcover types
-nlcd_df <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/NLCD_2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif.vat.dbf"
+nlcd_df <- "C:/workspace/GIS_Features/NLCD/2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif.vat.dbf"
 nlcd_df <- foreign::read.dbf(nlcd_df, as.is = TRUE)
 
 # Read in Model polyline extents
@@ -71,7 +71,6 @@ map_hs_temp_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/
   dplyr::select(Stream, Project_Na) %>% 
   dplyr::mutate(Stream = dplyr::case_when(Stream == "Sandy River" ~ "Sandy River (2001)",
                                           Stream == "Bull Run River" ~ "Bull Run River (2001)", 
-                                          Stream == "Salmon River" ~ "Salmon River (2001)", 
                                           TRUE ~ Stream))
 
 map_hs_solar_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis",
@@ -101,7 +100,7 @@ model_extents <- rbind(map_hs_temp_model_extent, map_hs_solar_model_extent, map_
 # check
 sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE)
 
-# rm(map_ce_model_extent, map_hs_temp_model_extent, map_hs_solar_model_extent)
+rm(map_ce_model_extent, map_hs_temp_model_extent, map_hs_solar_model_extent)
 
 # Read in county outline feature
 county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
@@ -221,11 +220,11 @@ save(nlcd.text, file = paste0(output_rdata_dir,"nlcd.text.RData"))
 
 # -- DMA area along the model extent -----------------------------------------
 
-dma_summary <- function(stream_buffer, dmaLU=dmaLU) {
+dma_summary <- function(stream_buffer, dmaGIS=dmaGIS) {
   
   county_name <- unique(stream_buffer$County)
   
-  dmapath <- dmaLU[[county_name]]
+  dmapath <- dmaGIS[[county_name]]
   
   print(paste0("Loading ", county_name))
   start_time <- Sys.time()
@@ -260,71 +259,39 @@ dma_summary <- function(stream_buffer, dmaLU=dmaLU) {
   
 }
 
+model_buff_dma <- model_buff_county %>% 
+  dplyr::group_by(County) %>%
+  dplyr::group_split(.keep = TRUE) %>%
+  lapply(FUN = dma_summary, dmaGIS=dmaGIS) %>%
+  dplyr::bind_rows()
 
 # This is a temporary fix to correct the names for some of 
 # the DMAs in the DMA_RP column.
 dmaLU <- read.csv("//deqhq1/TMDL/DMA_Mapping/Master/Lookups/DMAs.csv") %>%
   dplyr::select(DMA_RP=DMA_FullName, DMA_RP_Ab=DMA)
 
-# basin <- "John Day River Basin" 
-# basin <- "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
-# basin <- "Lower Willamette and Clackamas Subbasins"
-# basin <- "Malheur River Subbasins"
-# basin <- "Mid Willamette Subbasins"
-# basin <- "Middle Columbia-Hood, Miles Creeks"
-# basin <- "North Umpqua Subbasin"
-# basin <- "Rogue River Basin"
-# basin <- "Sandy Subbasin"
-# basin <- "South Umpqua and Umpqua Subbasins"
-# basin <- "Southern Willamette Subbasins"
-# basin <- "Walla Walla Subbasin"
-# basin <- "Willow Creek Subbasin"
+model_buff_dma <- model_buff_dma %>%
+  dplyr::select(-DMA_RP) %>%
+  dplyr::left_join(dmaLU)
 
-for(basin in unique(sort(model_buff_county$Project_Na))){
-  
-  file.name
-  
-  model_buff_dma <- model_buff_county %>% 
-    filter(Project_Na == "Lower Willamette and Clackamas Subbasins") %>%
-    dplyr::group_by(County) %>%
-    dplyr::group_split(.keep = TRUE) %>%
-    lapply(FUN = dma_summary, dmaLU=dmaLU) %>%
-    dplyr::bind_rows()
-  
-  #model_buff_dma_rp <- model_buff_dma %>%
-  #  dplyr::select(-DMA_RP) %>%
-  #  dplyr::left_join(dmaLU) %>% 
-  #  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
-  #                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
-  #                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
-  #                                        DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
-  #                                        TRUE ~ DMA_RP))
-  
-  model_buff_dma_rp <- model_buff_dma %>%
-    dplyr::left_join(dmaLU) %>% 
-    dplyr::mutate(DMA_RP2 = ifelse(is.na(DMA_RP2),DMA_RP,DMA_RP2)) %>% 
-    dplyr::select(-DMA_RP) %>%
-    dplyr::rename(DMA_RP = DMA_RP2) %>% 
-    dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
-                                          DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
-                                          DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
-                                          DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
-                                          TRUE ~ DMA_RP))
-  
-  # Output to shapefile
-  sf::st_write(model_buff_dma_rp, paste0(output_gis_dir,paste0(basin,"_model_buff_dma.shp")), delete_layer=TRUE)
-  
-  # Summarize by DMA/RP. Total Acres in buffer and percentage
-  dma.tbl <- model_buff_dma_rp %>%
-    sf::st_drop_geometry() %>%
-    dplyr::group_by(Stream, Project_Na, DMA_RP) %>%
-    dplyr::summarise(Acres=sum(Acres)) %>%
-    dplyr::group_by(Stream, Project_Na) %>%
-    dplyr::mutate(Percentage=round(Acres/sum(Acres)*100, 1)) %>%
-    dplyr::arrange(Stream, Project_Na, dplyr::desc(Percentage))
-  
-  sum(dma.tbl$Percentage)
-  
-  save(dma.tbl, file = paste0(output_rdata_dir, paste0(basin,"_dmas.RData")))
-  
-}
+# Output to shapefile
+sf::st_write(model_buff_dma , paste0(output_gis_dir,"model_buff_dma.shp"), delete_layer=TRUE)
+
+# Summarize by DMA/RP. Total Acres in buffer and percentage
+dma.tbl <- model_buff_dma %>%
+  sf::st_drop_geometry() %>%
+  dplyr::group_by(Stream, Project_Na, DMA_RP) %>%
+  dplyr::summarise(Acres=sum(Acres)) %>%
+  dplyr::group_by(Stream, Project_Na) %>%
+  dplyr::mutate(Percentage=round(Acres/sum(Acres)*100, 1)) %>%
+  dplyr::arrange(Stream, Project_Na, dplyr::desc(Percentage)) %>%
+  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
+                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
+                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
+                                        TRUE ~ DMA_RP))
+
+sum(dma.tbl$Percentage)
+
+save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
+
+
