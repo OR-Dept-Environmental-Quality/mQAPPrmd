@@ -272,25 +272,37 @@ model_buff_dma <- model_buff_county %>%
 dmaLU <- read.csv("//deqhq1/TMDL/DMA_Mapping/Master/Lookups/DMAs.csv") %>%
   dplyr::select(DMA_RP=DMA_FullName, DMA_RP_Ab=DMA)
 
-model_buff_dma <- model_buff_dma %>%
+#model_buff_dma_rp <- model_buff_dma %>%
+#  dplyr::select(-DMA_RP) %>%
+#  dplyr::left_join(dmaLU) %>% 
+#  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
+#                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
+#                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
+#                                        DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
+#                                        TRUE ~ DMA_RP))
+
+model_buff_dma_rp <- model_buff_dma %>%
+  dplyr::left_join(dmaLU) %>% 
+  dplyr::mutate(DMA_RP2 = ifelse(is.na(DMA_RP2),DMA_RP,DMA_RP2)) %>% 
   dplyr::select(-DMA_RP) %>%
-  dplyr::left_join(dmaLU)
+  dplyr::rename(DMA_RP = DMA_RP2) %>% 
+  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
+                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
+                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
+                                        DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
+                                        TRUE ~ DMA_RP))
 
 # Output to shapefile
-sf::st_write(model_buff_dma , paste0(output_gis_dir,"model_buff_dma.shp"), delete_layer=TRUE)
+sf::st_write(model_buff_dma_rp, paste0(output_gis_dir,"model_buff_dma.shp"), delete_layer=TRUE)
 
 # Summarize by DMA/RP. Total Acres in buffer and percentage
-dma.tbl <- model_buff_dma %>%
+dma.tbl <- model_buff_dma_rp %>%
   sf::st_drop_geometry() %>%
   dplyr::group_by(Stream, Project_Na, DMA_RP) %>%
   dplyr::summarise(Acres=sum(Acres)) %>%
   dplyr::group_by(Stream, Project_Na) %>%
   dplyr::mutate(Percentage=round(Acres/sum(Acres)*100, 1)) %>%
-  dplyr::arrange(Stream, Project_Na, dplyr::desc(Percentage)) %>%
-  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
-                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
-                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
-                                        TRUE ~ DMA_RP))
+  dplyr::arrange(Stream, Project_Na, dplyr::desc(Percentage))
 
 sum(dma.tbl$Percentage)
 
