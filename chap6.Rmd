@@ -171,6 +171,8 @@ if(NROW(dma.waterbody)>0){
 
 The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include, channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these later sources will be investigated as part of the model scenarios. 
 
+`r if(waterbody_name == "Columbia Slough"){paste0("The model includes 51 point source tributaries (storm water, combined sewer overflows and surface runoff), 12 distributed groundwater inflows, 12 irrigation withdrawals, 39 culverts, 4 weirs and 2 pump stations (Berger 2003).")}`
+
 `r npdes.txt`
 
 `r if(npdes.ind.n > 0){npdes.ind.tbl}`
@@ -182,8 +184,6 @@ The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)
 A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
 
 `r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
-
-`r if(waterbody_name == "Columbia Slough"){paste0("The model includes 51 point source tributaries (storm water, combined sewer overflows and surface runoff), 12 distributed groundwater inflows, 12 irrigation withdrawals, 39 culverts, 4 weirs and 2 pump stations (Berger 2003).")}`
 
 ### Time frame of simulation
 
