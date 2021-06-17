@@ -320,9 +320,13 @@ if(!model.extent == TRUE){
   
   t6x7 <- t6x7[,c(1,2,5,4)]
   
-  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
-                           caption = tbls(name = paste0("t6x7", waterbody_name),
-                                          caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  if(NROW(t6x7)>0){
+    
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                             caption = tbls(name = paste0("t6x7", waterbody_name),
+                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+    
+  }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
@@ -330,10 +334,13 @@ if(!model.extent == TRUE){
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
   
+  t6x7_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(waterbody_name == "Columbia Slough"){paste0("Model calibration was completed by PSU (Berger, 2003). Please refer to this report and Berger and Wells 2005 for more information.")}else{paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}}`
+
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}else{t6x7_1.txt}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
