@@ -25,28 +25,28 @@ dmaLU <- list(
   "Clackamas"="//deqhq1/TMDL/DMA_Mapping/Final/Clackamas_DMAs_2019-1",
   "Columbia"="//deqhq1/TMDL/DMA_Mapping/Final/Columbia_DMAs_2019-1",
   "Curry"="//deqhq1/TMDL/DMA_Mapping/Final/Curry_DMAs_2019-1",
-  "Douglas"="//deqhq1/TMDL/DMA_Mapping/Douglas/GIS/Douglas_DMAs_D4",
-  "Gilliam"="Gilliam",
-  "Grant"="Grant",
-  "Harney"="Harney",
-  "Hood River"="Hood River",
-  "Jackson"="Jackson",
-  "Jefferson"="Jefferson",
-  "Josephine"="Josephine",
-  "Lane"="Lane",
-  "Linn"="Linn",
-  "Malheur"="Malheur",
-  "Marion"="Marion",
-  "Morrow"="Morrow",
-  "Multnomah"="//deqhq1/TMDL/DMA_Mapping/Multnomah/GIS/Multnomah_DMAs_D5",
-  "Polk"="Polk",
-  "Sherman"="Sherman",
-  "Umatilla"="Umatilla",
-  "Union"="Union",
-  "Wallowa"="Wallowa",
-  "Wasco"="Wasco",
-  "Wheeler"="Wheeler",
-  "Yamhill"="Yamhill"
+  "Douglas"="//deqhq1/TMDL/DMA_Mapping/Final/Douglas_DMAs_2017-1",
+  "Gilliam"="//deqhq1/TMDL/DMA_Mapping/Final/Gilliam_DMAs_2020-1",
+  "Grant"="//deqhq1/TMDL/DMA_Mapping/Final/Grant_DMAs_2020-1",
+  "Harney"="//deqhq1/TMDL/DMA_Mapping/Final/Harney_DMAs_2019-1",
+  "Hood River"="//deqhq1/TMDL/DMA_Mapping/Final/HoodRiver_DMAs_2020-1",
+  "Jackson"="//deqhq1/TMDL/DMA_Mapping/Final/Jackson_DMAs_2019-1",
+  "Jefferson"="//deqhq1/TMDL/DMA_Mapping/Final/Jefferson_DMAs_2019-1",
+  "Josephine"="//deqhq1/TMDL/DMA_Mapping/Final/Josephine_DMAs_2019-1",
+  "Lane"="//deqhq1/TMDL/DMA_Mapping/Final/Lane_DMAs_2019-1",
+  "Linn"="//deqhq1/TMDL/DMA_Mapping/Final/Linn_DMAs_2019-1",
+  "Malheur"="//deqhq1/TMDL/DMA_Mapping/Final/Malheur_DMAs_2020-1",
+  "Marion"="//deqhq1/TMDL/DMA_Mapping/Final/Marion_DMAs_2019-1",
+  "Morrow"="//deqhq1/TMDL/DMA_Mapping/Final/Morrow_DMAs_2019-1",
+  "Multnomah"="//deqhq1/TMDL/DMA_Mapping/Final/Multnomah_DMAs_2019-1",
+  "Polk"="//deqhq1/TMDL/DMA_Mapping/Final/Polk_DMAs_2019-1",
+  "Sherman"="//deqhq1/TMDL/DMA_Mapping/Final/Sherman_DMAs_2020-1",
+  "Umatilla"="//deqhq1/TMDL/DMA_Mapping/Final/Umatilla_DMAs_2019-1",
+  "Union"="//deqhq1/TMDL/DMA_Mapping/Final/Union_DMAs_2019-1",
+  "Wallowa"="//deqhq1/TMDL/DMA_Mapping/Final/Wallowa_DMAs_2019-1",
+  "Wasco"="//deqhq1/TMDL/DMA_Mapping/Final/Wasco_DMAs_2019-1",
+  "Wheeler"="//deqhq1/TMDL/DMA_Mapping/Final/Wheeler_DMAs_2019-1",
+  "Yamhill"="//deqhq1/TMDL/DMA_Mapping/Final/Yamhill_DMAs_2019-1"
 )
 
 # Read in 2016 NLCD raster
@@ -101,7 +101,7 @@ model_extents <- rbind(map_hs_temp_model_extent, map_hs_solar_model_extent, map_
 # check
 sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE)
 
-rm(map_ce_model_extent, map_hs_temp_model_extent, map_hs_solar_model_extent)
+# rm(map_ce_model_extent, map_hs_temp_model_extent, map_hs_solar_model_extent)
 
 # Read in county outline feature
 county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
@@ -260,51 +260,71 @@ dma_summary <- function(stream_buffer, dmaLU=dmaLU) {
   
 }
 
-model_buff_dma <- model_buff_county %>% 
-  filter(Project_Na=="Sandy Subbasin") %>%
-  dplyr::group_by(County) %>%
-  dplyr::group_split(.keep = TRUE) %>%
-  lapply(FUN = dma_summary, dmaLU=dmaLU) %>%
-  dplyr::bind_rows()
 
 # This is a temporary fix to correct the names for some of 
 # the DMAs in the DMA_RP column.
 dmaLU <- read.csv("//deqhq1/TMDL/DMA_Mapping/Master/Lookups/DMAs.csv") %>%
   dplyr::select(DMA_RP=DMA_FullName, DMA_RP_Ab=DMA)
 
-#model_buff_dma_rp <- model_buff_dma %>%
-#  dplyr::select(-DMA_RP) %>%
-#  dplyr::left_join(dmaLU) %>% 
-#  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
-#                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
-#                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
-#                                        DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
-#                                        TRUE ~ DMA_RP))
+# basin <- "John Day River Basin" 
+# basin <- "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
+# basin <- "Lower Willamette and Clackamas Subbasins"
+# basin <- "Malheur River Subbasins"
+# basin <- "Mid Willamette Subbasins"
+# basin <- "Middle Columbia-Hood, Miles Creeks"
+# basin <- "North Umpqua Subbasin"
+# basin <- "Rogue River Basin"
+# basin <- "Sandy Subbasin"
+# basin <- "South Umpqua and Umpqua Subbasins"
+# basin <- "Southern Willamette Subbasins"
+# basin <- "Walla Walla Subbasin"
+# basin <- "Willow Creek Subbasin"
 
-model_buff_dma_rp <- model_buff_dma %>%
-  dplyr::left_join(dmaLU) %>% 
-  dplyr::mutate(DMA_RP2 = ifelse(is.na(DMA_RP2),DMA_RP,DMA_RP2)) %>% 
-  dplyr::select(-DMA_RP) %>%
-  dplyr::rename(DMA_RP = DMA_RP2) %>% 
-  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
-                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
-                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
-                                        DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
-                                        TRUE ~ DMA_RP))
-
-# Output to shapefile
-sf::st_write(model_buff_dma_rp, paste0(output_gis_dir,"model_buff_dma.shp"), delete_layer=TRUE)
-
-# Summarize by DMA/RP. Total Acres in buffer and percentage
-dma.tbl <- model_buff_dma_rp %>%
-  sf::st_drop_geometry() %>%
-  dplyr::group_by(Stream, Project_Na, DMA_RP) %>%
-  dplyr::summarise(Acres=sum(Acres)) %>%
-  dplyr::group_by(Stream, Project_Na) %>%
-  dplyr::mutate(Percentage=round(Acres/sum(Acres)*100, 1)) %>%
-  dplyr::arrange(Stream, Project_Na, dplyr::desc(Percentage))
-
-sum(dma.tbl$Percentage)
-
-save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
-
+for(basin in unique(sort(model_buff_county$Project_Na))){
+  
+  file.name
+  
+  model_buff_dma <- model_buff_county %>% 
+    filter(Project_Na == "Lower Willamette and Clackamas Subbasins") %>%
+    dplyr::group_by(County) %>%
+    dplyr::group_split(.keep = TRUE) %>%
+    lapply(FUN = dma_summary, dmaLU=dmaLU) %>%
+    dplyr::bind_rows()
+  
+  #model_buff_dma_rp <- model_buff_dma %>%
+  #  dplyr::select(-DMA_RP) %>%
+  #  dplyr::left_join(dmaLU) %>% 
+  #  dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
+  #                                        DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
+  #                                        DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
+  #                                        DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
+  #                                        TRUE ~ DMA_RP))
+  
+  model_buff_dma_rp <- model_buff_dma %>%
+    dplyr::left_join(dmaLU) %>% 
+    dplyr::mutate(DMA_RP2 = ifelse(is.na(DMA_RP2),DMA_RP,DMA_RP2)) %>% 
+    dplyr::select(-DMA_RP) %>%
+    dplyr::rename(DMA_RP = DMA_RP2) %>% 
+    dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
+                                          DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
+                                          DMA_RP=="Oregon Department of Forestry - Public" ~ "Oregon Department of Forestry - State Forestland",
+                                          DMA_RP=="Oregon Parks & Recreation Department" ~ "Oregon Parks and Recreation Department",
+                                          TRUE ~ DMA_RP))
+  
+  # Output to shapefile
+  sf::st_write(model_buff_dma_rp, paste0(output_gis_dir,paste0(basin,"_model_buff_dma.shp")), delete_layer=TRUE)
+  
+  # Summarize by DMA/RP. Total Acres in buffer and percentage
+  dma.tbl <- model_buff_dma_rp %>%
+    sf::st_drop_geometry() %>%
+    dplyr::group_by(Stream, Project_Na, DMA_RP) %>%
+    dplyr::summarise(Acres=sum(Acres)) %>%
+    dplyr::group_by(Stream, Project_Na) %>%
+    dplyr::mutate(Percentage=round(Acres/sum(Acres)*100, 1)) %>%
+    dplyr::arrange(Stream, Project_Na, dplyr::desc(Percentage))
+  
+  sum(dma.tbl$Percentage)
+  
+  save(dma.tbl, file = paste0(output_rdata_dir, paste0(basin,"_dmas.RData")))
+  
+}

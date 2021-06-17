@@ -59,7 +59,7 @@ numbers.to.words <- function(x) {
 # Update date: 2021-4-23
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
-#load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
+load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
 
 awqms.data.temp <- df.awqms.raw.state %>% 
   # AWQMS QA/QC check:
@@ -281,7 +281,7 @@ load(paste0(data.dir,"/RData/nlcd.tbl.RData")) # nlcd.tbl
 load(paste0(data.dir,"/RData/nlcd.text.RData")) # nlcd.text
 
 # _ DMAs ----
-load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
+#load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
 
 # _ Project areas and HUCs ----
 pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
@@ -667,6 +667,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::mutate(Stream = ifelse(Stream == "Salmon River", "Salmon River (2001)", Stream)) # source_char_data.R has been updated to include Salmon River 2001; delete this line after updated the data
   
   # _ DMA ----
+  load(paste0(data.dir,paste0("/RData/",file.name, "_dmas.RData")))
+       
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
