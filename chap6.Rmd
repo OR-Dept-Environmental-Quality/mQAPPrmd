@@ -317,16 +317,16 @@ if(!model.extent == TRUE){
   
   names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x7 <- t6x7[,c(1,2,5,4)]
-  
+  t6x7 <- t6x7[,c(1,2,5,4)]  
+
   if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){
     
     t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
     
   } else {
-    
+      
     t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
-    
+
   }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
@@ -334,6 +334,8 @@ if(!model.extent == TRUE){
                     ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs6"),
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
+  
+  t6x7_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
 
