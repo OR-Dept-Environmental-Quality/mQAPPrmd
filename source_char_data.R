@@ -293,5 +293,3 @@ dma.tbl <- model_buff_dma %>%
 sum(dma.tbl$Percentage)
 
 save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
-
-
