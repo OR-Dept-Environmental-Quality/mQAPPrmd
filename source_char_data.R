@@ -6,7 +6,6 @@
 # -Rdata file summarizing for each NLCD landcover class the total area (acres) and the percentage of area within 
 #  100 meters of the model extent stream centerline
 
-
 library(sf)
 library(rgdal)
 library(raster)
@@ -19,42 +18,42 @@ output_gis_dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/m
 output_rdata_dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/"
 
 # List of County DMA shapefiles
+dma_dir <- "//deqhq1/TMDL/DMA_Mapping/Final/"
 dmaGIS <- list(
-  "Baker"="//deqhq1/TMDL/DMA_Mapping/Final/Baker_DMAs_2019-1",
-  "Benton"="//deqhq1/TMDL/DMA_Mapping/Final/Benton_DMAs_2019-1",
-  "Clackamas"="//deqhq1/TMDL/DMA_Mapping/Final/Clackamas_DMAs_2019-1",
-  "Columbia"="//deqhq1/TMDL/DMA_Mapping/Final/Columbia_DMAs_2019-1",
-  "Curry"="//deqhq1/TMDL/DMA_Mapping/Final/Curry_DMAs_2019-1",
-  "Douglas"="//deqhq1/TMDL/DMA_Mapping/Final/Douglas_DMAs_2017-1",
-  "Gilliam"="//deqhq1/TMDL/DMA_Mapping/Final/Gilliam_DMAs_2020-1",
-  "Grant"="//deqhq1/TMDL/DMA_Mapping/Final/Grant_DMAs_2020-1",
-  "Harney"="//deqhq1/TMDL/DMA_Mapping/Final/Harney_DMAs_2019-1",
-  "Hood River"="//deqhq1/TMDL/DMA_Mapping/Final/HoodRiver_DMAs_2020-1",
-  "Jackson"="//deqhq1/TMDL/DMA_Mapping/Final/Jackson_DMAs_2019-1",
-  "Jefferson"="//deqhq1/TMDL/DMA_Mapping/Final/Jefferson_DMAs_2019-1",
-  "Josephine"="//deqhq1/TMDL/DMA_Mapping/Final/Josephine_DMAs_2019-1",
-  "Lane"="//deqhq1/TMDL/DMA_Mapping/Final/Lane_DMAs_2019-1",
-  "Linn"="//deqhq1/TMDL/DMA_Mapping/Final/Linn_DMAs_2019-1",
-  "Malheur"="//deqhq1/TMDL/DMA_Mapping/Final/Malheur_DMAs_2020-1",
-  "Marion"="//deqhq1/TMDL/DMA_Mapping/Final/Marion_DMAs_2019-1",
-  "Morrow"="//deqhq1/TMDL/DMA_Mapping/Final/Morrow_DMAs_2019-1",
-  "Multnomah"="//deqhq1/TMDL/DMA_Mapping/Final/Multnomah_DMAs_2019-1",
-  "Polk"="//deqhq1/TMDL/DMA_Mapping/Final/Polk_DMAs_2019-1",
-  "Sherman"="//deqhq1/TMDL/DMA_Mapping/Final/Sherman_DMAs_2020-1",
-  "Umatilla"="//deqhq1/TMDL/DMA_Mapping/Final/Umatilla_DMAs_2019-1",
-  "Union"="//deqhq1/TMDL/DMA_Mapping/Final/Union_DMAs_2019-1",
-  "Wallowa"="//deqhq1/TMDL/DMA_Mapping/Final/Wallowa_DMAs_2019-1",
-  "Wasco"="//deqhq1/TMDL/DMA_Mapping/Final/Wasco_DMAs_2019-1",
-  "Wheeler"="//deqhq1/TMDL/DMA_Mapping/Final/Wheeler_DMAs_2019-1",
-  "Yamhill"="//deqhq1/TMDL/DMA_Mapping/Final/Yamhill_DMAs_2019-1"
-)
+  "Baker"=paste0(dma_dir, "Baker_DMAs_2019-1"),
+  "Benton"=paste0(dma_dir, "Benton_DMAs_2019-1"),
+  "Clackamas"=paste0(dma_dir, "Clackamas_DMAs_2019-1"),
+  "Columbia"=paste0(dma_dir, "Columbia_DMAs_2019-1"),
+  "Curry"=paste0(dma_dir, "Curry_DMAs_2019-1"),
+  "Douglas"=paste0(dma_dir, "Douglas_DMAs_2017-1"),
+  "Gilliam"=paste0(dma_dir, "Gilliam_DMAs_2020-1"),
+  "Grant"=paste0(dma_dir, "Grant_DMAs_2020-1"),
+  "Harney"=paste0(dma_dir, "Harney_DMAs_2019-1"),
+  "Hood River"=paste0(dma_dir, "HoodRiver_DMAs_2020-1"),
+  "Jackson"=paste0(dma_dir, "Jackson_DMAs_2019-1"),
+  "Jefferson"=paste0(dma_dir, "Jefferson_DMAs_2019-1"),
+  "Josephine"=paste0(dma_dir, "Josephine_DMAs_2019-1"),
+  "Lane"=paste0(dma_dir, "Lane_DMAs_2019-1"),
+  "Linn"=paste0(dma_dir, "Linn_DMAs_2019-1"),
+  "Malheur"=paste0(dma_dir, "Malheur_DMAs_2020-1"),
+  "Marion"=paste0(dma_dir, "Marion_DMAs_2019-1"),
+  "Morrow"=paste0(dma_dir, "Morrow_DMAs_2019-1"),
+  "Multnomah"=paste0(dma_dir, "Multnomah_DMAs_2019-1"),
+  "Polk"=paste0(dma_dir, "Polk_DMAs_2019-1"),
+  "Sherman"=paste0(dma_dir, "Sherman_DMAs_2020-1"),
+  "Umatilla"=paste0(dma_dir, "Umatilla_DMAs_2019-1"),
+  "Union"=paste0(dma_dir, "Union_DMAs_2019-1"),
+  "Wallowa"=paste0(dma_dir, "Wallowa_DMAs_2019-1"),
+  "Wasco"=paste0(dma_dir, "Wasco_DMAs_2019-1"),
+  "Wheeler"=paste0(dma_dir, "Wheeler_DMAs_2019-1"),
+  "Yamhill"=paste0(dma_dir, "Yamhill_DMAs_2019-1"))
 
 # Read in 2016 NLCD raster
-nlcd_lay <- "C:/workspace/GIS_Features/NLCD/2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif"
+nlcd_lay <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/NLCD_2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif"
 nlcd <- raster::raster(nlcd_lay)
 
 # Read attribute table with values and landcover types
-nlcd_df <- "C:/workspace/GIS_Features/NLCD/2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif.vat.dbf"
+nlcd_df <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/NLCD_2016/NLCD_2016_Land_Cover_L48_20190424_Oregon.tif.vat.dbf"
 nlcd_df <- foreign::read.dbf(nlcd_df, as.is = TRUE)
 
 # Read in Model polyline extents
@@ -100,7 +99,7 @@ model_extents <- rbind(map_hs_temp_model_extent, map_hs_solar_model_extent, map_
 # check
 sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE)
 
-rm(map_ce_model_extent, map_hs_temp_model_extent, map_hs_solar_model_extent)
+# rm(map_ce_model_extent, map_hs_temp_model_extent, map_hs_solar_model_extent)
 
 # Read in county outline feature
 county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
@@ -230,7 +229,10 @@ dma_summary <- function(stream_buffer, dmaGIS=dmaGIS) {
   start_time <- Sys.time()
   
   # Read in DMA features
-  dma.shp <- sf::read_sf(dsn = dirname(dmapath), layer = basename(dmapath))
+  dma.shp <- sf::read_sf(dsn = dirname(dmapath), layer = basename(dmapath)) %>% 
+    dplyr::mutate(Taxlot = as.character(Taxlot),
+                  RailOwner = as.character(RailOwner),
+                  Tribe = as.character(Tribe))
   
   end_time <- Sys.time()
   print(paste0("Done loading ",county_name, " ", round(as.numeric(end_time - start_time, units = "mins"), 1)," minutes"))
@@ -259,7 +261,7 @@ dma_summary <- function(stream_buffer, dmaGIS=dmaGIS) {
   
 }
 
-model_buff_dma <- model_buff_county %>% 
+model_buff_dma_rp <- model_buff_county %>% 
   dplyr::group_by(County) %>%
   dplyr::group_split(.keep = TRUE) %>%
   lapply(FUN = dma_summary, dmaGIS=dmaGIS) %>%
@@ -270,7 +272,7 @@ model_buff_dma <- model_buff_county %>%
 dmaLU <- read.csv("//deqhq1/TMDL/DMA_Mapping/Master/Lookups/DMAs.csv") %>%
   dplyr::select(DMA_RP=DMA_FullName, DMA_RP_Ab=DMA)
 
-model_buff_dma <- model_buff_dma %>%
+model_buff_dma <- model_buff_dma_rp %>%
   dplyr::select(-DMA_RP) %>%
   dplyr::left_join(dmaLU)
 

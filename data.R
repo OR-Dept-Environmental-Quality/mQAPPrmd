@@ -281,7 +281,7 @@ load(paste0(data.dir,"/RData/nlcd.tbl.RData")) # nlcd.tbl
 load(paste0(data.dir,"/RData/nlcd.text.RData")) # nlcd.text
 
 # _ DMAs ----
-#load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
+load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
 
 # _ Project areas and HUCs ----
 pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
@@ -667,8 +667,6 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::mutate(Stream = ifelse(Stream == "Salmon River", "Salmon River (2001)", Stream)) # source_char_data.R has been updated to include Salmon River 2001; delete this line after updated the data
   
   # _ DMA ----
-  load(paste0(data.dir,paste0("/RData/",file.name, "_dmas.RData")))
-       
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
