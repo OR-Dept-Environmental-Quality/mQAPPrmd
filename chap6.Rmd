@@ -273,10 +273,6 @@ t6x6_2 <- section.model.input %>%
 
 `r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
 
-`r if(waterbody_name == "Johnson Creek"){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. These inputs were derived by digitizing and classifying riparian vegetation type polygons based on aerial photos.")}`
-
-`r if(waterbody_name == "Johnson Creek"){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. These inputs were derived from Lidar data.")}`
-
 ### Model calibration
 
 ```{r, label=`t6x7`, include=FALSE}
