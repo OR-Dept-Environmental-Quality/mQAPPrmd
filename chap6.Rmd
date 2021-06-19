@@ -58,13 +58,13 @@ if(length(section.model.info$`Model Extent Text`)>1){
 
 The extent of the model domain is the `r model.domain`
 
-`r if(waterbody_name == "Columbia Slough"){paste0("The domain for the Columbia Slough model is shown in Figure 3 (Berger 2003).")}`
+`r if(waterbody_name == "Columbia Slough"){paste0("The domain for the Columbia Slough model is shown in Figure 3 (Berger, 2003).")}`
 
 ```{r c_s, eval.after="fig.cap", fig.cap=columbia.slough, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
 
 if(waterbody_name == "Columbia Slough"){
   
-  columbia.slough <- figs(name="cs", caption = paste0("Columbia Slough system model domain (Berger 2003)."))
+  columbia.slough <- figs(name="cs", caption = paste0("Columbia Slough system model domain (Berger, 2003)."))
   knitr::include_graphics(path = "./fig/Columbia_Slough.png")
   
 }
@@ -136,7 +136,7 @@ if(npdes.ind.n > 1) {
 nlcd.waterbody <- nlcd.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Percentage)) %>% 
+  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
                 "Percent of Total Acres" = Percentage)
 
@@ -155,7 +155,7 @@ nlcd.text.waterbody <- nlcd.text.pro.area %>%
 dma.waterbody <- dma.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Percentage)) %>% 
+  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("DMA or Responsible Person" = DMA_RP,
                 "Percent of Total Acres" = Percentage) 
 
@@ -273,7 +273,7 @@ t6x6_2 <- section.model.input %>%
 
 `r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
 
-`r if(!is.na(unique(section.model.input$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.input$"Veg Notes"))}`
+`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
 
 ### Model calibration
 
@@ -302,7 +302,7 @@ if(!model.extent == TRUE){
                   `Model Location` = round(`Model Location`,2),
                   `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
                   `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                  `Model Location Name (Station ID)` = ifelse(`Model Location Name (Station ID)` == c("Mouth to Headwaters","Headwaters to mouth"),"Model extent",`Model Location Name (Station ID)`) %>% 
+                  `Model Location Name` = ifelse(`Model Location Name` %in% c("Mouth to Headwaters","Headwaters to mouth"),"Model extent",`Model Location Name`),
                   `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
@@ -339,7 +339,8 @@ if(!model.extent == TRUE){
 
 ```
 
+`r if(waterbody_name == "Columbia Slough"){paste0("Model calibration was completed by PSU (Berger, 2003). Please refer to this report and Berger and Wells 2005 for more information.")}`
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}else{t6x7_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
