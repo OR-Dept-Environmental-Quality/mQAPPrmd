@@ -108,7 +108,8 @@ tcat5 <- pro.cat.45.tbl %>%
                 `Year Listed` = Year_liste,
                 `Use Period` = Period) %>% 
   dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
-  dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
+  dplyr::arrange(`Assessment Unit Name`,`Year Listed`) %>% 
+  dplyr::filter(!`Assessment Unit Name` %in% c("Clackamas River", "Multnomah Channel", "Willamette River")) # removed because they are covered under the Willamette mainstem and major tributaries TMDL
 
 if(NROW(tcat5)>0){
   
@@ -129,7 +130,7 @@ huc8.txt <- lookup.huc %>%
 
 ```
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project. This QAPP project area includes all tributaries in `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))` **[Update: and excludes the (list rivers if applicable).]**
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project. This QAPP project area includes all tributaries in `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`, and excludes the mainstem Lower Willamette and Clackamas Rivers, which are included in the in the Willamette River and Major Tributaries QAPP. 
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -165,15 +166,11 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.        
 
-*   Bull Trout spawning and juvenile rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
-
 *   Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
 
 *   Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
 
 *   Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
-
-*   Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
 
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`.
 
@@ -328,11 +325,13 @@ The modeling framework needs for this project include:
 
 8)  Ability to evaluate thermally stratified lakes along the Columbia Slough, including Fairview Lake, and Smith and Bybee Lakes.       
 
-The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets the model framework needs for non-stratified waterbodies without water level control structures and was selected for stream temperature simulation in the project area except for in the Columbia Slough. Due to model framework needs 7 and 8, a CE-QUAL-W2 model was used to evaluate temperature in the Columbia Slough and is described below. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets the model framework needs for non-stratified waterbodies without flow control structures, and was used to model Johnson Creek for the development of the 2006 Willamette Basin TMDL. Because this model already exists, Heat Source was selected for stream temperature simulation in the project area, except for in the Columbia Slough. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
-The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
+The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
-CE-QUAL-W2 is a laterally averaged U.S. Army Corps of Engineers model that consists of directly coupled hydrodynamic and water quality transport algorithms. Developed for reservoirs and narrow, stratified estuaries, CE-QUAL-W2 can handle a branched and/or looped system with flow and/or head boundary conditions. CE-QUAL-W2 simulates temperature, phytoplankton, dissolved oxygen, pH, organic matter, nutrients and residence time.  
+The CE-QUAL-W2 model (Cole and Wells, 2000) meets the model framework needs for stratified waterbodies with flow control structures, and was used to model the Columbia Slough for the development of the 2006 Willamette Basin TMDL. Although this model exists and meets model framework needs, significant changes to flow and channel morphology have occurred in the Columbia Slough since the model was calibrated. The model needs to be recalibrated with updates to bathymetry and flow control structure inputs in order to simulate current water temperature conditions in the system. A summary of the recommended model updates is included in Appendix C. Due to resource constraints and the rigorous project schedule, the existing Columbia Slough CE-QUAL-W2 model will not be used for TMDL development at this time.
+
+CE-QUAL-W2 is a laterally averaged U.S. Army Corps of Engineers model that consists of directly coupled hydrodynamic and water quality transport algorithms. Developed for reservoirs and narrow, stratified estuaries, CE-QUAL-W2 can handle a branched and/or looped system with flow and/or head boundary conditions. CE-QUAL-W2 simulates temperature, phytoplankton, dissolved oxygen, pH, organic matter, nutrients and residence time.
 
 ## Software Development Quality Assessment
 We do not anticipate any new software development or model code changes as part of this project.
@@ -946,7 +945,7 @@ Waterbodies where model development was initiated for the `r paste0(pro.area.tmd
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and Portland State University and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
@@ -1111,12 +1110,6 @@ DEQ will review and respond to any public comments received on the model and mod
 # Management scenarios
 
 Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information or because the management scenario is not applicable to the specific waterbody. DEQ will review all available data and information during model development and revise this QAPP if it is determined a model scenario is not feasible.
-
-## Current conditions
-
-This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
-
-**[List specific changes that will be made]**
 
 ## Background
 
