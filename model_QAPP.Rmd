@@ -121,7 +121,15 @@ if(NROW(tcat5)>0){
 
 ```
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project.
+```{r, label=`huc-intro`, echo=FALSE}
+
+huc8.txt <- lookup.huc %>% 
+  dplyr::filter(QAPP_Project_Area == qapp_project_area) %>% 
+  dplyr::mutate(huc8txt = paste0("the ", HUC8_NAME," Subbasin (", HUC_8, ")"))
+
+```
+
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project. This QAPP project area includes all tributaries in `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))` **[Update: and excludes the (list rivers if applicable).]**
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 

@@ -35,7 +35,7 @@ tag.map.title <- tags$style(HTML("
 
 popupTable.temp <- function(station_name = NULL){
   
-  # test: station_name <- "Bull Run River Near Bull Run (River Only), OR"
+  # test: station_name <- "Little Sandy River Near Bull Run, OR"
   if(station_name %in% unique(sort(temp_stations$Station))){
     
     #station_name <- gsub(pattern=",[[:space:]]*OR$", replacement="", x=station_name, ignore.case = TRUE)
@@ -290,7 +290,7 @@ for (qapp_project_area in project.areas$areas) {
                                       "Station ID: ", temp_stations$`Station ID`,
                                       #"<br>",
                                       #"<br>",
-                                      sapply(unique(temp_stations$Station), 
+                                      sapply(temp_stations$Station, 
                                              popupTable.temp, USE.NAMES = FALSE)),
                       popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
     leaflet::addMarkers(data = temp_cal_sites,
@@ -323,7 +323,7 @@ for (qapp_project_area in project.areas$areas) {
                                         "Station ID: ", flow_stations$`Station ID`,
                                         #"<br>",
                                         #"<br>",
-                                        sapply(unique(flow_stations$Station), 
+                                        sapply(flow_stations$Station, 
                                                popupTable.flow, USE.NAMES = FALSE)),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
     leaflet::addMarkers(data = met_stations,
@@ -789,7 +789,7 @@ for (qapp_project_area in project.areas$areas) {
                                           "Station ID: ", gage_height_stations_map$`Station ID`,
                                           #"<br>",
                                           #"<br>",
-                                          sapply(unique(gage_height_stations_map$Station), 
+                                          sapply(gage_height_stations_map$Station, 
                                                  popupTable.gageHeight, USE.NAMES = FALSE)),
                           popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       leaflet::addLayersControl(overlayGroups = c("CE-QUAL-W2 Temperature Model Extent",
