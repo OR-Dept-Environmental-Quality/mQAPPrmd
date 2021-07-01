@@ -51,11 +51,11 @@ if(length(section.model.info$`Model Extent Text`)>1){
 } 
 ```
 
-The extent of the model domain is the `r model.domain`
+The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 ### Spatial and temporal resolution
 
-The model input sampling rate (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
+The model input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
 
 A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.
 
@@ -162,7 +162,9 @@ if(NROW(dma.waterbody)>0){
 
 `r if(waterbody_name == "Bull Run River (2016)"){paste0("Based on modeling completed for the 2005 TMDL (DEQ, 2005), the drinking water supply project results in cooler temperatures downstream of Dam 2 in August compared to temperatures under natural flows. The TMDL model focused on a single day, August 8, 2001, and did not evaluate temperature impacts during other periods. The 2005 TMDL established a surrogate measure temperature target at Larson’s Bridge. This location corresponds to where the model predicted the maximum stream temperatures occur. Based on monitoring information provided by the City of Portland to DEQ, the project typically attains the surrogate measure during the summer period and has more difficulty attaining the target in autumn when the supply of cooler water is diminished and the reservoirs become less thermally stratified.")}`
 
-`r if(!waterbody_name == "Bull Run River (2001)"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ", tbls(name = paste0("dma.waterbody",waterbody_name),display="cite"), " summarizes the potential designated management agencies and responsible persons along the ", waterbody_name, " model extent.")}`
+`r if(!waterbody_name == "Bull Run River (2001)"){paste0("Anthropogenic warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}
+
+`r if(!waterbody_name == "Bull Run River (2001)"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ", tbls(name = paste0("dma.waterbody",waterbody_name),display="cite"), " summarizes the potential designated management agencies and responsible persons along the ", waterbody_name, " model extent.")}`
 
 `r if(!waterbody_name == "Bull Run River (2001)" & NROW(dma.waterbody)>0){dma.wb.tbl}`
 
@@ -170,7 +172,15 @@ if(NROW(dma.waterbody)>0){
 
 ### Time frame of simulation
 
-The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
+```{r, label=`tf`, include=FALSE}
+
+tf <- tmdl.mod.2 %>% 
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  pull(Model_version)
+
+```
+
+`r if(tf == "Heat Source Version 6"){paste0("The model period is for a single day: ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"),".")}else{paste0("The model period is ", format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), ".")}`
 
 ### Important assumptions
 
