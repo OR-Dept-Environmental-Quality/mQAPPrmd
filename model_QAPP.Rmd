@@ -64,9 +64,9 @@ Oregon Department of Environmental Quality
 700 NE Multnomah Street, Suite 600  
 Portland, OR 97232  
 1-800-452-4011  
-www.oregon.gov/deq
+www.oregon.gov/deq  
 
-In cooperation with:
+In cooperation with:  
 USEPA Region 10
 
 and
@@ -133,7 +133,7 @@ huc8.txt <- lookup.huc %>%
 
 ```
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. **[Update: This QAPP project area excludes the (list rivers if applicable).]**
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`.
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -145,7 +145,7 @@ Where $\sum {WLA}$ is the sum of wasteload allocations (point sources), $\sum {L
 
 The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list. The `r paste0(qapp_project_area, if(str_sub(qapp_project_area,-1,-1) == "s"){paste0(" include")}else{paste0(" includes")})` several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature (`r tbls(name = "tcat5", display="cite")`). `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL was previously developed for the ", qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ") but it must be replaced due to recent litigation.")}else{paste0("TMDLs were previously developed for the ",qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ") but they must be replaced due to recent litigation.")}`
 
-In 2012, The U.S. District Court found that the United States Environmental Protection Agency’s (USEPA) approval of an element of Oregon’s water quality standard for temperature, the Natural Conditions Criteria, was unlawful (NWEA v. EPA, 855 F. Supp. 2d 1199 (D. Or., 2012)). The Natural Conditions Criterion stated where the natural thermal potential of all or a portion of a waterbody exceeds the biologically-based numeric temperature criteria in OAR 340-041-0028(4), the natural thermal potential temperatures supersede the biologically-based criteria, and are deemed to be the applicable temperature criteria for that waterbody. This portion of the temperature water quality standard was effective from 2003 until USEPA disapproved it in response to the court decision in 2013. Many temperature TMDLs were based on this criteria, and this became the subject of a second lawsuit brought by the Northwest Environmental Advocates against USEPA asserting the USEPA unlawfully approved TMDLs that were based on the now disapproved Natural Conditions Criterion. The court issued a judgment on October 4, 2019, requiring DEQ and USEPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard (NWEA v. EPA, No. 3:12-cv-01751-HZ (D. Or., Oct. 4, 2019)).
+In 2012, the U.S. District Court found that the U.S. Environmental Protection Agency’s (USEPA) approval of an element of Oregon’s water quality standard for temperature, the Natural Conditions Criteria, was unlawful (NWEA v. EPA, 855 F. Supp. 2d 1199 (D. Or., 2012)). The Natural Conditions Criterion stated where the natural thermal potential of all or a portion of a waterbody exceeds the biologically-based numeric temperature criteria in OAR 340-041-0028(4), the natural thermal potential temperatures supersede the biologically-based criteria, and are deemed to be the applicable temperature criteria for that waterbody. This portion of the temperature water quality standard was effective from 2003 until USEPA disapproved it in response to the court decision in 2013. Many temperature TMDLs were based on this criteria, and this became the subject of a second lawsuit brought by the Northwest Environmental Advocates against USEPA asserting the USEPA unlawfully approved TMDLs that were based on the now disapproved Natural Conditions Criterion. The court issued a judgment on October 4, 2019, requiring DEQ and USEPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard (NWEA v. EPA, No. 3:12-cv-01751-HZ (D. Or., Oct. 4, 2019)).
 
 This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 2017; EPA, 2016) and documents the analysis and numerical modeling approach that will support the updated `r qapp_project_area` TMDL as well as other project details. In particular, this QAPP details the following:
 
@@ -844,7 +844,7 @@ t56_sandy_tbl <- knitr::kable(t56_sandy, format = "pandoc", padding = 2,
 
 ```
 
-Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r tbls(name = "t56_sandy", display="cite")` lists the stations for effective shade measurements that were available in public and DEQ databases.
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r tbls(name = "t56_sandy", display="cite")` lists the locations where effective shade measurements were collected and the effective shade value for August 2001.
 
 `r t56_sandy_tbl`
 
@@ -1010,7 +1010,7 @@ The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", 
 
 The models for the Little Sandy River and Zigzag River were originally developed for the Sandy River Basin TMDL (DEQ, 2005) will also be used to support the updated TMDL. The models for the Sandy River, Bull Run River, and Salmon River (`r tbls(name = "tmdl.mod.b", display="cite")`) are new and will supplement the models that were developed for the 2005 TMDL.
 
-A new calibrated model is being developed on the Sandy River in order to characterize the current hydrology and channel morphology conditions post Marmot Dam removal. The existing (2001) calibrated model was developed before the removal of the Marmot Dam. The Bull Run River and Salmon River are major tributaries to the Sandy River. New calibrated models are being setup on these rivers for the same year as the Sandy River (2016) to support development of boundary conditions and model linkage under various management scenarios. The Bull River model will also support estimating background conditions for a longer period of time compared to the 2001 model. The 2001 model only simulated a single day. Separating the background loading from anthropogenic loading over the entire season when the applicable criteria are exceeded will support development of appropriate load allocations and potentially surrogate measures for the City of Portland Bull Run Dams and Reservoirs. DEQ considered developing an updated model for the Zigzag River but there are insufficient data to support a new model in 2016.
+A new calibrated model is being developed on the Sandy River to characterize the current hydrology and channel morphology conditions post Marmot Dam removal. The existing (2001) calibrated model was developed before the removal of the Marmot Dam. The Bull Run River and Salmon River are major tributaries to the Sandy River. New calibrated models are being setup on these rivers for the same year as the Sandy River (2016) to support development of boundary conditions and model linkage under various management scenarios. The Bull River model will also support estimating background conditions for a longer period of time compared to the 2001 model. The 2001 model only simulated a single day. Separating the background loading from anthropogenic loading over the entire season when the applicable criteria are exceeded will support development of appropriate load allocations and potentially surrogate measures for the City of Portland Bull Run Dams and Reservoirs. DEQ considered developing an updated model for the Zigzag River but there are insufficient temperature data to support a new model in 2016.
 
 ## General model inputs and parameters
 
@@ -1169,7 +1169,7 @@ When no changes or minor changes are made to the existing TMDL models, the exist
 
 Peer review of the models and model results will be conducted in the following ways:
 
-DEQ will conduct internal peer review during the modeling process with input from USEPA Region 10 as needed. For models being developed by EPA’s contractor, TetraTech, EPA and DEQ will peer review all contractor developed models and model documentation.
+DEQ will conduct internal peer review during the modeling process with input from USEPA Region 10 as needed. For models being developed by USEPA’s contractor, Tetra Tech, USEPA and DEQ will peer review all contractor developed models and model documentation.
 
 DEQ will consider feedback on model scenarios and results from the TMDL advisory group and make changes as appropriate.
 
@@ -1263,7 +1263,9 @@ This scenario evaluates stream temperature warming or cooling from the TMDL Wast
 
 This set of scenarios evaluate the stream temperature response from proposed or existing DMA and responsible person management plans, TMDL implementation plans, or rules. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations or surrogate measures. It is likely that multiple model scenarios will be developed evaluating a single implementation plan or multiple implementation plans together. Assumptions and methods used to develop this scenario will be documented in the TMDL. Elements of this scenario or scenarios may include:        
 
-* Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.       
+* Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.      
+
+* Modifying the temperature and outflow from Bull Run Dam One to evaluate different management options and the temperature response in the Bull Run River.        
 
 * Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.        
 
@@ -1283,18 +1285,18 @@ t1011_sandy_tbl <- knitr::kable(t1011_sandy, format = "pandoc", padding = 2,
 
 ```
 
-This scenario is specific to the Bull Run River and Sandy River. This scenario estimates the stream temperatures on the Bull Run River without Bull Run Dam and Reservoir Number One and Bull Run Dam and Reservoir Number Two. The model extent will be from the Bull Run River mouth to just upstream of Bull Run Reservoir Number Two at USGS Gage 14138850. No changes are proposed on the Sandy River model except for setting the Bull Run River input to the no dam temperature outputs. The stream temperature warming or cooling caused by the dams is evaluated by comparing the results of this scenario to the current condition model run and data collected at the various temperature monitoring locations downstream of Bull Run Reservoir Number Two including the following:        
+This scenario is specific to the Bull Run River and Sandy River. This scenario estimates the stream temperatures on the Bull Run River without Bull Run Dam and Reservoir Number One and Bull Run Dam and Reservoir Number Two. The model extent will be from the Bull Run River mouth to just upstream of Bull Run Reservoir Number One at USGS Gage 14138850. No changes are proposed on the Sandy River model except for setting the Bull Run River input to the no dam temperature outputs. The stream temperature warming or cooling caused by the dams is evaluated by comparing the results of this scenario to the current condition model run and data collected at the various temperature monitoring locations downstream of Bull Run Reservoir Number Two including the following:        
 
 * PWB_BR_DNSTM_PP: Bull Run River approximately 600 feet downstream of Bull Run Dam 2 spillway plunge pool        
 * USGS Gage 14140000: Bull Run River Near Bull Run (River Only), OR       
-* USGS Gage 14140020: Bull Run R at Larson's Bridge, Near Bull Run, OR        
+* USGS Gage 14140020: Bull Run River at Larson's Bridge, Near Bull Run, OR        
 * PWB_BR_DODGE: Bull Run River approximately 500 feet upstream of Sandy River confluence        
 
 This scenario will also be used to estimate the background rate of warming that occurs within the reaches where the reservoirs and dams are currently located. This warming rate may be used, in conjunction with data collected at the various gages in the Bull Run and Little Sandy Rivers to develop management targets for the Bull Run Reservoirs similar to the current temperature target surrogate measures in the 2006 Sandy TMDL (DEQ, 2005).
 
 To complete this scenario, DEQ anticipates extending the 2016 current condition Heat Source model upstream through the reservoir reaches but may also consider using a CE-QUAL-W2 model developed by Portland State University for The City of Portland (Annear, et al., 1999, City of Portland, 2004). The CE-QUAL-W2 model was developed as a no dam scenario for the 2001 model year. The City of Portland has updated this model over time and currently uses it for management objectives. Use of this model at minimum would require updates to the boundary conditions and meteorological inputs. At the current time the CE-QUAL-W2 model is not available to DEQ. Should this model become available DEQ will review the model to make a determination on its use considering the current model setup, data availability, and the amount of time and work required to update the model.
 
-Development of a riverine model in place of the Bull Run Reservoirs will require information about channel position, width, slope, substrate, and manning’s roughness coefficients. Existing bathymetry and any pre-dam channel measurements, if available, will be used to develop the model setup. `r tbls(name = "t1011_sandy", display="cite")` summarizes the various data sources to be used for the boundary conditions, tributary, and meteorological inputs for the no dam scenario. All other inputs downstream of Bull Run Dam Number One will be the same as the current condition model.    
+Development of a riverine model in place of the Bull Run Reservoirs will require information about channel position, width, slope, substrate, and manning’s roughness coefficients. Existing bathymetry and any pre-dam channel measurements, if available, will be used to develop the model setup. `r tbls(name = "t1011_sandy", display="cite")` summarizes the various data sources to be used for the boundary conditions, tributary, and meteorological inputs for the no dam scenario. All other inputs downstream of Bull Run Dam Number Two will be the same as the current condition model.    
 
 `r t1011_sandy_tbl`
 
