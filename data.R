@@ -634,18 +634,7 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
   #dplyr::mutate_at("Station", str_replace_all, "No", "N") %>% 
   #dplyr::mutate_at("Station", str_replace_all, "Nrth", "North") %>% 
   #dplyr::mutate_at("Station", str_replace_all, "Suth", "South")
-  
-  ## __ LW&C QAPP: __
-  #### Remove Multnomah Channel, Clackamas and Willamette river stations from LW&C QAPP
-  #### since they are covered under the Willamette mainstem and major tributaries TMDL
-  if(qapp_project_area == "Lower Willamette and Clackamas Subbasins") {
-    
-    lwc <- readxl::read_xlsx(paste0(data.dir, "appendix_data/stations.xlsx"), sheet = "LWC")
-    flow.stations <- flow.stations %>% 
-      dplyr::filter(!`Station ID` %in% lwc$`Station ID`)
-    
-  }
-  
+
   flow.data <- rbind(usgs.data.flow,owrd.data.flow,hydromet.data.flow)
   
   # Flow data.sample.count will be used in the Appendix B
