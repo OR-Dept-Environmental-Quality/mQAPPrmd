@@ -290,6 +290,35 @@ pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMD
 pro_areas_huc8 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
                               layer = "Study_Areas_v5_HUC8_scope")
 
+## In the 3 Willamette subbasin QAPPs, filter out the temp and flow stations and the AUs covered in the Willamette mainstem QAPP
+pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
+                           layer = "TempTMDL_QAPP_Reaches",
+                           stringsAsFactors=FALSE) %>% 
+  sf::st_zm() %>% 
+  sf::st_drop_geometry()
+
+## Get Willamette Mainstem AU IDs and reachcodes
+will_auid <- pro.reaches %>%
+  filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
+  distinct(AU_ID) %>%
+  pull(AU_ID)
+
+will_reachcodes <- pro.reaches %>%
+  filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
+  distinct(ReachCode) %>%
+  pull(ReachCode)
+
+## Get Snake River AU IDs to remove from Malheur and Grande Ronde project areas
+snake_auid <- pro.reaches %>%
+  dplyr::filter(Project_Na=="Snake River – Hells Canyon") %>%
+  dplyr::distinct(AU_ID) %>%
+  dplyr::pull(AU_ID)
+
+snake_reachcodes <- pro.reaches %>%
+  filter(Project_Na=="Snake River – Hells Canyon") %>%
+  distinct(ReachCode) %>%
+  pull(ReachCode)
+
 # QAPP Project Area Data ----
 
 ## for test:
@@ -336,6 +365,25 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
   pro.cat.45.tbl <- cat.45.tbl %>% 
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
   
+  ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
+                              "Mid Willamette Subbasins",
+                              "Southern Willamette Subbasins")) {
+    
+    pro.cat.45.tbl <- pro.cat.45.tbl %>% 
+      dplyr::filter(!AU_ID %in% will_auid)
+    
+  }
+  
+  ## In the Malheur and Grande Ronde QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
+                              "Malheur River Subbasins")) {
+    
+    pro.cat.45.tbl <- pro.cat.45.tbl %>% 
+      dplyr::filter(!AU_ID %in% snake_auid)
+    
+  }
+  
   # _ Temp data ----
   # AWQMS and OWRD Temp Data
   ## _ (1) AWQMS ----
@@ -367,6 +415,25 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
   station.awqms.temp <- station.awqms %>% 
     dplyr::filter(!Organization == "USGS") %>% 
     rbind(station.awqms.usgs.or)
+  
+  ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
+                              "Mid Willamette Subbasins",
+                              "Southern Willamette Subbasins")) {
+    
+    station.awqms.temp <- station.awqms.temp %>% 
+      dplyr::filter(!Reachcode %in% will_reachcodes)
+    
+  }
+  
+  ## In the Malheur and Grande Ronde QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
+                              "Malheur River Subbasins")) {
+    
+    station.awqms.temp <- station.awqms.temp %>% 
+      dplyr::filter(!Reachcode %in% snake_reachcodes)
+    
+  }
   
   ## _ (2) Worksheet ----
   station.model <- cal.input %>% 
@@ -413,19 +480,8 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization)) %>%
     dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS-OR", Organization)) 
   
-  ## __ LW&C QAPP: __
-  #### Remove Multnomah Channel, Clackamas and Willamette river stations from LW&C QAPP
-  #### since they are covered under the Willamette mainstem and major tributaries TMDL
-  if(qapp_project_area == "Lower Willamette and Clackamas Subbasins") {
-    
-    lwc <- readxl::read_xlsx(paste0(data.dir, "appendix_data/stations.xlsx"), sheet = "LWC")
-    temp.stations <- temp.stations %>% 
-      dplyr::filter(!`Station ID` %in% lwc$`Station ID`)
-    
-  }
-  
   temp.data <- awqms.data.temp %>% 
-    dplyr::filter(MLocID %in% station.awqms$`Station ID`) %>%
+    dplyr::filter(MLocID %in% station.awqms.temp$`Station ID`) %>%
     dplyr::left_join(station.awqms.temp[,c("Station ID","Station")], by=c("MLocID"="Station ID")) %>% 
     dplyr::select(-StationDes) %>%
     dplyr::rename(StationDes = Station) %>% 
@@ -433,17 +489,6 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
   #dplyr::left_join(df.stations, by="MLocID") %>% 
   #dplyr::mutate(HUC12.x = ifelse(is.na(HUC12.x),HUC12.y,HUC12.x)) %>% # add HUC12 to owrd data
   #dplyr::filter(HUC12.x %in% subbasin_num)
-  
-  ## __ LW&C QAPP: __
-  #### Remove Multnomah Channel, Clackamas and Willamette river stations from LW&C QAPP
-  #### since they are covered under the Willamette mainstem and major tributaries TMDL
-  if(qapp_project_area == "Lower Willamette and Clackamas Subbasins") {
-    
-    lwc <- readxl::read_xlsx(paste0(data.dir, "appendix_data/stations.xlsx"), sheet = "LWC")
-    temp.data <- temp.data %>% 
-      dplyr::filter(!MLocID %in% lwc$`Station ID`)
-    
-  }
   
   # Temp data.sample.count will be used in the Appendix A
   temp.data.sample.count <- temp.data %>% 
@@ -486,13 +531,37 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
     sf::st_drop_geometry() %>% 
     dplyr::filter(!is.na(dec_lat_va)) %>% 
+    dplyr::filter(!site_no %in% station.owrd$`Station ID`) %>% 
+    dplyr::distinct(site_no,.keep_all=TRUE)
+  
+  
+  ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
+                              "Mid Willamette Subbasins",
+                              "Southern Willamette Subbasins")) {
+    
+    station.usgs.flow <- station.usgs.flow %>% 
+      dplyr::left_join(df.stations[,c("MLocID","Reachcode")], by = c("site_no" = "MLocID")) %>% 
+      dplyr::filter(!Reachcode %in% will_reachcodes) 
+    
+  } 
+  
+  ## In the Malheur and Grande Ronde QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
+                              "Malheur River Subbasins")) {
+    
+    station.usgs.flow <- station.usgs.flow %>% 
+      dplyr::left_join(df.stations[,c("MLocID","Reachcode")], by = c("site_no" = "MLocID")) %>% 
+      dplyr::filter(!Reachcode %in% will_reachcodes)
+    
+  }
+  
+  station.usgs.flow <- station.usgs.flow %>% 
     dplyr::select(`Data Source` = agency_cd, 
                   `Station ID` = site_no, 
                   `Station` = station_nm, 
                   `Lat` = dec_lat_va, 
-                  `Long` = dec_long_va) %>% 
-    dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
-    dplyr::filter(!`Station ID` %in% station.owrd$`Station ID`)
+                  `Long` = dec_long_va)
   
   usgs.data.flow <- usgs.fl.data %>% 
     dplyr::filter(site_no %in% station.usgs.flow$`Station ID`) %>% 
@@ -577,19 +646,7 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     
   }
   
-  
   flow.data <- rbind(usgs.data.flow,owrd.data.flow,hydromet.data.flow)
-  
-  ## __ LW&C QAPP: __
-  #### Remove Multnomah Channel, Clackamas and Willamette river stations from LW&C QAPP
-  #### since they are covered under the Willamette mainstem and major tributaries TMDL
-  if(qapp_project_area == "Lower Willamette and Clackamas Subbasins") {
-    
-    lwc <- readxl::read_xlsx(paste0(data.dir, "appendix_data/stations.xlsx"), sheet = "LWC")
-    flow.data <- flow.data %>% 
-      dplyr::filter(!`Station ID` %in% lwc$`Station ID`)
-    
-  }
   
   # Flow data.sample.count will be used in the Appendix B
   flow.data.sample.count <- flow.data %>% 
@@ -685,21 +742,21 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
   # _ NPEDES ----
   npdes.ind.pro.area <- npdes.ind %>% 
     dplyr::filter(`Project Area` == qapp_project_area)
-    #dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
-    #dplyr::filter(!is.na(Latitude)) %>% 
-    #dplyr::mutate(lat = Latitude, long = Longitude) %>% 
-    #sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-    #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    #sf::st_drop_geometry()
+  #dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
+  #dplyr::filter(!is.na(Latitude)) %>% 
+  #dplyr::mutate(lat = Latitude, long = Longitude) %>% 
+  #sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+  #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
+  #sf::st_drop_geometry()
   
   npdes.gen.pro.area <- npdes.gen %>% 
     dplyr::filter(`Project Area` == qapp_project_area)
-    #dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
-    #dplyr::filter(!is.na(Latitude)) %>% 
-    #dplyr::mutate(lat = Latitude, long = Longitude) %>% 
-    #sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-    #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    #sf::st_drop_geometry()
+  #dplyr::filter(!is.na(`WQ File Nbr`)) %>% 
+  #dplyr::filter(!is.na(Latitude)) %>% 
+  #dplyr::mutate(lat = Latitude, long = Longitude) %>% 
+  #sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+  #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
+  #sf::st_drop_geometry()
   
   # _ NLCD ----
   nlcd.pro.area <- nlcd.tbl %>% 
@@ -719,40 +776,40 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
   
   # _ Save Data ----
   save(df.stations,
-    tir,
-    ref,
-    roles,
-    risks,
-    abbr,
-    data.gap,
-    lookup.huc,
-    project.areas,
-    qapp_project_area,
-    station.model,
-    temp.stations,
-    temp.data.sample.count,
-    model.info,
-    model.input,
-    pro.area.tmdls,
-    pro.cat.45.tbl,
-    flow.stations,
-    flow.data.sample.count,
-    ncei.station.tbl,
-    raws.station.tbl,
-    agrimet.station.tbl,
-    hydromet.station.tbl,
-    mw.station.tbl,
-    npdes.ind.pro.area,
-    npdes.gen.pro.area,
-    nlcd.pro.area,
-    nlcd.text.pro.area,
-    dma.pro.area,
-    strip_alpha,
-    strip_tbl_num,
-    s,
-    is.are,
-    numbers.to.words,
-    file = paste0(data.dir,"RData/",file.name,".RData"))
+       tir,
+       ref,
+       roles,
+       risks,
+       abbr,
+       data.gap,
+       lookup.huc,
+       project.areas,
+       qapp_project_area,
+       station.model,
+       temp.stations,
+       temp.data.sample.count,
+       model.info,
+       model.input,
+       pro.area.tmdls,
+       pro.cat.45.tbl,
+       flow.stations,
+       flow.data.sample.count,
+       ncei.station.tbl,
+       raws.station.tbl,
+       agrimet.station.tbl,
+       hydromet.station.tbl,
+       mw.station.tbl,
+       npdes.ind.pro.area,
+       npdes.gen.pro.area,
+       nlcd.pro.area,
+       nlcd.text.pro.area,
+       dma.pro.area,
+       strip_alpha,
+       strip_tbl_num,
+       s,
+       is.are,
+       numbers.to.words,
+       file = paste0(data.dir,"RData/",file.name,".RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -975,4 +1032,3 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
        file = paste0(data.dir,"RData/map_",file.name,".RData"))
   
 #}
-

@@ -58,7 +58,7 @@ if(length(section.model.info$`Model Extent Text`)>1){
 
 ```
 
-The extent of the model domain is the `r model.domain`
+The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 `r if(waterbody_name == "Columbia Slough"){paste0("The domain for the Columbia Slough model is shown in Figure 3 (Berger, 2003).")}`
 
@@ -91,7 +91,7 @@ tbl.col.slough <- flextable::regulartable(col.slough) %>%
 
 `r if(waterbody_name == "Columbia Slough"){paste0("The Columbia Slough model is composed of 397 longitudinal segments (25-231 m) and 17 vertical layers (layer height of 0.30-0.61 m) and 41 branches (separate water bodies or branches off the main stem), many of which are segregated by culverts. The number of model time step intervals (NDT) is 2 and the minimum time step (DLTMIN) is 0.025 seconds. The characteristics of the Columbia Slough model regions are shown in ", tbls(name = "col.slough", display="cite"), ". For additional details regarding model setup and resolution, see Berger and Wells 2005.")}`
 
-`r if(!waterbody_name == "Columbia Slough"){paste0("The model input sampling rate (*dx*) is ", unique(section.model.info$"Input dx"), " ", unique(section.model.info$"Input dx Units"), ". Output is generated every ", unique(section.model.info$"Output dx"), " ", unique(section.model.info$"Output dx Units"), ". The model time step (*dt*) is ", unique(section.model.info$dT), " ", unique(section.model.info$"dT Units"),".")}`
+`r if(!waterbody_name == "Columbia Slough"){paste0("The model input spatial resolution (*dx*) is ", unique(section.model.info$"Input dx"), " ", unique(section.model.info$"Input dx Units"), ". Outputs are generated every ", unique(section.model.info$"Output dx"), " ", unique(section.model.info$"Output dx Units"), ". The model time step (*dt*) is ", unique(section.model.info$dT), " ", unique(section.model.info$"dT Units")," and outputs are generated every hour.")}`
 
 `r if(!waterbody_name == "Columbia Slough"){paste0("A *dx* of ", unique(section.model.info$"Input dx"), " ", unique(section.model.info$"Input dx Units"), " was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.")}`
 
@@ -187,7 +187,9 @@ The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)
 
 `r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading.
+Anthropogenic warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.
+
+A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies  that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
 
 `r if(waterbody_name == "Columbia Slough"){paste0("The Multnomah County Drainage District (MCDD) is a special purpose district whose primary responsibility is to provide flood control for most of the Slough watershed. Due to the extensive modifications to the Columbia Slough, the area within MCDD’s boundaries no longer drains naturally, but relies on two primary pump stations that lift water over the levee, and into the Columbia River and/or lower Columbia Slough which drains to the Willamette River. The hydraulic management of the Slough can have a significant impact on the water quality and uses supported by the Slough (DEQ 2006).  For this reason, the DEQ expects to name MCDD a responsible person for temperature TMDL implementation.")}`
 
@@ -197,7 +199,15 @@ A designated management agency is defined in OAR 340-042-0030(2) as a federal, s
 
 ### Time frame of simulation
 
-The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
+```{r, label=`tf`, include=FALSE}
+
+tf <- tmdl.mod.2 %>% 
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  pull(Model_version)
+
+```
+
+`r if(tf == "Heat Source Version 6"){paste0("The model period is for a single day: ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"),".")}else{paste0("The model period is ", format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), ".")}`
 
 ### Important assumptions
 
