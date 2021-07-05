@@ -1,6 +1,5 @@
 ---
-author: "Ryan Michie"
-date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+date: "`r paste0(format(Sys.Date(), '%m/%d/%Y'), ' - DRAFT version XX')`"
 output:
   officedown::rdocx_document:
   word_document:
@@ -58,22 +57,26 @@ eqns <- captioner::captioner(prefix="Equation")
 
 This report prepared by:
 
+Erin Costello, Yuan Grund, and Ryan Michie
+
 Oregon Department of Environmental Quality  
 700 NE Multnomah Street, Suite 600  
 Portland, OR 97232  
 1-800-452-4011  
 www.oregon.gov/deq
 
-Contact:  
-Ryan Michie  
-503-229-6162
-
 In cooperation with:
+USEPA Region 10
 
-USEPA Region 10  
+and
+
 Tetra Tech, Inc.
 
-Documents can be provided upon request in an alternate format for individuals with disabilities or in a language other than English for people with limited English skills. To request a document in another format or language, call DEQ in Portland at 503-229-5696, or toll-free in Oregon at 1-800-452-4011, ext. 5696; or email deqinfo@deq.state.or.us.
+Contact:        
+Ryan Michie       
+503-229-6162        
+
+DEQ can provide documents in an alternate format or in a language other than English upon request. Call DEQ at 800-452-4011 or email deqinfo@deq.state.or.us.
 
 \newpage
 **[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
@@ -114,7 +117,7 @@ if(NROW(tcat5)>0){
   
   tcat5 <- knitr::kable(tcat5, format = "pandoc", padding = 2,
                         caption = tbls(name = "tcat5",
-                                       caption = paste0("Assessment units listed for temperature impairment based on Section 303(d) Category 5 in the 2018/20 Integrated Report.")))
+                                       caption = paste0("Assessment units that are classified as water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
   
 }
 
@@ -129,7 +132,7 @@ huc8.txt <- lookup.huc %>%
 
 ```
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the `r qapp_project_area` Temperature Total Maximum Daily Load (TMDL) replacement project. This QAPP project area includes all tributaries in `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))` **[Update: and excludes the (list rivers if applicable).]**
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. **[Update: This QAPP project area excludes the (list rivers if applicable).]**
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -141,9 +144,9 @@ Where $\sum {WLA}$ is the sum of wasteload allocations (point sources), $\sum {L
 
 The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list. The `r paste0(qapp_project_area, if(str_sub(qapp_project_area,-1,-1) == "s"){paste0(" include")}else{paste0(" includes")})` several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature (`r tbls(name = "tcat5", display="cite")`). `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL was previously developed for the ", qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ") but it must be replaced due to recent litigation.")}else{paste0("TMDLs were previously developed for the ",qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ") but they must be replaced due to recent litigation.")}`
 
-In 2012, The U.S. District Court found that USEPA’s approval of an element of Oregon’s water quality standard for temperature, the Natural Conditions Criteria, was unlawful. The Natural Conditions Criterion stated that where the natural thermal potential of all or a portion of a waterbody exceeds the biologically-based numeric temperature criteria in OAR 340-041-0028(4), the natural thermal potential temperatures supersede the biologically-based criteria, and are deemed to be the applicable temperature criteria for that waterbody. This portion of the temperature water quality standard was effective from 2003 until USEPA disapproved it in response to the court decision in 2013. Many temperature TMDLs were based on this criteria, and this became the subject of a second lawsuit brought by the Northwest Environmental Advocates against USEPA asserting the USEPA unlawfully approved TMDLs that were based on the now disapproved Natural Conditions Criterion. The court issued a judgment on October 4, 2019, requiring DEQ and USEPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard.
+In 2012, The U.S. District Court found that the United States Environmental Protection Agency’s (USEPA) approval of an element of Oregon’s water quality standard for temperature, the Natural Conditions Criteria, was unlawful (NWEA v. EPA, 855 F. Supp. 2d 1199 (D. Or., 2012)). The Natural Conditions Criterion stated where the natural thermal potential of all or a portion of a waterbody exceeds the biologically-based numeric temperature criteria in OAR 340-041-0028(4), the natural thermal potential temperatures supersede the biologically-based criteria, and are deemed to be the applicable temperature criteria for that waterbody. This portion of the temperature water quality standard was effective from 2003 until USEPA disapproved it in response to the court decision in 2013. Many temperature TMDLs were based on this criteria, and this became the subject of a second lawsuit brought by the Northwest Environmental Advocates against USEPA asserting the USEPA unlawfully approved TMDLs that were based on the now disapproved Natural Conditions Criterion. The court issued a judgment on October 4, 2019, requiring DEQ and USEPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard (NWEA v. EPA, No. 3:12-cv-01751-HZ (D. Or., Oct. 4, 2019)).
 
-This QAPP has been developed to document the analysis and numerical modeling approach that will support the updated `r qapp_project_area` TMDL as well as other project details. In particular, this QAPP details the following:
+This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 2017; EPA, 2016) and documents the analysis and numerical modeling approach that will support the updated `r qapp_project_area` TMDL as well as other project details. In particular, this QAPP details the following:
 
 *	Definition of the issue and objectives, including the spatial and temporal extents of the water quality impairments (Section 2);    
 
@@ -163,17 +166,17 @@ This QAPP has been developed to document the analysis and numerical modeling app
 
 # Problem definition and management objectives
 
-Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.
+Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
 **[Update with specific temperature criteria based on the project area]**.
 
-Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`.
+Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
-In addition, the temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
+The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
 As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
 
-Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r tbls(name = "tcat5", display="cite")`. 
+Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r tbls(name = "tcat5", display="cite")`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
@@ -208,7 +211,8 @@ The effort currently described in the QAPP includes use of existing models and t
 `r if(NROW(tcat5)>0){tcat5}`
 
 # Conceptual model: key processes and variables
-The current theory to explain the nature of heat is called the kinetic-molecular theory. The modern version of this theory was developed in the mid-19^th^ century by Rudolf Clausis, James Clerk Maxwell, and Ludwig Boltzmann. The theory is based on the assumption that all matter is composed of a tiny population of molecules that are always in motion. The molecules in hot objects are moving faster, and hence have greater kinetic energy than the molecules in cold objects. Individual molecules have a certain amount of kinetic energy based on their mass and velocity. The thermal energy of an object is determined by adding up the kinetic energy of all the molecules in that object. When a hot and cold object come into contact with each other, the molecules collide and the kinetic energy flows from the molecules with more kinetic energy to molecules with less kinetic energy. This type of flow of kinetic energy is called heat. 
+
+The current theory to explain the nature of heat is called the kinetic-molecular theory. The modern version of this theory was developed in the mid-19^th^ century by Rudolf Clausis, James Clerk Maxwell, and Ludwig Boltzmann. The theory is based on the assumption that all matter is composed of a tiny population of molecules that are always in motion. The molecules in hot objects are moving faster and hence have greater kinetic energy than the molecules in cold objects. Individual molecules have a certain amount of kinetic energy based on their mass and velocity. The thermal energy of an object is determined by adding up the kinetic energy of all the molecules in that object. When a hot and cold object come into contact with each other, the molecules collide and the kinetic energy flows from the molecules with more kinetic energy to molecules with less kinetic energy. This type of flow of kinetic energy is called heat. 
 
 Temperature is an intensive property and much like concentration measures the “strength” rather than “quantity” of kinetic energy. The temperature of an object is the measure of the average kinetic energy of all the molecules in that object. Hot water has greater average kinetic energy than cold water but may not have greater total kinetic energy. For example, a small pot of water with a temperature near the boiling point has a higher average kinetic energy than a swimming pool at room temperature. The swimming pool has a much larger quantity of molecules and therefore a higher total kinetic energy than the pot of water.
 
@@ -240,7 +244,7 @@ $\Phi_{evaporation}$ = Evaporation (+/-)
 
 ^1^Air/Water convection includes both turbulent and free surface conduction.        
 
-**Mass transfer** relates to transport of flow volume downstream, instream mixing and the introduction or removal of water from a stream.  For instance, flow from a tributary will cause a temperature change if the temperature is different from the receiving water.  Mass transfer commonly occurs in stream systems as a result of       
+**Mass transfer** relates to transport of flow volume downstream, instream mixing and the introduction or removal of water from a stream.  For instance, flow from a tributary will cause a temperature change if the temperature is different from the receiving water.  Mass transfer commonly occurs in stream systems as a result of:       
 
 * Advection,
 * Dispersion,
@@ -521,7 +525,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 
 ```
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 2 through Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`.
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 2 through Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 `r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
 `r if(NROW(t51.raws)>0){t51_raws_tbl}`
@@ -601,7 +605,7 @@ if(NROW(t53_1)>0){
 
 ```
 
-All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). `r tbls(name = "t53_1", display="cite")` lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. Appendix A summarizes when data were collected at each station.
+All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS). `r tbls(name = "t53_1", display="cite")` lists all the locations where continuous stream temperature data were collected and the organizations that collected that data. Appendix A summarizes when data were collected at each station. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
 
 `r if(NROW(t53_1)>0){t53_1_tbl}`
 
@@ -711,7 +715,7 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp
 
 ```
 
-`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases.
+`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases. Appendix B summarizes when data were collected at each of the stations with continuous flow measurements. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
 
 `r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
 `r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
@@ -759,7 +763,7 @@ if(NROW(section.npdes.gen)>0){
 
 ```
 
-`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_gen", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
+`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. The location of these individual NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_gen", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen)>0){t55_gen_tbl}`
@@ -961,7 +965,7 @@ if(mod.check == "11"){
 
 ```
 
-Waterbodies where model development was initiated for the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}`
+Waterbodies where model development was initiated for the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}` The extent and location of these models is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
@@ -1085,7 +1089,7 @@ This section identifies the model acceptance criteria. Model acceptance relies o
 
 4)	Goodness of fit statistics have been calculated comparing the model predicted results to the associated observed measurements. The calibration goodness of fit statistics are shown in Equation 4 through Equation 7.    
 
-5)	Goodness of fit statistics have been used to inform the appropriate use of the model. Where a model achieves an excellent fit it can generally assume a strong role in evaluating management options. Conversely, where a model achieves only a fair or poor fit it should assume a much less prominent role in the overall weight-of-evidence evaluation of management options. If a desired level of quality is not achieved on some or all measures, the model might still be useful; however, a detailed description of its potential range of applicability will be provided.    
+5)  Goodness of fit statistics have been used to inform the appropriate use of the model. Where a model achieves an excellent or good fit it can generally assume a strong role in decision making about appropriate management options. Conversely, where a model achieves only a fair or poor fit it should assume a much less prominent role in decision making about appropriate management options. If a desired level of quality is not achieved on some or all measures, the model might still be useful; however, a detailed description of its potential range of applicability will be provided.    
 
 6)	Written documentation of all important elements in the model, including model setup, model parameterization, key assumptions, and known areas of uncertainty.    
 
@@ -1117,13 +1121,20 @@ $n$ = The sample size.
 
 # Documentation in model reports
 
-The existing TMDL technical appendices will be cited or added to the replacement TMDL as new appendices if those documents contain information supporting replacement TMDL results or decisions. The existing technical appendices will be amended as necessary to document any modifications, updates, or new models that have been developed.
+Model documentation will consist of a series of TMDL technical appendices describing the model setup, model calibration results, model scenario setup, and model scenario results. 
+
+The model setup and calibration documentation will include details on the calibrated model domain and layout; spatial and temporal resolution; timeframe of simulation; summary of data used for model inputs; summary of methods used to fill data gaps; summary of data used for calibration; timeseries plots comparing observed and model predicted temperatures and other parameters as appropriate; goodness-of-fit statistics, and plots and tables summarizing temperature and effective shade model results.
+
+The model scenario setup and scenario results documentation will include a description of the scenario, what model elements were modified for the scenario; tables, plots, or narrative summarizing the final values for any modified inputs or parameters; methods or data sources used to setup the scenario; and plots and tables that summarize the scenario results.
+
+When no changes or minor changes are made to the existing TMDL models, the existing TMDL technical appendices will be amended as necessary to document any changes to the existing calibration or management scenarios. For more extensive changes or entirely new models new technical appendices may need to be developed to document the models and results.
+
 
 # Peer review
 
 Peer review of the models and model results will be conducted in the following ways:
 
-DEQ will conduct internal peer review during the modeling process with input from USEPA Region 10 as needed.
+DEQ will conduct internal peer review during the modeling process with input from USEPA Region 10 as needed. For models being developed by EPA’s contractor, TetraTech, EPA and DEQ will peer review all contractor developed models and model documentation.
 
 DEQ will consider feedback on model scenarios and results from the TMDL advisory group and make changes as appropriate.
 
@@ -1131,7 +1142,7 @@ DEQ will review and respond to any public comments received on the model and mod
 
 # Management scenarios
 
-Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information or because the management scenario is not applicable to the specific waterbody. DEQ will review all available data and information during model development and revise this QAPP if it is determined a model scenario is not feasible.
+Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information or because the management scenario is not applicable to the specific waterbody. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
 
 ## Current conditions
 
@@ -1187,7 +1198,7 @@ This scenario evaluates the stream temperature response from restoration actions
 
 This scenario evaluates the stream temperature response from changes in air temperature and relative humidity connected to human caused changes to global or micro climate conditions. Warming or cooling from climate related impacts will be evaluated by comparing this scenario to the current conditions model scenario. Assumptions and methods used to develop this scenario will be documented in the TMDL Elements of this scenario or scenarios may include:
 
-*	Model inputs for air temperature and relative humidity may be modified to reflect potential conditions or improved climate change scenarios if enough information exists that would allow downscaling to the site specific conditions in model extent.    
+*	Model inputs for air temperature and relative humidity may be modified to reflect potential conditions or conditions without climate change impacts assuming enough information exists that would allow downscaling to the site specific conditions in model extent.    
 
 *	Model inputs for groundwater or stream flow may also be modified if sufficient information exists that would allow downscaling to the site specific conditions in model extent.    
 
@@ -1221,7 +1232,7 @@ This scenario evaluates stream temperature warming or cooling from the TMDL Wast
 
 ## TMDL implementation plans
 
-This set of scenarios evaluate the stream temperature response from proposed or existing DMA and responsible person land management plans, TMDL implementation plans, or rules. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations or surrogate measures. It is likely that multiple model scenarios will be developed evaluating a single implementation plan or multiple implementation plans together. Assumptions and methods used to develop this scenario will be documented in the TMDL. Elements of this scenario or scenarios may include:        
+This set of scenarios evaluate the stream temperature response from proposed or existing DMA and responsible person management plans, TMDL implementation plans, or rules. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations or surrogate measures. It is likely that multiple model scenarios will be developed evaluating a single implementation plan or multiple implementation plans together. Assumptions and methods used to develop this scenario will be documented in the TMDL. Elements of this scenario or scenarios may include:        
 
 * Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.       
 
@@ -1265,7 +1276,7 @@ DEQ staff involved in developing and configuring models, performing model calibr
 
 ## Reports to management
 
-The DEQ Project Manager (or designee) will provide monthly progress reports to DEQ Management and USEPA. As appropriate, these reports will provide information on the following:
+The DEQ Project Manager (or designee) will provide progress reports to DEQ Management and USEPA as needed based on new project information. As appropriate, these reports will provide information on the following:
 
 *	Adherence to project schedule and/or budget.
 *	Deviations from approved QAPP, as determined from project assessment and oversight activities.
@@ -1302,7 +1313,7 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **Task P5** Development of template TMDL and WQMP section outlines and language.     
 
-**Task P6** Implement Modeling QAPPs. This task a follow-up to Task P2. Gathering of new data and completion of new technical described in the modeling QAPPs.     
+**Task P6** Implement Modeling QAPPs. This task a follow-up to Task P2. Gathering of new data and completion of new technical work described in the modeling QAPPs.     
 
 **TMDL and WQMP development phase**    
 
@@ -1414,7 +1425,11 @@ TMDL documents: At each key stage of TMDL and WQMP development copies of the fol
 
 # QAPP review and approval
 
-The DEQ Project Technical Lead will distribute the draft QAPP to the respective DEQ and USEPA project team members for review. Comments will be provided to the Project Technical Lead for further discussion if appropriate and revision and submittal of the final plan within 10 business days of receipt of comments. Following approval, the Project Technical Lead will distribute the final, signed copy to their respective staff assigned to the project. Official copies of the final, approved QAPP will be retained. If any change(s) in the QAPP are required during the project, they must be described in a memorandum and approved by the signatories to this QAPP and attached to the QAPP.
+The DEQ Project Technical Lead will distribute the draft QAPP to the respective DEQ and USEPA project team members for review. Comments will be provided to the Project Technical Lead for further discussion. When possible, revision and submittal of the final plan within 10 business days of receipt of comments. Following approval, the Project Technical Lead will distribute the final, signed copy to the respective DEQ and USEPA project team members. 
+
+USEPA has an independent responsibility for this QAPP and must complete a separate approval protocol. USEPA approval is necessary for USEPA contractors to begin any modeling work.
+
+Official copies of the final, approved QAPP will be retained in DEQ’s document control system. If any change(s) to the QAPP are required during the project, they must be described in a memorandum and approved by the signatories to this QAPP and attached to the QAPP.
 
 # Implementation and adaptive management
 
@@ -1487,7 +1502,9 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J., and Hawkins, T.W. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., Diabat, M. and Haggerty, R. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
-  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.'
+  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
+  'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
+  'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
@@ -1543,8 +1560,46 @@ if(NROW(flow.data.sample.count)>0){
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "appendixC.Rmd", envir = globalenv())}`
 
+\newpage
+# Appendix C HTML map
 
+DEQ prepared an interactive HTML map to display relevant information described in this QAPP. The map will be posted to DEQ’s website alongside this QAPP and saved in same location as the QAPP in DEQ’s files. The interactive map contains the following layers and location information:
 
+1. OpenStreetMap base map.       
+
+2. 2017 and 2018 one foot Oregon Statewide Imagery Program (OSIP) aerial imagery.       
+
+3. TMDL project area boundary.        
+
+4. Available continuous stream temperature monitoring locations, organizations that collected that data, and the count of days per month for each year when temperature data are available.       
+
+5. Available stream flow monitoring locations, organizations that collected that data, and the count of days per month for each year when flow data are available.       
+
+6. The location of meteorological monitoring locations and the source of the data.        
+
+7. The location of active individual NPDES permitted facilities, the permit type, and DEQ file number.        
+
+8. The extent of existing calibrated models described in this QAPP.       
+
+9. The extent of newly proposed calibrated models described in this QAPP.       
+
+10. The location of temperature calibration sites.        
+
+11. The location of temperature monitoring used for model boundary conditions and tributary inputs.       
+
+12. The location of flow monitoring locations used for model boundary conditions and tributary inputs.        
+
+13. Eight-digit hydrologic unit boundaries (HUC8 Subbasins).        
+
+14. Ten-digit hydrologic unit boundaries (HUC10 Watersheds).        
+
+15. Twelve-digit hydrologic unit boundaries (HUC12 Subwatersheds).        
+
+16.	2018/2020 303(d) Integrated Report status category for temperature.       
+
+17. Fish use designations depicted in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure.A")`.    
+
+`r if(!is.na(project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B)){paste0("18. Salmon and Steelhead spawning use extent and period depicted in OAR ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B, ".")}`    
 
 ```{r, label=`area-map-data`,echo=FALSE}
 # Stream Temperature Stations
