@@ -612,6 +612,7 @@ qapp_project_area = "Sandy Subbasin"
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::mutate(Station = stringr::str_to_title(Station)) %>% 
     dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
+    dplyr::mutate_at("Station", str_replace_all, "OReg.", "OR") %>% 
     dplyr::mutate_at("Station", str_replace_all, "Ordeq", "ORDEQ") %>%
     dplyr::mutate_at("Station", str_replace_all, "ORegon", "Oregon") %>% 
     dplyr::mutate_at("Station", str_replace_all, " Rm", " RM") %>%
