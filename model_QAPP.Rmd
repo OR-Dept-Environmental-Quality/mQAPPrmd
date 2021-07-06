@@ -1186,14 +1186,6 @@ This scenario evaluates stream temperature response from improvements to channel
 
 * All other model inputs will be the same as the current condition model.    
 
-## No point sources
-
-This scenario evaluates the stream temperature response from removing point source heat load. The stream temperature warming or cooling from permitted NPDES point sources is evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:    
-
-* Modifying the Portland International Airport and Arclin point source discharges to the Columbia Slough to assess the effects of cumulative warming.        
-
-*	All other model inputs will be the same as the current condition model.       
-
 ## TMDL waste load allocations
 
 This scenario evaluates stream temperature warming or cooling from the TMDL Waste Load Allocations. These scenarios will be compared to the background model scenario to evaluating attainment of the human use allowance allocations. Elements of this scenario or scenarios may include:    
