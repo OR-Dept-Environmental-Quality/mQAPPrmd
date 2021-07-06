@@ -427,7 +427,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins")) {
       
       station.awqms.temp <- station.awqms.temp %>% 
-        dplyr::filter(!`Station ID` %in% c("MHNF-107","MHNF-108","MHNF-110 "))
+        dplyr::filter(!`Station ID` %in% c("MHNF-107","MHNF-108","MHNF-110"))
       
     }
     
