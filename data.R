@@ -424,6 +424,13 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     station.awqms.temp <- station.awqms.temp %>% 
       dplyr::filter(!Reachcode %in% will_reachcodes)
     
+    if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins")) {
+      
+      station.awqms.temp <- station.awqms.temp %>% 
+        dplyr::filter(!`Station ID` %in% c("MHNF-107","MHNF-108","MHNF-110 "))
+      
+    }
+    
   }
   
   ## In the Malheur and Grande Ronde QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
