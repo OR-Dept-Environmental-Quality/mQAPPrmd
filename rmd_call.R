@@ -12,7 +12,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
-# qapp_project_area = "Mid Willamette Subbasins"
+qapp_project_area = "Mid Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
@@ -23,7 +23,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas$areas) {
+#for (qapp_project_area in project.areas$areas) {
   
   print(qapp_project_area)
   
@@ -35,4 +35,4 @@ for (qapp_project_area in project.areas$areas) {
                     output_dir = output.dir,
                     output_file=paste0("QAPP_",file.name, ".docx"))
   
-}
+#}
