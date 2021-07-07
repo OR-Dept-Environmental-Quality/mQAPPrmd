@@ -321,8 +321,8 @@ if(!model.extent == TRUE){
                   Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
                   `Model Location` = round(`Model Location`,2),
                   `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                  `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
                   `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                  `Model Location Name` = ifelse(`Model Location Name` %in% c("Mouth to Headwaters","Headwaters to mouth", "Johnson Creek mouth to headwaters"),"Model extent",`Model Location Name`),
                   `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
