@@ -1097,12 +1097,11 @@ The model scenario setup and scenario results documentation will include a descr
 
 When no changes or minor changes are made to the existing TMDL models, the existing TMDL technical appendices will be amended as necessary to document any changes to the existing calibration or management scenarios. For more extensive changes or entirely new models new technical appendices may need to be developed to document the models and results.
 
-
 # Peer review
 
 Peer review of the models and model results will be conducted in the following ways:
 
-DEQ will conduct internal peer review during the modeling process with input from USEPA Region 10 as needed. For models being developed by EPA’s contractor, TetraTech, EPA and DEQ will peer review all contractor developed models and model documentation.
+DEQ will conduct internal peer review during the modeling process with input from USEPA Region 10 as needed. For models being developed by EPA’s contractor, Tetra Tech, EPA and DEQ will peer review all contractor developed models and model documentation.
 
 DEQ will consider feedback on model scenarios and results from the TMDL advisory group and make changes as appropriate.
 
