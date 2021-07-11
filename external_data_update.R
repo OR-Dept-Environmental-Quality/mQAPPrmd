@@ -287,3 +287,24 @@ doe.data.pro.area <- readxl::read_xlsx(paste0(file.dir,"doe_data_pro_area.xlsx")
 
 save(doe.stations.pro.area, doe.data.pro.area, file=paste0(file.dir,"doe.RData")) # updated date: 6/2/2021
 
+# City of Portland Water Temp Data ----
+## COP: https://aquarius.portlandoregon.gov/
+devtools::install_github("TravisPritchardODEQ/odeqIRextdata")
+library(odeqIRextdata)
+library (readr)
+urlfile <- "https://raw.githubusercontent.com/TravisPritchardODEQ/odeqIRextdata/master/BES_stations.csv"
+bes.stations <- read_csv(url(urlfile))
+bes.stations.id <- bes.stations %>% 
+  dplyr::pull(LocationIdentifier)
+
+station <- bes.stations.id
+startdate <- "1990-01-01"
+enddate <- "2020-12-31"
+char=c("Temperature.Primary") # 'Temperature.Primary' - Continuous Water temperature (deg C)
+
+bes.data <- odeqIRextdata::copbes_data(station, startdate, enddate, char) %>% 
+  dplyr::filter(Grade.Code == 100, # 100=Good
+                Approval.Level == 1200) # 1200=Approved
+
+save(bes.stations, bes.data, file=paste0(file.dir,"bes.RData")) # download date: 7/9/2021
+
