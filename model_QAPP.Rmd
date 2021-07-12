@@ -52,6 +52,7 @@ figs <- captioner::captioner(prefix="Figure")
 eqns <- captioner::captioner(prefix="Equation")
 
 ```
+
 \newpage
 **[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
 
@@ -149,21 +150,21 @@ In 2012, The U.S. District Court found that the United States Environmental Prot
 
 This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 2017; EPA, 2016) and documents the analysis and numerical modeling approach that will support the updated `r qapp_project_area` TMDL as well as other project details. In particular, this QAPP details the following:
 
-*	Definition of the issue and objectives, including the spatial and temporal extents of the water quality impairments (Section 2);    
+*	Definition of the issue and objectives, including the spatial and temporal extents of the water quality impairments (Section 2);
 
-*	A high-level description of the key processes and variables for temperature (Section 3);    
+*	A high-level description of the key processes and variables for temperature (Section 3);
 
-*	The overarching technical approach, including the appropriate modeling and analytical tools to be used (Section 4);    
+*	The overarching technical approach, including the appropriate modeling and analytical tools to be used (Section 4);
 
-*	The data sources for defining and creating inputs to the model, including data that were used in the modeling for the original TMDL. Examples of these inputs include meteorological data, stream flow and temperature, point sources and vegetation characteristics (Sections 5 and 6);    
+*	The data sources for defining and creating inputs to the model, including data that were used in the modeling for the original TMDL. Examples of these inputs include meteorological data, stream flow and temperature, point sources and vegetation characteristics (Sections 5 and 6);
 
-*	How the analysis and modeling will be evaluated for acceptability (Sections 7 and 9);    
+*	How the analysis and modeling will be evaluated for acceptability (Sections 7 and 9);
 
-*	Scenarios for evaluating management strategies for reducing anthropogenic thermal loads (Section 10);     
+*	Scenarios for evaluating management strategies for reducing anthropogenic thermal loads (Section 10);
 
-*	Various aspects for managing the TMDL development project, including documentation (Section 8), the project team (Section 11), data and records management (Sections 12  and 13); and    
+*	Various aspects for managing the TMDL development project, including documentation (Section 8), the project team (Section 11), data and records management (Sections 12  and 13); and
 
-*	Aspects relating to this QAPP and its role in the project (Sections 14  and 15).    
+*	Aspects relating to this QAPP and its role in the project (Sections 14  and 15).
 
 # Problem definition and management objectives
 
