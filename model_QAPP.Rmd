@@ -1504,6 +1504,8 @@ if(NROW(temp.data.sample.count)>0){
 
 `r app_a_tbl`
 
+**[Update: Delete this note if there is no data count > 31. * Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.]**
+
 \newpage
 # Appendix B Continuous flow data summary
 
