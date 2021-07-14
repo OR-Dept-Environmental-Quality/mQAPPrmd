@@ -326,7 +326,7 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
-qapp_project_area = "Mid Willamette Subbasins"
+qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
@@ -367,7 +367,7 @@ qapp_project_area = "Mid Willamette Subbasins"
   
   ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
   if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
-                              "Mid Willamette Subbasins",
+                              "Middle Willamette Subbasins",
                               "Southern Willamette Subbasins")) {
     
     pro.cat.45.tbl <- pro.cat.45.tbl %>% 
@@ -418,7 +418,7 @@ qapp_project_area = "Mid Willamette Subbasins"
   
   ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
   if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
-                              "Mid Willamette Subbasins",
+                              "Middle Willamette Subbasins",
                               "Southern Willamette Subbasins")) {
     
     station.awqms.temp <- station.awqms.temp %>% 
@@ -541,10 +541,9 @@ qapp_project_area = "Mid Willamette Subbasins"
     dplyr::filter(!site_no %in% station.owrd$`Station ID`) %>% 
     dplyr::distinct(site_no,.keep_all=TRUE)
   
-  
   ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
   if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
-                              "Mid Willamette Subbasins",
+                              "Middle Willamette Subbasins",
                               "Southern Willamette Subbasins")) {
     
     station.usgs.flow <- station.usgs.flow %>% 
@@ -642,7 +641,7 @@ qapp_project_area = "Mid Willamette Subbasins"
   #dplyr::mutate_at("Station", str_replace_all, "No", "N") %>% 
   #dplyr::mutate_at("Station", str_replace_all, "Nrth", "North") %>% 
   #dplyr::mutate_at("Station", str_replace_all, "Suth", "South")
-
+  
   flow.data <- rbind(usgs.data.flow,owrd.data.flow,hydromet.data.flow)
   
   # Flow data.sample.count will be used in the Appendix B
@@ -881,7 +880,7 @@ pro_areas <- pro_areas %>%
                                          Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins" ~ "yellow",
                                          Project_Na == "Lower Willamette and Clackamas Subbasins" ~ "#253494", #blue
                                          Project_Na == "Malheur River Subbasins" ~ "#78c679", #green
-                                         Project_Na == "Mid Willamette Subbasins" ~ "#253494", #blue
+                                         Project_Na == "Middle Willamette Subbasins" ~ "#253494", #blue
                                          Project_Na == "Middle Columbia-Hood, Miles Creeks" ~ "yellow",
                                          Project_Na == "North Umpqua Subbasin" ~ "purple",
                                          Project_Na == "Rogue River Basin" ~ "#df65b0", #pink
@@ -917,7 +916,6 @@ map_hs_temp_model_extent <- sf::st_transform(map_hs_temp_model_extent, 4326) %>%
   dplyr::mutate(Stream = ifelse(Stream == "Sandy River", "Sandy River (2001)",
                                 ifelse(Stream == "Bull Run River", "Bull Run River (2001)", 
                                        ifelse(Stream == "Salmon River", "Salmon River (2001)", Stream))))
-
 
 map_hs_solar_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_solar_model_extent.shp"),
                                          layer = "hs_solar_model_extent")
@@ -979,7 +977,7 @@ map_hs_solar_model_area <- sf::st_transform(map_hs_solar_model_area, 4326) %>% s
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
-qapp_project_area = "Mid Willamette Subbasins"
+qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
