@@ -64,12 +64,12 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 ```{r, label=`sc`, include=FALSE}
 
 ## 1st paragraph
-source.char.1 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",
+source.char.1 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_MidWillamette.xlsx",
                                  sheet = "midW_sourceChar") %>%
   dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
   dplyr::pull(sourceChar1)
 
-source.char.2 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",
+source.char.2 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_MidWillamette.xlsx",
                                  sheet = "midW_sourceChar") %>%
   dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
   dplyr::pull(sourceChar2)
