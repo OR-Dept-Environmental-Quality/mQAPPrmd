@@ -3,7 +3,7 @@ date: "`r paste0(format(Sys.Date(), '%m/%d/%Y'), ' - DRAFT version XX')`"
 output:
   officedown::rdocx_document:
   word_document:
-    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -83,6 +83,11 @@ DEQ can provide documents in an alternate format or in a language other than Eng
 **[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
 
 **[Approval Page]**
+
+\newpage
+# List of Tables
+
+# List of Figures
 
 \newpage
 # Abbreviations
@@ -185,31 +190,31 @@ Since the issuance of the original TMDL, the extent and number of waterbodies th
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
-1)	Complete a source assessment and cumulative effects analysis.       
+1) Complete a source assessment and cumulative effects analysis.       
 
-    a.	Identify anthropogenic sources of stream temperature warming.
-    b.	Characterize how much warming comes from background sources.
-    c.	Characterize how much warming comes from each anthropogenic source or source category.
-    d.	Characterize the cumulative warming from all anthropogenic sources combined.
-    e.	Identify where along the stream anthropogenic warming occurs.
-    f.	Identify where the point of maximum stream warming is located.
-    g.	Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
+    a. Identify anthropogenic sources of stream temperature warming.
+    b. Characterize how much warming comes from background sources.
+    c. Characterize how much warming comes from each anthropogenic source or source category.
+    d. Characterize the cumulative warming from all anthropogenic sources combined.
+    e. Identify where along the stream anthropogenic warming occurs.
+    f. Identify where the point of maximum stream warming is located.
+    g. Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
 
-2)	Determine TMDL elements and allocations that attain the applicable temperature criteria.        
+2) Determine TMDL elements and allocations that attain the applicable temperature criteria.        
 
-    a.	Identify the thermal loading capacity for each temperature listed waterbody.
-    b.	Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
-    c.	Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
-    d.	Identify any surrogate measures.
-    e.	Identify any reserve capacity.
-    f.	Identify any margin of safety.
-    g.	Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
+    a. Identify the thermal loading capacity for each temperature listed waterbody.
+    b. Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
+    c. Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
+    d. Identify any surrogate measures.
+    e. Identify any reserve capacity.
+    f. Identify any margin of safety.
+    g. Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
 
-3)	Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.       
+3) Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.       
 
-    a.	Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
-    b.	Identify additional management strategies or surrogate measures.
-    c.	Identify under what timeline and where management strategies need to be implemented.        
+    a. Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
+    b. Identify additional management strategies or surrogate measures.
+    c. Identify under what timeline and where management strategies need to be implemented.        
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
