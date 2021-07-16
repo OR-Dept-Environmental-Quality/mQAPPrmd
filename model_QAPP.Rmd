@@ -541,6 +541,8 @@ Meteorological data, including air temperature, cloudiness, relative humidity, a
 `r if(NROW(t51.hydromet)>0){t51_hydromet_tbl}`
 `r if(NROW(t51.mw)>0){t51_mw_tbl}`
 
+**Yuan note: check worksheet met stations here**
+
 ## Thermal Infrared Radiometry (TIR) data
 
 ```{r, label=`t52`, echo=FALSE}
