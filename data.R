@@ -61,6 +61,14 @@ load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewi
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
 
+# TEMPERORARY: USGS Station 14184100 has a mismatching reachcode in the AWQMS station database
+df.stations.state <- df.stations.state %>% 
+  dplyr::mutate(Reachcode = ifelse(Reachcode == "17090005007863", "17090005007864", Reachcode))
+
+df.stations <- df.stations %>% 
+  dplyr::mutate(Reachcode = ifelse(Reachcode == "17090005007863", "17090005007864", Reachcode))
+# Remove when AWQMS udpated with this staiton reachcode
+
 awqms.data.temp <- df.awqms.raw.state %>% 
   # AWQMS QA/QC check:
   dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
@@ -283,6 +291,43 @@ load(paste0(data.dir,"/RData/nlcd.text.RData")) # nlcd.text
 # _ DMAs ----
 load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
 
+# _ BES ----
+load(paste0(data.dir,"/download/bes.RData")) # bes.stations & bes.data
+bes.data <- bes.data %>% 
+  dplyr::rename(MLocID = Monitoring_Location_ID,
+                SampleStartDate = date,
+                Result_Unit = Result.Unit) %>% 
+  dplyr::mutate(Result_status = "Good, Approved",
+                StationDes = NA,
+                Activity_Type = NA,
+                AU_ID = NA,
+                HUC8 = NA,
+                HUC8_Name = NA,
+                HUC10 = NA,
+                HUC12 = NA,
+                HUC12_Name = NA,
+                Lat_DD = NA,
+                Long_DD = NA,
+                Measure = NA,
+                Method_Code = NA,
+                MonLocType = NA,
+                Org_Name = "Portland Environmental Services",
+                OrganizationID = "COP",
+                Project1 = NA,
+                QualifierAbbr = NA,
+                Reachcode = NA,
+                Result_Comment = NA,
+                Result_Depth = NA,
+                Result_Depth_Unit = NA,
+                Result_Operator = NA,
+                Result_Type = NA,
+                SampleStartTime = NA,
+                SampleStartTZ = NA,
+                SamplingMethod = NA,
+                Statistical_Base = "Maximum",
+                Time_Basis = NA)
+
+
 # _ Project areas and HUCs ----
 pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
                          layer = "project_areas")
@@ -470,9 +515,32 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   station.owrd.temp <- station.owrd %>% 
     dplyr::filter(`Station ID` %in% owrd.data.temp$MLocID) # only keep the stations that have data
   
-  ## _ (4) AWQMS + OWRD ----  
+  ## _ (4) BES ----
+  station.bes <- bes.stations %>% 
+    dplyr::mutate(Organization = "Portland Environmental Services",
+                  lat = Latitude,
+                  long = Longitude) %>% 
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
+    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
+    sf::st_drop_geometry() %>% 
+    dplyr::select(Organization,
+                  `Station ID` = LocationIdentifier,
+                  `Station` = LocationName,
+                  Latitude,
+                  Longitude) %>% 
+    dplyr::distinct(`Station ID`,.keep_all=TRUE)
+  
+  bes.data.temp <- bes.data %>% 
+    dplyr::filter(MLocID %in% station.bes$`Station ID`) %>% 
+    dplyr::mutate(Source = "bes")
+  
+  station.bes.temp <- station.bes %>% 
+    dplyr::filter(`Station ID` %in% bes.data.temp$MLocID) # only keep the stations that have data
+  
+  ## _ (5) AWQMS + OWRD + BES ----  
   temp.stations <- rbind(station.awqms.temp[,c("Station","Station ID", "Organization", "Latitude", "Longitude")],
-                         station.owrd.temp[,c("Station","Station ID", "Organization", "Latitude", "Longitude")]) %>% 
+                         station.owrd.temp[,c("Station","Station ID", "Organization", "Latitude", "Longitude")],
+                         station.bes.temp[,c("Station","Station ID", "Organization", "Latitude", "Longitude")]) %>% 
     dplyr::distinct(Station,`Station ID`, .keep_all=TRUE) %>%
     dplyr::mutate(Organization = ifelse(Organization == "OregonDEQ", "DEQ", Organization)) %>% 
     dplyr::mutate(Organization = ifelse(Organization == "11NPSWRD_WQX", "EPA WQX", Organization)) %>% 
@@ -492,7 +560,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::left_join(station.awqms.temp[,c("Station ID","Station")], by=c("MLocID"="Station ID")) %>% 
     dplyr::select(-StationDes) %>%
     dplyr::rename(StationDes = Station) %>% 
-    rbind(owrd.data.temp) #%>% 
+    rbind(owrd.data.temp,bes.data.temp) #%>% 
   #dplyr::left_join(df.stations, by="MLocID") %>% 
   #dplyr::mutate(HUC12.x = ifelse(is.na(HUC12.x),HUC12.y,HUC12.x)) %>% # add HUC12 to owrd data
   #dplyr::filter(HUC12.x %in% subbasin_num)

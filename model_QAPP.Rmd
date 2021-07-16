@@ -538,7 +538,7 @@ Meteorological data, including air temperature, cloudiness, relative humidity, a
 `r if(NROW(t51.agrimet)>0){t51_agrimet_tbl}`
 `r if(NROW(t51.hydromet)>0){t51_hydromet_tbl}`
 `r if(NROW(t51.mw)>0){t51_mw_tbl}`
-`r if(NROW(model.input[which(model.input$"Model Location Type" == "Meteorological"),])>0){t51_sp_tbl}`
+`r if(NROW(t51.sp)>0){t51_sp_tbl}`
 
 ## Thermal Infrared Radiometry (TIR) data
 

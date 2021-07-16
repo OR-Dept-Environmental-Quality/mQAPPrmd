@@ -13,6 +13,7 @@ library(RAWSmet) # RAWS
 library(mesowest) # MesoWest
 mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # MesoWest
 library(rvest)
+library(lubridate)
 
 file.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/"
 ### for Willamette Mainstem QAPP: 
@@ -304,7 +305,11 @@ char=c("Temperature.Primary") # 'Temperature.Primary' - Continuous Water tempera
 
 bes.data <- odeqIRextdata::copbes_data(station, startdate, enddate, char) %>% 
   dplyr::filter(Grade.Code == 100, # 100=Good
-                Approval.Level == 1200) # 1200=Approved
+                Approval.Level == 1200) %>%  # 1200=Approved
+  dplyr::mutate(date = lubridate::date(as.Date(datetime))) %>% 
+  dplyr::group_by(date, Monitoring_Location_ID, Result.Unit) %>% 
+  dplyr::summarize(Result_Numeric = max(Result.Value)) %>% 
+  dplyr::mutate(Char_Name = "daily_max_water_temp")
 
 save(bes.stations, bes.data, file=paste0(file.dir,"bes.RData")) # download date: 7/9/2021
 
