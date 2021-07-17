@@ -374,20 +374,61 @@ for (qapp_project_area in project.areas$areas) {
   if(qapp_project_area %in% c("Walla Walla Subbasin")) {} else {
     
     # _ map ----
-    map <- map_basic %>% 
-      leaflet::addMarkers(data = ind_ps,
-                          group = "Individual NPDES Point Sources",
-                          options = leaflet::leafletOptions(pane="marker"),
-                          #clusterOptions = markerClusterOptions(),
-                          label = paste0(ind_ps$`Facility Name (Facility Number)`),
-                          labelOptions = labelOptions(textsize = "15px"),
-                          popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
-                                          "<br>", 
-                                          "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
-                                          "<br>",
-                                          "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
-                          popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) 
-    
+    if(qapp_project_area %in% c("John Day River Basin",
+                                "Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
+                                "Lower Willamette and Clackamas Subbasins",
+                                "Middle Willamette Subbasins",
+                                "North Umpqua Subbasin",
+                                "Rogue River Basin",
+                                "Sandy Subbasin",
+                                "South Umpqua and Umpqua Subbasins",
+                                "Southern Willamette Subbasins",
+                                "Willamette River Mainstem and Major Tributaries")) {
+      
+      map <- map_basic %>% 
+        leaflet::addMarkers(data = ind_ps,
+                            group = "Individual NPDES Point Sources",
+                            options = leaflet::leafletOptions(pane="marker"),
+                            #clusterOptions = markerClusterOptions(),
+                            label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                            labelOptions = labelOptions(textsize = "15px"),
+                            popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                            "<br>", 
+                                            "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                            "<br>",
+                                            "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                            popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+        leaflet::addMarkers(data = gen_ps,
+                            group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                            options = leaflet::leafletOptions(pane="marker"),
+                            #clusterOptions = markerClusterOptions(),
+                            label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                            labelOptions = labelOptions(textsize = "15px"),
+                            popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                            "<br>", 
+                                            "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                            "<br>",
+                                            "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                            popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) 
+      
+      
+    } else {
+      
+      map <- map_basic %>% 
+        leaflet::addMarkers(data = ind_ps,
+                            group = "Individual NPDES Point Sources",
+                            options = leaflet::leafletOptions(pane="marker"),
+                            #clusterOptions = markerClusterOptions(),
+                            label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                            labelOptions = labelOptions(textsize = "15px"),
+                            popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                            "<br>", 
+                                            "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                            "<br>",
+                                            "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                            popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) 
+      
+    }
   }
   
   # models ----
