@@ -756,27 +756,50 @@ if(NROW(section.npdes.ind)>0){
   
 }
 
-section.npdes.gen <- npdes.gen.pro.area %>% 
+##
+section.npdes.gen.1 <- npdes.gen.pro.area %>% 
+  dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
+  dplyr::filter(PermitType %in% c("GEN01","GEN03","GEN04","GEN05")) %>% 
+  dplyr::mutate(`Facility Name (Facility Number)` = paste0(`CommonName`," (", `WQ File Nbr`,")"),
+                `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
+                `Permit Type and Description` = paste0(`PermitType`, ": ", `PermitDescription`),
+                `River Mile` = round(`RiverMile`,1),
+                `Stream/River Mile` = ifelse(is.na(`StreamName`), NA, paste0(`StreamName`, " ", " RM ",`RiverMile`))) %>% 
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
+  dplyr::arrange(`Facility Name (Facility Number)`)
+
+if(NROW(section.npdes.gen.1)>0){
+  
+  t55_gen1_tbl <- knitr::kable(section.npdes.gen.1, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t55_gen1",
+                                             caption = paste0("Summary of any current general NPDES GEN01, GEN03, GEN04 and GEN05 permitted discharges in the ", qapp_project_area, ".")))
+  
+}
+##
+
+section.npdes.gen.2 <- npdes.gen.pro.area %>% 
   dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
+  dplyr::filter(!PermitType %in% c("GEN01","GEN03","GEN04","GEN05")) %>% 
   dplyr::mutate(`Permit Type and Description` = paste0(PermitType, ": ", PermitDescription)) %>% 
   dplyr::group_by(`Permit Type and Description`) %>% 
   dplyr::summarise(`Current Number of Registrants` = n()) %>% 
   dplyr::ungroup()
 
-if(NROW(section.npdes.gen)>0){
+if(NROW(section.npdes.gen.2)>0){
   
-  t55_gen_tbl <- knitr::kable(section.npdes.gen, format = "pandoc", padding = 2,
-                              caption = tbls(name = "t55_gen",
-                                             caption = paste0("Summary of current general NPDES permit registrants in the ", qapp_project_area, ".")))
+  t55_gen2_tbl <- knitr::kable(section.npdes.gen.2, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t55_gen2",
+                                             caption = paste0("Summary of current number of general NPDES permit registrants, other than GEN01, GEN03, GEN04 and GEN05 registrants, in the ", qapp_project_area, ".")))
   
 }
 
 ```
 
-`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. The location of these individual NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r tbls(name = "t55_gen", display="cite")` lists all the active general NPDES permitting types in the `r qapp_project_area`.
+`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite"), " lists the permittes of all the active  general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ". ")}`The location of these individual NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists all the active general NPDES permitting types `r if(NROW(section.npdes.gen.1)>0){paste0("other than GEN01, GEN03, GEN04 and GEN05 permitting types ")}`in the `r qapp_project_area`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
-`r if(NROW(section.npdes.gen)>0){t55_gen_tbl}`
+`r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
+`r if(NROW(section.npdes.gen.2)>0){t55_gen2_tbl}`
 
 ## Water rights/surface water diversions
 
@@ -1580,6 +1603,7 @@ DEQ prepared an interactive HTML map to display relevant information described i
 
 `r if(!is.na(project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B)){paste0("18. Salmon and Steelhead spawning use extent and period depicted in OAR ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B, ".")}`    
 
+
 ```{r, label=`area-map-data`,echo=FALSE}
 # Stream Temperature Stations
 temp_stations <- t53_1 %>% 
@@ -1645,6 +1669,12 @@ ind_ps <- section.npdes.ind %>%
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
+# General NPDES Point Sources (GEN01, GEN03, GEN04 and GEN05)
+gen_ps <- section.npdes.gen.1 %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
 if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
   save(temp.data.sample.count,
@@ -1656,6 +1686,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        flow_stations,
        met_stations,
        ind_ps,
+       gen_ps,
        file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
                      file.name,"_qapp.RData"))
 } else {
@@ -1670,6 +1701,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        gage_height_stations_map,
        met_stations,
        ind_ps,
+       gen_ps,
        file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
                      file.name,"_qapp.RData"))
   
