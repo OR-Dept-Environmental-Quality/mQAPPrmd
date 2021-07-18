@@ -430,7 +430,7 @@ qapp_project_area = "Middle Willamette Subbasins"
   }
   
   # _ Temp data ----
-  # AWQMS and OWRD Temp Data
+  # AWQMS, OWRD, and BES Temp Data
   ## _ (1) AWQMS ----
   station.awqms <- awqms.stations.temp %>% 
     dplyr::rename(`Station ID` = MLocID,
