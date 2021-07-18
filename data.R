@@ -430,7 +430,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   }
   
   # _ Temp data ----
-  # AWQMS and OWRD Temp Data
+  # AWQMS, OWRD, and BES Temp Data
   ## _ (1) AWQMS ----
   station.awqms <- awqms.stations.temp %>% 
     dplyr::rename(`Station ID` = MLocID,
