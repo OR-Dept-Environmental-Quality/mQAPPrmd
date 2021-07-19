@@ -173,6 +173,7 @@ roles <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "roles")
 risks <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "risks")
 abbr <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "abbr")
 data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
+rev <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "revision_history")
 
 # _ NPDES ----
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Individual_NDPES") %>% 
@@ -822,6 +823,7 @@ save(df.stations,
   risks,
   abbr,
   data.gap,
+  rev,
   lookup.huc,
   project.areas,
   qapp_project_area,

@@ -803,7 +803,7 @@ if(NROW(section.npdes.gen.2)>0){
 
 ```
 
-`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite"), " lists the permittes of all the active  general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ". ")}`The location of these individual NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists all the active general NPDES permitting types `r if(NROW(section.npdes.gen.1)>0){paste0("other than GEN01, GEN03, GEN04 and GEN05 permitting types ")}`in the `r qapp_project_area`.
+`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite"), " lists the permittees of all the active  general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ". ")}`The location of these individual NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists all the active general NPDES permitting types `r if(NROW(section.npdes.gen.1)>0){paste0("other than GEN01, GEN03, GEN04 and GEN05 permitting types ")}`in the `r qapp_project_area`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -1512,6 +1512,16 @@ for(r in unique(sort(qapp.ref$reference))) {
   cat("\n")
   
 }
+
+```
+
+# Revision history
+
+```{r, rev, echo=FALSE}
+
+knitr::kable(rev, format = "pandoc", padding = 2,
+                            caption = tbls(name = "rev",
+                                           caption = paste0("Revision history.")))
 
 ```
 
