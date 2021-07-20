@@ -108,7 +108,8 @@ if(npdes.ind.n > 1) {
 } 
 
 # NLCD
-nlcd.waterbody <- nlcd.pro.area %>% 
+nlcd.waterbody <- nlcd.pro.area %>%
+  dplyr::mutate(Stream = ifelse(Stream == "McKenzie River", "McKenzie River: Upper", Stream)) %>% # Temporary edits - check
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
   dplyr::arrange(desc(Acres)) %>% 
@@ -128,6 +129,7 @@ nlcd.text.waterbody <- nlcd.text.pro.area %>%
 
 # DMA
 dma.waterbody <- dma.pro.area %>% 
+  dplyr::mutate(Stream = ifelse(Stream == "McKenzie River", "McKenzie River: Upper", Stream)) %>% # Temporary edits - check
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
   dplyr::arrange(desc(Acres)) %>% 

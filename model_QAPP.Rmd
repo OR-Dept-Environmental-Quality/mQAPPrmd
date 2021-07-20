@@ -837,17 +837,36 @@ t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>%
 
 if(NROW(t56)>0){
   
-  t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
-                          caption = tbls(name = "t56",
-                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
+  #t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
+  #                        caption = tbls(name = "t56",
+  #                                       caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
   
 }
 
 ```
 
-Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the stations for effective shade measurements that were available in public and DEQ databases.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+```{r, label=`t56_sw`, echo=FALSE}
 
-`r if(NROW(t56)>0){t56_tbl}`
+t56.sw.shade <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_SouthWillamette.xlsx",
+                               sheet = "sW_effectiveShade") %>% 
+  dplyr::filter(!STATUS %in% c("REJECT","SUSPECT"))
+
+t56_sw <- t56 %>% 
+  dplyr::filter(`Station ID` %in% unique(sort(t56.sw.shade$SITE_ID))) %>% 
+  dplyr::left_join(t56.sw.shade[, c("SITE_ID","RESULT")],by=c("Station ID"="SITE_ID")) %>% 
+  dplyr::mutate(`Effective Shade` = ifelse(is.na(RESULT), NA, paste0(RESULT,"%"))) %>% 
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`,`Effective Shade`,`Data Source`) %>% 
+  dplyr::arrange(`Station ID`)
+
+t56_sw_tbl <- knitr::kable(t56_sw, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t56_sw",
+                                             caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
+
+```
+
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56_sw)>0){paste0(tbls(name = "t56_sw", display="cite")," lists the stations for effective shade measurements that were available in public and DEQ databases.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+
+`r if(NROW(t56_sw)>0){t56_sw_tbl}`
 
 # Model development and calibration
 
