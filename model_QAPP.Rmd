@@ -822,6 +822,38 @@ Estimates of water diversion rates and location of points of diversion can be de
 [WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
 [Water Use Reports]: https://apps.wrd.state.or.us/apps/wr/wateruse_query/
 
+## Effective shade measurements
+
+```{r, label=`t56`, echo=FALSE}
+
+t56 <- model.input %>% 
+  dplyr::filter(`Parameter` %in% c("Effective Shade")) %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::mutate(Station = `Model Location Name`,
+                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Data Source`) %>% 
+  dplyr::arrange(`Station ID`)
+
+t56_na <- t56 %>% dplyr::filter(is.na(`Latitude/Longitude`))
+t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>% 
+  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  rbind(t56_na) %>% 
+  dplyr::arrange(`Data Source`,`Station ID`,Station)
+
+if(NROW(t56)>0){
+  
+  t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
+                          caption = tbls(name = "t56",
+                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
+  
+}
+
+```
+
+**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+
+`r if(NROW(t56)>0){t56_tbl}`
+
 # Model development and calibration
 
 ```{r, label=`chap6`, include=FALSE}
