@@ -864,7 +864,7 @@ t56_sw_tbl <- knitr::kable(t56_sw, format = "pandoc", padding = 2,
 
 ```
 
-Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56_sw)>0){paste0(tbls(name = "t56_sw", display="cite")," lists the stations for effective shade measurements that were available in public and DEQ databases.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56_sw)>0){paste0(tbls(name = "t56_sw", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for September 2014.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t56_sw)>0){t56_sw_tbl}`
 

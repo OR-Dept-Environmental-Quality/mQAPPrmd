@@ -51,7 +51,7 @@ if(length(section.model.info$`Model Extent Text`)>1){
 } 
 ```
 
-The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+`r if(waterbody_name == "Southern Willamette Subbasins"){model.domain}else{paste0("The extent of the model domain is the ", model.domain)}` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 ### Spatial and temporal resolution
 
