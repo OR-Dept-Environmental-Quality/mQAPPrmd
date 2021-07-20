@@ -845,9 +845,9 @@ t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>%
 
 if(NROW(t56)>0){
   
-  t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
-                          caption = tbls(name = "t56",
-                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
+  #t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
+  #                        caption = tbls(name = "t56",
+  #                                       caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
   
 }
 
