@@ -181,9 +181,7 @@ Multiple waterbodies in the `r qapp_project_area` do not meet the water quality 
 *   Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
 
 *   Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
-
-*   Lahontan Cutthroat or Redband Trout Use: 20.0 deg-C (OAR 340-041-0028(4)(e))        
-
+   
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
@@ -361,7 +359,8 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
     dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
     dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
     dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
-    dplyr::ungroup()
+    dplyr::ungroup() %>% 
+    dplyr::filter(!Station == "KEUG - Eugene Airport, NCDC")
 }
 
 t51_ncei <- ncei.station.tbl %>% 
@@ -419,7 +418,8 @@ t51_mw <- mw.station.tbl %>%
                 tbl = "MesoWest") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Station`, .keep_all=TRUE)
+  dplyr::distinct(`Station`, .keep_all=TRUE) %>% 
+  dplyr::filter(!`Station ID` == "KEUG")
 
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   t51 <- rbind(t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw,t51_sp)} else {
