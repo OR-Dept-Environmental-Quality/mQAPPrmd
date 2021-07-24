@@ -58,7 +58,7 @@ if(length(section.model.info$`Model Extent Text`)>1){
 
 ```
 
-The extent of the model domain is the `r model.domain` `r if(waterbody_name == "Columbia Slough"){paste0("The model extent is shown in Figure xx through Figure xx (extracted from Berger and Wells, 2005) and also included in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}else{paste0("The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}`
+The extent of the model domain is the `r model.domain` `r if(waterbody_name == "Columbia Slough"){paste0("The model extent is shown in Figure 3 through Figure 6 (extracted from Berger and Wells, 2005) and also included in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}else{paste0("The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}`
 
 ```{r cs_lower_west, eval.after="fig.cap", fig.cap=cs.lower.west, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
 
@@ -120,7 +120,7 @@ tbl.col.slough <- flextable::regulartable(col.slough) %>%
 
 ```
 
-`r if(waterbody_name == "Columbia Slough"){paste0("The Columbia Slough model is composed of 397 longitudinal segments (25-231 meters in length), 17 vertical layers (layer height of 0.30-0.61 meters), and 41 branches (separate water bodies or branches off the main stem), many of which are segregated by culverts. The number of model time step intervals (NDT) is 2 and the minimum time step (DLTMIN) is 0.025 seconds. The maximum timestep (DLTMAX) is 20 seconds. The characteristics of the Columbia Slough model regions are shown in Table 13. For additional details regarding model setup and resolution, see Berger and Wells, 2005.")}`
+`r if(waterbody_name == "Columbia Slough"){paste0("The Columbia Slough model is composed of 397 longitudinal segments (25-231 meters in length), 17 vertical layers (layer height of 0.30-0.61 meters), and 41 branches (separate water bodies or branches off the main stem), many of which are segregated by culverts. The number of model time step intervals (NDT) is 2 and the minimum time step (DLTMIN) is 0.025 seconds. The maximum timestep (DLTMAX) is 20 seconds. The characteristics of the Columbia Slough model regions are shown in Table 16. For additional details regarding model setup and resolution, see Berger and Wells, 2005.")}`
 
 `r if(!waterbody_name == "Columbia Slough"){paste0("The model input spatial resolution (*dx*) is ", unique(section.model.info$"Input dx"), " ", unique(section.model.info$"Input dx Units"), ". Outputs are generated every ", unique(section.model.info$"Output dx"), " ", unique(section.model.info$"Output dx Units"), ". The model time step (*dt*) is ", unique(section.model.info$dT), " ", unique(section.model.info$"dT Units")," and outputs are generated every hour.")}`
 
@@ -300,20 +300,16 @@ if(!model.extent == TRUE){
                                                caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
     
   }
-  
-  t6x6_1.txt <- "For a description of model setup and inputs, see Berger and Wells 2005."
-  
+
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
-`r if(waterbody_name == "Columbia Slough"){paste0("For a complete description of model setup and inputs, see Wells and Berger (1995); and Berger and Wells (2005).")}`
-
-`r if(waterbody_name == "Columbia Slough"){paste0("The shading from near stream vegetation inputs to the model include vegetation height and canopy cover. These inputs were derived by digitizing and classifying riparian vegetation type polygons based on aerial photos and through discussions with Multnomah County Drainage District personnel (DEQ, 2006).")}`
+`r if(waterbody_name == "Columbia Slough"){paste0("For a complete description of model setup and inputs, see Wells and Berger (1995), and Berger and Wells (2005).")}`
 
 ```{r, label=`t6x6_2`, echo=FALSE}
 
@@ -324,7 +320,7 @@ t6x6_2 <- section.model.input %>%
 
 `r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}`
 
-`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
+`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The shading from near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
 
 ### Model calibration
 
@@ -390,7 +386,7 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(waterbody_name == "Columbia Slough"){paste0("Model calibration was completed by PSU (Berger and Wells, 2005; and Berger, 2003). Please refer to these reports for more information.")}`
+`r if(waterbody_name == "Columbia Slough"){paste0("Model calibration was completed by PSU (Berger, 2003; Berger and Wells, 2005). Please refer to these reports for more information.")}`
 
 `r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}}`
 
