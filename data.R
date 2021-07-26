@@ -295,11 +295,12 @@ load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
 # _ BES ----
 load(paste0(data.dir,"/download/bes.RData")) # bes.stations & bes.data
 bes.data <- bes.data %>% 
+  dplyr::left_join(bes.stations,by=c("Monitoring_Location_ID" = "LocationIdentifier")) %>% 
   dplyr::rename(MLocID = Monitoring_Location_ID,
                 SampleStartDate = date,
                 Result_Unit = Result.Unit) %>% 
   dplyr::mutate(Result_status = "Good, Approved",
-                StationDes = NA,
+                StationDes = LocationName,
                 Activity_Type = NA,
                 AU_ID = NA,
                 HUC8 = NA,
@@ -326,7 +327,12 @@ bes.data <- bes.data %>%
                 SampleStartTZ = NA,
                 SamplingMethod = NA,
                 Statistical_Base = "Maximum",
-                Time_Basis = NA)
+                Time_Basis = NA) %>% 
+  dplyr::select("Char_Name","Result_status","Result_Numeric","MLocID","SampleStartDate","StationDes",
+                "Activity_Type","AU_ID","HUC8","HUC8_Name","HUC10","HUC12","HUC12_Name","Lat_DD","Long_DD",
+                "Measure","Method_Code","MonLocType","Org_Name","OrganizationID","Project1","QualifierAbbr",
+                "Reachcode","Result_Comment","Result_Depth","Result_Depth_Unit","Result_Operator","Result_Type",
+                "Result_Unit","SampleStartTime","SampleStartTZ","SamplingMethod","Statistical_Base","Time_Basis")
 
 
 # _ Project areas and HUCs ----
