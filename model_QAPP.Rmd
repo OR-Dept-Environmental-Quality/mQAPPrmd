@@ -913,16 +913,15 @@ if(mod.check == "11"){
   
   if(NROW(modv)>0){
     
+    mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
+               knitr::knit_child(input = "hs67.Rmd", envir = globalenv()))
+    
     for(mod in unique(sort(modv$mod_rmd))){
       
       mod.child <- paste0(mod,".Rmd")
       mod.v <- c(mod.v,knitr::knit_child(input = mod.child, envir = globalenv()))
       
     }
-    
-    mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
-               knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
-               mod.v)
     
   } else {
     
@@ -940,16 +939,15 @@ if(mod.check == "11"){
     
     if(NROW(modv)>0){
       
+      mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
+                 knitr::knit_child(input = "hs68.Rmd", envir = globalenv()))
+      
       for(mod in unique(sort(modv$mod_rmd))){
         
         mod.child <- paste0(mod,".Rmd")
         mod.v <- c(mod.v, knitr::knit_child(input = mod.child, envir = globalenv()))
         
       }
-      
-      mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
-                 knitr::knit_child(input = "hs68.Rmd", envir = globalenv()),
-                 mod.v)
       
     } else {
       
@@ -966,6 +964,11 @@ if(mod.check == "11"){
         dplyr::filter(!mod_rmd %in% c("hs6","hs7","hs8"))
       
       if(NROW(modv)>0){
+
+        mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
+                   knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
+                   knitr::knit_child(input = "hs68.Rmd", envir = globalenv()))
+        
         
         for(mod in unique(sort(modv$mod_rmd))){
           
@@ -973,11 +976,6 @@ if(mod.check == "11"){
           mod.v <- c(mod.v, knitr::knit_child(input = mod.child, envir = globalenv()))
           
         }
-        
-        mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
-                   knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
-                   knitr::knit_child(input = "hs68.Rmd", envir = globalenv()),
-                   mod.v)
         
       } else {
         
@@ -996,16 +994,15 @@ if(mod.check == "11"){
         
         if(NROW(modv)>0){
           
+          mod.v <- c(knitr::knit_child(input = "hs7.Rmd", envir = globalenv()),
+                     knitr::knit_child(input = "hs78.Rmd", envir = globalenv()))
+          
           for(mod in unique(sort(modv$mod_rmd))){
             
             mod.child <- paste0(mod,".Rmd")
             mod.v <- c(mod.v,knitr::knit_child(input = mod.child, envir = globalenv()))
             
           }
-          
-          mod.v <- c(knitr::knit_child(input = "hs7.Rmd", envir = globalenv()),
-                     knitr::knit_child(input = "hs78.Rmd", envir = globalenv()),
-                     mod.v)
           
         } else {
           
