@@ -38,7 +38,7 @@ model.extent <- na.omit(model.extent)
 
 ### Model domain
 
-```{r, label=`t6x1`, include=FALSE}
+```{r, label=`t6x1`, echo=FALSE}
 
 if(length(section.model.info$`Model Extent Text`)>1){
   
@@ -49,9 +49,46 @@ if(length(section.model.info$`Model Extent Text`)>1){
   model.domain <- section.model.info$`Model Extent Text`
   
 } 
-```
 
-The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+if(waterbody_name %in% "North Umpqua River"){
+  
+  cat("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek. Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 1: Lemolo Reservoir to Lemolo Powerhouse #1")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 2: Lemolo Powerhouse #1 to Toketee Reservoir")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 3: Toketee Reservoir to Slide Powerhouse")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 4: Slide Powerhouse to Soda Springs Reservoir")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 5: Soda Springs Reservoir to Steamboat Creek")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 6: Steamboat Creek to Mouth")
+  
+} else {
+  
+  cat("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")
+
+}
 
 ### Spatial and temporal resolution
 
@@ -151,15 +188,22 @@ A designated management agency is defined in OAR 340-042-0030(2) as a federal, s
 
 ### Time frame of simulation
 
-```{r, label=`tf`, include=FALSE}
+```{r, label=`timeframe`, echo=FALSE}
 
-tf <- tmdl.mod.2 %>% 
-  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
-  pull(Model_version)
-
-```
-
-`r if(tf == "Heat Source Version 6"){paste0("The model period is for a single day: ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"),".")}else{paste0("The model period is ", format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), ".")}`
+if(waterbody_name %in% "North Umpqua River"){
+  
+  cat("The model period for North Umpqua Models 1-5 is July 8-11, 2001.")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("The model period for North Umpqua Model 6 is July 12-31, 2002.")
+  
+} else {
+  
+  cat(paste0("The model period is ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), "."))
+  
+}
 
 ### Important assumptions
 
