@@ -18,12 +18,13 @@ knitr::opts_chunk$set(results = "asis",
                       autodep = TRUE)
 
 options(kableExtra.auto_format = F)
+options(knitr.kable.NA = '')
 
 # For testing: model_extent <- "Model 1: Lemolo Reservoir to Lemolo Powerhouse #1"
 
 ```
 
-##### `r model_extent`
+#### `r model_extent`
 
 ```{r, label=`t6x7j`, include=FALSE}
 
@@ -35,16 +36,18 @@ t6x7j <- section.model.input %>%
                 `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                 `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`)),
                 Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Model Location` = round(`Model Location`,2),
+                  `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                  `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
                 `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
                 `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                             `Model Location Name`,
-                                                            paste0(`Model Location Name`, " (",`Station ID`,")")),
-                `Model Location` = round(`Model Location`,2)) %>% 
-  dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
-  dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::arrange(desc(`Model Location`)) %>% 
-  dplyr::rename(`Calibration Parameter` = `Parameter`)
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
+    dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+    dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
+    dplyr::rename(`Calibration Parameter` = `Parameter`)
 
 t6x7j_col <- t6x7j %>% 
   dplyr::filter(!is.na(`Location Units`))
@@ -59,9 +62,9 @@ if(NROW(t6x7j)>0){
                      caption = tbls(name = paste0("t6x7j", model_extent),
                                     caption = paste0("Calibration sites and parameters used in the existing ", model_extent, " Heat Source Model.")))
     
-  mod.loc <- ifelse(tmdl.mod.2$mod_rmd == "hs7" | tmdl.mod.2$mod_rmd == "hs8"| tmdl.mod.2$mod_rmd == "hs9",
+  mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
-                    ifelse(tmdl.mod.2$mod_rmd == "hs6",
+                    ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs6"),
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
   
@@ -69,7 +72,7 @@ if(NROW(t6x7j)>0){
 
 ```
 
-`r if(NROW(t6x7j)>0){paste0("Model calibration was completed by ",knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (",knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). Temperature, flow, and effective shade calibration sites are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite")," to improve documentation of the TMDL approach. The model location in the table describes the distance of each input from the most upstream model node. If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model file are described in Section 6.2 General model inputs and parameters. ", mod.loc[1])}`
+`r if(NROW(t6x7j)>0){paste0("Model calibration was completed by ",knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (",knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). Temperature, flow, and effective shade calibration sites are summarized in ",tbls(name = paste0("t6x7j", model_extent),display="cite")," to improve documentation of the TMDL approach. The model location in the table describes the distance of each input from the most upstream model node. If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model file are described in Section 6.2 General model inputs and parameters. ", mod.loc[1])}`
 
 `r if(NROW(t6x7j)>0){t6x7j_tbl}`
 
