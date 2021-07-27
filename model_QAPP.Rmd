@@ -195,13 +195,13 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
-•	Salmon and Steelhead Spawning: 13.0$^\circ C$/55.4$^\circ F$      
+*	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))      
 
-•	Core Cold Water Habitat: 16.0$^\circ C$/60.8$^\circ F$      
+*	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))      
 
-•	Salmon and Trout Rearing and Migration: 18.0$^\circ C$/64.4$^\circ F$  
+*	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))  
 
-•	Salmon and Steelhead Migration Corridors: 20.0$^\circ C$/68.0$^\circ F$   
+*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))   
 
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
@@ -209,9 +209,7 @@ The temperature standard authorizes insignificant additions of heat from human s
 
 As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
 
-Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r tbls(name = "tcat5", display="cite")`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
-
-Since the issuance of the original TMDL, the number of waterbodies that are identified as water quality limited for temperature on the Oregon 2018/2020 Section 303(d) Category 4A and Category 5 list has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, are summarized in `r tbls(name = "tcat5", display="cite")` and `r tbls(name = "tcat4a", display="cite")`.
+Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r tbls(name = "tcat5", display="cite")` and `r tbls(name = "tcat4a", display="cite")`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
@@ -362,7 +360,7 @@ DEQ has developed Heat Source models for the riverine portions of the North Umpq
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.       
 
-**[Update this paragraph where CE-QUAL-W2 is used].** The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
@@ -385,7 +383,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
                   `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
                   `Available Data` = Parameter,
                   Agency = NA,
-                  tbl = "DEQ File") %>% 
+                   tbl = "DEQ File") %>% 
     dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
     dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
     dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
@@ -474,10 +472,15 @@ if(NROW(t51.ncei)>0){
                                                                qapp_project_area, ".")))
 }
 
+# add 353036 from the worksheet to the RAWS table
+sp.raws <- data.frame("orOGAD","GRANDAD", "43.4158/122.577","USFS")
+names(sp.raws) <- c("Station ID","Station","Latitude/Longitude","Agency" )
+
 t51.raws <- t51 %>% 
   dplyr::filter(tbl=="RAWS") %>% 
   dplyr::select(-c(`Available Data`,tbl)) %>% 
-  dplyr::arrange(`Station ID`)
+  dplyr::arrange(`Station ID`) %>% 
+  rbind(sp.raws)
 
 if(NROW(t51.raws)>0){
   
@@ -533,7 +536,9 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
     dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
     dplyr::arrange(Station) %>% 
     dplyr::rename(Source = Station) %>% 
-    dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
+    dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+    dplyr::filter(!Source == "353036, RAWS") # add this site to the RAWS table
+
   
   if(NROW(t51.sp)>0){
     
@@ -559,13 +564,13 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
                            tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw))) %>% 
     dplyr::filter(tbl_rows != "0")
   
-  t51_num <- NROW(tables.met)+1
+  t51_num <- NROW(tables.met)+2
   
 }
 
 ```
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 2 through Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 3 through Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 `r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
 `r if(NROW(t51.raws)>0){t51_raws_tbl}`
@@ -1214,12 +1219,6 @@ Management scenarios described in this section summarize the means by which the 
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-**[List specific changes that will be made]**
-
-## Current conditions
-
-This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
-
 * Updating the Little River model to include current discharges from the USFS-Wolf Creek Civilian Conservation Center.       
 
 *	Updating the North Umpqua River Model to include current discharges from the Glide-Idleyld Sanitary District.       
@@ -1592,8 +1591,7 @@ other.ref <- data.frame(reference = c(
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
   'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
   'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
-  'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.'
-))
+  'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
   'Lorenz, D.L. and Ziegeweid, J.R. 2016. “Methods to estimate historical daily streamflow for ungaged stream locations in Minnesota. No. 2015-5181.” US Geological Survey, 2016.',
   'Risley, J., Stonewall, A. and Haluska, T. 2008. “Estimating flow-duration and low-flow frequency statistics for unregulated streams in Oregon. No. FHWA-OR-RD-09-03”. Geological Survey (US), 2008.',
   'DEQ (Oregon Department of Environmental Quality). 2002. “Little River Watershed TMDL.” https://www.oregon.gov/deq/wq/tmdls/Pages/TMDLs-Umpqua-Basin.aspx.',

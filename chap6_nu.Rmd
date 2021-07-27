@@ -90,6 +90,8 @@ if(waterbody_name %in% "North Umpqua River"){
 
 }
 
+```
+
 ### Spatial and temporal resolution
 
 The model input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
@@ -205,6 +207,8 @@ if(waterbody_name %in% "North Umpqua River"){
   
 }
 
+```
+
 ### Important assumptions
 
 **[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
@@ -270,13 +274,13 @@ if(!model.extent == TRUE){
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  #t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
