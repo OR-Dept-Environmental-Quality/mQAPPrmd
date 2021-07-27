@@ -46,6 +46,7 @@ library(stringr);library(stringi)
 library(english)
 library(pacman)
 library(httr)
+library(scales)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -863,6 +864,7 @@ t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>%
 
 t56.lw <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_LowerWillamette.xlsx",
                                sheet = "LowerWillamette_effectiveShade") %>% 
+  dplyr::mutate(`Effective Shade` = scales::percent(`Effective Shade`, accuracy = 1)) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`,`Effective Shade`,`Data Source`) %>%
   dplyr::arrange(`Station ID`)
 
