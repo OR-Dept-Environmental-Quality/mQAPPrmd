@@ -46,6 +46,7 @@ library(stringr);library(stringi)
 library(english)
 library(pacman)
 library(httr)
+library(scales)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -209,6 +210,10 @@ The temperature standard authorizes insignificant additions of heat from human s
 
 As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
 
+**[Update:]**The existing temperature TMDL addresses temperature on streams with both point and nonpoint sources of thermal loads. 
+
+**[Update:]**The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2006 Umpqua Basin TMDL were developed for short time periods in July 2001 and July 2002, which do not coincide with the spawning season. The simulation years are also not well harmonized among the various waterbodies. Therefore, some Heat Source models need to be updated to cover the spawning season using data collected by DEQ during the 2009 spawning season to support the TMDL modeling.
+
 Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r tbls(name = "tcat5", display="cite")` and `r tbls(name = "tcat4a", display="cite")`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
@@ -240,10 +245,6 @@ To the extent existing data and information allow, the primary analysis and mode
     c. Identify under what timeline and where management strategies need to be implemented.        
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
-
-The existing temperature TMDL addresses temperature on streams with both point and nonpoint sources of thermal loads. 
-
-The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2006 Umpqua Basin TMDL were developed for short time periods in July 2001 and July 2002, which do not coincide with the spawning season. The simulation years are also not well harmonized among the various waterbodies. Therefore, some Heat Source models need to be updated to cover the spawning season using data collected by DEQ during the 2009 spawning season to support the TMDL modeling.
 
 `r if(NROW(tcat5)>0){tcat5}`
 `r if(NROW(tcat4a)>0){tcat4a}`
@@ -467,7 +468,7 @@ t51.ncei <- t51 %>%
 if(NROW(t51.ncei)>0){
   
   t51_ncei_tbl <- knitr::kable(t51.ncei, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_ncdc",
+                               caption = tbls(name = "t51_ncei",
                                               caption = paste0("Meteorological stations and data available in the National Climatic Data Center (NCDC) database in the ",
                                                                qapp_project_area, ".")))
 }
@@ -552,25 +553,25 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 # Table NUM
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   
-  tables.met <- data.frame(tbl_name = c("t51.sp","t51.ncei","t51.raws","t51.agrimet","t51.hydromet","t51.mw"),
-                           tbl_rows = c(NROW(t51.sp),NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw))) %>% 
+  tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
+                           tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp))) %>% 
     dplyr::filter(tbl_rows != "0")
   
-  t51_num <- NROW(tables.met)+1
+  #t51_num <- NROW(tables.met)+1
   
 } else {
   
-  tables.met <- data.frame(tbl_name = c("t51.ncei","t51.raws","t51.agrimet","t51.hydromet","t51.mw"),
+  tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw"),
                            tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw))) %>% 
     dplyr::filter(tbl_rows != "0")
   
-  t51_num <- NROW(tables.met)+2
+  #t51_num <- NROW(tables.met)+1
   
 }
 
 ```
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 3 through Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 `r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
 `r if(NROW(t51.raws)>0){t51_raws_tbl}`
@@ -759,14 +760,25 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp
                           `nrow` = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp))) %>% 
   dplyr::filter(!`nrow` == 0)
 
+# North Umpqua instantaneous flow
+t54_nu <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_NorthUmpqua.xlsx",sheet = "NorthUmpqua_InstFlow") %>% 
+  dplyr::mutate(Time = format(Time,"%H:%M")) %>% 
+  dplyr::select(Station,Date,Time,`Flow (cfs)`,`Latitude/Longitude`) 
+
+t54_nu_tbl <- knitr::kable(t54_nu, format = "pandoc", padding = 2, row.names = NA,
+                           caption = tbls(name = "t54_nu",
+                                          caption = paste0("Instantaneous flow volume measurements in the ", qapp_project_area, ".")))
+
+
 ```
 
-`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases. Appendix B summarizes when data were collected at each of the stations with continuous flow measurements. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
+`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases. Appendix B summarizes when data were collected at each of the stations with continuous flow measurements. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C. `r tbls(name = "t54_nu", display="cite")` lists the locations where instantaneous flow volume measurements made by DEQ were available.
 
 `r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
 `r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
 `r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
 `r if(NROW(t54_sp)>0){t54_sp_tbl}`
+`r t54_nu_tbl`
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
@@ -868,19 +880,42 @@ t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>%
   rbind(t56_na) %>% 
   dplyr::arrange(`Data Source`,`Station ID`,Station)
 
-if(NROW(t56)>0){
+#if(NROW(t56)>0){
   
-  t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
-                          caption = tbls(name = "t56",
-                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
+#  t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
+#                          caption = tbls(name = "t56",
+#                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
   
-}
+#}
 
 ```
 
-Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+```{r, label=`t56_nu`, echo=FALSE}
 
-`r if(NROW(t56)>0){t56_tbl}`
+t56.nu <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_NorthUmpqua.xlsx",
+                               sheet = "NorthUmpqua_effectiveShade") %>% 
+  dplyr::mutate(site = scales::percent(site, accuracy = 1),
+                `u/s 150 m` = scales::percent(`u/s 150 m`, accuracy = 1),
+                `u/s 100 m` = scales::percent(`u/s 100 m`, accuracy = 1),
+                `u/s 50 m` = scales::percent(`u/s 50 m`, accuracy = 1),
+                `d/s 50 m` = scales::percent(`d/s 50 m`, accuracy = 1)) %>% 
+  dplyr::rename(`At Location` = site,
+                `Upstream 150m` = `u/s 150 m`,
+                `Upstream 100m` = `u/s 100 m`,
+                `Upstream 50m` = `u/s 50 m`,
+                `Downstream 50m` = `d/s 50 m`) %>% 
+  dplyr::select(Location,`Latitude/Longitude`,`At Location`,`Upstream 150m`,`Upstream 100m`,`Upstream 50m`,`Downstream 50m`) %>%
+  dplyr::arrange(Location)
+
+t56_nu_tbl <- knitr::kable(t56.nu, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t56.nu",
+                                             caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
+
+```
+
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56.nu)>0){paste0(tbls(name = "t56.nu", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for September 2009.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+
+`r if(NROW(t56.nu)>0){t56_nu_tbl}`
 
 # Model development and calibration
 
@@ -1120,7 +1155,11 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
     
   } else {
     
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+    if(!waterbody_name == "Fish Creek (2009)"){
+      
+      chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+      
+    }
   }
   
 }

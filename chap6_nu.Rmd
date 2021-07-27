@@ -378,3 +378,5 @@ if(!model.extent == TRUE){
 ### Model inputs
 
 ### Model calibration
+
+`r if(waterbody_name == "Fish Creek (2001)"){paste0("[Update: Fish Creek (2009) (Spawning Period)]")}`
