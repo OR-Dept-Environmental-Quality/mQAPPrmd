@@ -51,11 +51,11 @@ if(length(section.model.info$`Model Extent Text`)>1){
 } 
 ```
 
-The extent of the model domain is the `r model.domain`
+The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 ### Spatial and temporal resolution
 
-The model input sampling rate (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
+The model input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
 
 A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.
 
@@ -133,21 +133,33 @@ if(NROW(dma.waterbody)>0){
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include, channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these later sources will be investigated as part of the model scenarios. `r npdes.txt`
+The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+
+`r npdes.txt`
 
 `r if(npdes.ind.n > 0){npdes.ind.tbl}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percentage of the near stream area. `r tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
 
 `r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agency that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
+Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.
+
+A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies  that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
 
 `r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
 
 ### Time frame of simulation
 
-The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
+```{r, label=`tf`, include=FALSE}
+
+tf <- tmdl.mod.2 %>% 
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  pull(Model_version)
+
+```
+
+`r if(tf == "Heat Source Version 6"){paste0("The model period is for a single day: ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"),".")}else{paste0("The model period is ", format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), ".")}`
 
 ### Important assumptions
 
@@ -231,9 +243,9 @@ t6x6_2 <- section.model.input %>%
 
 ```
 
-`r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
+`r if(!model.extent == TRUE){}else{if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}}`
 
-`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
+`r if(!model.extent == TRUE){}else{if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}}`
 
 ### Model calibration
 
@@ -259,16 +271,17 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
                   Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Model Location` = round(`Model Location`,2),
+                  `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                  `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
                   `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                  `Model Location Name` = ifelse(`Model Location Name` %in% c("Mouth to Headwaters","Headwaters to mouth"),"Model extent",`Model Location Name`),
                   `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
-                  `Model Location` = round(`Model Location`,2)) %>% 
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
     dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
     dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
     dplyr::ungroup() %>% 
-    dplyr::arrange(desc(`Model Location`)) %>% 
+    dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
   
   t6x7_col <- t6x7 %>% 
@@ -278,9 +291,13 @@ if(!model.extent == TRUE){
   
   t6x7 <- t6x7[,c(1,2,5,4)]
   
-  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
-                           caption = tbls(name = paste0("t6x7", waterbody_name),
-                                          caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  if(NROW(t6x7)>0){
+    
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                             caption = tbls(name = paste0("t6x7", waterbody_name),
+                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+    
+  }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
@@ -288,11 +305,13 @@ if(!model.extent == TRUE){
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
   
+  t6x7_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}else{t6x7_1.txt}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
 
