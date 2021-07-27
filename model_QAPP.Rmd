@@ -441,7 +441,7 @@ t51.ncei <- t51 %>%
 if(NROW(t51.ncei)>0){
   
   t51_ncei_tbl <- knitr::kable(t51.ncei, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_ncdc",
+                               caption = tbls(name = "t51_ncei",
                                               caption = paste0("Meteorological stations and data available in the National Climatic Data Center (NCDC) database in the ",
                                                                qapp_project_area, ".")))
 }
@@ -519,25 +519,25 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
 # Table NUM
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   
-  tables.met <- data.frame(tbl_name = c("t51.sp","t51.ncei","t51.raws","t51.agrimet","t51.hydromet","t51.mw"),
-                           tbl_rows = c(NROW(t51.sp),NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw))) %>% 
+  tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
+                           tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp))) %>% 
     dplyr::filter(tbl_rows != "0")
   
-  t51_num <- NROW(tables.met)+1
+  #t51_num <- NROW(tables.met)+1
   
 } else {
   
-  tables.met <- data.frame(tbl_name = c("t51.ncei","t51.raws","t51.agrimet","t51.hydromet","t51.mw"),
+  tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw"),
                            tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw))) %>% 
     dplyr::filter(tbl_rows != "0")
   
-  t51_num <- NROW(tables.met)+1
+  #t51_num <- NROW(tables.met)+1
   
 }
 
 ```
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. Table 2 through Table `r t51_num` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 `r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
 `r if(NROW(t51.raws)>0){t51_raws_tbl}`
@@ -1096,7 +1096,11 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
     
   } else {
     
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+    if(!waterbody_name == "Fish Creek (2009)"){
+      
+      chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+      
+    }
   }
   
 }
