@@ -292,9 +292,16 @@ save(doe.stations.pro.area, doe.data.pro.area, file=paste0(file.dir,"doe.RData")
 ## COP: https://aquarius.portlandoregon.gov/
 devtools::install_github("TravisPritchardODEQ/odeqIRextdata")
 library(odeqIRextdata)
-library (readr)
-urlfile <- "https://raw.githubusercontent.com/TravisPritchardODEQ/odeqIRextdata/master/BES_stations.csv"
-bes.stations <- read_csv(url(urlfile))
+#library (readr)
+#urlfile <- "https://raw.githubusercontent.com/TravisPritchardODEQ/odeqIRextdata/master/BES_stations.csv"
+#bes.stations <- readr::read_csv(url(urlfile))
+
+# Use the station list provided by Peter Bryant from COP.
+bes.stations <- readxl::read_xlsx(paste0(file.dir, "cop_stations.xlsx"), sheet = "2021-08-03 Surface Water Time S") %>% 
+  dplyr::filter(Parameter == "Temperature",
+                Label == "Primary",
+                Unit == "degC") %>% 
+  dplyr::select("LocationIdentifier","LocationName","Latitude","Longitude","LocationType")
 bes.stations.id <- bes.stations %>% 
   dplyr::pull(LocationIdentifier)
 
@@ -311,5 +318,26 @@ bes.data <- odeqIRextdata::copbes_data(station, startdate, enddate, char) %>%
   dplyr::summarize(Result_Numeric = max(Result.Value)) %>% 
   dplyr::mutate(Char_Name = "daily_max_water_temp")
 
-save(bes.stations, bes.data, file=paste0(file.dir,"bes.RData")) # download date: 7/9/2021
+# check ----
+station <- bes.stations.id
+startdate <- "2015-01-01"
+enddate <- "2016-12-31"
+char=c("Temperature.Primary") # 'Temperature.Primary' - Continuous Water temperature (deg C)
 
+bes.data.1516 <- odeqIRextdata::copbes_data(station, startdate, enddate, char) %>% 
+  dplyr::filter(Grade.Code == 100, # 100=Good
+                Approval.Level == 1200) %>%  # 1200=Approved
+  dplyr::mutate(date = lubridate::date(as.Date(datetime))) %>% 
+  dplyr::group_by(date, Monitoring_Location_ID, Result.Unit) %>% 
+  dplyr::summarize(Result_Numeric = max(Result.Value)) %>% 
+  dplyr::mutate(Char_Name = "daily_max_water_temp")
+
+bes.data.check <- bes.data %>% 
+  dplyr::group_by(Monitoring_Location_ID) %>% 
+  dplyr::summarise(date_range = paste(range(date)[1]," - ",range(date)[2])) %>% 
+  dplyr::ungroup()
+
+write.csv(bes.data.check, paste0(file.dir,"bes_data_check.csv"))
+# end check ----
+
+save(bes.stations, bes.data, file=paste0(file.dir,"bes.RData")) # download date: 8/11/2021
