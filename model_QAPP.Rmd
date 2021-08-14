@@ -862,21 +862,21 @@ t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>%
 
 ```{r, label=`t56_lw`, echo=FALSE}
 
-t56.lw <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_LowerWillamette.xlsx",
+t56 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_LowerWillamette.xlsx",
                                sheet = "LowerWillamette_effectiveShade") %>% 
   dplyr::mutate(`Effective Shade` = scales::percent(`Effective Shade`, accuracy = 1)) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`,`Effective Shade`,`Data Source`) %>%
   dplyr::arrange(`Station ID`)
 
-t56_lw_tbl <- knitr::kable(t56.lw, format = "pandoc", padding = 2,
-                              caption = tbls(name = "t56.lw",
+t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t56",
                                              caption = paste0("Effective shade data collected along Johnson Creek.")))
 
 ```
 
-Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56.lw)>0){paste0(tbls(name = "t56.lw", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for July 2002.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for July 2002.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
-`r if(NROW(t56.lw)>0){t56_lw_tbl}`
+`r if(NROW(t56)>0){t56_tbl}`
 
 # Model development and calibration
 
