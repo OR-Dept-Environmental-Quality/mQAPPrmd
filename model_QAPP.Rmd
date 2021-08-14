@@ -853,9 +853,9 @@ t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>%
 
 ```
 
-```{r, label=`t56_sandy`, echo=FALSE}
+```{r, label=`t56`, echo=FALSE}
 
-t56_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",
+t56 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",
                                sheet = "sandy_effective_shade") %>% 
   #dplyr::mutate(`Effective Shade` = ifelse((`Effective Shade` %in% c("5-30%","15-40%","88-94%","88-100%","95-100%")),as.character(`Effective Shade`),scales::percent(as.numeric(`Effective Shade`)))) %>% 
   dplyr::mutate(`Effective Shade` = ifelse((`Effective Shade` %in% c("5-30%","15-40%","88-94%","88-100%","95-100%")),
@@ -867,15 +867,15 @@ t56_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMD
   dplyr::mutate(`Latitude/Longitude` = ifelse(Station == "Sandy R. @ Troutdale STP", "45.4982/-122.01", `Latitude/Longitude`)) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`,`Effective Shade`,`Data Source`) 
 
-t56_sandy_tbl <- knitr::kable(t56_sandy, format = "pandoc", padding = 2,
-                              caption = tbls(name = "t56_sandy",
+t56_tbl <- knitr::kable(t56, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t56",
                                              caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
 
 ```
 
-Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r tbls(name = "t56_sandy", display="cite")` lists the locations where effective shade measurements were collected and the effective shade value for August 2001.
+Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r tbls(name = "t56", display="cite")` lists the locations where effective shade measurements were collected and the effective shade value for August 2001.
 
-`r t56_sandy_tbl`
+`r t56_tbl`
 
 # Model development and calibration
 
