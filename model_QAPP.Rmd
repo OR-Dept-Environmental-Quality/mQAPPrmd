@@ -769,7 +769,7 @@ if(NROW(section.npdes.gen.1)>0){
   
   t55_gen1_tbl <- knitr::kable(section.npdes.gen.1, format = "pandoc", padding = 2,
                               caption = tbls(name = "t55_gen1",
-                                             caption = paste0("Summary of any current general NPDES GEN01, GEN03, GEN04 and GEN05 permitted discharges in the ", qapp_project_area, ".")))
+                                             caption = paste0("Summary of current registrants under the general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ".")))
   
 }
 ##
@@ -792,7 +792,7 @@ if(NROW(section.npdes.gen.2)>0){
 
 ```
 
-`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite"), " lists the permittees of all the active  general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ". ")}`The location of these individual NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists all the active general NPDES permitting types `r if(NROW(section.npdes.gen.1)>0){paste0("other than GEN01, GEN03, GEN04 and GEN05 permitting types ")}`in the `r qapp_project_area`.
+`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite"), " lists the registrants covered under the general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ". ")}`This group of general permit are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists all the active general NPDES permitting types `r if(NROW(section.npdes.gen.1)>0){paste0("other than GEN01, GEN03, GEN04 and GEN05 permitting types ")}`in the `r qapp_project_area`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -839,7 +839,7 @@ if(NROW(t56)>0){
 
 ```
 
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux delivered to the stream surface. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t56)>0){t56_tbl}`
 
@@ -1010,7 +1010,7 @@ The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", 
 
 Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
 
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the Model Parameters sections in the current Chapter 6  Model Development and Calibration.
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the sections of model inputs in the current Chapter 6 Model development and calibration.
 
 ```{r, label=`data_gap`, echo=FALSE}
 
@@ -1118,7 +1118,7 @@ This section identifies the model acceptance criteria. Model acceptance relies o
 
 3)	Model predicted results have been compared with the associated observed measurements using graphical presentations. Visual comparisons are useful in evaluating model performance over the appropriate temporal or spatial scales.    
 
-4)	Goodness of fit statistics have been calculated comparing the model predicted results to the associated observed measurements. The calibration goodness of fit statistics are shown in Equation 4 through Equation 7.    
+4)	Goodness of fit statistics have been calculated comparing the model predicted results to the associated observed measurements. The calibration goodness of fit statistics are shown in Equation 5 through Equation 8.    
 
 5)  Goodness of fit statistics have been used to inform the appropriate use of the model. Where a model achieves an excellent or good fit it can generally assume a strong role in decision making about appropriate management options. Conversely, where a model achieves only a fair or poor fit it should assume a much less prominent role in decision making about appropriate management options. If a desired level of quality is not achieved on some or all measures, the model might still be useful; however, a detailed description of its potential range of applicability will be provided.    
 
@@ -1126,23 +1126,27 @@ This section identifies the model acceptance criteria. Model acceptance relies o
 
 7)	Peer review as described in Section 9.    
 
-Equation 4 through Equation 7 are the goodness of fit statistics to be calculated for each calibrated model.
+Equation 5 through Equation 8 are the goodness of fit statistics to be calculated for each calibrated temperature model. Equation 4 through Equation 7 are the goodness of fit statistics to be calculated for each calibrated shade model.
+
+**Coefficient of Determination – R squared ($R^2$)**: A coefficient of determination, or $R^2$, of one indicates a perfect fit. $R^2$ is a measure of how well predicted values fit the observed data. It compares the variations in the residuals to the variation of the observed data.
+
+$$R^2 = 1-\frac{\sum(X_{obs} - X_{mod})^2}{\sum(X_{obs} - \overline{X_{obs}})^2}\hspace{3em}\text{Equation 4}$$ 
 
 **Mean Error (ME)**: A mean error of zero indicates a perfect fit. A positive value indicates on average the model predicted values are less than the observed data. A negative value indicates on average the model predicted values are greater than the observed data. The mean error statistic may give a false ideal value of zero (or near zero) if the average of the positive deviations between predictions and observations is about equal to the average of the negative deviations in a data set. Because of this, the mean absolute error (MAE) statistic should be used in conjunction with mean error to evaluate model performance.
 
-$$ME = \frac{1}{n}\sum(X_{mod} - X_{obs}) \hspace{3em}\text{Equation 4}$$ 
+$$ME = \frac{1}{n}\sum(X_{mod} - X_{obs}) \hspace{3em}\text{Equation 5}$$ 
 
 **Mean Absolute Error (MAE)**: A mean absolute error of zero indicates a perfect fit. The magnitude of the mean absolute error indicates the average deviation between model predicted values and observed data. The mean absolute error cannot give a false zero.
 
-$$MAE = \frac{1}{n}\sum|X_{mod} - X_{obs}|  \hspace{3em}\text{Equation 5}$$
+$$MAE = \frac{1}{n}\sum|X_{mod} - X_{obs}|  \hspace{3em}\text{Equation 6}$$
 
 **Root Mean Square Error (RMSE)**: A root mean square error of zero indicates a perfect fit. Root mean square error is a measure of the magnitude of the difference between model predicted values and observed data.
 
-$$RMSE = \sqrt{\frac{1}{n}\sum(X_{mod} - X_{obs})^2} \hspace{3em}\text{Equation 6}$$
+$$RMSE = \sqrt{\frac{1}{n}\sum(X_{mod} - X_{obs})^2} \hspace{3em}\text{Equation 7}$$
 
 **Nash-Sutcliffe efficiency coefficient (NS)**: Nash-Sutcliffe efficiencies can range from -$\infty$ to 1. An efficiency of 1 corresponds to a perfect match of modeled predicted value to the observed data. An efficiency of 0 indicates that the model predictions are as accurate as the mean of the observed data, whereas an efficiency less than zero occurs when the observed mean is a better predictor than the model.
 
-$$NS = 1 - \frac {\sum (X_{mod} - X_{obs})^2}{\sum (X_{mod} - \overline{X_{obs}})^2}  \hspace{3em}\text{Equation 7}$$
+$$NS = 1 - \frac {\sum (X_{mod} - X_{obs})^2}{\sum (X_{mod} - \overline{X_{obs}})^2}  \hspace{3em}\text{Equation 8}$$
 
 where,  
 $X_{mod}$ = The model predicted results;  
@@ -1347,7 +1351,7 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **TMDL and WQMP development phase**    
 
-The TMDL and WQMP development phase is scheduled to begin on `r format(project.areas[which(project.areas$areas == qapp_project_area),]$Task.1.Start,"%B %d, %Y")` with USEPA’s final agency action approving or disapproving of the TMDL no later than `r format(project.areas[which(project.areas$areas == qapp_project_area),]$EPA.Approval,"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to USEPA for their action.
+The TMDL and WQMP development phase is scheduled to begin in `r year(project.areas[which(project.areas$areas == qapp_project_area),]$Task.1.Start)` with USEPA’s final agency action approving or disapproving of the TMDL no later than `r format(project.areas[which(project.areas$areas == qapp_project_area),]$EPA.Approval,"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to USEPA for their action.
 
 # Data management
 
