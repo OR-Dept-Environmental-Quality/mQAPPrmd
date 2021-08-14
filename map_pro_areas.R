@@ -127,7 +127,7 @@ popupTable.gageHeight <- function(station_name = NULL){
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
-# qapp_project_area = "Sandy Subbasin"
+qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
 # qapp_project_area = "Southern Willamette Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
@@ -136,7 +136,7 @@ popupTable.gageHeight <- function(station_name = NULL){
 
 #for (qapp_project_area in project.areas[which(!project.areas$areas %in% c("Willamette River Mainstem and Major Tributaries")),]$areas) {
 
-for (qapp_project_area in project.areas$areas) {
+#for (qapp_project_area in project.areas$areas) {
   
   print(qapp_project_area)
   
@@ -898,4 +898,4 @@ for (qapp_project_area in project.areas$areas) {
   htmlwidgets::saveWidget(map_pro_area, paste0(dir,map.file.name,".html"), 
                           background = "grey", selfcontained = TRUE)
   
-}
+#}
