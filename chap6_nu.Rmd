@@ -38,7 +38,7 @@ model.extent <- na.omit(model.extent)
 
 ### Model domain
 
-```{r, label=`t6x1`, include=FALSE}
+```{r, label=`t6x1`, echo=FALSE}
 
 if(length(section.model.info$`Model Extent Text`)>1){
   
@@ -49,9 +49,48 @@ if(length(section.model.info$`Model Extent Text`)>1){
   model.domain <- section.model.info$`Model Extent Text`
   
 } 
-```
 
-The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+if(waterbody_name %in% "North Umpqua River"){
+  
+  cat("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek. Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 1: Lemolo Reservoir to Lemolo Powerhouse #1")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 2: Lemolo Powerhouse #1 to Toketee Reservoir")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 3: Toketee Reservoir to Slide Powerhouse")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 4: Slide Powerhouse to Soda Springs Reservoir")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 5: Soda Springs Reservoir to Steamboat Creek")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("Model 6: Steamboat Creek to Mouth")
+  
+} else {
+  
+  cat("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")
+
+}
+
+```
 
 ### Spatial and temporal resolution
 
@@ -151,15 +190,24 @@ A designated management agency is defined in OAR 340-042-0030(2) as a federal, s
 
 ### Time frame of simulation
 
-```{r, label=`tf`, include=FALSE}
+```{r, label=`timeframe`, echo=FALSE}
 
-tf <- tmdl.mod.2 %>% 
-  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
-  pull(Model_version)
+if(waterbody_name %in% "North Umpqua River"){
+  
+  cat("The model period for North Umpqua Models 1-5 is July 8-11, 2001.")
+  cat("\
+  
+      ")
+  cat("\n")
+  cat("The model period for North Umpqua Model 6 is July 12-31, 2002.")
+  
+} else {
+  
+  cat(paste0("The model period is ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), "."))
+  
+}
 
 ```
-
-`r if(tf == "Heat Source Version 6"){paste0("The model period is for a single day: ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"),".")}else{paste0("The model period is ", format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), ".")}`
 
 ### Important assumptions
 
@@ -226,13 +274,13 @@ if(!model.extent == TRUE){
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  #t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
@@ -330,3 +378,5 @@ if(!model.extent == TRUE){
 ### Model inputs
 
 ### Model calibration
+
+`r if(waterbody_name == "Fish Creek (2001)"){paste0("[Update: Fish Creek (2009) (Spawning Period)]")}`
