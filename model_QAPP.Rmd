@@ -495,7 +495,7 @@ if(NROW(t51.mw)>0){
   
 }
 
-if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
+#if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   
   t51.sp <- t51 %>% 
     dplyr::filter(tbl=="DEQ File") %>% 
@@ -511,7 +511,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
                                               caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
     
   }
-}
+#}
 
 # Table NUM
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
@@ -569,7 +569,7 @@ t52_ref <- tir %>%
 
 ```
 
-DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
