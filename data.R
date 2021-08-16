@@ -146,14 +146,15 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
   dplyr::mutate(Model_version = ifelse(substr(`Model version`, 13,13) == "6", "Heat Source Version 6",
                                        ifelse(substr(`Model version`, 13,13) == "7", "Heat Source Version 7",
                                               ifelse(substr(`Model version`, 13,13) == "8", "Heat Source Version 8",
-                                                     ifelse(substr(`Model version`, 13,13) == "9", "Heat Source Version 9",
+                                                     ifelse(substr(`Model version`, 13,13) == "9", ifelse(`Primary Model Parameter` == "Solar","Heat Source Version 9 shade model","Heat Source Version 9"),
                                                             ifelse(substr(`Model version`, 1,2) == "CE", "CE-QUAL-W2 Version 3","SHADOW")))))) %>% 
   dplyr::mutate(mod_rmd = ifelse(Model_version == "Heat Source Version 6", "hs6",
                                  ifelse(Model_version == "Heat Source Version 7", "hs7",
                                         ifelse(Model_version == "Heat Source Version 8", "hs8",
                                                ifelse(Model_version == "Heat Source Version 9", "hs9",
-                                                      ifelse(Model_version == "CE-QUAL-W2 Version 3", "ce",
-                                                             "sh")))))) %>% 
+                                                      ifelse(Model_version == "Heat Source Version 9 shade model", "hs9",
+                                                             ifelse(Model_version == "CE-QUAL-W2 Version 3", "ce",
+                                                                    "sh"))))))) %>% 
   dplyr::mutate(mod_score = ifelse(mod_rmd == "hs6", "1",
                                    ifelse(mod_rmd == "hs7", "10",
                                           ifelse(mod_rmd == "hs8", "20", "0")))) %>% 
@@ -560,7 +561,9 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::mutate(Organization = ifelse(Organization == "EMSWCD(NOSTORETID)", "EMSWCD", Organization)) %>%
     dplyr::mutate(Organization = ifelse(Organization == "PSU(NOSTORETID)", "Portland State University", Organization)) %>%
     dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS-OR", Organization)) 
+    dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS-OR", Organization)) %>% 
+    dplyr::mutate(Organization = ifelse(Organization == "CRITFC(NOSTORETID)", "CRITFC", Organization)) %>% 
+    dplyr::mutate(Organization = ifelse(Organization == "IPC(NOSTORETID)", "Idaho Power Company", Organization))
   
   temp.data <- awqms.data.temp %>% 
     dplyr::filter(MLocID %in% station.awqms.temp$`Station ID`) %>%
