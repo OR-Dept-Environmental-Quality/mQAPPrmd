@@ -1,7 +1,7 @@
 ---
 output: 
   word_document:
-    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -23,6 +23,10 @@ options(kableExtra.auto_format = F)
 
 ```{r, hs9_tbl, echo=FALSE}
 
+hs9.v <- tmdl.mod.2 %>% 
+  dplyr::filter(mod_rmd == "hs9") %>% 
+  pull(Model_version)
+
 hs9 <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = "hs9")
 
 hs9.tbl <- knitr::kable(hs9, format = "pandoc", padding = 2,
@@ -31,7 +35,7 @@ hs9.tbl <- knitr::kable(hs9, format = "pandoc", padding = 2,
 
 ```
 
-### Heat Source version 9
+### `r hs9.v`
 
 For revised temperature TMDLs, the Heat Source version 9 was used as a shade model to estimate effective shade and solar radiation input to streams. The Heat Source 9 shade model is similar to the Heat Source 8 model, especially as inputs relate to vegetation, solar inputs and effective shade. `r tbls(name = "hs9", display="cite")` summarizes all of the user entered model inputs and input categories required to run the shade module of Heat Source version 9. `r tbls(name = "hs9", display="cite")` also identifies the subset of inputs that could possibly be modified to improve the calibration of the model. It should be noted, it is unlikely all of these will be used as calibration parameters; rather this list identifies the candidate model inputs that will be considered for adjustment through the calibration process.
 

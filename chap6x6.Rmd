@@ -1,7 +1,7 @@
 ---
 output: 
   word_document:
-    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -23,7 +23,7 @@ options(kableExtra.auto_format = F)
 
 ```
 
-##### `r model_extent`
+#### `r model_extent`
 
 ```{r, label=t6x6j, include=FALSE}
 
@@ -35,7 +35,7 @@ t6x6j_met <- section.model.input %>%
                 `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                 `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
   dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
-  dplyr::summarize(`Model Location` = toString(unique(sort(`Model Location`))),
+  dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
                    Parameter = toString(unique(sort(Parameter))))%>% 
   dplyr::ungroup() %>% 
   dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
@@ -44,7 +44,7 @@ t6x6j_met <- section.model.input %>%
 t6x6j_1 <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
-  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+  dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in%  "No Station ID" | is.na(`Station ID`),
                                                             `Model Location Name`,
                                                             paste0(`Model Location Name`, " (", `Station ID`, ")")),
                 `Model Location` = round(`Model Location`,2),
@@ -78,3 +78,16 @@ if(NROW(t6x6j_1)>0){
 `r if(NROW(t6x6j_1)>0){paste0(tbls(name = paste0("t6x6j_1", model_extent),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}`
 
 `r if(NROW(t6x6j_1)>0){t6x6j_tbl}else{paste0("There were no boundary condition and tributary inputs to this model.")}`
+
+```{r, label=`t6x6_2`, echo=FALSE}
+
+t6x6j_2 <- section.model.input %>%
+  dplyr::filter(`Model Extent` %in%  model_extent) %>% 
+  dplyr::filter(`Model Location Type` %in% "Meteorological")
+
+```
+
+`r if(NROW(t6x6j_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6j_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
+
+`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
+
