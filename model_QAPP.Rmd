@@ -174,7 +174,13 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
-**[Update with specific temperature criteria based on the project area]**.
+**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**.
+
+* Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
+*	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
+*	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
+*	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
+*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
 
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
@@ -492,7 +498,7 @@ if(NROW(t51.mw)>0){
   
 }
 
-if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
+#if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
   
   t51.sp <- t51 %>% 
     dplyr::filter(tbl=="DEQ File") %>% 
@@ -508,7 +514,7 @@ if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological")
                                               caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
     
   }
-}
+#}
 
 # Table NUM
 if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
@@ -566,7 +572,7 @@ t52_ref <- tir %>%
 
 ```
 
-DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
