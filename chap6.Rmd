@@ -53,7 +53,7 @@ if(length(section.model.info$`Model Extent Text`)>1){
 } 
 ```
 
-The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+`r if(waterbody_name == "Southern Willamette Subbasins"){model.domain}else{paste0("The extent of the model domain is the ", model.domain)}` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 ### Spatial and temporal resolution
 
@@ -64,6 +64,17 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 ### Source characteristics
 
 ```{r, label=`sc`, include=FALSE}
+
+## 1st paragraph
+source.char.1 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_SouthWillamette.xlsx",
+                                 sheet = "sW_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar1)
+
+source.char.2 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_SouthWillamette.xlsx",
+                                 sheet = "sW_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar2)
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
@@ -82,7 +93,9 @@ if(npdes.ind.n>0){
   
   npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+                                               caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                                paste0("Summary of individual NPDES permitted discharges in the upper portion of the McKenzie River."),
+                                                                paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, "."))))
   
 }
 
@@ -99,7 +112,8 @@ if(npdes.ind.n > 1) {
 } 
 
 # NLCD
-nlcd.waterbody <- nlcd.pro.area %>% 
+nlcd.waterbody <- nlcd.pro.area %>%
+  dplyr::mutate(Stream = ifelse(Stream == "McKenzie River", "McKenzie River: Upper", Stream)) %>% # Temporary edits - check
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
   dplyr::arrange(desc(Acres)) %>% 
@@ -110,15 +124,19 @@ if(NROW(nlcd.waterbody)>0){
   
   nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
+                                             caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                                paste0("Summary of land uses within 100 meters of the digitized centerline of the upper portion of the McKenzie River based on the 2016 National Land Cover Database (Yang et al 2018)."),
+                                                                paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018)."))))
   
 }
 
 nlcd.text.waterbody <- nlcd.text.pro.area %>% 
+  dplyr::mutate(Stream = ifelse(Stream == "McKenzie River", "McKenzie River: Upper", Stream)) %>% # Temporary edits - check
   dplyr::filter(Stream == waterbody_name)
 
 # DMA
 dma.waterbody <- dma.pro.area %>% 
+  dplyr::mutate(Stream = ifelse(Stream == "McKenzie River", "McKenzie River: Upper", Stream)) %>% # Temporary edits - check
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
   dplyr::arrange(desc(Acres)) %>% 
@@ -129,25 +147,27 @@ if(NROW(dma.waterbody)>0){
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                            caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                                            caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                                paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized centerline of the upper portion of the McKenzie River."),
+                                                                paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline."))))
   
 }
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+The primary sources of thermal loading contributing to temperatures exceedances along the `r if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River")}else{waterbody_name}` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges,")}` `r if(!is.na(source.char.1)){source.char.1}` and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). `r source.char.2` The contribution of these latter potential sources may be investigated as part of the model scenarios.
 
 `r npdes.txt`
 
 `r if(npdes.ind.n > 0){npdes.ind.tbl}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River")}else{waterbody_name}` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River")}else{waterbody_name}` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
 
 `r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
 Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
+A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along the `r if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River")}else{waterbody_name}` model extent. 
 
 `r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
 
@@ -165,7 +185,7 @@ tf <- tmdl.mod.2 %>%
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
 
 ### Model inputs
 
@@ -224,17 +244,19 @@ if(!model.extent == TRUE){
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
+                                               caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                                paste0("Boundary condition and tributary inputs to the existing Heat Source Model for the upper portion of the McKenzie River."),
+                                                                paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model."))))
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  #t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
@@ -295,10 +317,22 @@ if(!model.extent == TRUE){
   
   if(NROW(t6x7)>0){
     
-    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
-                             caption = tbls(name = paste0("t6x7", waterbody_name),
-                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
-    
+    if(waterbody_name == "Southern Willamette Subbasins"){
+      
+      # remove table column "Model Location"
+      t6x7_tbl <- knitr::kable(t6x7[,-2], format = "pandoc", padding = 2,
+                               caption = tbls(name = paste0("t6x7", waterbody_name),
+                                              caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+      
+    } else {
+      
+      t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                               caption = tbls(name = paste0("t6x7", waterbody_name),
+                                              caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                                paste0("Calibration sites and parameters used in the existing Heat Source Model for the upper portion of the McKenzie River."),
+                                                                paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model."))))
+      
+    }
   }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
@@ -313,6 +347,6 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), ". ", mod.loc[1], if(NROW(t56)>0){paste0(" Effective shade model calibrations sites are summarized in ",tbls(name = "t56",display="cite"),".")}," If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}else{t6x7_1.txt}}`
+`r if(!waterbody_name == "Southern Willamette Subbasins"){if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), ". ", mod.loc[1], if(NROW(t56)>0){paste0(" Effective shade model calibrations sites are summarized in ",tbls(name = "t56",display="cite"),".")}," If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}else{t6x7_1.txt}}}else{paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), ". ", if(NROW(t56)>0){paste0("Effective shade model calibrations sites are summarized in ",tbls(name = "t56",display="cite"),".")}," If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
