@@ -232,7 +232,7 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
-Heat transfer relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
+**Heat transfer** relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 
@@ -261,7 +261,7 @@ $\Phi_{evaporation}$ = Evaporation (+/-)
 * Dispersion,
 * Groundwater exchange,
 * Hyporheic flows,
-* Surface water exchange (e.g. Tributary input, Precipitation), and
+* Surface water exchange (e.g. tributary input, precipitation), and
 * Other human related activities that alter stream flow volume.
 
 Stream temperature is influenced by both human and natural factors. Figure 2 is a conceptual diagram that identifies the key process and variables that drive stream temperature. Human sources and natural sources are identified. Near the bottom of the diagram the biological responses are identified.
@@ -278,7 +278,7 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 **Background Sources**: Background sources include all sources of pollution or pollutants not originating from human activities. In the context of a TMDL, background sources may also include anthropogenic sources of a pollutant that DEQ or another Oregon state agency does not have authority to regulate, such as pollutants emanating from another state, tribal lands, or sources otherwise beyond the jurisdiction of the state (OAR 340-042-0030(1)). Additionally, effective shade levels on smaller streams are more sensitive to riparian disturbances and so the differences between current condition solar flux and background solar flux can be larger.
 
-**Anthropogenic Point Sources**: Temperature increases from point sources are those caused by warm water discharges from NPDES permitted facilities, such as industrial outfalls, municipal waste-water treatment plants (WWTP), and other point sources.
+**Anthropogenic Point Sources**: Temperature increases from point sources are those caused by warm water discharges from NPDES permitted facilities, such as industrial outfalls, municipal waste water treatment plants (WWTP), and other point sources.
 
 # Technical approach
 
