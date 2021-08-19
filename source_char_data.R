@@ -91,8 +91,20 @@ map_hs_fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Te
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
 
+map_bes_shade_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/bes_pro_reaches.shp",
+                                      layer = "bes_pro_reaches")  %>% 
+  sf::st_transform(2992) %>% 
+  sf::st_zm() %>%
+  dplyr::select(Stream = NAME, 
+                Project_Na)
+
 # Combine into one feature and dissolve by stream and project area
-model_extents <- rbind(map_hs_temp_model_extent, map_hs_solar_model_extent, map_ce_model_extent, map_hs_sandy_2016, map_hs_fish_creek_2009) %>%
+model_extents <- rbind(map_hs_temp_model_extent, 
+                       map_hs_solar_model_extent, 
+                       map_ce_model_extent, 
+                       map_hs_sandy_2016, 
+                       map_hs_fish_creek_2009,
+                       map_bes_shade_reaches) %>%
   dplyr::group_by(Stream, Project_Na) %>%
   dplyr::summarise()
 
@@ -295,4 +307,3 @@ dma.tbl <- model_buff_dma %>%
 sum(dma.tbl$Percentage)
 
 save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
-
