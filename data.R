@@ -143,17 +143,17 @@ owrd.stations <- owrd.stations.or %>%
 cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Model Setup Info") %>% 
   dplyr::filter(!`QAPP Project Area` %in%  c("Upper Klamath and Lost Subbasins")) %>% 
   # for Section 6.1 General model inputs and parameters
-  dplyr::mutate(Model_version = ifelse(substr(`Model version`, 13,13) == "6", "Heat Source Version 6",
-                                       ifelse(substr(`Model version`, 13,13) == "7", "Heat Source Version 7",
-                                              ifelse(substr(`Model version`, 13,13) == "8", "Heat Source Version 8",
-                                                     ifelse(substr(`Model version`, 13,13) == "9", ifelse(`Primary Model Parameter` == "Solar","Heat Source Version 9 shade model","Heat Source Version 9"),
-                                                            ifelse(substr(`Model version`, 1,2) == "CE", "CE-QUAL-W2 Version 3","SHADOW")))))) %>% 
-  dplyr::mutate(mod_rmd = ifelse(Model_version == "Heat Source Version 6", "hs6",
-                                 ifelse(Model_version == "Heat Source Version 7", "hs7",
-                                        ifelse(Model_version == "Heat Source Version 8", "hs8",
-                                               ifelse(Model_version == "Heat Source Version 9", "hs9",
-                                                      ifelse(Model_version == "Heat Source Version 9 shade model", "hs9",
-                                                             ifelse(Model_version == "CE-QUAL-W2 Version 3", "ce",
+  dplyr::mutate(Model_version = ifelse(substr(`Model version`, 13,13) == "6", "Heat Source version 6",
+                                       ifelse(substr(`Model version`, 13,13) == "7", "Heat Source version 7",
+                                              ifelse(substr(`Model version`, 13,13) == "8", "Heat Source version 8",
+                                                     ifelse(substr(`Model version`, 13,13) == "9", ifelse(`Primary Model Parameter` == "Solar","Heat Source version 9 shade model","Heat Source version 9"),
+                                                            ifelse(substr(`Model version`, 1,2) == "CE", "CE-QUAL-W2 version 3","SHADOW")))))) %>% 
+  dplyr::mutate(mod_rmd = ifelse(Model_version == "Heat Source version 6", "hs6",
+                                 ifelse(Model_version == "Heat Source version 7", "hs7",
+                                        ifelse(Model_version == "Heat Source version 8", "hs8",
+                                               ifelse(Model_version == "Heat Source version 9", "hs9",
+                                                      ifelse(Model_version == "Heat Source version 9 shade model", "hs9",
+                                                             ifelse(Model_version == "CE-QUAL-W2 version 3", "ce",
                                                                     "sh"))))))) %>% 
   dplyr::mutate(mod_score = ifelse(mod_rmd == "hs6", "1",
                                    ifelse(mod_rmd == "hs7", "10",
