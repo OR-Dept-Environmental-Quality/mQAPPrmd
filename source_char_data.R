@@ -91,15 +91,24 @@ map_hs_fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Te
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
 
+map_bes_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/bes_pro_reaches.shp",
+                                    layer = "bes_pro_reaches")  %>% 
+  sf::st_transform(2992) %>% 
+  sf::st_zm() %>%
+  dplyr::select(Stream = NAME, Project_Na)
+
 # Combine into one feature and dissolve by stream and project area
-model_extents <- rbind(map_hs_temp_model_extent, map_hs_solar_model_extent, map_ce_model_extent, map_hs_sandy_2016, map_hs_fish_creek_2009) %>%
+model_extents <- rbind(map_hs_temp_model_extent, 
+                       map_hs_solar_model_extent, 
+                       map_ce_model_extent, 
+                       map_hs_sandy_2016, 
+                       map_hs_fish_creek_2009,
+                       map_bes_model_extent) %>%
   dplyr::group_by(Stream, Project_Na) %>%
   dplyr::summarise()
 
 # check
 sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE)
-
-# rm(map_ce_model_extent, map_hs_temp_model_extent, map_hs_solar_model_extent)
 
 # Read in county outline feature
 county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
@@ -110,6 +119,7 @@ county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnt
 # Buffer streams by 100 m
 model_buff <- sf::st_buffer(model_extents, dist = units::set_units(100, m))
 
+# check
 sf::st_write(model_buff, paste0(output_gis_dir,"model_buff.shp"), delete_layer=TRUE)
 
 # intersect stream buffer with counties. The purpose is the get a list of 
