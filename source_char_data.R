@@ -97,6 +97,9 @@ map_bes_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temp
   sf::st_zm() %>%
   dplyr::select(Stream = NAME, Project_Na)
 
+lookup_model_extents <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/Lookup_model_extents.xlsx", 
+                                          sheet = "model_extent") 
+
 # Combine into one feature and dissolve by stream and project area
 model_extents <- rbind(map_hs_temp_model_extent, 
                        map_hs_solar_model_extent, 
@@ -104,8 +107,18 @@ model_extents <- rbind(map_hs_temp_model_extent,
                        map_hs_sandy_2016, 
                        map_hs_fish_creek_2009,
                        map_bes_model_extent) %>%
+  dplyr::left_join(lookup_model_extents,by="Stream") %>% # added the following lines 8/19
+  dplyr::select(-c("Stream","Project_Na.x","...1")) %>%  #
+  dplyr::rename(Stream = Model_waterbody,                #
+                Project_Na = Project_Na.y) %>%           #
   dplyr::group_by(Stream, Project_Na) %>%
   dplyr::summarise()
+
+# to be deleted
+#model_extents_csv <- model_extents %>% sf::st_drop_geometry()
+#temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
+#write.csv(model_extents_csv,paste0(temp.dir,"model_extent.csv"))
+# end to be deleted
 
 # check
 sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE)
@@ -306,3 +319,6 @@ sum(dma.tbl$Percentage)
 
 save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
 
+# only for checking
+#save.image(file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/source_char_",Sys.Date(),".RData"))
+#load("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/source_char_2021-08-20_1.RData")
