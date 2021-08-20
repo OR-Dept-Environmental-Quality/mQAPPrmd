@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "North Umpqua River"
+# for test: waterbody_name <- "Balch Creek-Willamette River Subwatershed (2019)"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -36,7 +36,13 @@ model.extent <- na.omit(model.extent)
 
 ## `r waterbody_name`
 
-The `r waterbody_name` model is a `r tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))` model developed using `r unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version")`. The model `r if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}` developed by `r unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org")`.
+`r if(!waterbody_name %in% "Columbia Slough (1992)"){paste0("The ", waterbody_name, " model is a ", tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The mode ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")}`
+
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("The Columbia Slough CE-QUAL-W2 model setup and calibration were conducted by Portland State University and documented in Wells and Berger, 1995; Berger, 2003; Berger and Wells, 2005; and DEQ, 2006. The model used for the temperature TMDL development was a modified version of a previous series of calibrated CE-QUAL-W2 models that had been developed for the Columbia Slough by Portland State University for the City of Portland Bureau of Environmental Services (Wells and Berger, 1995; Berger and Wells, 1999).")}`
+
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("The modified model for the TMDL included a shorter period of simulation focusing on the summer season in the year 1992. This change was made to focus on the period when temperature data were available. The model also included additional macrophyte and shading algorithms. Features of the macrophyte model include the ability to simulate multiple submerged macrophyte species; the transport of nutrient fluxes between plant biomass and the water column and/or sediments; growth limitation due to nutrient, light and temperature; the simulation of the spatial distribution of macrophytes vertically and horizontally; the modeling of light attenuation in the water column caused by macrophyte concentration; and the modeling of channel friction due to macrophytes. Macrophyte growth can significantly affect temperatures in the Columbia Slough because the greater channel friction raises water levels and increases travel time. The amount of shade predicted by the model was based upon DEQ vegetation and land cover classifications provided to Portland State University (DEQ, 2006).")}`
+
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("Conditions affecting water temperature in the Columbia Slough have changed significantly since the 1992 model calibration period (MCDD, personal communication June 2021; CSWC, 2013). These changes include the removal or replacement of multiple culverts; replacement of older pumps with new ones that have increased pumping capacity; removal of the weir and control structure at the outlet of Bybee Lake; channel modification and channel dredging in the Middle and Upper Slough; riparian replanting; and changes to flow management. All these changes are expected affect water level, flow rate, and water temperature. Due to the extensive changes in the system, DEQ believes the existing model should be updated and recalibrated before it is used for simulation of current water temperature conditions and new management scenarios. DEQ investigated, to the extent that time allowed, some of the model setup changes required for recalibration. This summary, found in Appendix D, is not exhaustive and should be treated as a starting point. Based on this initial investigation, it was determined that a recalibration of the Columbia Slough model will require an effort and timeline that likely does not align with the project schedule or available resources. The Columbia Slough model is a complex system and DEQ is concerned that an attempt to proceed with a recalibration would put the project at risk of missing critical court mandated deadlines. For this reason, the existing Columbia Slough CE-QUAL-W2 model will not be updated or used for new management scenarios at this time. The implication of this decision is that it will not be possible to quantify the amount of warming caused by anthropogenic activities separate from the warming caused by background sources. As a result, the TMDL may be more general and lump all nonpoint sources into a general nonpoint source load allocation. The existing calibrated model is summarized in this section to document its existence and that it was considered for TMDL development.")}`
 
 ### Model domain
 
@@ -51,15 +57,88 @@ The `r waterbody_name` model is a `r tolower(ifelse(unique(section.model.info[wh
 #  model.domain <- section.model.info$`Model Extent Text`
   
 #} 
+
 ```
 
-The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+The extent of the model domain is the `r model.domain` `r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("The model extent is shown in Figure 3 through Figure 6 (extracted from Berger and Wells, 2005) and also included in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}else{paste0("The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}`
+
+```{r cs_lower_west, eval.after="fig.cap", fig.cap=cs.lower.west, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
+
+cs.lower.west <- figs(name="cs.lower.west", caption = paste0("Columbia Slough (1992) model segments for the west end of the Lower Columbia Slough (Berger and Wells, 2005)."))
+
+if(waterbody_name %in% "Columbia Slough (1992)"){
+
+  knitr::include_graphics(path = "./fig/Columbia_Slough_lower_west_model_domain.JPG")
+  
+}
+
+```
+
+```{r cs_lower_east, eval.after="fig.cap", fig.cap=cs.lower.east, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
+
+cs.lower.east <- figs(name="cs.lower.east", caption = paste0("Columbia Slough (1992) model segments for the east end of the Lower Columbia Slough (Berger and Wells, 2005)."))
+
+if(waterbody_name %in% "Columbia Slough (1992)"){
+  
+  knitr::include_graphics(path = "./fig/Columbia_Slough_lower_east_model_domain.JPG")
+  
+}
+
+```
+
+```{r cs_mid_west, eval.after="fig.cap", fig.cap=cs.mid.west, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
+
+  
+cs.mid.west <- figs(name="cs.mid.west", caption = paste0("Columbia Slough (1992) model segments for the west end of the Middle Columbia Slough (Berger and Wells, 2005)."))
+
+if(waterbody_name %in% "Columbia Slough (1992)"){
+  
+  knitr::include_graphics(path = "./fig/Columbia_Slough_middle_west_model_domain.JPG")
+  
+}
+
+```
+
+```{r cs_mid_east, eval.after="fig.cap", fig.cap=cs.mid.east, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
+
+  
+cs.mid.east <- figs(name="cs.mid.east", caption = paste0("Columbia Slough (1992) model segments for the east end of the Middle Columbia Slough and the Upper Slough (Berger and Wells, 2005)."))
+
+if(waterbody_name %in% "Columbia Slough (1992)"){
+
+  knitr::include_graphics(path = "./fig/Columbia_Slough_middle_east_upper_model_domain.JPG")
+  
+}
+
+```
 
 ### Spatial and temporal resolution
 
-The model input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
+```{r, label=`resol`, include=FALSE}
+# test: waterbody_name <-  "Columbia Slough (1992)"
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+col.slough <- readxl::read_xlsx(paste0(data.dir,"tables_LowerWillamette.xlsx"),sheet = "LowerWillamette_ColumbiaSlough")
 
-A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.
+if(waterbody_name %in% "Columbia Slough (1992)"){
+  
+  tbl.col.slough <- flextable::regulartable(col.slough) %>% 
+    flextable::set_table_properties(layout = "autofit") %>% 
+    flextable::valign(valign = "top") %>% 
+    flextable::theme_box() %>% 
+    flextable::set_caption(tbls(name = "col.slough",
+                                caption = paste0("Model characteristics of the Columbia Slough CE-QUAL-W2 grids.")))
+  
+}
+
+```
+
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("The Columbia Slough (1992) model is composed of 397 longitudinal segments (25-231 meters in length), 17 vertical layers (layer height of 0.30-0.61 meters), and 41 branches (separate water bodies or branches off the main stem), many of which are segregated by culverts. The number of model time step intervals (NDT) is 2 and the minimum time step (DLTMIN) is 0.025 seconds. The maximum timestep (DLTMAX) is 20 seconds. The characteristics of the Columbia Slough (1992) model regions are shown in Table 16. For additional details regarding model setup and resolution, see Berger and Wells, 2005.")}`
+
+`r if(!waterbody_name %in% "Columbia Slough (1992)"){paste0("The model input spatial resolution (*dx*) is ", unique(section.model.info$"Input dx"), " ", unique(section.model.info$"Input dx Units"), ". Outputs are generated every ", unique(section.model.info$"Output dx"), " ", unique(section.model.info$"Output dx Units"), ". The model time step (*dt*) is ", unique(section.model.info$dT), " ", unique(section.model.info$"dT Units")," and outputs are generated every hour.")}`
+
+`r if(!waterbody_name %in% "Columbia Slough (1992)"){paste0("A *dx* of ", unique(section.model.info$"Input dx"), " ", unique(section.model.info$"Input dx Units"), " was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.")}`
+
+`r if(waterbody_name %in% "Columbia Slough (1992)"){tbl.col.slough}`
 
 ### Source characteristics
 
@@ -80,9 +159,13 @@ npdes.ind.n <- nrow(npdes.ind.waterbody)
 
 if(npdes.ind.n>0){
   
-  npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
-                                caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+  if(!waterbody_name %in% "Columbia Slough (2019)"){
+    
+    npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
+                                  caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
+                                                 caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+    
+  }
   
 }
 
@@ -91,11 +174,11 @@ if(npdes.ind.n == 0) {
 } 
 
 if(npdes.ind.n == 1) {
-  npdes.txt <- paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"), ".")
+  npdes.txt <- paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",if(!waterbody_name %in% "Columbia Slough (2019)"){tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite")}, ".")
 }
 
 if(npdes.ind.n > 1) {
-  npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),".")
+  npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",if(!waterbody_name %in% "Columbia Slough (2019)"){tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite")},".")
 } 
 
 # NLCD
@@ -108,10 +191,13 @@ nlcd.waterbody <- nlcd.pro.area %>%
 
 if(NROW(nlcd.waterbody)>0){
   
-  nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
-                              caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
-  
+  if(!waterbody_name %in% "Columbia Slough (2019)"){
+    
+    nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
+                                caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
+                                               caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
+    
+  }
 }
 
 nlcd.text.waterbody <- nlcd.text.pro.area %>% 
@@ -127,29 +213,43 @@ dma.waterbody <- dma.pro.area %>%
 
 if(NROW(dma.waterbody)>0){
   
-  dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
-                             caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                            caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+  if(!waterbody_name %in% "Columbia Slough (2019)"){
+    
+    dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
+                               caption = tbls(name = paste0("dma.waterbody",waterbody_name),
+                                              caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+    
+  }
   
 }
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("The primary sources of thermal loading contributing to temperatures exceedances along the Columbia Slough include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, point source discharges, channel modification, flow management, and background sources (Wells and Berger, 1995; Berger, 2003; DEQ, 2006). Other potential sources include warming caused by climate change.")}`
 
-`r npdes.txt`
+`r if(waterbody_name %in% "Columbia Slough (2019)"){paste0("For the discussion of source characteristics, see Section 6.4.3 for the existing Columbia Slough (1992) model.")}`
 
-`r if(npdes.ind.n > 0){npdes.ind.tbl}`
+`r if(waterbody_name %in% "Johnson Creek (2002)"){paste0("The primary sources of thermal loading contributing to temperatures exceedances along the Johnson Creek include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, channel modification, reductions to stream flow, and background sources (DEQ, 2006). Inline ponds, which are small ponds within the stream channel created by small dams, are also a source of increased temperatures (Holzer, 2020). There are at least 70 inline ponds in the Johnson Creek watershed. Other potential sources include warming caused by climate change.")}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+`r if(waterbody_name %in% "Johnson Creek (2019)"){paste0("The primary purpose of the Johnson Creek shade model is to characterize solar radiation loading and the amount of effective shade. Effective shade is a surrogate for solar radiation loading caused by the disturbance or removal of near-stream vegetation. Other potential sources of thermal loading will not evaluated by this model.")}`
 
-`r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
+`r if(waterbody_name %in% "Balch Creek-Willamette River Subwatershed (2019)"){paste0("The primary purpose of the Balch Creek-Willamette River shade model is to characterize solar radiation loading and the amount of effective shade. Effective shade is a surrogate for solar radiation loading caused by the disturbance or removal of near-stream vegetation. Other potential sources of thermal loading will not evaluated by this model.")}`
 
-Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("Over the years the Slough system has been extensively dredged, diked, filled and channelized, principally by the U.S. Army Corps of Engineers, the City of Portland, and the Port of Portland. Originally a series of wetlands and marshes created by annual flooding of the Columbia and Willamette Rivers, the Slough is now a highly managed water system with dikes, levees, pipes, culverts, and pumps to provide watershed drainage and flood control for the lowlands surrounding it. Multnomah County Drainage District (MCDD) manages this complex set of infrastructure. The district also clears debris and other blockages within the system.  Due to the extensive modifications to the Columbia Slough, water no longer drains naturally, but relies on two primary pump stations that lift water over the levees, and into the Columbia River or lower Columbia Slough which drains to the Willamette River. The hydraulic management of the Slough can have a significant impact on the water quality and the uses supported by the Slough (Wells and Berger ,1995; Berger, 2003; DEQ, 2006).")}`
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
+`r if(!waterbody_name %in% c("Balch Creek-Willamette River Subwatershed (2019)","Columbia Slough (2019)","Johnson Creek (2019)")){npdes.txt}`
 
-`r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
+`r if(!waterbody_name %in% "Columbia Slough (2019)"){if(npdes.ind.n > 0){npdes.ind.tbl}}`
+
+`r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("The majority land use",if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}," along the ",waterbody_name," ",if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}," ",if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}," accounting for about ",if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}," percent of the near stream area. ",if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}," summarizes all the land uses within 100 meters of the digitized ",waterbody_name," centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018).")}`
+
+`r if(!waterbody_name %in% "Columbia Slough (2019)"){if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}}`
+
+`r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}`
+
+`r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ",if(!waterbody_name %in% "Balch Creek-Willamette River Subwatershed (2019)"){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}," summarizes the potential designated management agencies and responsible persons along the ",waterbody_name," model extent. ",if(waterbody_name %in% "Columbia Slough (1992)"){paste0("This table is based on land ownership and does not include special districts like the MCDD. The MCDD area overlaps with much of the Columbia Slough.")})}`
+
+`r if(!waterbody_name %in% c("Balch Creek-Willamette River Subwatershed (2019)","Columbia Slough (2019)")){if(NROW(dma.waterbody)>0){dma.wb.tbl}}`
 
 ### Time frame of simulation
 
@@ -165,7 +265,11 @@ tf <- tmdl.mod.2 %>%
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2006), the model setup and calibration documentation (Wells and Berger 1995; Berger and Wells 2005), and the CE-QUAL-W2 user guide (Cole and Wells, 2000).")}`
+
+`r if(waterbody_name %in% c("Balch Creek-Willamette River Subwatershed (2019)","Columbia Slough (2019)","Johnson Creek (2019)")){paste0("Model development for the Columbia Slough will be completed by City of Portland Bureau of Environmental Services. Model development assumptions are expected to be documented in the City of Portland final model report. DEQ will review the model and model assumptions and include or reference them in the TMDL. Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}`
+
+`r if(waterbody_name %in% "Johnson Creek (2002)"){paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2006).")}`
 
 ### Model inputs
 
@@ -222,21 +326,25 @@ if(!model.extent == TRUE){
   
   if(NROW(t6x6_1)>0){
     
+
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
                                                caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
     
+    
   }
-  
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
-  
+
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
+
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("For a complete description of model setup and inputs, see Wells and Berger (1995), and Berger and Wells (2005).")}`
+
+`r if(waterbody_name %in% c("Balch Creek-Willamette River Subwatershed (2019)","Columbia Slough (2019)","Johnson Creek (2019)")){paste0("The inputs to the model include LiDAR derived vegetation heights and stream position (latitude and longitude) derived from aerial imagery and LiDAR.")}`
 
 ```{r, label=`t6x6_2`, echo=FALSE}
 
@@ -245,7 +353,7 @@ t6x6_2 <- section.model.input %>%
 
 ```
 
-`r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
+`r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}`
 
 `r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
 
@@ -299,6 +407,8 @@ if(!model.extent == TRUE){
                              caption = tbls(name = paste0("t6x7", waterbody_name),
                                             caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
     
+    
+    
   }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
@@ -313,6 +423,10 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), ". ", mod.loc[1], if(NROW(t56)>0){paste0(" Effective shade model calibrations sites are summarized in ",tbls(name = "t56",display="cite"),".")}," If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}else{t6x7_1.txt}}`
+`r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("Model calibration was completed by PSU (Berger, 2003; Berger and Wells, 2005). Please refer to these reports for more information.")}`
+
+`r if(waterbody_name %in% c("Balch Creek-Willamette River Subwatershed (2019)","Columbia Slough (2019)","Johnson Creek (2019)")){paste0("Model calibration will be completed by the City of Portland Bureau of Environmental Services. DEQ and the City of Portland will coordinate and communicate on model development and quality assurance procedures outlined in this QAPP. The model will be calibrated primarily by comparing the model effective shade predictions to field measured effective shade values and canopy cover values measured with a densitometer by the City of Portland.  Canopy cover will be the primary calibration parameter. Other calibration parameters identified in Section 6.1.3 (landcover height and landcover overhang) will be determined directly from LiDAR with minimal adjustment. DEQ will review the model and model assumptions and recommend adjustments as necessary. The model and final calibration report will be made available to DEQ upon completion (COP BES personal communication August 2021).")}`
+
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), ". ", mod.loc[1], if(NROW(t56)>0){paste0(" Effective shade model calibrations sites are summarized in ",tbls(name = "t56",display="cite"),".")}," If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
