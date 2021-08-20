@@ -174,7 +174,7 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
-**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**.
+**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**
 
 * Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
 *	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
