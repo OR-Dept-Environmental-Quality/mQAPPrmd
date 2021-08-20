@@ -129,7 +129,6 @@ if(NROW(tcat5)>0){
 
 
 ```
-The `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` `r if(length(unique(model.info$"TMDL Document"))==1){paste0(" was")}else{paste0(" were")}` developed for temperature, dissolved oxygen, bacteria, sedimentation, and biological criterion. The original temperature TMDLs were based on the Natural Conditions Criteria (NCC) identified in Oregon Administrative Rules (OAR), specifically OAR 340-041-0028(8). These criteria were invalidated by the Oregon U.S. District Court. The applicable numeric and narrative temperature criteria must be used. As required by court order, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards. The numeric temperature criteria are based on a 7-Day Average Daily Maximum.
 
 ```{r, label=`huc-intro`, echo=FALSE}
 
@@ -175,17 +174,19 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
-* Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))      
-*	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))      
-*	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))      
+**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**
+
+* Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
+*	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
+*	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
 *	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
-*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
+*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))              
 
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
-[Update: please review this paragrah, which was kept from the olderv verion.]The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2010 John Day River Basin TMDL were developed primarily to address summer (non-spawning) periods in 2002 for the Middle Fork and North Fork John Day Rivers, and summer periods in 2004 for the main stem John Day River. The Middle Fork John Day River model covers some periods during which Salmon and Steelhead spawning occur, however, neither the Main stem nor the North Fork John Day River models cover Salmon and Steelhead spawning periods. Nevertheless, DEQ has determined that it is appropriate to use the existing models to extrapolate results to develop waste load allocations for those time periods. It is not anticipated additional modeling or modeling updates will need to be made. 
+**[Update: please review this paragraph, which was kept from the older version.]**The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2010 John Day River Basin TMDL were developed primarily to address summer (non-spawning) periods in 2002 for the Middle Fork and North Fork John Day Rivers, and summer periods in 2004 for the main stem John Day River. The Middle Fork John Day River model covers some periods during which Salmon and Steelhead spawning occur, however, neither the Main stem nor the North Fork John Day River models cover Salmon and Steelhead spawning periods. Nevertheless, DEQ has determined that it is appropriate to use the existing models to extrapolate results to develop waste load allocations for those time periods. It is not anticipated additional modeling or modeling updates will need to be made. 
 
 As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
 
@@ -284,7 +285,7 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 **Anthropogenic Point Sources**: Temperature increases from point sources are those caused by warm water discharges from NPDES permitted facilities, such as industrial outfalls, municipal waste water treatment plants (WWTP), and other point sources.
 
-**[Update: Check if this paragraph should be kept - Yuan]**There are four WWTPs within the basin that were addressed and allocated thermal waste loads: City of John Day WWTP, Mount Vernon WWTP, Dayville WWTP, and the Long Creek WWTP. Other point sources within the basin but not specifically allocated thermal waste loads include confined animal feed operations (CAFO), general stormwater permits and storage facilities.
+**[Update: Check if this paragraph should be kept.]**There are four WWTPs within the basin that were addressed and allocated thermal waste loads: City of John Day WWTP, Mount Vernon WWTP, Dayville WWTP, and the Long Creek WWTP. Other point sources within the basin but not specifically allocated thermal waste loads include confined animal feed operations (CAFO), general stormwater permits and storage facilities.
 
 # Technical approach
 
@@ -467,6 +468,9 @@ if(NROW(t51.raws)>0){
 t51.agrimet <- t51 %>% 
   dplyr::filter(tbl=="AgriMet") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "GOLW",
+                 Station = "GOLDENDALE, OREGON AGRIMET WEATHER STATION",
+                 `Latitude/Longitude` = "45.8119/-120.824") %>% 
   dplyr::arrange(`Station ID`)
 
 if(NROW(t51.agrimet)>0){
@@ -510,7 +514,8 @@ if(NROW(t51.mw)>0){
     dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
     dplyr::arrange(Station) %>% 
     dplyr::rename(Source = Station) %>% 
-    dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
+    dplyr::filter(!Source %in% c("NO STATION ID, DEQ FILE",
+                                 "GOLW - GOLDENDALE, OREGON AGRIMET WEATHER STATION"))
   
   if(NROW(t51.sp)>0){
     
@@ -577,7 +582,7 @@ t52_ref <- tir %>%
 
 ```
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -852,7 +857,7 @@ if(NROW(t56)>0){
 
 ```
 
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t56)>0){paste0(tbls(name = "t56", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t56)>0){t56_tbl}`
 
@@ -862,7 +867,7 @@ if(NROW(t56)>0){
 
 tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
                                caption = tbls(name = "tmdl.mod.a",
-                                              caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+                                              caption = paste0("Waterbodies where a model has already been developed.")))
 
 if(NROW(tmdl.mod.b)>0){
   
@@ -1117,7 +1122,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
-Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
+The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
 
 It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
