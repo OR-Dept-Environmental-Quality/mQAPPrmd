@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Columbia Slough (2019)"
+# for test: waterbody_name <- "Balch Creek-Willamette River Subwatershed (2019)"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -48,15 +48,15 @@ model.extent <- na.omit(model.extent)
 
 ```{r, label=`t6x1`, include=FALSE}
 
-if(length(section.model.info$`Model Extent Text`)>1){
+#if(length(section.model.info$`Model Extent Text`)>1){
   
   model.domain <- unique(sort(section.model.info$`Model Extent Text`))
   
-} else {
+#} else {
   
-  model.domain <- section.model.info$`Model Extent Text`
+#  model.domain <- section.model.info$`Model Extent Text`
   
-} 
+#} 
 
 ```
 
@@ -181,14 +181,9 @@ if(npdes.ind.n > 1) {
   npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",if(!waterbody_name %in% "Columbia Slough (2019)"){tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite")},".")
 } 
 
-# For LW ONLY
-if(waterbody_name %in% c("Columbia Slough (1992)","Columbia Slough (2019)")){waterbody_name_lw <- "Columbia Slough"} else {
- if(waterbody_name %in% c("Johnson Creek (2002)","Johnson Creek (2019)")){waterbody_name_lw <- "Johnson Creek"} else {
-   waterbody_name_lw <- waterbody_name}}
-
 # NLCD
 nlcd.waterbody <- nlcd.pro.area %>% 
-  dplyr::filter(Stream == waterbody_name_lw) %>% 
+  dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
   dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
@@ -200,17 +195,17 @@ if(NROW(nlcd.waterbody)>0){
     
     nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name_lw, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
+                                               caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
     
   }
 }
 
 nlcd.text.waterbody <- nlcd.text.pro.area %>% 
-  dplyr::filter(Stream == waterbody_name_lw)
+  dplyr::filter(Stream == waterbody_name)
 
 # DMA
 dma.waterbody <- dma.pro.area %>% 
-  dplyr::filter(Stream == waterbody_name_lw) %>% 
+  dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
   dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("DMA or Responsible Person" = DMA_RP,
@@ -222,7 +217,7 @@ if(NROW(dma.waterbody)>0){
     
     dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                                caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                              caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name_lw, " centerline.")))
+                                              caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
     
   }
   
@@ -246,13 +241,13 @@ if(NROW(dma.waterbody)>0){
 
 `r if(!waterbody_name %in% "Columbia Slough (2019)"){if(npdes.ind.n > 0){npdes.ind.tbl}}`
 
-`r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("The majority land use",if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}," along the ",waterbody_name_lw," ",if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}," ",if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}," accounting for about ",if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}," percent of the near stream area. ",if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}," summarizes all the land uses within 100 meters of the digitized ",waterbody_name_lw," centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018).")}`
+`r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("The majority land use",if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}," along the ",waterbody_name," ",if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}," ",if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}," accounting for about ",if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}," percent of the near stream area. ",if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}," summarizes all the land uses within 100 meters of the digitized ",waterbody_name," centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018).")}`
 
 `r if(!waterbody_name %in% "Columbia Slough (2019)"){if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}}`
 
 `r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}`
 
-`r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ",if(!waterbody_name %in% "Balch Creek-Willamette River Subwatershed (2019)"){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}," summarizes the potential designated management agencies and responsible persons along the ",waterbody_name_lw," model extent. ",if(waterbody_name %in% "Columbia Slough (1992)"){paste0("This table is based on land ownership and does not include special districts like the MCDD. The MCDD area overlaps with much of the Columbia Slough.")})}`
+`r if(!waterbody_name %in% "Columbia Slough (2019)"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ",if(!waterbody_name %in% "Balch Creek-Willamette River Subwatershed (2019)"){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}," summarizes the potential designated management agencies and responsible persons along the ",waterbody_name," model extent. ",if(waterbody_name %in% "Columbia Slough (1992)"){paste0("This table is based on land ownership and does not include special districts like the MCDD. The MCDD area overlaps with much of the Columbia Slough.")})}`
 
 `r if(!waterbody_name %in% c("Balch Creek-Willamette River Subwatershed (2019)","Columbia Slough (2019)")){if(NROW(dma.waterbody)>0){dma.wb.tbl}}`
 
