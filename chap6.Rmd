@@ -42,15 +42,15 @@ The `r waterbody_name` model is a `r tolower(ifelse(unique(section.model.info[wh
 
 ```{r, label=`t6x1`, include=FALSE}
 
-if(length(section.model.info$`Model Extent Text`)>1){
+#if(length(section.model.info$`Model Extent Text`)>1){
   
   model.domain <- unique(sort(section.model.info$`Model Extent Text`))
   
-} else {
+#} else {
   
-  model.domain <- section.model.info$`Model Extent Text`
+#  model.domain <- section.model.info$`Model Extent Text`
   
-} 
+#} 
 ```
 
 The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
