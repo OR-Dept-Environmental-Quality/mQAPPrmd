@@ -318,3 +318,7 @@ dma.tbl <- model_buff_dma %>%
 sum(dma.tbl$Percentage)
 
 save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
+
+# only for checking
+#save.image(file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/source_char_",Sys.Date(),".RData"))
+#load("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/source_char_2021-08-20_1.RData")

@@ -30,7 +30,7 @@ title <- tags$div(tag.map.title, HTML("Temperature TMDL Replacement Project"))
 
 map <- leaflet::leaflet() %>% leaflet::addTiles() %>% 
   leaflet::setView(lng = -121, lat = 44, zoom=7.2) %>%
-  leaflet::addPolygons(data = pro.areas,
+  leaflet::addPolygons(data = pro_areas,
                        group = "Project Areas",
                        label = ~Project_Na,
                        popup = ~map_link,
@@ -43,7 +43,7 @@ map <- leaflet::leaflet() %>% leaflet::addTiles() %>%
                                                            fillOpacity = 0.2,
                                                            weight = 3,
                                                            bringToFront = TRUE)) %>%
-  leaflet::addPolygons(data = pro.areas,
+  leaflet::addPolygons(data = pro_areas,
                        group = "Completion Schedule",
                        label = ~Project_Na,
                        fillColor = ~color,
@@ -108,10 +108,10 @@ map <- leaflet::leaflet() %>% leaflet::addTiles() %>%
   leaflet::addLayersControl(overlayGroups = c("Project Areas","Temperature Model Streams","SHADOW Model Streams","HUC 8", "HUC 10", "HUC 12", "Completion Schedule"),
                             options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
   leaflet::hideGroup(c("HUC 8","HUC 10", "HUC 12", "Completion Schedule")) %>% 
-  leaflet::addLegend(data = pro.areas,
+  leaflet::addLegend(data = pro_areas,
                      position = "topright",
-                     colors = ~unique(pro.areas$color),
-                     labels = ~unique(pro.areas$CompleteD),
+                     colors = ~unique(pro_areas$color),
+                     labels = ~unique(pro_areas$CompleteD),
                      title = "Completion Date") %>% 
   leaflet::addMiniMap(position = "bottomright",
                       width = 200,
