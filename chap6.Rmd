@@ -155,13 +155,12 @@ A designated management agency is defined in OAR 340-042-0030(2) as a federal, s
 
 ```{r, label=`tf`, include=FALSE}
 
-tf <- tmdl.mod.2 %>% 
-  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
-  pull(Model_version)
+model_period_start <- as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30")
+model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30")
 
 ```
 
-`r if(tf == "Heat Source Version 6"){paste0("The model period is for a single day: ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"),".")}else{paste0("The model period is ", format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), ".")}`
+`r if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}`
 
 ### Important assumptions
 
