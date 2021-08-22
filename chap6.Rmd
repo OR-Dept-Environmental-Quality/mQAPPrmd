@@ -247,7 +247,7 @@ if(NROW(dma.waterbody)>0){
 
 `r if(!waterbody_name %in% "Columbia Slough Subwatershed (2019)"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ",if(!waterbody_name %in% "Tualatin Mountains (2019)"){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}," summarizes the potential designated management agencies and responsible persons along the ",waterbody_name," model extent. ",if(waterbody_name %in% "Columbia Slough (1992)"){paste0("This table is based on land ownership and does not include special districts like the MCDD. The MCDD area overlaps with much of the Columbia Slough.")})}`
 
-`r if(!waterbody_name %in% c("Tualatin Mountains (2019)","Columbia Slough Subwatershed (2019)")){if(NROW(dma.waterbody)>0){dma.wb.tbl}}`
+`r if(!waterbody_name %in% "Columbia Slough Subwatershed (2019)"){if(NROW(dma.waterbody)>0){dma.wb.tbl}}`
 
 ### Time frame of simulation
 

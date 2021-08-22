@@ -278,7 +278,8 @@ dma_summary <- function(stream_buffer, dmaGIS=dmaGIS) {
   dma_buff$area <- sf::st_area(dma_buff)
   
   # Convert area to Acres
-  dma_buff$Acres=round(as.numeric(set_units(dma_buff$area, "acres")), 1)
+  #dma_buff$Acres=round(as.numeric(set_units(dma_buff$area, "acres")), 1)
+  dma_buff$Acres=as.numeric(set_units(dma_buff$area, "acres"))
   
   return(dma_buff)
   
@@ -308,7 +309,7 @@ dma.tbl <- model_buff_dma %>%
   dplyr::group_by(Stream, Project_Na, DMA_RP) %>%
   dplyr::summarise(Acres=sum(Acres)) %>%
   dplyr::group_by(Stream, Project_Na) %>%
-  dplyr::mutate(Percentage=round(Acres/sum(Acres)*100, 1)) %>%
+  dplyr::mutate(Percentage=round(Acres/sum(Acres)*100, 7)) %>%
   dplyr::arrange(Stream, Project_Na, dplyr::desc(Percentage)) %>%
   dplyr::mutate(DMA_RP=dplyr::case_when(DMA_RP=="Water" ~ "Oregon Department of State Lands - Waterway",
                                         DMA_RP=="Oregon Department of Forestry - Private" ~ "Oregon Department of Forestry - Private Forestland",
@@ -322,3 +323,4 @@ save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
 # only for checking
 #save.image(file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/source_char_",Sys.Date(),".RData"))
 #load("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/source_char_2021-08-20_1.RData")
+
