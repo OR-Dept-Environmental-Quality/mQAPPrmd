@@ -874,7 +874,7 @@ Effective shade is the percent of potential daily solar radiation flux that is b
 
 tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
                                caption = tbls(name = "tmdl.mod.a",
-                                              caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+                                              caption = paste0("Waterbodies where a model has already been developed.")))
 
 if(NROW(tmdl.mod.b)>0){
   
