@@ -845,7 +845,7 @@ t56 <- t56[!duplicated(t56$`Latitude/Longitude`),] %>%
 
 ```
 
-```{r, label=`t56`, echo=FALSE}
+```{r, label=`t56-sw`, echo=FALSE}
 
 t56.sw.shade <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_SouthWillamette.xlsx",
                                sheet = "sW_effectiveShade") %>% 
