@@ -47,16 +47,8 @@ model.extent <- na.omit(model.extent)
 ### Model domain
 
 ```{r, label=`t6x1`, include=FALSE}
-
-#if(length(section.model.info$`Model Extent Text`)>1){
   
   model.domain <- unique(sort(section.model.info$`Model Extent Text`))
-  
-#} else {
-  
-#  model.domain <- section.model.info$`Model Extent Text`
-  
-#} 
 
 ```
 
