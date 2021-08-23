@@ -45,7 +45,7 @@ model.extent <- na.omit(model.extent)
 ```{r, label=`t6x1`, include=FALSE}
 
 model.domain <- unique(sort(section.model.info$`Model Extent Text`))
-  
+
 ```
 
 `r if(waterbody_name == "Southern Willamette Subbasins"){paste0(model.domain, " The model extent is shown in Figure 3 in addition to the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}else{paste0("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}`
