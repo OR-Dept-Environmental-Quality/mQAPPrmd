@@ -572,7 +572,7 @@ t52_ref <- tir %>%
 
 ```
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1368,7 +1368,7 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **TMDL and WQMP development phase**    
 
-The TMDL and WQMP development phase is scheduled to begin in `r year(project.areas[which(project.areas$areas == qapp_project_area),]$Task.1.Start)` with USEPA’s final agency action approving or disapproving of the TMDL no later than `r format(project.areas[which(project.areas$areas == qapp_project_area),]$EPA.Approval,"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to USEPA for their action.
+The TMDL and WQMP development phase is scheduled to begin in `r year(project.areas[which(project.areas$areas == qapp_project_area),]$Task.2.Start)` with USEPA’s final agency action approving or disapproving of the TMDL no later than `r format(project.areas[which(project.areas$areas == qapp_project_area),]$EPA.Approval,"%B %d, %Y")`. In this phase, the draft TMDL and WQMP documents will be written; a TMDL advisory committee will be convened to discuss the updated TMDL allocations and any revisions to the WQMP; and finally DEQ will conduct a public comment period. DEQ will respond to all public comments received, revise the TMDL and WQMP as necessary, and issue the final TMDL to USEPA for their action.
 
 # Data management
 
@@ -1555,7 +1555,9 @@ other.ref <- data.frame(reference = c(
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
   'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
   'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
-  'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.'
+  'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
+  'FGDC (Federal Geographic Data Committee). 2013. "Classification of wetlands and deepwater habitats of the United States." FGDC-STD-004-2013. Second Edition. Wetlands Subcommittee, Federal Geographic Data Committee and U.S. Fish and Wildlife Service, Washington, DC. Accessed at https://www.fgdc.gov/standards/projects/wetlands/nwcs-2013',
+  'USFWS (U. S. Fish and Wildlife Service). 2013. "National Wetlands Inventory." U.S. Department of the Interior, Fish and Wildlife Service, Washington, D.C. http://www.fws.gov/wetlands/'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
