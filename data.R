@@ -837,7 +837,8 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage))
+    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
+    dplyr::arrange(desc(as.numeric(Acres)))
   
   nlcd.text.pro.area <- nlcd.text %>% 
     dplyr::filter(Project_Na == qapp_project_area) 
@@ -847,7 +848,8 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage))
+    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage))%>% 
+    dplyr::arrange(desc(as.numeric(Acres)))
   
   # _ Save Data ----
   save(df.stations,
