@@ -102,7 +102,6 @@ if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salm
 nlcd.waterbody <- nlcd.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
                 "Percent of Total Acres" = Percentage)
 
@@ -121,7 +120,6 @@ nlcd.text.waterbody <- nlcd.text.pro.area %>%
 dma.waterbody <- dma.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("DMA or Responsible Person" = DMA_RP,
                 "Percent of Total Acres" = Percentage) 
 
