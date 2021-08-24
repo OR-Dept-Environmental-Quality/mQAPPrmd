@@ -601,8 +601,7 @@ t53_1 <- t53_1 %>%
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
   rbind(t53_1_na) %>% 
   dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>% 
-  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization) %>% 
-  dplyr::filter(!`Station ID` == "PR1-5808")
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization)
 
 if(NROW(t53_1)>0){
   

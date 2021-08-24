@@ -106,7 +106,6 @@ if(npdes.ind.n > 1) {
 nlcd.waterbody <- nlcd.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
                 "Percent of Total Acres" = Percentage)
 
@@ -125,7 +124,6 @@ nlcd.text.waterbody <- nlcd.text.pro.area %>%
 dma.waterbody <- dma.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("DMA or Responsible Person" = DMA_RP,
                 "Percent of Total Acres" = Percentage) 
 
@@ -294,8 +292,7 @@ if(!model.extent == TRUE){
   
   names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x7 <- t6x7[,c(1,2,5,4)] %>% 
-    dplyr::filter(`Model Location Name (Station ID)` == "PR1-5808")
+  t6x7 <- t6x7[,c(1,2,5,4)] 
   
   if(NROW(t6x7)>0){
     
