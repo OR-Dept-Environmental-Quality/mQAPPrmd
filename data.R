@@ -836,17 +836,18 @@ qapp_project_area = "Middle Willamette Subbasins"
   nlcd.pro.area <- nlcd.tbl %>% 
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
-    dplyr::mutate(Stream = ifelse(Stream == "Salmon River", "Salmon River (2001)", Stream)) # source_char_data.R has been updated to include Salmon River 2001; delete this line after updated the data
+    dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
+    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage))
   
   nlcd.text.pro.area <- nlcd.text %>% 
-    dplyr::filter(Project_Na == qapp_project_area) %>% 
-    dplyr::mutate(Stream = ifelse(Stream == "Salmon River", "Salmon River (2001)", Stream)) # source_char_data.R has been updated to include Salmon River 2001; delete this line after updated the data
+    dplyr::filter(Project_Na == qapp_project_area) 
   
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
-    dplyr::mutate(Stream = ifelse(Stream == "Salmon River", "Salmon River (2001)", Stream)) # source_char_data.R has been updated to include Salmon River 2001; delete this line after updated the data
+    dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
+    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage))
   
   # _ Save Data ----
   save(df.stations,
