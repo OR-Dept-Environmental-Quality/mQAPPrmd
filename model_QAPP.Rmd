@@ -54,37 +54,6 @@ eqns <- captioner::captioner(prefix="Equation")
 ```
 
 \newpage
-**[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
-
-This report prepared by:
-
-Erin Costello, Yuan Grund, and Ryan Michie
-
-Oregon Department of Environmental Quality  
-700 NE Multnomah Street, Suite 600  
-Portland, OR 97232  
-1-800-452-4011  
-www.oregon.gov/deq
-
-In cooperation with:
-USEPA Region 10
-
-and
-
-Tetra Tech, Inc.
-
-Contact:        
-Ryan Michie       
-503-229-6162        
-
-DEQ can provide documents in an alternate format or in a language other than English upon request. Call DEQ at 800-452-4011 or email deqinfo@deq.state.or.us.
-
-\newpage
-**[MOVE THIS PAGE BEFORE THE TABLE OF CONTENTS] **    
-
-**[Approval Page]**
-
-\newpage
 # List of Tables
 
 # List of Figures
@@ -194,29 +163,29 @@ To the extent existing data and information allow, the primary analysis and mode
 
 1) Complete a source assessment and cumulative effects analysis.       
 
-    a. Identify anthropogenic sources of stream temperature warming.
-    b. Characterize how much warming comes from background sources.
-    c. Characterize how much warming comes from each anthropogenic source or source category.
-    d. Characterize the cumulative warming from all anthropogenic sources combined.
-    e. Identify where along the stream anthropogenic warming occurs.
-    f. Identify where the point of maximum stream warming is located.
-    g. Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
+a. Identify anthropogenic sources of stream temperature warming.
+b. Characterize how much warming comes from background sources.
+c. Characterize how much warming comes from each anthropogenic source or source category.
+d. Characterize the cumulative warming from all anthropogenic sources combined.
+e. Identify where along the stream anthropogenic warming occurs.
+f. Identify where the point of maximum stream warming is located.
+g. Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
 
 2) Determine TMDL elements and allocations that attain the applicable temperature criteria.        
 
-    a. Identify the thermal loading capacity for each temperature listed waterbody.
-    b. Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
-    c. Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
-    d. Identify any surrogate measures.
-    e. Identify any reserve capacity.
-    f. Identify any margin of safety.
-    g. Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
+a. Identify the thermal loading capacity for each temperature listed waterbody.
+b. Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
+c. Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
+d. Identify any surrogate measures.
+e. Identify any reserve capacity.
+f. Identify any margin of safety.
+g. Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
 
 3) Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.       
 
-    a. Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
-    b. Identify additional management strategies or surrogate measures.
-    c. Identify under what timeline and where management strategies need to be implemented.        
+a. Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
+b. Identify additional management strategies or surrogate measures.
+c. Identify under what timeline and where management strategies need to be implemented.        
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
@@ -344,24 +313,21 @@ We do not anticipate any new software development or model code changes as part 
 ## Meteorology
 
 ```{r, label=`t51`, echo=FALSE}
-if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
-  
-  t51_sp <- model.input %>% 
-    dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
-    dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>%
-    dplyr::mutate(Station = ifelse(is.na(`Station ID`),paste0("No Station ID, ", `Data Source`),
-                                   paste0(`Station ID`, ", ", `Data Source`)),
-                  `Station ID` = NA,
-                  `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
-                  `Available Data` = Parameter,
-                  Agency = NA,
-                  tbl = "DEQ File") %>% 
-    dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
-    dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
-    dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::filter(!Station == "KEUG - Eugene Airport, NCDC")
-}
+
+t51_sp <- model.input %>% 
+  dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
+  dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>%
+  dplyr::mutate(Station = ifelse(is.na(`Station ID`),paste0("No Station ID, ", `Data Source`),
+                                 paste0(`Station ID`, ", ", `Data Source`)),
+                `Station ID` = NA,
+                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
+                `Available Data` = Parameter,
+                Agency = NA,
+                tbl = "DEQ File") %>% 
+  dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
+  dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl)
 
 t51_ncei <- ncei.station.tbl %>% 
   dplyr::mutate(`Station` = STATION_NAME,
@@ -370,9 +336,9 @@ t51_ncei <- ncei.station.tbl %>%
                 `Available Data` = NA,
                 Agency = NA,
                 tbl = "NCDC") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(Station, .keep_all=TRUE)
+  dplyr::distinct(Station, .keep_all=TRUE) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl)
 
 t51_raws <- raws.station.tbl %>% 
   dplyr::mutate(`Station` = siteName,
@@ -381,9 +347,9 @@ t51_raws <- raws.station.tbl %>%
                 `Available Data` = NA,
                 Agency = agency,
                 tbl = "RAWS") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Station`, .keep_all=TRUE)
+  dplyr::distinct(`Station`, .keep_all=TRUE) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl)
 
 t51_agrimet <- agrimet.station.tbl %>%
   dplyr::mutate(`Station` = description.x,
@@ -392,9 +358,9 @@ t51_agrimet <- agrimet.station.tbl %>%
                 `Available Data` = NA,
                 Agency = NA,
                 tbl = "AgriMet") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
-  dplyr::distinct(`Station`, .keep_all=TRUE)
+  dplyr::distinct(`Station`, .keep_all=TRUE) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl)
 
 t51_hydromet <- hydromet.station.tbl %>% 
   dplyr::filter(Parameter %in% c("Air Temperature","Precipitation")) %>% 
@@ -404,10 +370,10 @@ t51_hydromet <- hydromet.station.tbl %>%
                 `Available Data` = Parameter,
                 Agency = NA,
                 tbl = "Hydromet") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
   dplyr::group_by(`Station ID`, Station, `Latitude/Longitude`,Agency,tbl) %>% 
   dplyr::summarize(`Available Data` = toString(unique(sort(`Available Data`)))) %>% 
-  dplyr::ungroup()
+  dplyr::ungroup() %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl)
 
 t51_mw <- mw.station.tbl %>% 
   dplyr::mutate(`Station` = NAME,
@@ -416,15 +382,12 @@ t51_mw <- mw.station.tbl %>%
                 `Available Data` = NA,
                 Agency = NA,
                 tbl = "MesoWest") %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
   dplyr::distinct(`Station`, .keep_all=TRUE) %>% 
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>%
   dplyr::filter(!`Station ID` == "KEUG")
 
-if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
-  t51 <- rbind(t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw,t51_sp)} else {
-    t51 <- rbind(t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw)  
-  }
+t51 <- rbind(t51_ncei,t51_raws,t51_agrimet,t51_hydromet,t51_mw,t51_sp)
 
 t51_na <- t51 %>% dplyr::filter(is.na(`Latitude/Longitude`))
 t51 <- t51[!duplicated(t51$`Latitude/Longitude`),] %>% 
@@ -444,6 +407,7 @@ if(NROW(t51.ncei)>0){
                                caption = tbls(name = "t51_ncei",
                                               caption = paste0("Meteorological stations and data available in the National Climatic Data Center (NCDC) database in the ",
                                                                qapp_project_area, ".")))
+  
 }
 
 t51.raws <- t51 %>% 
@@ -498,46 +462,40 @@ if(NROW(t51.mw)>0){
   
 }
 
-#if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
-  
-  t51.sp <- t51 %>% 
-    dplyr::filter(tbl=="DEQ File") %>% 
-    dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
-    dplyr::arrange(Station) %>% 
-    dplyr::rename(Source = Station) %>% 
-    dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
-  
-  if(NROW(t51.sp)>0){
-    
-    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_sp",
-                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
-    
-  }
-#}
+t51.sp <- t51 %>% 
+  dplyr::filter(tbl=="DEQ File") %>% 
+  dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
+  dplyr::arrange(Station) %>% 
+  dplyr::rename(Source = Station) %>% 
+  dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
 
-# Table NUM
-if(NROW(model.input[which(model.input$`Model Location Type` == "Meteorological"),])>0){
+if(NROW(t51.sp)>0){
   
-  tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
-                           tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp))) %>% 
-    dplyr::filter(tbl_rows != "0")
-  
-  #t51_num <- NROW(tables.met)+1
-  
-} else {
-  
-  tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw"),
-                           tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw))) %>% 
-    dplyr::filter(tbl_rows != "0")
-  
-  #t51_num <- NROW(tables.met)+1
+  t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
+                             caption = tbls(name = "t51_sp",
+                                            caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
   
 }
 
+tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
+                         tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
+                         txt = c("National Oceanic and Atmospheric Association (NOAA)’s National Climatic Data Center (NCDC)",
+                                 "National Interagency Fire Center’s Remote Automatic Weather Stations (RAWS)",
+                                 "Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet)",
+                                 "Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet)",
+                                 "University of Utah MesoWest database",
+                                 "DEQ database")) %>% 
+  dplyr::filter(tbl_rows != "0")
+
+t51_txt <- knitr::combine_words(tables.met$txt)
+
 ```
 
-Meteorological data, including air temperature, cloudiness, relative humidity, and wind speed, are available from the DEQ database, National Oceanic and Atmospheric Association (NOAA)'s National Climatic Data Center (NCDC), National Interagency Fire Center (NIFC)'s Remote Automatic Weather Stations (RAWS), Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet) and Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet), and University of Utah MesoWest database. `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+Meteorological data, including air temperature, sky conditions, cloudiness, relative humidity, and wind speed, are available from `r t51_txt`.
+
+The meteorological data obtained from the NCDC includes the Local Climatological Dataset (NOAA, 2005) and the Global Integrated Surface Dataset (NOAA, 2001). The Local Climatological Dataset includes quality controlled meteorological data from airports and other prominent weather stations managed by the National Weather Service, Federal Aviation Administration, and the U.S. Department of Defense. The Global Integrated Surface Dataset provides a long-term record of hourly, sub-hourly and synoptic weather observations from a variety of meteorological networks around the world. The dataset includes observations from the World Meteorological Organization, Automated Surface Observing System, Automated Weather Observing Stations, U.S. Climate Reference Network, and others. 
+
+`r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. The station IDs in `r tbls(name = "t51_ncei", display="cite")` are the NCDC ID, which may differ from the station identifiers used by other sources.
 
 `r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
 `r if(NROW(t51.raws)>0){t51_raws_tbl}`
@@ -553,7 +511,6 @@ t52 <- tir %>%
   dplyr::filter(`QAPP Project Area` == qapp_project_area) %>% 
   dplyr::mutate(`Survey Distance` = paste0(`Survey Distance`," ", `Distance Units`)) %>% 
   dplyr::select(Stream, `Survey Extent`, Date, Time, `Survey Distance`) %>% 
-  #dplyr::select(Stream, "Survey Extent","Survey Date") %>% 
   dplyr::arrange(Stream)
 
 if(NROW(t52)>0){
@@ -639,12 +596,6 @@ t54_owrd <- flow.stations %>%
 t54_hydromet <- flow.stations %>% 
   dplyr::filter(`Data Source` %in% c("Hydromet")) %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(as.numeric(Lat),4), "/",round(as.numeric(Long),3))) %>%  
-  #hydromet.station.tbl %>% 
-  #dplyr::filter(Parameter %in% c("Discharge", "Spillway Discharge", "Flow")) %>% 
-  #dplyr::mutate(Station = Station.Name,
-  #              `Station ID` = Station.ID,
-  #              `Latitude/Longitude` = paste0(round(as.numeric(lat),4), "/",round(as.numeric(long),3)),
-  #              `Data Source` = "hydromet") %>% 
   dplyr::select(`Station ID`, Station, `Latitude/Longitude`,`Data Source`)
 
 t54_sp <- model.input %>% 
@@ -759,7 +710,6 @@ if(NROW(section.npdes.ind)>0){
   
 }
 
-##
 section.npdes.gen.1 <- npdes.gen.pro.area %>% 
   dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
   dplyr::filter(PermitType %in% c("GEN01","GEN03","GEN04","GEN05")) %>% 
@@ -774,11 +724,10 @@ section.npdes.gen.1 <- npdes.gen.pro.area %>%
 if(NROW(section.npdes.gen.1)>0){
   
   t55_gen1_tbl <- knitr::kable(section.npdes.gen.1, format = "pandoc", padding = 2,
-                              caption = tbls(name = "t55_gen1",
-                                             caption = paste0("Summary of current registrants under the general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ".")))
+                               caption = tbls(name = "t55_gen1",
+                                              caption = paste0("Summary of current registrants under the general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ".")))
   
 }
-##
 
 section.npdes.gen.2 <- npdes.gen.pro.area %>% 
   dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
@@ -791,8 +740,8 @@ section.npdes.gen.2 <- npdes.gen.pro.area %>%
 if(NROW(section.npdes.gen.2)>0){
   
   t55_gen2_tbl <- knitr::kable(section.npdes.gen.2, format = "pandoc", padding = 2,
-                              caption = tbls(name = "t55_gen2",
-                                             caption = paste0("Summary of current number of general NPDES permit registrants, other than GEN01, GEN03, GEN04 and GEN05 registrants, in the ", qapp_project_area, ".")))
+                               caption = tbls(name = "t55_gen2",
+                                              caption = paste0("Summary of current number of general NPDES permit registrants, other than GEN01, GEN03, GEN04 and GEN05 registrants, in the ", qapp_project_area, ".")))
   
 }
 
@@ -955,7 +904,7 @@ if(mod.check == "11"){
         dplyr::filter(!mod_rmd %in% c("hs6","hs7","hs8"))
       
       if(NROW(modv)>0){
-
+        
         mod.v <- c(knitr::knit_child(input = "hs6.Rmd", envir = globalenv()),
                    knitr::knit_child(input = "hs67.Rmd", envir = globalenv()),
                    knitr::knit_child(input = "hs68.Rmd", envir = globalenv()))
@@ -1038,8 +987,6 @@ Non-steady state stream models typically require a significant amount of data be
 To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the sections of model inputs in the current Chapter 6 Model development and calibration.
 
 ```{r, label=`data_gap`, echo=FALSE}
-
-# tdata.gap <- 
 
 print(knitr::kable(data.gap, format = "pandoc", padding = 2,
                    caption = tbls(name = "data.gap",
@@ -1304,9 +1251,6 @@ roles.pro.area <- roles %>%
 
 troles <- flextable::regulartable(roles.pro.area) %>% 
   flextable::set_table_properties(layout = "autofit") %>% 
-  #flextable::merge_h(i = c(1,13)) %>% 
-  #flextable::bold(i = c(1,13)) %>% 
-  #flextable::bg(i = 1, bg = "#B52222", part = "body") %>% 
   flextable::valign(valign = "top") %>% 
   flextable::theme_box() %>% 
   flextable::set_caption(tbls(name = "roles",
@@ -1530,7 +1474,9 @@ other.ref <- data.frame(reference = c(
   'Boyd, M.S. 1996. “Heat Source: Stream, River, and Open Channel Temperature Prediction (Master\'s Thesis).” Oregon State University: Corvallis.',
   'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” Accessed at http://www.deq.state.or.us/wq/tmdls/heatsource.htm.',
   'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version5.0." http://www.oregon.gov/deq/FilterDocs/DataQualMatrix.pdf',
+  'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
   'Diabat, M., R. Haggerty, and S.M. Wondzell. 2013. “Diurnal timing of warmer air under climate-change affects magnitude, timing and duration of stream temperature change.” Hydrological. Processes. 27(16): 2367–2.',
+  'EPA (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
   'EPA (U.S. Environmental Protection Agency). 2009. "Guidance on the Development, Evaluation, and Application of Environmental Models". Council for Regulatory Environmental Modeling, Washington D.C., EPA/100/K-09/003.',
   'Gianfagna, C.J. 2015. “Watershed area ratio accurately predicts daily streamflow in nested catchments in the Catskills, New York.” Journal of Hydrology, 583-594.',
   'Hannah, D.M., I.A. Malcom, C. Soulsby, and A.F. Youngson. 2008. “A comparison of forest and moorland stream microclimate, heat exchanges and thermal dynamics.” Hydrological Processes. 22(7):919-940.',
@@ -1543,6 +1489,8 @@ other.ref <- data.frame(reference = c(
   'Lawrence, D.J., B. Stewart-Koster, J.D. Olden, A.S. Ruesch, C.E. Torgersen, J.J. Lawler, D.P.Butcher, and J.K. Crown. 2014. “The interactive effects of climate change, riparian management, and a nonnative predator on stream-rearing salmon.” Ecological Applications. 24(4): 895-912.',
   'Loheide S.P. and S.M. Gorelick. 2006. Quantifying stream−aquifer interactions through the analysis of remotely sensed thermographic profiles and in situ temperature histories.” Environmental Science and Technology. 40(10): 3336-3341.',
   'Lorenz, D.L. and S.M. Ziegeweid. 2016. “Methods to estimate historical daily streamflow for ungaged stream locations in Minnesota. No. 2015-5181.” US Geological Survey, 2016.',
+  'NOAA (National Oceanic and Atmospheric Administration). 2001. Global Surface Hourly Datasets. NOAA National Centers for Environmental Information. Dataset identifier: gov.noaa.ncdc:C00532.',
+  'NOAA (National Oceanic and Atmospheric Administration). 2005. U.S. Local Climatological Data. NOAA National Centers for Environmental Information. Dataset identifier: gov.noaa.ncdc:C00684.',
   'Pelletier, G.J., C. Chapra, and H. Taob. 2006. “QUAL2Kw – A framework for modeling water quality in streams and rivers using a genetic algorithm for calibration.” Environmental Modelling & Software. 21(3), 419-425.',
   'Ries III, K.G., J.K. Newson,  M.J. Smith, J.D. Guthrie, P.A. Steeves, T.L. Haluska, K.R. Kolb, R.F. Thompson, R.D. Santoro, and H.W. Vraga. 2017. “StreamStats, version 4: U.S. Geological Survey Fact 2017–3046, 4 p.” https://doi.org/10.3133/fs20173046. [Supersedes USGS Fact Sheet 2008–3067.]',
   'Risley, J. S. 2009. “Estimating flow-duration and low-flow frequency statistics for unregulated stream in Oregon.” Reston, VA: U.S. Geological Survey.',
@@ -1554,8 +1502,6 @@ other.ref <- data.frame(reference = c(
   'Wondzell, S.M., M. Diabat, and R. Haggerty. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
   'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
-  'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
-  'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
   'FGDC (Federal Geographic Data Committee). 2013. "Classification of wetlands and deepwater habitats of the United States." FGDC-STD-004-2013. Second Edition. Wetlands Subcommittee, Federal Geographic Data Committee and U.S. Fish and Wildlife Service, Washington, DC. Accessed at https://www.fgdc.gov/standards/projects/wetlands/nwcs-2013',
   'USFWS (U. S. Fish and Wildlife Service). 2013. "National Wetlands Inventory." U.S. Department of the Interior, Fish and Wildlife Service, Washington, D.C. http://www.fws.gov/wetlands/'
 ))
@@ -1580,8 +1526,8 @@ for(r in unique(sort(qapp.ref$reference))) {
 ```{r, rev, echo=FALSE}
 
 knitr::kable(rev, format = "pandoc", padding = 2,
-                            caption = tbls(name = "rev",
-                                           caption = paste0("Revision history.")))
+             caption = tbls(name = "rev",
+                            caption = paste0("Revision history.")))
 
 ```
 
@@ -1602,7 +1548,7 @@ if(NROW(temp.data.sample.count)>0){
 
 `r app_a_tbl`
 
-**[Update: Delete this note if there is no data count > 31. * Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.]**
+**[Update: Delete this note if there is no data count > 31.]** * Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
 # Appendix B Continuous flow data summary
