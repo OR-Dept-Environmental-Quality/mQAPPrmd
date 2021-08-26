@@ -123,7 +123,7 @@ popupTable.gageHeight <- function(station_name = NULL){
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
-# qapp_project_area = "Mid Willamette Subbasins"
+# qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
@@ -434,7 +434,7 @@ for (qapp_project_area in project.areas$areas) {
   # models ----
   hs.temp.areas <- c("John Day River Basin",
                      "Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
-                     "Mid Willamette Subbasins",
+                     "Middle Willamette Subbasins",
                      "North Umpqua Subbasin",
                      "Sandy Subbasin",
                      "South Umpqua and Umpqua Subbasins",
