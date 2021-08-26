@@ -410,8 +410,6 @@ qapp_project_area = "John Day River Basin"
   
   pro_area_huc12_union <- sf::st_union(pro_area_huc12)
   
-  #huc8.extent <- project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent
-  
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   
   # _ IR2018/20 Cat 4 & 5 ----
@@ -570,10 +568,7 @@ qapp_project_area = "John Day River Basin"
     dplyr::left_join(station.awqms.temp[,c("Station ID","Station")], by=c("MLocID"="Station ID")) %>% 
     dplyr::select(-StationDes) %>%
     dplyr::rename(StationDes = Station) %>% 
-    rbind(owrd.data.temp,bes.data.temp) #%>% 
-  #dplyr::left_join(df.stations, by="MLocID") %>% 
-  #dplyr::mutate(HUC12.x = ifelse(is.na(HUC12.x),HUC12.y,HUC12.x)) %>% # add HUC12 to owrd data
-  #dplyr::filter(HUC12.x %in% subbasin_num)
+    rbind(owrd.data.temp,bes.data.temp) 
   
   # Temp data.sample.count will be used in the Appendix A
   temp.data.sample.count <- temp.data %>% 
@@ -745,7 +740,6 @@ qapp_project_area = "John Day River Basin"
   
   ncei.station.tbl <- ncei.stations.pro.area %>%
     dplyr::mutate(STATION_NAME = ifelse(NCDC == "10009634","PORTLAND TROUTDALE AIRPORT",STATION_NAME))
-  #dplyr::mutate(STATION_NAME = stringr::str_to_title(STATION_NAME))
   
   # _ RAWS met data ----
   raws.stations.pro.area <- raws.stations %>% 
@@ -987,34 +981,31 @@ pro_reaches <- pro_reaches %>%
 
 # _ Model Extents ----
 map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent.shp"),
-                                   layer = "ce_model_extent")
-
-map_ce_model_extent <- sf::st_transform(map_ce_model_extent, 4326) %>% sf::st_zm() 
+                                   layer = "ce_model_extent")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
 
 map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_model_extent.shp"),
-                                        layer = "hs_temp_model_extent")
-
-map_hs_temp_model_extent <- sf::st_transform(map_hs_temp_model_extent, 4326) %>% sf::st_zm() %>% 
-  dplyr::mutate(Stream = ifelse(Stream == "Sandy River", "Sandy River (2001)",
-                                ifelse(Stream == "Bull Run River", "Bull Run River (2001)", 
-                                       ifelse(Stream == "Salmon River", "Salmon River (2001)", Stream))))
+                                        layer = "hs_temp_model_extent")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
 
 map_hs_solar_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_solar_model_extent.shp"),
-                                         layer = "hs_solar_model_extent")
-
-map_hs_solar_model_extent <- sf::st_transform(map_hs_solar_model_extent, 4326) %>% sf::st_zm()
+                                         layer = "hs_solar_model_extent")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
 
 # Shadow model is only for the Rouge River Basin
 map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_streams_temp_projects_clean.shp"),
-                                   layer = "shade_model_streams_temp_projects_clean")
-
-map_sh_model_extent <- sf::st_transform(map_sh_model_extent, 4326) %>% sf::st_zm() 
+                                   layer = "shade_model_streams_temp_projects_clean")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
 
 # Heat source solar model defined in area is only for the Southern Willamette Subbasins
 map_hs_solar_model_area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/shade_models/Southern_Willamette_ShadeModelArea.shp",
-                                       layer = "Southern_Willamette_ShadeModelArea")
-
-map_hs_solar_model_area <- sf::st_transform(map_hs_solar_model_area, 4326) %>% sf::st_zm() %>% 
+                                       layer = "Southern_Willamette_ShadeModelArea")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()%>% 
   dplyr::mutate(Project_Na = "Southern Willamette Subbasins",
                 Name = "Southern Willamette Subbasins Heat Source Solar Model Area")
 
