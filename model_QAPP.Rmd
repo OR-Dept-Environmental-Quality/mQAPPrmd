@@ -293,7 +293,7 @@ Stream temperatures were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the c
 
 ## Model selection
 
-DEQ has developed Heat Source models (version 8) for the main stem, North Fork and Middle Fork John Day Rivers for the 2010 temperature TMDL. It is anticipated those models will be carried forward into this scope of work, and will define the technical basis of the TMDL and thermal load and waste load allocations. The modeling framework needs for this project include:
+The modeling framework needs for this project include:
 
 1)	Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.  
 
@@ -479,14 +479,6 @@ if(NROW(t51.mw)>0){
     dplyr::rename(Source = Station) %>% 
     dplyr::filter(!Source %in% c("NO STATION ID, DEQ FILE",
                                  "GOLW - GOLDENDALE, OREGON AGRIMET WEATHER STATION"))
-  
-  if(NROW(t51.sp)>0){
-    
-    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_sp",
-                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
-    
-  }
 
 if(NROW(t51.sp)>0){
   
