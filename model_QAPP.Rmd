@@ -697,7 +697,8 @@ t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp
 
 # Instantaneous flow
 t54_ins_flow <- inst.flow.pro.area %>% 
-  dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3))) %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
+                Time = format(Time,"%H:%M")) %>% 
   dplyr::select(`Station ID`,Station,Date,`Flow (cfs)`,`Latitude/Longitude`)
 
 if(NROW(t54_ins_flow)>0){
@@ -805,6 +806,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 ```{r, label=`t57`, echo=FALSE}
 
 t57 <- effective.shade.pro.area %>% 
+  dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
                 `Effective Shade` = paste0(Result,"%")) %>% 
   dplyr::select(`Station ID` = `Site ID`,
