@@ -783,6 +783,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 ```{r, label=`t57`, echo=FALSE}
 
 t57 <- effective.shade.pro.area %>% 
+  dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
                 `Effective Shade` = paste0(Result,"%")) %>% 
   dplyr::select(`Station ID` = `Site ID`,

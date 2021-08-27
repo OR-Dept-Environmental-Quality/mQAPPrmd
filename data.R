@@ -175,6 +175,8 @@ risks <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "risks")
 abbr <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "abbr")
 data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
 rev <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "revision_history")
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_flow")
 
 # _ NPDES ----
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Individual_NDPES") %>% 
@@ -733,6 +735,14 @@ qapp_project_area = "Sandy Subbasin"
     dplyr::arrange(Year, `Station ID`) %>% 
     dplyr::distinct(Year, `Station ID`,.keep_all=TRUE)
   
+  ## _ (5) Instantaneous flow ----
+  inst.flow.pro.area <- inst.flow %>% 
+    dplyr::filter(`Project Area` == qapp_project_area)
+  
+  # _ Effective shade data ----
+  effective.shade.pro.area <- effective.shade %>% 
+    dplyr::filter(`Project Area` == qapp_project_area)
+  
   # _ NCDC met data ----
   ncei.stations.pro.area <- ncei.stations %>% 
     dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
@@ -866,6 +876,8 @@ qapp_project_area = "Sandy Subbasin"
        pro.cat.45.tbl,
        flow.stations,
        flow.data.sample.count,
+       inst.flow.pro.area,
+       effective.shade.pro.area,
        ncei.station.tbl,
        raws.station.tbl,
        agrimet.station.tbl,
