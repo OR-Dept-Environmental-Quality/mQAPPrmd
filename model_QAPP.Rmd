@@ -465,13 +465,6 @@ t51.sp <- t51 %>%
     dplyr::arrange(Station) %>% 
     dplyr::rename(Source = Station) %>% 
     dplyr::filter(!Source == "NO STATION ID, DEQ FILE") # Remove the sites from this table
-  
-  if(NROW(t51.sp)>0){
-    
-    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_sp",
-                                             caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
-  }
 
 if(NROW(t51.sp)>0){
   
@@ -506,6 +499,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 `r if(NROW(t51.agrimet)>0){t51_agrimet_tbl}`
 `r if(NROW(t51.hydromet)>0){t51_hydromet_tbl}`
 `r if(NROW(t51.mw)>0){t51_mw_tbl}`
+`r if(NROW(t51.sp)>0){t51_sp_tbl}`
 
 ## Thermal Infrared Radiometry (TIR) data
 
