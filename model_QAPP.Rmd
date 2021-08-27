@@ -293,7 +293,7 @@ Stream temperatures were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the c
 
 ## Model selection
 
-The modeling framework needs for this project include:
+DEQ has developed Heat Source models (version 8) for the main stem, North Fork and Middle Fork John Day Rivers for the 2010 temperature TMDL. It is anticipated those models will be carried forward into this scope of work, and will define the technical basis of the TMDL and thermal load and waste load allocations. The modeling framework needs for this project include:
 
 1)	Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.  
 
