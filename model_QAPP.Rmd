@@ -1235,7 +1235,7 @@ DEQ may also rely upon the results of relevant studies, reports, or published ar
 
 ```{r, label=`t1011`, echo=FALSE}
 
-t1011_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "sandy_nodam")
+t1011_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_Sandy.xlsx",sheet = "sandy_nodam")
 
 t1011_sandy_tbl <- knitr::kable(t1011_sandy, format = "pandoc", padding = 2,
                               caption = tbls(name = "t1011_sandy",
