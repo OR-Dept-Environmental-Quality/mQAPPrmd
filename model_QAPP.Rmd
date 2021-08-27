@@ -46,7 +46,6 @@ library(stringr);library(stringi)
 library(english)
 library(pacman)
 library(httr)
-library(scales)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
