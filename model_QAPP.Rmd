@@ -46,7 +46,6 @@ library(stringr);library(stringi)
 library(english)
 library(pacman)
 library(httr)
-library(scales)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -503,14 +502,6 @@ t51.sp <- t51 %>%
     dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
     dplyr::filter(!Source == "353036, RAWS") # add this site to the RAWS table
   
-  if(NROW(t51.sp)>0){
-    
-    t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_sp",
-                                              caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
-    
-  }
-
 if(NROW(t51.sp)>0){
   
   t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
