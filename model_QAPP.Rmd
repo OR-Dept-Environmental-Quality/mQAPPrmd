@@ -586,6 +586,7 @@ All available continuous stream temperature data were retrieved from DEQ’s Amb
 
 ```{r, label=`t54`, echo=FALSE}
 
+# Continuous flow
 t54_usgs <- flow.stations %>% 
   dplyr::filter(`Data Source` %in% c("USGS")) %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(as.numeric(Lat),5), "/",round(as.numeric(Long),4))) %>% 
@@ -672,22 +673,34 @@ if(NROW(t54_sp)>0){
                              caption = tbls(name = "t54_sp",
                                             caption = paste0("Flow measurements from DEQ and other public databases in the ", qapp_project_area, ".")))
   
-  t54.sp.tbl.num <- tbls(name = "t54_sp", display="cite")
-  
 }
 
 t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
                           `nrow` = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp))) %>% 
   dplyr::filter(!`nrow` == 0)
 
+# Instantaneous flow
+t54_ins_flow <- inst.flow.pro.area %>% 
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3))) %>% 
+  dplyr::select(`Station ID`,Station,Date,`Flow (cfs)`,`Latitude/Longitude`)
+
+if(NROW(t54_ins_flow)>0){
+  
+  t54_ins_flow_tbl <- knitr::kable(t54_ins_flow, format = "pandoc", padding = 2, row.names = NA,
+                             caption = tbls(name = "t54_ins_flow",
+                                            caption = paste0("Instantaneous flow measurements made by DEQ in the ", qapp_project_area, ".")))
+  
+}
+
 ```
 
-`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations for flow volume data and other instream measurements that were available in USGS, DEQ, and other public databases. Appendix B summarizes when data were collected at each of the stations with continuous flow measurements. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
+`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations where continuous flow volume data were available in USGS, DEQ, and other public databases. Appendix B summarizes when data were collected at each of the stations with continuous flow measurements. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_lw", display="cite"), "lists the locations where instantaneous flow volume measurements made by DEQ were available.")}`
 
 `r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
 `r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
 `r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
 `r if(NROW(t54_sp)>0){t54_sp_tbl}`
+`r if(NROW(t54_ins_flow)>0){t54_ins_flow_tbl}`
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
