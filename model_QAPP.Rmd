@@ -552,8 +552,8 @@ t53_1 <- rbind(temp.stations,st_model) %>%
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3))) %>%
   dplyr::mutate(`Latitude/Longitude`= ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
-  dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>% #
-  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization, Org_order)
+  dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>%
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization)
 
 if(NROW(t53_1)>0){
   
