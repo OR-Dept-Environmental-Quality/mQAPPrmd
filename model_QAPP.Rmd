@@ -316,7 +316,7 @@ We do not anticipate any new software development or model code changes as part 
 
 t51_sp <- model.input %>% 
   dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
-  dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>%
+  dplyr::filter(!is.na(`Data Source`) | is.na(`Interpolated Data`)) %>%
   dplyr::mutate(Station = ifelse(is.na(`Station ID`),paste0("No Station ID, ", `Data Source`),
                                  paste0(`Station ID`, ", ", `Data Source`)),
                 `Station ID` = NA,
@@ -536,9 +536,9 @@ DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrare
 ## Continuous stream temperature data
 
 ```{r, label=`t53`, echo=FALSE}
-st_model <- station.model %>% 
+st_model <- model.input %>% 
   dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
-  dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
+  dplyr::filter(!is.na(`Data Source`) | is.na(`Interpolated Data`)) %>% 
   dplyr::filter(!`Station ID` == "TIR") %>% 
   dplyr::mutate(Station = ifelse(is.na(Station),`Model Location Name`,Station),
                 Organization = ifelse(is.na(Organization),`Data Source`,Organization),
@@ -546,24 +546,13 @@ st_model <- station.model %>%
                                       paste0(gsub(",.*$", "", Organization)," (",stringi::stri_sub(strip_alpha(Organization),-4),")"),Organization)) %>% 
   dplyr::select(Station,`Station ID`, Organization, Latitude, Longitude)
 
-st_model_nodata <- station.model %>% 
-  dplyr::filter(Note == "Data not in AWQMS.") %>% 
-  dplyr::pull(`Station ID`)
-
 t53_1 <- rbind(temp.stations,st_model) %>% 
   dplyr::distinct(Station,`Station ID`, .keep_all=TRUE) %>%
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3))) %>%
   dplyr::mutate(`Latitude/Longitude`= ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
+  dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>% #
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization, Org_order)
-
-t53_1_na <- t53_1 %>% dplyr::filter(is.na(`Latitude/Longitude`))
-t53_1 <- t53_1 %>% 
-  #t53_1[!duplicated(t53_1$`Latitude/Longitude`),] %>% 
-  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
-  rbind(t53_1_na) %>% 
-  dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>% 
-  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization)
 
 if(NROW(t53_1)>0){
   
@@ -602,7 +591,8 @@ t54_hydromet <- flow.stations %>%
 t54_sp <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
   dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
-  dplyr::filter(!`Data Source` == "USGS" & !is.na(`Data Source`)) %>% 
+  dplyr::filter(!`Data Source` == "USGS") %>% 
+  dplyr::filter(!is.na(`Data Source`)) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::mutate(Station = `Model Location Name`,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
@@ -1605,12 +1595,8 @@ DEQ prepared an interactive HTML map to display relevant information described i
 
 ```{r, label=`area-map-data`,echo=FALSE}
 # Stream Temperature Stations
-temp_stations <- t53_1 %>% 
-  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
-  #dplyr::filter(!`Station ID` %in% st_model_nodata) %>% 
-  dplyr::filter((Station %in% temp.data.sample.count$Station)&(`Station ID` %in% temp.data.sample.count$`Station ID`)) %>% 
-  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
-  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+temp_stations <- temp.stations %>% 
+  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
 # Stream Temperature Calibration Sites
 temp_cal_sites <- model.input %>% 
@@ -1639,12 +1625,9 @@ flow_model_bc_tri <- model.input %>%
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
-# Flow Stations
-flow_stations <- t54 %>% 
-  dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
-  dplyr::filter((Station %in% flow.data.sample.count$Station)&(`Station ID` %in% flow.data.sample.count$`Station ID`)) %>% 
-  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
-  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+# Stream Flow Stations
+flow_stations <- flow.stations %>% 
+  sf::st_as_sf(coords = c("Long","Lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
 # Gage Height Stations
 if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
