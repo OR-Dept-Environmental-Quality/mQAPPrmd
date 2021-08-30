@@ -107,7 +107,7 @@ huc8.txt <- lookup.huc %>%
 
 ```
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. **[Update: This QAPP project area excludes the (list rivers if applicable).]**
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`.
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -143,8 +143,6 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
-**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**
-
 * Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
 *	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
 *	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
@@ -155,7 +153,7 @@ Where and when the applicable criteria apply are based on the designated fish us
 
 The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
-**[Update: please review this paragraph, which was kept from the older version.]**The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2010 John Day River Basin TMDL were developed primarily to address summer (non-spawning) periods in 2002 for the Middle Fork and North Fork John Day Rivers, and summer periods in 2004 for the main stem John Day River. The Middle Fork John Day River model covers some periods during which Salmon and Steelhead spawning occur, however, neither the Main stem nor the North Fork John Day River models cover Salmon and Steelhead spawning periods. Nevertheless, DEQ has determined that it is appropriate to use the existing models to extrapolate results to develop waste load allocations for those time periods. It is not anticipated additional modeling or modeling updates will need to be made. 
+The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2010 John Day River Basin TMDL were developed primarily to address summer (non-spawning) periods in 2002 for the Middle Fork and North Fork John Day Rivers, and summer periods in 2004 for the main stem John Day River. The Middle Fork John Day River model covers some periods during which Salmon and Steelhead spawning occur, however, neither the Main stem nor the North Fork John Day River models cover Salmon and Steelhead spawning periods. Nevertheless, DEQ has determined that it is appropriate to use the existing models to extrapolate results to develop waste load allocations for those time periods. It is not anticipated additional modeling or modeling updates will need to be made. 
 
 As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
 
@@ -254,8 +252,6 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 **Anthropogenic Point Sources**: Temperature increases from point sources are those caused by warm water discharges from NPDES permitted facilities, such as industrial outfalls, municipal waste water treatment plants (WWTP), and other point sources.
 
-**[Update: Check if this paragraph should be kept.]**There are four WWTPs within the basin that were addressed and allocated thermal waste loads: City of John Day WWTP, Mount Vernon WWTP, Dayville WWTP, and the Long Creek WWTP. Other point sources within the basin but not specifically allocated thermal waste loads include confined animal feed operations (CAFO), general stormwater permits and storage facilities.
-
 # Technical approach
 
 ## Overview
@@ -307,9 +303,7 @@ DEQ has developed Heat Source models (version 8) for the main stem, North Fork a
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-7)	**[Update as needed]**
-
-**[Update this paragraph where CE-QUAL-W2 is used].** The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
@@ -562,8 +556,8 @@ t53_1 <- rbind(temp.stations,st_model) %>%
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3))) %>%
   dplyr::mutate(`Latitude/Longitude`= ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
-  dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>% #
-  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization, Org_order)
+  dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>%
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization)
 
 if(NROW(t53_1)>0){
   
@@ -806,7 +800,7 @@ if(NROW(t57)>0){
 
 ```
 
-Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for August 2002 and August 2004.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -963,7 +957,7 @@ Waterbodies where model development was initiated for the `r paste0(pro.area.tmd
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
@@ -1069,8 +1063,6 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
-The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
-
 It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
 ## Model acceptance
@@ -1147,7 +1139,7 @@ Management scenarios described in this section summarize the means by which the 
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-**[List specific changes that will be made]**
+* Updating the John Day River model to include current discharges from City of Dayville and Mt Vernon STP.
 
 ## Background
 
