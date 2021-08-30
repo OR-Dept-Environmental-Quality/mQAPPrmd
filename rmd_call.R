@@ -9,7 +9,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 ## for test:
 # qapp_project_area = "John Day River Basin"
-# qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
+qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
@@ -23,16 +23,16 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas$areas) {
+#for (qapp_project_area in project.areas$areas) {
   
   print(qapp_project_area)
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   load(paste0(file.name,".RData"))
   
-  rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/master/mQAPPrmd/model_QAPP.Rmd",
+  rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/Lower_Grande_Ronde_Imnaha_and_Wallowa_Subbasins/mQAPPrmd/model_QAPP.Rmd",
                     output_format = "word_document",
                     output_dir = output.dir,
                     output_file=paste0("QAPP_",file.name, ".docx"))
   
-}
+#}
