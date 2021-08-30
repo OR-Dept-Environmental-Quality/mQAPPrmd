@@ -17,7 +17,7 @@ library(geojsonsf)
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 load(paste0(data.dir,"RData/lookup.RData"))
 
-dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
+map.dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
 
 tag.map.title <- tags$style(HTML("
   .leaflet-control.map-title { 
@@ -117,7 +117,7 @@ popupTable.gageHeight <- function(station_name = NULL){
   
 }
 
-# project area map ----
+# PROJECT AREA MAPS ----
 ## for test:
 # qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
@@ -134,11 +134,7 @@ qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for (qapp_project_area in project.areas[which(!project.areas$areas %in% c("Willamette River Mainstem and Major Tributaries")),]$areas) {
-
-#for (qapp_project_area in project.areas$areas) {
-  
-  print(qapp_project_area)
+for (qapp_project_area in project.areas$areas) {
   
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
   load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
@@ -177,11 +173,37 @@ qapp_project_area = "Sandy Subbasin"
     }
   }
   
+  dta.check.area <- data.frame("Project Area"=qapp_project_area,
+                               "hs_temp_model_extent" = nrow(hs_temp_model_extent),
+                               "hs_solar_model_extent" = nrow(hs_solar_model_extent),
+                               "hs_solar_model_area" = nrow(hs_solar_model_area),
+                               "ce_model_extent" = nrow(ce_model_extent),
+                               "sh_model_extent" = nrow(sh_model_extent),
+                               "temp_stations" = nrow(temp_stations),
+                               "temp_cal_sites" = nrow(temp_cal_sites),
+                               "temp_model_bc_tri" = nrow(temp_model_bc_tri),
+                               "flow_model_bc_tri" = nrow(flow_model_bc_tri),
+                               "flow_stations" = nrow (flow_stations),
+                               "met_stations" = nrow(met_stations),
+                               "ind_ps" = nrow(ind_ps),
+                               "gen_ps" = nrow(gen_ps))
+  
+  dta.stations.mod <- dta.check.area %>% 
+    tidyr::pivot_longer(!Project.Area, names_to= "data", values_to = "nrow") %>% 
+    dplyr::filter(!nrow == 0) %>% 
+    pull(data)
+  
+  print(qapp_project_area)
+  
+  # Basic layers ----
   map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
-  # basic ----
-  # _ map_walla ----
-  # No ind. NPDES stations
   map_basic <- leaflet::leaflet() %>%
+    leaflet::addControl(map.title, position = "topleft", className="map-title")%>% 
+    leaflet::addMiniMap(position = "bottomright",
+                        width = 405,
+                        height = 250,
+                        zoomLevelFixed = 5) %>% 
+    leaflet.extras::addResetMapButton() %>% 
     leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                        lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
     leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>% 
@@ -252,6 +274,15 @@ qapp_project_area = "Sandy Subbasin"
                                       opacity = 1,
                                       fillColor = "transparent",
                                       fillOpacity = 0) %>% 
+    # __ WQS ----
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
+                                    options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                    group = "Fish Use Designations",
+                                    pathOptions = leaflet::pathOptions(pane="wqs1")) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
+                                      options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                      group = "Salmon and Steelhead Spawning Use Designations",
+                                      pathOptions = leaflet::pathOptions(pane="wqs2")) %>% 
     # __ IR ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc12),
@@ -268,16 +299,14 @@ qapp_project_area = "Sandy Subbasin"
                                       group = "2018/2020 IR Temperature Status - Watershed",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
                                       fill=FALSE) %>% 
-    # __ WQS ----
-  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
-                                    options = leaflet.esri::featureLayerOptions(where = reachcode),
-                                    group = "Fish Use Designations",
-                                    pathOptions = leaflet::pathOptions(pane="huc8")) %>% 
-    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
-                                      options = leaflet.esri::featureLayerOptions(where = reachcode),
-                                      group = "Salmon and Steelhead Spawning Use Designations",
-                                      pathOptions = leaflet::pathOptions(pane="huc8")) %>% 
-    # __ Stations ----
+    # __ Meteorological Stations ----
+  leaflet::addMarkers(data = met_stations,
+                      group = "Meteorological Stations",
+                      options = leaflet::leafletOptions(pane="marker"),
+                      #clusterOptions = markerClusterOptions(),
+                      label = paste0(met_stations$tbl, ": ", met_stations$Station, " (", met_stations$`Station ID`, ")"),
+                      labelOptions = labelOptions(textsize = "15px")) %>% 
+    # __ Temp Stations ----
   leaflet::addMarkers(data = temp_stations,
                       group = "Stream Temperature Stations",
                       options = leaflet::leafletOptions(pane="marker"),
@@ -293,60 +322,25 @@ qapp_project_area = "Sandy Subbasin"
                                       sapply(temp_stations$Station, 
                                              popupTable.temp, USE.NAMES = FALSE)),
                       popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
-    leaflet::addMarkers(data = temp_cal_sites,
-                        group = "Stream Temperature Calibration Sites",
-                        options = leaflet::leafletOptions(pane="marker"),
-                        #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
-    leaflet::addMarkers(data = temp_model_bc_tri,
-                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                        options = leaflet::leafletOptions(pane="marker"),
-                        #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
-    leaflet::addMarkers(data = flow_model_bc_tri,
-                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                        options = leaflet::leafletOptions(pane="marker"),
-                        #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
-    leaflet::addMarkers(data = flow_stations,
-                        group = "Stream Flow Stations",
-                        options = leaflet::leafletOptions(pane="marker"),
-                        #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_stations$`Data Source`, ": ", flow_stations$Station, " (", flow_stations$`Station ID`,")"),
-                        labelOptions = labelOptions(textsize = "15px"),
-                        popup = ~paste0("<b>", 
-                                        flow_stations$`Data Source`," Station Name: ",
-                                        flow_stations$Station,"<br>",
-                                        "Station ID: ", flow_stations$`Station ID`,
-                                        #"<br>",
-                                        #"<br>",
-                                        sapply(flow_stations$Station, 
-                                               popupTable.flow, USE.NAMES = FALSE)),
-                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
-    leaflet::addMarkers(data = met_stations,
-                        group = "Meteorological Stations",
-                        options = leaflet::leafletOptions(pane="marker"),
-                        #clusterOptions = markerClusterOptions(),
-                        label = paste0(met_stations$tbl, ": ", met_stations$Station, " (", met_stations$`Station ID`, ")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
-    leaflet::hideGroup(c("HUC8","HUC10","HUC12",
-                         "2018/2020 IR Temperature Status - Streams",
-                         "2018/2020 IR Temperature Status - Waterbodies",
-                         "2018/2020 IR Temperature Status - Watershed",
-                         "Fish Use Designations",
-                         "Salmon and Steelhead Spawning Use Designations",
-                         "Oregon Imagery")) %>% 
-    leaflet::addMiniMap(position = "bottomright",
-                        width = 405,
-                        height = 250,
-                        zoomLevelFixed = 5) %>% 
-    leaflet.extras::addResetMapButton() %>% 
-    leaflet::addControl(map.title, position = "topleft", className="map-title")%>% 
-    leaflet.extras::addSearchFeatures(targetGroups = c("Stream Temperature Stations","Stream Flow Stations"),
-                                      options = searchFeaturesOptions(openPopup = TRUE)) %>% 
+    # __ Flow Stations ----
+  leaflet::addMarkers(data = flow_stations,
+                      group = "Stream Flow Stations",
+                      options = leaflet::leafletOptions(pane="marker"),
+                      #clusterOptions = markerClusterOptions(),
+                      label = paste0(flow_stations$`Data Source`, ": ", flow_stations$Station, " (", flow_stations$`Station ID`,")"),
+                      labelOptions = labelOptions(textsize = "15px"),
+                      popup = ~paste0("<b>", 
+                                      flow_stations$`Data Source`," Station Name: ",
+                                      flow_stations$Station,"<br>",
+                                      "Station ID: ", flow_stations$`Station ID`,
+                                      #"<br>",
+                                      #"<br>",
+                                      sapply(flow_stations$Station, 
+                                             popupTable.flow, USE.NAMES = FALSE)),
+                      popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+    # __ Search temp and flow stations ----
+  leaflet.extras::addSearchFeatures(targetGroups = c("Stream Temperature Stations","Stream Flow Stations"),
+                                    options = searchFeaturesOptions(openPopup = TRUE)) %>% 
     htmlwidgets::onRender(jsCode = "function(el, x){
     var elements = document.getElementsByClassName('Station');
     var index;
@@ -371,246 +365,75 @@ qapp_project_area = "Sandy Subbasin"
   layerToggle.style.backgroundColor = 'white';
                }")
   
-  if(qapp_project_area %in% c("Walla Walla Subbasin")) {} else {
-    
-    # _ map ----
-    if(qapp_project_area %in% c("John Day River Basin",
-                                "Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
-                                "Lower Willamette and Clackamas Subbasins",
-                                "Middle Willamette Subbasins",
-                                "North Umpqua Subbasin",
-                                "Rogue River Basin",
-                                "Sandy Subbasin",
-                                "South Umpqua and Umpqua Subbasins",
-                                "Southern Willamette Subbasins",
-                                "Willamette River Mainstem and Major Tributaries")) {
-      
-      map <- map_basic %>% 
-        leaflet::addMarkers(data = ind_ps,
-                            group = "Individual NPDES Point Sources",
-                            options = leaflet::leafletOptions(pane="marker"),
-                            #clusterOptions = markerClusterOptions(),
-                            label = paste0(ind_ps$`Facility Name (Facility Number)`),
-                            labelOptions = labelOptions(textsize = "15px"),
-                            popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
-                                            "<br>", 
-                                            "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
-                                            "<br>",
-                                            "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
-                            popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
-        leaflet::addMarkers(data = gen_ps,
-                            group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
-                            options = leaflet::leafletOptions(pane="marker"),
-                            #clusterOptions = markerClusterOptions(),
-                            label = paste0(gen_ps$`Facility Name (Facility Number)`),
-                            labelOptions = labelOptions(textsize = "15px"),
-                            popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
-                                            "<br>", 
-                                            "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
-                                            "<br>",
-                                            "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
-                            popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) 
-      
-      
-    } else {
-      
-      map <- map_basic %>% 
-        leaflet::addMarkers(data = ind_ps,
-                            group = "Individual NPDES Point Sources",
-                            options = leaflet::leafletOptions(pane="marker"),
-                            #clusterOptions = markerClusterOptions(),
-                            label = paste0(ind_ps$`Facility Name (Facility Number)`),
-                            labelOptions = labelOptions(textsize = "15px"),
-                            popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
-                                            "<br>", 
-                                            "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
-                                            "<br>",
-                                            "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
-                            popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) 
-      
-    }
-  }
-  
-  # models ----
-  hs.temp.areas <- c("John Day River Basin",
-                     "Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
-                     "Middle Willamette Subbasins",
-                     "North Umpqua Subbasin",
-                     "Sandy Subbasin",
-                     "South Umpqua and Umpqua Subbasins",
-                     "Willow Creek Subbasin")
-  
-  hs.solar.areas <- c("Malheur River Subbasins")
-  
-  hs.temp.solar.areas <- c("Middle Columbia-Hood, Miles Creeks",
-                           "Walla Walla Subbasin")
-  
-  hs.temp.solar.ce.areas <- c("Southern Willamette Subbasins")
-  
-  hs.temp.ce.areas <- c("Lower Willamette and Clackamas Subbasins")
-  
-  ce.areas <- c("Willamette River Mainstem and Major Tributaries")
-  
-  hs.temp.sh.areas <- c("Rogue River Basin")
-  
-  # _ hs.temp.areas ----
-  if(qapp_project_area %in% hs.temp.areas) {
-    
-    # __ North Umpqua Subbasin ----
-    if (qapp_project_area == "North Umpqua Subbasin"){
-      # Fish Creek 2009
-      fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
-                                     layer = "fish_creek_2009")
-      fish_creek_2009 <- sf::st_transform(fish_creek_2009, 4326) %>% sf::st_zm()
-      
-      # North Umpqua River model nodes
-      n_umpqua_model_nodes <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/n_umpqua_river_model_nodes.shp",
-                                          layer = "n_umpqua_river_model_nodes")
-      
-      n_umpqua_model_nodes <- sf::st_transform(n_umpqua_model_nodes, 4326) %>%sf::st_zm()
-      
-      map_pro_area <- map %>% 
-        leaflet::addPolylines(data = hs_temp_model_extent,
-                              group = "Heat Source Temperature Model Extent (Existing Models)",
-                              options = leaflet::leafletOptions(pane="mod"),
-                              label = ~Stream,
-                              labelOptions = labelOptions(style = list("color" = "black",
-                                                                       "font-size" = "20px")),
-                              color = "#045a8d",
-                              opacity = 1,
-                              weight = 4) %>% 
-        leaflet::addPolylines(data = fish_creek_2009,
-                              group = "Heat Source Temperature Model Extent (New Models)",
-                              options = leaflet::leafletOptions(pane="mod2009"),
-                              label = ~Stream,
-                              labelOptions = labelOptions(style = list("color" = "black",
-                                                                       "font-size" = "20px")),
-                              color = "#993404",
-                              opacity = 0.5,
-                              weight = 10) %>% 
-        leaflet::addCircleMarkers(data = n_umpqua_model_nodes,
-                                  group = "North Umpqua River Model Nodes",
-                                  options = leaflet::leafletOptions(pane="node"),
-                                  color = "#e34a33", #red orange
-                                  stroke = FALSE, 
-                                  fillOpacity = 0.5,
-                                  label = ~Location,
-                                  labelOptions = labelOptions(textsize = "15px"))%>% 
-        leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (Existing Models)",
-                                                    "Heat Source Temperature Model Extent (New Models)",
-                                                    "North Umpqua River Model Nodes",
-                                                    "HUC8","HUC10","HUC12",
-                                                    "2018/2020 IR Temperature Status - Streams",
-                                                    "2018/2020 IR Temperature Status - Waterbodies",
-                                                    "2018/2020 IR Temperature Status - Watershed",
-                                                    "Fish Use Designations",
-                                                    "Salmon and Steelhead Spawning Use Designations",
-                                                    "Oregon Imagery"),
-                                  baseGroups = c("Stream Temperature Stations",
-                                                 "Stream Temperature Calibration Sites",
-                                                 "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                                 "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                                 "Stream Flow Stations",
-                                                 "Meteorological Stations",
-                                                 "Individual NPDES Point Sources"),
-                                  options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
-    } else {
-      
-      # __ Sandy Subbasin ----
-      if (qapp_project_area == "Sandy Subbasin"){
-        
-        # Sandy River 2016 Heat Source Model Extent
-        sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/sandy_2016.shp",
-                                  layer = "sandy_2016")
-        
-        sandy_2016 <- sf::st_transform(sandy_2016, 4326) %>% sf::st_zm()
-        
-        map_pro_area <- map %>% 
-          leaflet::addPolylines(data = hs_temp_model_extent,
-                                group = "Heat Source Temperature Model Extent (Existing Models)",
-                                options = leaflet::leafletOptions(pane="mod"),
-                                label = ~Stream,
-                                labelOptions = labelOptions(style = list("color" = "black",
-                                                                         "font-size" = "20px")),
-                                color = "#045a8d",
-                                opacity = 1,
-                                weight = 4) %>% 
-          leaflet::addPolylines(data = sandy_2016,
-                                group = "Heat Source Temperature Model Extent (New Models)",
-                                options = leaflet::leafletOptions(pane="mod2016"),
-                                label = ~Name,
-                                labelOptions = labelOptions(style = list("color" = "black",
-                                                                         "font-size" = "20px")),
-                                color = "#993404",
-                                opacity = 0.5,
-                                weight = 10) %>% 
-          leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (Existing Models)",
-                                                      "Heat Source Temperature Model Extent (New Models)",
-                                                      "HUC8","HUC10","HUC12",
-                                                      "2018/2020 IR Temperature Status - Streams",
-                                                      "2018/2020 IR Temperature Status - Waterbodies",
-                                                      "2018/2020 IR Temperature Status - Watershed",
-                                                      "Fish Use Designations",
-                                                      "Salmon and Steelhead Spawning Use Designations",
-                                                      "Oregon Imagery"),
-                                    baseGroups = c("Stream Temperature Stations",
-                                                   "Stream Temperature Calibration Sites",
-                                                   "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                                   "Stream Flow Stations",
-                                                   "Meteorological Stations",
-                                                   "Individual NPDES Point Sources"),
-                                    options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
-        
-      } else {
-        
-        # __ other hs.temp basins ----
-        map_pro_area <- map %>% 
-          leaflet::addPolylines(data = hs_temp_model_extent,
-                                group = "Heat Source Temperature Model Extent",
-                                options = leaflet::leafletOptions(pane="mod"),
-                                label = ~Stream,
-                                labelOptions = labelOptions(style = list("color" = "black",
-                                                                         "font-size" = "20px")),
-                                color = "#045a8d",
-                                opacity = 1,
-                                weight = 4) %>% 
-          leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
-                                                      "HUC8","HUC10","HUC12",
-                                                      "2018/2020 IR Temperature Status - Streams",
-                                                      "2018/2020 IR Temperature Status - Waterbodies",
-                                                      "2018/2020 IR Temperature Status - Watershed",
-                                                      "Fish Use Designations",
-                                                      "Salmon and Steelhead Spawning Use Designations",
-                                                      "Oregon Imagery"),
-                                    baseGroups = c("Stream Temperature Stations",
-                                                   "Stream Temperature Calibration Sites",
-                                                   "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                                   "Stream Flow Stations",
-                                                   "Meteorological Stations",
-                                                   "Individual NPDES Point Sources"),
-                                    options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
-      }
-      
-    }
-    
-  }
-  
-  # _ hs.solar.areas ----
-  if(qapp_project_area %in% hs.solar.areas) {
-    
-    map_pro_area <- map %>% 
-      leaflet::addPolylines(data = hs_solar_model_extent,
-                            group = "Heat Source Solar Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#3690c0 ",
-                            opacity = 1,
-                            weight = 4) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Solar Model Extent",
+  # John Day River Basin ----
+  if(qapp_project_area == "John Day River Basin") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Flow Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -618,135 +441,453 @@ qapp_project_area = "Sandy Subbasin"
                                                   "Fish Use Designations",
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
-                                baseGroups = c("Stream Temperature Stations",
-                                               "Stream Temperature Calibration Sites",
-                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Stations",
-                                               "Meteorological Stations",
-                                               "Individual NPDES Point Sources"),
-                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
-  }
-  
-  # _ hs.temp.solar.areas ----
-  if(qapp_project_area %in% hs.temp.solar.areas) {
-    
-    if(qapp_project_area == "Walla Walla Subbasin") {
-      
-      map_pro_area <- map_basic %>% 
-        leaflet::addPolylines(data = hs_temp_model_extent,
-                              group = "Heat Source Temperature Model Extent",
-                              options = leaflet::leafletOptions(pane="mod"),
-                              label = ~Stream,
-                              labelOptions = labelOptions(style = list("color" = "black",
-                                                                       "font-size" = "20px")),
-                              color = "#045a8d",
-                              opacity = 1,
-                              weight = 4) %>% 
-        leaflet::addPolylines(data = hs_solar_model_extent,
-                              group = "Heat Source Solar Model Extent",
-                              options = leaflet::leafletOptions(pane="mod"),
-                              label = ~Stream,
-                              labelOptions = labelOptions(style = list("color" = "black",
-                                                                       "font-size" = "20px")),
-                              color = "#3690c0",
-                              opacity = 1,
-                              weight = 4) %>% 
-        leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
-                                                    "Heat Source Solar Model Extent",
-                                                    "HUC8","HUC10","HUC12",
-                                                    "2018/2020 IR Temperature Status - Streams",
-                                                    "2018/2020 IR Temperature Status - Waterbodies",
-                                                    "2018/2020 IR Temperature Status - Watershed",
-                                                    "Fish Use Designations",
-                                                    "Salmon and Steelhead Spawning Use Designations",
-                                                    "Oregon Imagery"),
-                                  baseGroups = c("Stream Temperature Stations",
-                                                 "Stream Temperature Calibration Sites",
-                                                 "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                                 "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                                 "Stream Flow Stations",
-                                                 "Meteorological Stations"),
-                                  options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
-      
-    } else {
-      
-      map_pro_area <- map %>% 
-        leaflet::addPolylines(data = hs_temp_model_extent,
-                              group = "Heat Source Temperature Model Extent",
-                              options = leaflet::leafletOptions(pane="mod"),
-                              label = ~Stream,
-                              labelOptions = labelOptions(style = list("color" = "black",
-                                                                       "font-size" = "20px")),
-                              color = "#045a8d",
-                              opacity = 1,
-                              weight = 4) %>% 
-        leaflet::addPolylines(data = hs_solar_model_extent,
-                              group = "Heat Source Solar Model Extent",
-                              options = leaflet::leafletOptions(pane="mod"),
-                              label = ~Stream,
-                              labelOptions = labelOptions(style = list("color" = "black",
-                                                                       "font-size" = "20px")),
-                              color = "#3690c0",
-                              opacity = 1,
-                              weight = 4) %>% 
-        leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
-                                                    "Heat Source Solar Model Extent",
-                                                    "HUC8","HUC10","HUC12",
-                                                    "2018/2020 IR Temperature Status - Streams",
-                                                    "2018/2020 IR Temperature Status - Waterbodies",
-                                                    "2018/2020 IR Temperature Status - Watershed",
-                                                    "Fish Use Designations",
-                                                    "Salmon and Steelhead Spawning Use Designations",
-                                                    "Oregon Imagery"),
-                                  baseGroups = c("Stream Temperature Stations",
-                                                 "Stream Temperature Calibration Sites",
-                                                 "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                                 "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                                 "Stream Flow Stations",
-                                                 "Meteorological Stations",
-                                                 "Individual NPDES Point Sources"),
-                                  options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
-    }
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
     
   }
   
-  # _ hs.temp.solar.ce.areas ----
-  if(qapp_project_area %in% hs.temp.solar.ce.areas) {
+  # Lower Grande Ronde, Imnaha, and Wallowa Subbasins ----
+  if(qapp_project_area == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
     
-    map_pro_area <- map %>% 
-      leaflet::addPolylines(data = hs_temp_model_extent,
-                            group = "Heat Source Temperature Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#045a8d",
-                            opacity = 1,
-                            weight = 4) %>% 
-      leaflet::addPolygons(data = hs_solar_model_area,
-                           group = "Heat Source Solar Model Extent",
-                           options = leaflet::leafletOptions(pane="mod"),
-                           label = ~Name,
-                           labelOptions = labelOptions(style = list("color" = "black",
-                                                                    "font-size" = "20px")),
-                           fillColor = "#3690c0",
-                           fillOpacity = 0.8,
-                           weight = 3,
-                           color = "#3690c0",
-                           opacity = 1) %>% 
-      leaflet::addPolylines(data = ce_model_extent,
-                            group = "CE-QUAL-W2 Temperature Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#8c510a",
-                            opacity = 1,
-                            weight = 4) %>% 
+  }
+  
+  # Lower Willamette and Clackamas Subbasins ----
+  if(qapp_project_area == "Lower Willamette and Clackamas Subbasins") {
+    
+    # ____ New models: BES 2019 ----
+    bes_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/bes_pro_reaches.shp",
+                                    layer = "bes_pro_reaches")  %>% 
+      sf::st_transform(4326) %>% 
+      sf::st_zm() %>% 
+      dplyr::rename(Stream = NAME)
+    
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent (Existing Models)",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ ce_model_extent ----
+    leaflet::addPolylines(data = ce_model_extent,
+                          group = "CE-QUAL-W2 Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#8c510a",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ BES (2019) ----
+    leaflet::addPolylines(data = bes_model_extent,
+                          group = "Heat Source Shade Model Extent (New Models)",
+                          options = leaflet::leafletOptions(pane="modbes"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#993404",
+                          opacity = 0.5,
+                          weight = 10) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Flow Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (Existing Models)",
+                                                  "Heat Source Temperature Model Extent (New Models)",
+                                                  "CE-QUAL-W2 Temperature Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
+                           "CE-QUAL-W2 Temperature Model Extent",
+                           "Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # Malheur River Subbasins ----
+  if(qapp_project_area == "Malheur River Subbasins") {
+    map_area <- map_basic %>% 
+      # __ hs_solar_model_extent ----
+    leaflet::addPolylines(data = hs_solar_model_extent,
+                          group = "Heat Source Solar Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#3690c0",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Solar Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Flow Stations",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Flow Stations",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # Middle Willamette Subbasins ----
+  if(qapp_project_area == "Middle Willamette Subbasins") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Flow Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # Middle Columbia-Hood, Miles Creeks ----
+  if(qapp_project_area == "Middle Columbia-Hood, Miles Creeks") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ hs_solar_model_extent ----
+    leaflet::addPolylines(data = hs_solar_model_extent,
+                          group = "Heat Source Solar Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#3690c0",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
                                                   "Heat Source Solar Model Extent",
-                                                  "CE-QUAL-W2 Temperature Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -754,40 +895,119 @@ qapp_project_area = "Sandy Subbasin"
                                                   "Fish Use Designations",
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
-                                baseGroups = c("Stream Temperature Stations",
-                                               "Stream Temperature Calibration Sites",
-                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Stations",
-                                               "Meteorological Stations",
-                                               "Individual NPDES Point Sources"),
-                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Heat Source Solar Model Extent",
+                           "Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
   }
   
-  # _ hs.temp.ce.areas ----
-  if(qapp_project_area %in% hs.temp.ce.areas) {
+  # North Umpqua Subbasin ----
+  if(qapp_project_area == "North Umpqua Subbasin") {
     
-    map_pro_area <- map %>% 
-      leaflet::addPolylines(data = hs_temp_model_extent,
-                            group = "Heat Source Temperature Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#045a8d",
-                            opacity = 1,
-                            weight = 4) %>%
-      leaflet::addPolylines(data = ce_model_extent,
-                            group = "CE-QUAL-W2 Temperature Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#8c510a",
-                            opacity = 1,
-                            weight = 4) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
-                                                  "CE-QUAL-W2 Temperature Model Extent",
+    # ____ New models: Fish Creek 2009 ----
+    fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
+                                   layer = "fish_creek_2009") %>% 
+      sf::st_transform(4326) %>% 
+      sf::st_zm()
+    
+    # North Umpqua River model nodes
+    n_umpqua_model_nodes <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/n_umpqua_river_model_nodes.shp",
+                                        layer = "n_umpqua_river_model_nodes") %>% 
+      
+      sf::st_transform(4326) %>%
+      sf::st_zm()
+    
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent (Existing Models)",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Fish Creek (2009) ----
+    leaflet::addPolylines(data = fish_creek_2009,
+                          group = "Heat Source Temperature Model Extent (New Models)",
+                          options = leaflet::leafletOptions(pane="mod2009"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#993404",
+                          opacity = 0.5,
+                          weight = 10)%>% 
+      leaflet::addCircleMarkers(data = n_umpqua_model_nodes,
+                                group = "North Umpqua River Model Nodes",
+                                options = leaflet::leafletOptions(pane="node"),
+                                color = "#e34a33", #red orange
+                                stroke = FALSE, 
+                                fillOpacity = 0.5,
+                                label = ~Location,
+                                labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (Existing Models)",
+                                                  "Heat Source Temperature Model Extent (New Models)",
+                                                  "North Umpqua River Model Nodes",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -795,88 +1015,106 @@ qapp_project_area = "Sandy Subbasin"
                                                   "Fish Use Designations",
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
-                                baseGroups = c("Stream Temperature Stations",
-                                               "Stream Temperature Calibration Sites",
-                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Stations",
-                                               "Meteorological Stations",
-                                               "Individual NPDES Point Sources"),
-                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
-  }
-  
-  # _ ce.areas ----
-  if(qapp_project_area %in% ce.areas) {
-    
-    map_pro_area <- map %>% 
-      leaflet::addPolylines(data = pro_reaches,
-                            group = "CE-QUAL-W2 Temperature Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~GNIS_Name,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#8c510a",
-                            opacity = 1,
-                            weight = 4) %>% 
-      leaflet::addMarkers(data = gage_height_stations_map,
-                          group = "Gage Height Stations",
-                          options = leaflet::leafletOptions(pane="marker"),
-                          #clusterOptions = markerClusterOptions(),
-                          label = paste0("USGS: ", gage_height_stations_map$Station, " (", gage_height_stations_map$`Station ID`,")"),
-                          labelOptions = labelOptions(textsize = "15px"),
-                          popup = ~paste0("<b>", 
-                                          "USGS Station Name: ",
-                                          gage_height_stations_map$Station,"<br>",
-                                          "Station ID: ", gage_height_stations_map$`Station ID`,
-                                          #"<br>",
-                                          #"<br>",
-                                          sapply(gage_height_stations_map$Station, 
-                                                 popupTable.gageHeight, USE.NAMES = FALSE)),
-                          popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
-      leaflet::addLayersControl(overlayGroups = c("CE-QUAL-W2 Temperature Model Extent",
-                                                  "HUC8","HUC10","HUC12",
-                                                  "2018/2020 IR Temperature Status - Streams",
-                                                  "2018/2020 IR Temperature Status - Waterbodies",
-                                                  "2018/2020 IR Temperature Status - Watershed",
-                                                  "Fish Use Designations",
-                                                  "Salmon and Steelhead Spawning Use Designations",
-                                                  "Oregon Imagery"),
-                                baseGroups = c("Stream Temperature Stations",
-                                               #"Stream Temperature Calibration Sites",
-                                               #"Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                               #"Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Stations",
-                                               "Gage Height Stations",
-                                               "Meteorological Stations",
-                                               "Individual NPDES Point Sources"),
-                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
+                           "North Umpqua River Model Nodes",
+                           "Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
     
   }
   
-  # _ hs.temp.sh.areas ----
-  if(qapp_project_area %in% hs.temp.sh.areas) {
-    
-    map_pro_area <- map %>% 
-      leaflet::addPolylines(data = hs_temp_model_extent,
-                            group = "Heat Source Temperature Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~Stream,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#045a8d",
-                            opacity = 1,
-                            weight = 4) %>% 
-      leaflet::addPolylines(data = sh_model_extent,
-                            group = "SHADOW Model Extent",
-                            options = leaflet::leafletOptions(pane="mod"),
-                            label = ~Stname,
-                            labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
-                            color = "#8c510a",
-                            opacity = 1,
-                            weight = 4) %>% 
+  # Rogue River Basin ----
+  if(qapp_project_area == "Rogue River Basin") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ sh_model_extent ----
+    leaflet::addPolylines(data = sh_model_extent,
+                          group = "SHADOW Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stname,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#8c510a",
+                          opacity = 1,
+                          weight = 4) %>%
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Flow Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
                                                   "SHADOW Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -884,18 +1122,600 @@ qapp_project_area = "Sandy Subbasin"
                                                   "Fish Use Designations",
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
-                                baseGroups = c("Stream Temperature Stations",
-                                               "Stream Temperature Calibration Sites",
-                                               "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                               "Stream Flow Stations",
-                                               "Meteorological Stations",
-                                               "Individual NPDES Point Sources"),
-                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE))
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("SHADOW Model Extent",
+                           "Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
   }
   
+  # Sandy Subbasin ----
+  if(qapp_project_area == "Sandy Subbasin") {
+    
+    # ____ New models: Sandy 2016 ----
+    sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/sandy_2016.shp",
+                              layer = "sandy_2016") %>% 
+      sf::st_transform(4326) %>% 
+      sf::st_zm()
+    
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent (Existing Models)",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Bull Run River, Salmon River and Sandy Rivers (2016) ----
+    leaflet::addPolylines(data = sandy_2016,
+                          group = "Heat Source Temperature Model Extent (New Models)",
+                          options = leaflet::leafletOptions(pane="mod2016"),
+                          label = ~Name,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#993404",
+                          opacity = 0.5,
+                          weight = 10) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Flow Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (Existing Models)",
+                                                  "Heat Source Temperature Model Extent (New Models)",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
+                           "Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # South Umpqua and Umpqua Subbasins ----
+  if(qapp_project_area == "South Umpqua and Umpqua Subbasins") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Flow Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # Southern Willamette Subbasins ----
+  if(qapp_project_area == "Southern Willamette Subbasins") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ hs_solar_model_area ----
+    leaflet::addPolygons(data = hs_solar_model_area,
+                         group = "Heat Source Solar Model Extent",
+                         options = leaflet::leafletOptions(pane="mod"),
+                         label = ~Name,
+                         labelOptions = labelOptions(style = list("color" = "black",
+                                                                  "font-size" = "20px")),
+                         fillColor = "#3690c0",
+                         fillOpacity = 0.8,
+                         weight = 3,
+                         color = "#3690c0",
+                         opacity = 1) %>% 
+            # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Flow Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = flow_model_bc_tri,
+                        group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Heat Source Solar Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Heat Source Solar Model Extent",
+                           "Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # Walla Walla Subbasin ----
+  if(qapp_project_area == "Walla Walla Subbasin") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ hs_solar_model_extent ----
+    leaflet::addPolylines(data = hs_solar_model_extent,
+                          group = "Heat Source Solar Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#3690c0",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Heat Source Solar Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Flow Stations",
+                                                  "Meteorological Stations",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Heat Source Solar Model Extent",
+                           "Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Flow Stations",
+                           "Meteorological Stations",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # Willamette River Mainstem and Major Tributaries ----
+  if(qapp_project_area == "Willamette River Mainstem and Major Tributaries") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ hs_solar_model_extent ----
+    leaflet::addPolylines(data = hs_solar_model_extent,
+                          group = "Heat Source Solar Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#3690c0",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
+    leaflet::addMarkers(data = gen_ps,
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Heat Source Solar Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Flow Stations",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Heat Source Solar Model Extent",
+                           "Stream Temperature Stations",
+                           "Stream Flow Stations",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  # Willow Creek Subbasin ----
+  if(qapp_project_area == "Willow Creek Subbasin") {
+    map_area <- map_basic %>% 
+      # __ hs_temp_model_extent ----
+    leaflet::addPolylines(data = hs_temp_model_extent,
+                          group = "Heat Source Temperature Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#045a8d",
+                          opacity = 1,
+                          weight = 4) %>% 
+      # __ Temp Calibration Sites ----
+    leaflet::addMarkers(data = temp_cal_sites,
+                        group = "Stream Temperature Calibration Sites",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      # __ Temp Model Boundary Conditions and Tributary Inputs ----
+    leaflet::addMarkers(data = temp_model_bc_tri,
+                        group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
+                        labelOptions = labelOptions(textsize = "15px")) %>% 
+      
+      # __ Ind NPDES PS ----
+    leaflet::addMarkers(data = ind_ps,
+                        group = "Individual NPDES Point Sources",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                                        "<br>", 
+                                        "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
+                                        "<br>",
+                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
+      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Stream Temperature Stations",
+                                                  "Stream Temperature Calibration Sites",
+                                                  "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                                  "Stream Flow Stations",
+                                                  "Meteorological Stations",
+                                                  "Individual NPDES Point Sources",
+                                                  "HUC8","HUC10","HUC12",
+                                                  "2018/2020 IR Temperature Status - Streams",
+                                                  "2018/2020 IR Temperature Status - Waterbodies",
+                                                  "2018/2020 IR Temperature Status - Watershed",
+                                                  "Fish Use Designations",
+                                                  "Salmon and Steelhead Spawning Use Designations",
+                                                  "Oregon Imagery"),
+                                options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
+      leaflet::hideGroup(c("Stream Temperature Stations",
+                           "Stream Temperature Calibration Sites",
+                           "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                           "Stream Flow Stations",
+                           "Meteorological Stations",
+                           "Individual NPDES Point Sources",
+                           "HUC8","HUC10","HUC12",
+                           "2018/2020 IR Temperature Status - Streams",
+                           "2018/2020 IR Temperature Status - Waterbodies",
+                           "2018/2020 IR Temperature Status - Watershed",
+                           "Fish Use Designations",
+                           "Salmon and Steelhead Spawning Use Designations",
+                           "Oregon Imagery"))
+    
+  }
+  
+  print(dta.stations.mod)
+  
+  # SAVE DATA ----
   print(paste0(qapp_project_area,"...Save the map"))
-  htmlwidgets::saveWidget(map_pro_area, paste0(dir,map.file.name,".html"), 
+  htmlwidgets::saveWidget(map_area, paste0(map.dir,map.file.name,".html"), 
                           background = "grey", selfcontained = TRUE)
   
-#}
+}
+
+# *************** -----
+# DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+load(paste0(data.dir,"RData/lookup.RData")) #lookup.huc; project.areas
+
+dta.check <- NULL
+for (qapp_project_area in project.areas$areas) {
+  #qapp_project_area = "Southern Willamette Subbasins"
+  
+  map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
+  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
+  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  
+  dta.check.area <- data.frame("Project Area"=qapp_project_area,
+                               "hs_temp_model_extent" = nrow(hs_temp_model_extent),
+                               "hs_solar_model_extent" = nrow(hs_solar_model_extent),
+                               "hs_solar_model_area" = nrow(hs_solar_model_area),
+                               "ce_model_extent" = nrow(ce_model_extent),
+                               "sh_model_extent" = nrow(sh_model_extent),
+                               "temp_stations" = nrow(temp_stations),
+                               "temp_cal_sites" = nrow(temp_cal_sites),
+                               "temp_model_bc_tri" = nrow(temp_model_bc_tri),
+                               "flow_model_bc_tri" = nrow(flow_model_bc_tri),
+                               "flow_stations" = nrow (flow_stations),
+                               "met_stations" = nrow(met_stations),
+                               "ind_ps" = nrow(ind_ps),
+                               "gen_ps" = nrow(gen_ps))
+  
+  dta.stations.mod <- dta.check.area %>% 
+    tidyr::pivot_longer(!Project.Area, names_to= "data", values_to = "nrow") %>% 
+    dplyr::filter(!nrow == 0)
+  
+  dta.check <- dplyr::bind_rows(dta.check,dta.check.area)
+  
+}
+
+temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
+write.csv(dta.check,paste0(temp.dir,"dta.check.csv"))
+
