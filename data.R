@@ -56,22 +56,14 @@ numbers.to.words <- function(x) {
 
 # General data ----
 # _ AWQMS data ----
-# Update date: 2021-4-23
+# Update date: 2021-8-28
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
 
-# TEMPERORARY: USGS Station 14184100 has a mismatching reachcode in the AWQMS station database
-df.stations.state <- df.stations.state %>% 
-  dplyr::mutate(Reachcode = ifelse(Reachcode == "17090005007863", "17090005007864", Reachcode))
-
-df.stations <- df.stations %>% 
-  dplyr::mutate(Reachcode = ifelse(Reachcode == "17090005007863", "17090005007864", Reachcode))
-# Remove when AWQMS udpated with this staiton reachcode
-
 awqms.data.temp <- df.awqms.raw.state %>% 
   # AWQMS QA/QC check:
-  dplyr::filter(Result_status %in% c("Final", "Provisional") | QualifierAbbr %in% c("DQL=A","DQL=B","DQL=E")) %>% 
+  dplyr::filter(Result_status %in% c("Final", "Provisional") & DQL %in% c("A","B","E")) %>% 
   dplyr::mutate(Source = "AWQMS",
                 SampleStartDate = as.Date(SampleStartDate)) %>% 
   dplyr::select("Char_Name","Result_status","Result_Numeric","MLocID","SampleStartDate","Activity_Type","AU_ID","HUC8",             
@@ -181,9 +173,6 @@ inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_f
 # _ NPDES ----
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Individual_NDPES") %>% 
   dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Wrf", "WRF") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ati ", "ATI ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Bdc/", "BDC/") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "cmss", "CMSS") %>%
@@ -193,12 +182,16 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Odfw", "ODFW") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ohsu", "OHSU") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS") %>% 
-  dplyr::mutate_at("Common Name", str_replace_all, "Usfw", "USFW")
+  dplyr::mutate_at("Common Name", str_replace_all, "Usfw", "USFW") %>% 
+  dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wrf", "WRF") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP")
+  
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
 
 # _ Lookup table & Project areas ----
@@ -207,6 +200,7 @@ lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"),
                 HUC_8 = as.character(HUC_8),
                 HUC10 = as.character(HUC10),
                 HUC12 = as.character(HUC12))
+
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
 
@@ -238,21 +232,22 @@ colum_auid <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
   dplyr::pull(AU_ID) 
 
 cat.45.tbl <- sf::st_drop_geometry(cat.45) %>% 
-  dplyr::filter(!AU_ID %in% c(colum_auid)) %>%
+  dplyr::filter(!AU_ID %in% c(colum_auid)) %>%  
+  dplyr::mutate_at("AU_Name", str_replace_all, "Cre\\*", "Creek") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "For\\*", "Fork Willamette River") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Joh\\*", "John Day River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "John\\*", "John Day River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "Mill\\*", "Mill Creek") %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "R\\*", "River") %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Ri\\*", "River") %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Riv\\*", "River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "For\\*", "Fork Willamette River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Cre\\*", "Creek") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Willamet\\*", "Willamette River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Mill\\*", "Mill Creek") %>%
+  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")  %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "W\\*", "Willamette River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Joh\\*", "John Day River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "John\\*", "John Day River") %>% 
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamet\\*", "Willamette River") %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")
+  dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River")
+
 
 # _ NCDC met data ----
 load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
@@ -295,7 +290,7 @@ load(paste0(data.dir,"/RData/nlcd.text.RData")) # nlcd.text
 # _ DMAs ----
 load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
 
-# _ BES ----
+# _ BES temp ----
 load(paste0(data.dir,"/download/bes.RData")) # bes.stations & bes.data
 bes.data <- bes.data %>% 
   dplyr::left_join(bes.stations,by=c("Monitoring_Location_ID" = "LocationIdentifier")) %>% 
@@ -446,7 +441,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                   Organization = OrgID,
                   Latitude = Lat_DD,
                   Longitude = Long_DD) %>% 
-    dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS-OR", Organization),
+    dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS", Organization),
                   Organization = ifelse(Organization == "USGS-OR", "USGS", Organization)) %>% 
     dplyr::mutate(lat = Latitude,
                   long = Longitude) %>%
@@ -469,7 +464,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(!Organization == "USGS") %>% 
     rbind(station.awqms.usgs.or)
   
-  ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  ## In the 3 Willamette subbasin QAPPs, filter out the reachcodes/stations covered in the Willamette mainstem QAPP
   if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
                               "Middle Willamette Subbasins",
                               "Southern Willamette Subbasins")) {
@@ -486,7 +481,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     
   }
   
-  ## In the Malheur and Grande Ronde QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
   if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
                               "Malheur River Subbasins")) {
     
@@ -494,13 +489,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
       dplyr::filter(!Reachcode %in% snake_reachcodes)
     
   }
-  
-  ## _ (2) Worksheet ----
-  station.model <- cal.input %>% 
-    dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
-    dplyr::left_join(station.awqms.temp[,c("Station ID", "Station", "Organization")], by="Station ID")
-  
-  ## _ (3) OWRD ----
+
+  ## _ (2) OWRD ----
   station.owrd <- owrd.stations %>%
     dplyr::mutate(`Station ID` = as.character(station_nbr),
                   lat = Lat,
@@ -523,7 +513,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   station.owrd.temp <- station.owrd %>% 
     dplyr::filter(`Station ID` %in% owrd.data.temp$MLocID) # only keep the stations that have data
   
-  ## _ (4) BES ----
+  ## _ (3) BES ----
   station.bes <- bes.stations %>% 
     dplyr::mutate(Organization = "Portland Environmental Services",
                   lat = Latitude,
@@ -545,25 +535,26 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   station.bes.temp <- station.bes %>% 
     dplyr::filter(`Station ID` %in% bes.data.temp$MLocID) # only keep the stations that have data
   
-  ## _ (5) AWQMS + OWRD + BES ----  
+  ## _ (4) AWQMS + OWRD + BES ----  
   temp.stations <- rbind(station.awqms.temp[,c("Station","Station ID", "Organization", "Latitude", "Longitude")],
                          station.owrd.temp[,c("Station","Station ID", "Organization", "Latitude", "Longitude")],
                          station.bes.temp[,c("Station","Station ID", "Organization", "Latitude", "Longitude")]) %>% 
     dplyr::distinct(Station,`Station ID`, .keep_all=TRUE) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "OregonDEQ", "DEQ", Organization)) %>% 
     dplyr::mutate(Organization = ifelse(Organization == "11NPSWRD_WQX", "EPA WQX", Organization)) %>% 
-    dplyr::mutate(Organization = ifelse(Organization == "CITY_SALEM(NOSTORETID)", "City of Salem", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "USFS(NOSTORETID)", "USFS", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "CTUIR_WQX", "CTUIR WQX", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "PDX_WB(NOSTORETID)", "Portland Water Bureau", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "WALLAWALLA_WC(NOSTORETID)", "Walla Walla Basin Watershed Council", Organization)) %>%
     dplyr::mutate(Organization = ifelse(Organization == "CITY_GRESHAM(NOSTORETID)", "City of Gresham", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "EMSWCD(NOSTORETID)", "EMSWCD", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "PSU(NOSTORETID)", "Portland State University", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS-OR", Organization)) %>% 
+    dplyr::mutate(Organization = ifelse(Organization == "CITY_SALEM(NOSTORETID)", "City of Salem", Organization)) %>%
     dplyr::mutate(Organization = ifelse(Organization == "CRITFC(NOSTORETID)", "CRITFC", Organization)) %>% 
-    dplyr::mutate(Organization = ifelse(Organization == "IPC(NOSTORETID)", "Idaho Power Company", Organization))
+    dplyr::mutate(Organization = ifelse(Organization == "CTUIR_WQX", "CTUIR WQX", Organization)) %>%
+    dplyr::mutate(Organization = ifelse(Organization == "EMSWCD(NOSTORETID)", "EMSWCD", Organization)) %>%
+    dplyr::mutate(Organization = ifelse(Organization == "IPC(NOSTORETID)", "Idaho Power Company", Organization)) %>%
+    dplyr::mutate(Organization = ifelse(Organization == "OregonDEQ", "DEQ", Organization)) %>% 
+    dplyr::mutate(Organization = ifelse(Organization == "PDX_WB(NOSTORETID)", "Portland Water Bureau", Organization)) %>%
+    dplyr::mutate(Organization = ifelse(Organization == "PSU(NOSTORETID)", "Portland State University", Organization)) %>%
+    dplyr::mutate(Organization = ifelse(Organization == "USFS(NOSTORETID)", "USFS", Organization)) %>%
+    dplyr::mutate(Organization = ifelse(Organization == "USGS-OR", "USGS", Organization)) %>% 
+    dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS", Organization)) %>% 
+    dplyr::mutate(Organization = ifelse(Organization == "WALLAWALLA_WC(NOSTORETID)", "Walla Walla Basin Watershed Council", Organization)) %>%
+    dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization))
   
   temp.data <- awqms.data.temp %>% 
     dplyr::filter(MLocID %in% station.awqms.temp$`Station ID`) %>%
@@ -573,6 +564,9 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     rbind(owrd.data.temp,bes.data.temp) 
   
   # Temp data.sample.count will be used in the Appendix A
+  cols <- c("Year"=NA, "Station ID"=NA, "Station"=NA, 'Statistical_Base'=NA, "Org_Names"=NA,
+            "Jan"=NA, "Feb"=NA, "Mar"=NA, "Apr"=NA, "May"=NA, "Jun"=NA, "Jul"=NA, "Aug"=NA, "Sep"=NA, "Oct"=NA, "Nov"=NA, "Dec"=NA)
+  
   temp.data.sample.count <- temp.data %>% 
     dplyr::filter(Statistical_Base == "Maximum") %>% 
     dplyr::filter(!MLocID == "TIR") %>% 
@@ -587,21 +581,12 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     tidyr::pivot_wider(names_from = month, values_from=n) %>%
     dplyr::rename(`Station ID` = MLocID,
                   Station = StationDes,
-                  Year = year) %>%
+                  Year = year) %>% 
+    tibble::add_column(!!!cols[!names(cols) %in% names(.)]) %>% 
     dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
     dplyr::distinct(Year, `Station ID`,.keep_all=TRUE) %>% 
     dplyr::arrange(Year, `Station ID`)
-  
-  model.info <- cal.model %>% 
-    dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
-  
-  model.input  <- cal.input %>% 
-    dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
-    dplyr::mutate(Latitude = round(Latitude,4),
-                  Longitude = round(Longitude,3))
-  
-  pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
-  
+
   # _ Flow data ----
   ## _ (1) USGS ----
   station.usgs.flow <- usgs.flow.stations %>%  # Discharge [ft3/s]
@@ -616,7 +601,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(!site_no %in% station.owrd$`Station ID`) %>% 
     dplyr::distinct(site_no,.keep_all=TRUE)
   
-  ## In the 3 Willamette subbasin QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  ## In the 3 Willamette subbasin QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
   if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
                               "Middle Willamette Subbasins",
                               "Southern Willamette Subbasins")) {
@@ -627,7 +612,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     
   } 
   
-  ## In the Malheur and Grande Ronde QAPPs, filter out the AUs covered in the Willamette mainstem QAPP
+  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
   if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
                               "Malheur River Subbasins")) {
     
@@ -681,8 +666,11 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   hydromet.data.flow <- hydromet.data %>%
     dplyr::filter(`Station ID` %in% station.hydromet.flow$`Station ID`)
   
+  station.hydromet.flow <- station.hydromet.flow %>% 
+    dplyr::filter(`Station ID` %in% hydromet.data.flow$`Station ID`)
+  
   ## _ (4) USGS + OWRD + Hydromet ----
-  flow.stations <- rbind(station.usgs.flow, station.owrd.flow,station.hydromet.flow) %>% 
+  flow.stations <- rbind(station.usgs.flow, station.owrd.flow, station.hydromet.flow) %>% 
     dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
     dplyr::mutate(Station = stringr::str_to_title(Station)) %>% 
     dplyr::mutate_at("Station", str_replace_all, "Or", "OR") %>% 
@@ -742,6 +730,18 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   # _ Effective shade data ----
   effective.shade.pro.area <- effective.shade %>% 
     dplyr::filter(`Project Area` == qapp_project_area)
+  
+  # _ Worksheet ----
+  model.info <- cal.model %>% 
+    dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
+  
+  model.input  <- cal.input %>% 
+    dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
+    dplyr::mutate(Latitude = round(Latitude,4),
+                  Longitude = round(Longitude,3)) %>% 
+    dplyr::left_join(station.awqms.temp[,c("Station ID", "Station", "Organization")], by="Station ID")
+  
+  pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
   
   # _ NCDC met data ----
   ncei.stations.pro.area <- ncei.stations %>% 
@@ -867,7 +867,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
        lookup.huc,
        project.areas,
        qapp_project_area,
-       station.model,
        temp.stations,
        temp.data.sample.count,
        model.info,
@@ -909,7 +908,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                   Track = "TRUE") %>% 
     dplyr::select(`Station ID`,Station,Latitude,Longitude,Organization,Data,Track)
   
-  station.worksheet.temp <- station.model %>% 
+  station.worksheet.temp <- model.input %>% 
     dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
     dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
     dplyr::filter(!`Station ID` == "TIR") %>% 
@@ -921,9 +920,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                   Track = "TRUE") %>% 
     dplyr::distinct(Station, .keep_all = TRUE) %>% 
     dplyr::select(`Station ID`,Station,Latitude,Longitude,Organization,Data,Track)
-  
-  station.worksheet.flow <- cal.input %>% 
-    dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
+
+  station.worksheet.flow <- model.input %>% 
     dplyr::filter(`Parameter` %in% c("Flow")) %>%
     dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
     dplyr::filter(!`Data Source` == "USGS" & !is.na(`Data Source`)) %>% 
@@ -961,9 +959,8 @@ data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_Q
 load(paste0(data.dir,"RData/lookup.RData"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
-                         layer = "project_areas")
-pro_areas <- sf::st_transform(pro_areas, 4326)
-pro_areas <- pro_areas %>% 
+                         layer = "project_areas") %>% 
+  sf::st_transform(4326) %>% 
   dplyr::mutate(color = dplyr::case_when(Project_Na == "John Day River Basin" ~ "#df65b0", #pink
                                          Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins" ~ "yellow",
                                          Project_Na == "Lower Willamette and Clackamas Subbasins" ~ "#253494", #blue
@@ -984,19 +981,13 @@ pro_areas <- pro_areas %>%
   dplyr::arrange(EPA.Approval)
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
-                           layer = "TempTMDL_QAPP_Reaches")
-#pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
-pro_reaches <- sf::st_transform(pro_reaches, 4326)
-pro_reaches <- pro_reaches %>% 
+                           layer = "TempTMDL_QAPP_Reaches") %>% 
+  sf::st_transform(4326) %>% 
   dplyr::mutate(color = dplyr::case_when(Project_Na == "Willamette River Mainstem and Major Tributaries"~ "purple",
                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
+#pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
 
 # _ Model Extents ----
-map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent.shp"),
-                                   layer = "ce_model_extent")%>% 
-  sf::st_transform(4326) %>% 
-  sf::st_zm()
-
 map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_model_extent.shp"),
                                         layer = "hs_temp_model_extent")%>% 
   sf::st_transform(4326) %>% 
@@ -1004,12 +995,6 @@ map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_mode
 
 map_hs_solar_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_solar_model_extent.shp"),
                                          layer = "hs_solar_model_extent")%>% 
-  sf::st_transform(4326) %>% 
-  sf::st_zm()
-
-# Shadow model is only for the Rouge River Basin
-map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_streams_temp_projects_clean.shp"),
-                                   layer = "shade_model_streams_temp_projects_clean")%>% 
   sf::st_transform(4326) %>% 
   sf::st_zm()
 
@@ -1021,40 +1006,18 @@ map_hs_solar_model_area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/T
   dplyr::mutate(Project_Na = "Southern Willamette Subbasins",
                 Name = "Southern Willamette Subbasins Heat Source Solar Model Area")
 
+map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent_Willamette.shp"),
+                                   layer = "ce_model_extent_Willamette")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
+
+# Shadow model is only for the Rouge River Basin
+map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_streams_temp_projects_clean.shp"),
+                                   layer = "shade_model_streams_temp_projects_clean")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
+
 # map.tir_extent
-
-# _ HUC 8,10,12 ---- 
-# Codes for HUCs here are not used. HUCs are pulled from the REST server in the map_pro_areas.R.
-#map_huc8 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
-#                        layer = "Study_Areas_v5_HUC8_scope") %>% 
-#  dplyr::select(HUC_8,geometry)
-#map_huc8 <- tigris::geo_join(map_huc8, lookup.huc, by_sp = "HUC_8", by_df = "HUC_8", how = "left")
-#map_huc8  <- sf::st_transform(map_huc8 , 4326)
-
-#map_huc10 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v6_HUC10_scope.shp",
-#                         layer = "Study_Areas_v6_HUC10_scope")%>% 
-#  dplyr::select(HUC_10,geometry)
-#map_huc10 <- tigris::geo_join(map_huc10, lookup.huc, by_sp = "HUC_10", by_df = "HUC10", how = "left")
-#map_huc10 <- sf::st_transform(map_huc10, 4326)
-
-#map_huc12 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_huc12.shp",
-#                         layer = "project_huc12") %>% 
-#  dplyr::select(HUC12,geometry)
-#map_huc12 <- tigris::geo_join(map_huc12, lookup.huc, by_sp = "HUC12", by_df = "HUC12", how = "left")
-#map_huc12 <- sf::st_transform(map_huc12, 4326)
-
-# _ Temperature WQS ----
-## this takes too long to get the layer. Need to use the REST layer.
-#wqs <- sf::st_read(
-#  dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Standards/GeoRef_Standards.gdb",
-#  layer = "Oregon_Standards",
-#  stringsAsFactors = FALSE) %>% 
-#  sf::st_zm() %>%
-#  sf::st_transform(4326)
-
-#pro_area_wqs <- wqs %>% 
-#  dplyr::filter(sf::st_intersects(pro_area, ., sparse = FALSE)) %>% 
-#  dplyr::filter(!TempCode == "99")
 
 # _ Project area map data ----
 ## for test:
@@ -1084,10 +1047,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
   
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
-  
-  ce_model_extent <- map_ce_model_extent %>% 
-    dplyr::filter(Project_Na == qapp_project_area)
-  
+
   hs_temp_model_extent <- map_hs_temp_model_extent %>% 
     dplyr::filter(Project_Na == qapp_project_area)
   
@@ -1097,16 +1057,19 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
   hs_solar_model_area <-  map_hs_solar_model_area %>% 
     dplyr::filter(Project_Na == qapp_project_area)
   
+  ce_model_extent <- map_ce_model_extent %>% 
+    dplyr::filter(Project_Na == qapp_project_area)
+  
   sh_model_extent <- map_sh_model_extent %>% 
     dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
   
   #tir_extent
   
   save(pro_area,
-       ce_model_extent,
        hs_temp_model_extent,
        hs_solar_model_extent,
        hs_solar_model_area,
+       ce_model_extent,
        sh_model_extent,
        #tir_extent,
        file = paste0(data.dir,"RData/map_",file.name,".RData"))

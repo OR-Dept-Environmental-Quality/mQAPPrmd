@@ -57,12 +57,6 @@ nlcd_df <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QA
 nlcd_df <- foreign::read.dbf(nlcd_df, as.is = TRUE)
 
 # Read in Model polyline extents
-map_ce_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis",
-                                   layer = "ce_model_extent", stringsAsFactors = FALSE) %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream, Project_Na)
-
 map_hs_temp_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis",
                                         layer = "hs_temp_model_extent", stringsAsFactors = FALSE) %>%
   sf::st_transform(2992) %>% 
@@ -78,15 +72,8 @@ map_hs_solar_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
 
-map_hs_sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/sandy_2016.shp",
-                                 layer = "sandy_2016") %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream, Project_Na)
-
-
-map_hs_fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
-                                      layer = "fish_creek_2009")  %>% 
+map_ce_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis",
+                                   layer = "ce_model_extent_Willamette", stringsAsFactors = FALSE) %>% 
   sf::st_transform(2992) %>% 
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
@@ -97,8 +84,37 @@ map_bes_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temp
   sf::st_zm() %>%
   dplyr::select(Stream = NAME, Project_Na)
 
+map_hs_fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
+                                      layer = "fish_creek_2009")  %>% 
+  sf::st_transform(2992) %>% 
+  sf::st_zm() %>%
+  dplyr::select(Stream, Project_Na)
+
+map_hs_sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/sandy_2016.shp",
+                                 layer = "sandy_2016") %>% 
+  sf::st_transform(2992) %>% 
+  sf::st_zm() %>%
+  dplyr::select(Stream, Project_Na)
+
 lookup_model_extents <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/Lookup_model_extents.xlsx", 
                                           sheet = "model_extent") 
+
+# to check if dissolving the model waterbodies will run correctly
+#model_extents <- rbind(map_hs_temp_model_extent, 
+#                       map_hs_solar_model_extent, 
+#                       map_ce_model_extent, 
+#                       map_hs_sandy_2016, 
+#                       map_hs_fish_creek_2009,
+#                       map_bes_model_extent) %>%
+#  dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins", "Bear Creek (Wallowa)", Stream)) %>% 
+#  dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Rogue River Basin", "Bear Creek (Rogue)", Stream)) %>% 
+#  dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "Rogue River Basin", "Elk Creek (Rogue)", Stream)) %>% 
+#  dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "South Umpqua and Umpqua Subbasins", "Elk Creek (Umpqua)", Stream)) %>% 
+#  dplyr::left_join(lookup_model_extents,by="Stream") 
+#model_extents_csv <- model_extents %>% sf::st_drop_geometry()
+#temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
+#write.csv(model_extents_csv,paste0(temp.dir,"model_extent_leftjoin.csv"))
+# end check
 
 # Combine into one feature and dissolve by stream and project area
 model_extents <- rbind(map_hs_temp_model_extent, 
@@ -107,18 +123,16 @@ model_extents <- rbind(map_hs_temp_model_extent,
                        map_hs_sandy_2016, 
                        map_hs_fish_creek_2009,
                        map_bes_model_extent) %>%
-  dplyr::left_join(lookup_model_extents,by="Stream") %>% # added the following lines 8/19
-  dplyr::select(-c("Stream","Project_Na.x","...1")) %>%  #
-  dplyr::rename(Stream = Model_waterbody,                #
-                Project_Na = Project_Na.y) %>%           #
+  dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins", "Bear Creek (Wallowa)", Stream)) %>% 
+  dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Rogue River Basin", "Bear Creek (Rogue)", Stream)) %>% 
+  dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "Rogue River Basin", "Elk Creek (Rogue)", Stream)) %>% 
+  dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "South Umpqua and Umpqua Subbasins", "Elk Creek (Umpqua)", Stream)) %>% 
+  dplyr::left_join(lookup_model_extents,by="Stream") %>%
+  dplyr::select(-c("Stream","Project_Na.x")) %>%
+  dplyr::rename(Stream = Model_waterbody,
+                Project_Na = Project_Na.y) %>%
   dplyr::group_by(Stream, Project_Na) %>%
   dplyr::summarise()
-
-# to be deleted
-#model_extents_csv <- model_extents %>% sf::st_drop_geometry()
-#temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
-#write.csv(model_extents_csv,paste0(temp.dir,"model_extent.csv"))
-# end to be deleted
 
 # check
 sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE)
