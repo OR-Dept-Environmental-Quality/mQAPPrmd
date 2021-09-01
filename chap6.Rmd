@@ -252,11 +252,15 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
+#<<<<<<< master
+**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+#=======
 `r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2006), the model setup and calibration documentation (Wells and Berger 1995; Berger and Wells 2005), and the CE-QUAL-W2 user guide (Cole and Wells, 2000).")}`
 
 `r if(waterbody_name %in% "Johnson Creek (2002)"){paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2006).")}`
 
 `r if(waterbody_name %in% c("Johnson Creek Watershed (2019)","Columbia Slough Subwatershed (2019)","Tualatin Mountains (2019)","Tryon Creek Watershed (2019)")){paste0("Model development for the ",waterbody_name," will be completed by City of Portland Bureau of Environmental Services. Model development assumptions are expected to be documented in the City of Portland final model report. DEQ will review the model and model assumptions and include or reference them in the TMDL. Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}`
+#>>>>>>> Lower_Willamette_and_Clackamas_Subbasins
 
 ### Model inputs
 
