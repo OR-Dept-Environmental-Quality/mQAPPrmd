@@ -711,6 +711,10 @@ section.npdes.ind <- npdes.ind.pro.area %>%
   dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
   dplyr::arrange(`Facility Name (Facility Number)`)
 
+ms4 <- section.npdes.ind %>% 
+  dplyr::filter(`Permit Type and Description` %in% c("NPDES-DOM-MS4-1: Municipal Separate Storm Sewer System - Phase I",
+                                                     "NPDES-DOM-MS4-2: Municipal Separate Storm Sewer System - Phase II"))
+
 if(NROW(section.npdes.ind)>0){
   
   t55_ind_tbl <- knitr::kable(section.npdes.ind, format = "pandoc", padding = 2,
@@ -721,7 +725,7 @@ if(NROW(section.npdes.ind)>0){
 
 section.npdes.gen.1 <- npdes.gen.pro.area %>% 
   dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
-  dplyr::filter(PermitType %in% c("GEN01","GEN03","GEN04","GEN05")) %>% 
+  dplyr::filter(PermitType %in% c("GEN01","GEN03","GEN04","GEN05","GEN19","GEN40")) %>% 
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`CommonName`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`PermitType`, ": ", `PermitDescription`),
@@ -730,17 +734,24 @@ section.npdes.gen.1 <- npdes.gen.pro.area %>%
   dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
   dplyr::arrange(`Facility Name (Facility Number)`)
 
+gen.txt <- npdes.gen.pro.area %>% 
+  dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
+  dplyr::filter(PermitType %in% c("GEN01","GEN03","GEN04","GEN05","GEN19","GEN40")) %>% 
+  dplyr::mutate(PermitType = ifelse (PermitType == "GEN40", "GEN40 (MS4)", PermitType))
+
 if(NROW(section.npdes.gen.1)>0){
   
   t55_gen1_tbl <- knitr::kable(section.npdes.gen.1, format = "pandoc", padding = 2,
                                caption = tbls(name = "t55_gen1",
-                                              caption = paste0("Summary of current registrants under the general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ".")))
+                                              caption = paste0("Summary of current registrants under the general NPDES ",
+                                                               knitr::combine_words(unique(sort(gen.txt$PermitType))),
+                                                               " permits in the ", qapp_project_area, ".")))
   
 }
 
 section.npdes.gen.2 <- npdes.gen.pro.area %>% 
   dplyr::filter(`Project Area` %in%  qapp_project_area)%>%
-  dplyr::filter(!PermitType %in% c("GEN01","GEN03","GEN04","GEN05")) %>% 
+  dplyr::filter(!PermitType %in% c("GEN01","GEN03","GEN04","GEN05","GEN19","GEN40")) %>% 
   dplyr::mutate(`Permit Type and Description` = paste0(PermitType, ": ", PermitDescription)) %>% 
   dplyr::group_by(`Permit Type and Description`) %>% 
   dplyr::summarise(`Current Number of Registrants` = n()) %>% 
@@ -750,13 +761,19 @@ if(NROW(section.npdes.gen.2)>0){
   
   t55_gen2_tbl <- knitr::kable(section.npdes.gen.2, format = "pandoc", padding = 2,
                                caption = tbls(name = "t55_gen2",
-                                              caption = paste0("Summary of current number of general NPDES permit registrants, other than GEN01, GEN03, GEN04 and GEN05 registrants, in the ", qapp_project_area, ".")))
+                                              caption = ifelse(NROW(section.npdes.gen.1)>0,
+                                                               paste0("Summary of the current number of registrants for all the other general NPDES permits in the ",
+                                                                      qapp_project_area,
+                                                                      " that are not listed in ",
+                                                                      tbls(name = "t55_gen1", display="cite")),
+                                                               paste0("Summary of the current number of registrants for all the general NPDES permits in the ",
+                                                                      qapp_project_area))))
   
 }
 
 ```
 
-`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area`. `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite"), " lists the registrants covered under the general NPDES GEN01, GEN03, GEN04 and GEN05 permits in the ", qapp_project_area, ". ")}`This group of general permit are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists all the active general NPDES permitting types `r if(NROW(section.npdes.gen.1)>0){paste0("other than GEN01, GEN03, GEN04 and GEN05 permitting types ")}`in the `r qapp_project_area`.
+`r if(NROW(section.npdes.ind)>0){tbls(name = "t55_ind", display="cite")}else{paste0("[Update: No individual NPDES permits]")}` identifies all the active individual NPDES permittees in the `r qapp_project_area` `r if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")}`. `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ", qapp_project_area, ". ")}` This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -982,45 +999,24 @@ print(knitr::kable(data.gap, format = "pandoc", padding = 2,
 
 ```
 
-```{r,label=`shadow`, echo=FALSE}
+```{r,label=`shadow`, include=FALSE}
 
-if("SHADOW" %in% tmdl.mod.1$`Model Version`){
+if(qapp_project_area == "Rogue River Basin"){
   
-  shadow <- model.info %>% 
-    dplyr::filter(`Model version` == "SHADOW") %>% 
-    dplyr::select(`Model Waterbody`,`Model Extent Distance`,`Model Extent Units`,`TMDL Document`) %>%
-    dplyr::arrange(as.numeric(`Model Extent Distance`))
+  chap6_shadow <- NULL
   
-  names(shadow)[names(shadow) == "Model Extent Distance"] <- if(NROW(shadow)>0){paste0("Model Extent (",unique(shadow$`Model Extent Units`),")")}
+  for(waterbody_name in unique(sort(model.info[model.info$`Model version` == "SHADOW",]$`Model Waterbody`))){
+    
+    chap6_shadow <- c(chap6_shadow, knitr::knit_child(input = "chap6_shadow.Rmd", envir = globalenv()))
+    
+  } 
   
-  shadow_tbl <-  knitr::kable(shadow[,c(1:2)], format = "pandoc", padding = 2,
-                              caption = tbls(name = "shadow",
-                                             caption = paste0("SHADOW model waterbodies in the ", qapp_project_area,".")))
-  
-  cat("## SHADOW\n")
-  
-  cat(paste0("DEQ used USFS SHADOW shade modeling results in its development for the original ", knitr::combine_words(unique(sort(shadow$'TMDL Document'))), ". DEQ does not intend to update any of the stream segments in the ",qapp_project_area, " where SHADOW was utilized.  If the need arises to revisit some of the SHADOW modeling, this QAPP will be updated at that time to inform the project team on how to proceed."))
-  
-  cat("\
-  
-      ")
-  cat("\n")
-  
-  cat("### Model Domain\n")
-  
-  cat(paste0("The SHADOW model domain includes all of the streams identified in ", tbls(name = "shadow", display="cite"), ". Typically the extent is the entire length of the stream from mouth to headwaters."))
-  
-  print(knitr::kable(shadow[,c(1:2)], format = "pandoc", padding = 2,
-                     caption = tbls(name = "shadow",
-                                    caption = paste0("SHADOW model waterbodies in the ", qapp_project_area,"."))))
-  
-} else {cat("")}
+}
 
 ```
 
 ```{r, label=`chap6x`, include=FALSE}
 
-# Note: SHADOW model streams were not included in Section 6 sub-sections of Model Waterbodies
 chap6 <- NULL
 
 for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHADOW",]$`Model Waterbody`))){
@@ -1042,6 +1038,7 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
 
 ```
 
+`r if(qapp_project_area == "Rogue River Basin"){paste(chap6_shadow, collapse = "\n")}`
 `r paste(chap6, collapse = "\n")`
 
 # Model evaluation and acceptance
