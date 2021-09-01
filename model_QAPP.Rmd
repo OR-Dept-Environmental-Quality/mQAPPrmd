@@ -967,11 +967,7 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-#<<<<<<< master
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
-#=======
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
-#>>>>>>> Southern_Willamette_Subbasins
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
