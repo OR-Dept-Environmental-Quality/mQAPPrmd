@@ -741,7 +741,15 @@ qapp_project_area = "Sandy Subbasin"
                   Longitude = round(Longitude,3)) %>% 
     dplyr::left_join(station.awqms.temp[,c("Station ID", "Station", "Organization")], by="Station ID")
   
-  pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
+  pro.area.tmdls <- model.info %>% 
+    dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
+    dplyr::filter(!is.na(`TMDL Document`)) %>% 
+    dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
+    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
+    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",`Abbreviated Reference`,")")) %>% 
+    dplyr::distinct(tmdls.ref) 
+  
+  pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
   
   # _ NCDC met data ----
   ncei.stations.pro.area <- ncei.stations %>% 
