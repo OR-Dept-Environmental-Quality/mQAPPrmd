@@ -107,7 +107,7 @@ huc8.txt <- lookup.huc %>%
 
 ```
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. **[Update: This QAPP project area excludes the (list rivers if applicable).]**
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. 
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -143,14 +143,10 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
-**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**
-
-* Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
 *	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
 *	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
 *	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
-*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
-
+  
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
@@ -263,7 +259,7 @@ tmdl.mod.a<- model.info %>%
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
   dplyr::rename(`Model Version` = Model_version) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Version` == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`))
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Version` == "SHADOW", "Multiple streams (see Section 6.3 - Section 6.5)", `Model Waterbody`))
 
 tmdl.mod.b<- model.info %>% 
   dplyr::filter(!is.na(`New Model`)) %>% 
@@ -277,7 +273,7 @@ tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
 
 ```
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the Rogue River is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance, removal, or channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
@@ -301,9 +297,7 @@ The modeling framework needs for this project include:
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-7)	**[Update as needed]**
-
-**[Update this paragraph where CE-QUAL-W2 is used].** The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
@@ -811,7 +805,7 @@ if(NROW(t57)>0){
 
 ```
 
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected. Data were collected in Elk Creek in August 2007, in Evans Creek and West Fork Evans Creek in July 2003, and in Little Butte Creek and tributaries in July 2001.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -821,7 +815,7 @@ if(NROW(t57)>0){
 
 tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
                                caption = tbls(name = "tmdl.mod.a",
-                                              caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+                                              caption = paste0("Waterbodies where a model has already been developed.")))
 
 if(NROW(tmdl.mod.b)>0){
   
@@ -968,11 +962,13 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
+The setup and calibration for the Heat Source models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. The SHADOW models were setup and calibrated by the BLM, USFS, and Lower Rogue Watershed Council. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
+
+Not listed in `r tbls(name = "tmdl.mod.a", display="cite")` are existing SHADOW models for various streams in Sucker Creek Watershed, a Heat Source temperature model for Sucker Creek, and Heat Source shade models for Cheney Creek, Thompson Creek, Slate Creek, and Waters Creek in the Applegate Subbasin. These models were documented in their respective TMDLs but unfortunately have gone missing from DEQ’s files. DEQ does not plan to replace these models with new ones.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
-`r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
+New calibrated temperature models are being developed for the Applegate River and the Little Applegate River. Models were originally developed for these rivers in support of the Applegate Subbasin TMDL (DEQ, 2004) but they too have gone missing from DEQ’s files. The new models will support estimating background conditions for a longer period of time compared to the original models. The original models only simulated a single day. Data from the same year (1999) will be used to develop the new models. DEQ considered developing models for a more recent time period but there are insufficient temperature data available. The Little Applegate River is a major tributary to the Applegate River. The new calibrated model on the Little Applegate River will support development of tributary boundary conditions under various management scenarios.
 
 ## General model inputs and parameters
 
