@@ -63,7 +63,7 @@ load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewi
 
 awqms.data.temp <- df.awqms.raw.state %>% 
   # AWQMS QA/QC check:
-  dplyr::filter(Result_status %in% c("Final", "Provisional") & DQL %in% c("A","B","E")) %>% 
+  dplyr::filter(Result_status %in% c("Final", "Provisional") & DQL %in% c("A","B","E","Q",NA)) %>% 
   dplyr::mutate(Source = "AWQMS",
                 SampleStartDate = as.Date(SampleStartDate)) %>% 
   dplyr::select("Char_Name","Result_status","Result_Numeric","MLocID","SampleStartDate","Activity_Type","AU_ID","HUC8",             
@@ -910,7 +910,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   
   station.worksheet.temp <- model.input %>% 
     dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
-    dplyr::filter(!is.na(`Data Source`) & is.na(`Interpolated Data`)) %>% 
+    dplyr::filter(!is.na(`Data Source`)) %>% 
+    dplyr::filter(is.na(`Interpolated Data`)) %>% 
     dplyr::filter(!`Station ID` == "TIR") %>% 
     dplyr::mutate(Station = ifelse(is.na(Station),`Model Location Name`,Station),
                   Organization = ifelse(is.na(Organization),`Data Source`,Organization),
@@ -924,7 +925,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   station.worksheet.flow <- model.input %>% 
     dplyr::filter(`Parameter` %in% c("Flow")) %>%
     dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
-    dplyr::filter(!`Data Source` == "USGS" & !is.na(`Data Source`)) %>% 
+    dplyr::filter(!`Data Source` == "USGS") %>% 
+    dplyr::filter(!is.na(`Data Source`)) %>% 
     dplyr::filter(is.na(`Interpolated Data`)) %>% 
     dplyr::mutate(Station = `Model Location Name`,
                   Organization = `Data Source`,
