@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "North Umpqua River"
+# for test: waterbody_name <- "Sandy River (2001)"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -58,6 +58,12 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 ```{r, label=`sc`, include=FALSE}
 
+## 1st paragraph
+source.char <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_Sandy.xlsx",
+                                 sheet = "sandy_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull()
+
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
   dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name), x=`Stream Name`, ignore.case = TRUE)) %>% 
@@ -71,7 +77,7 @@ npdes.ind.waterbody <- npdes.ind.pro.area %>%
 
 npdes.ind.n <- nrow(npdes.ind.waterbody)
 
-if(npdes.ind.n>0){
+if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)") & npdes.ind.n > 0){
   
   npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
@@ -83,26 +89,27 @@ if(npdes.ind.n == 0) {
   npdes.txt <- "There are no permitted individual NPDES point sources along the model extent."
 } 
 
-if(npdes.ind.n == 1) {
+if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)") & npdes.ind.n == 1) {
   npdes.txt <- paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"), ".")
 }
 
-if(npdes.ind.n > 1) {
+if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)") & npdes.ind.n > 1) {
   npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),".")
 } 
 
 # NLCD
+# test: waterbody_name <- "Bull Run River (2016)"
 nlcd.waterbody <- nlcd.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
                 "Percent of Total Acres" = Percentage)
 
-if(NROW(nlcd.waterbody)>0){
+if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)") & NROW(nlcd.waterbody)>0){
   
   nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
+                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al., 2018).")))
   
 }
 
@@ -116,7 +123,7 @@ dma.waterbody <- dma.pro.area %>%
   dplyr::rename("DMA or Responsible Person" = DMA_RP,
                 "Percent of Total Acres" = Percentage) 
 
-if(NROW(dma.waterbody)>0){
+if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)") & NROW(dma.waterbody)>0){
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
@@ -126,21 +133,39 @@ if(NROW(dma.waterbody)>0){
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+`r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The primary sources of thermal loading contributing to temperatures exceedances along the ", waterbody_name, " include increases in solar radiation loading from ",source.char)}`
 
-`r npdes.txt`
+`r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){npdes.txt}`
 
-`r if(npdes.ind.n > 0){npdes.ind.tbl}`
+`r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)") & npdes.ind.n > 0){npdes.ind.tbl}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The majority land use ", if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}, " along the ",waterbody_name, " ", if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}, " ", if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}, " accounting for about ", if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}, " percent of the near stream area. ", tbls(name =paste0("nlcd.waterbody_",waterbody_name),display="cite"), " summarizes all the land uses within 100 meters of the digitized ", waterbody_name, " centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al., 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.")}`
 
-`r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("There are no permitted NPDES point sources in the Bull Run Watershed.")}`
 
-Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)") & NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("The City of Portland’s drinking water supply project is the primary source of anthropogenic warming in the Bull Run River (DEQ, 2005). The project consists of two storage reservoirs (Dam Numbers 1 and 2) and a dam structure on Bull Run Lake, a natural water body near the headwaters.  In 1929, the City of Portland’s Water Bureau completed construction of Bull Run Dam 1, a concrete gravity arch dam, creating Reservoir 1 (also known as Lake Ben Morrow). The maximum capacity for Reservoir 1 is ten billion gallons. Dam 1 has a selective withdrawal structure that allows water to be withdrawn at different elevations in the reservoir allowing some control over stream temperatures. The water surface elevation in Reservoir 1 varies between 970 and 1,045 feet above mean sea level.")}`
 
-`r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("Dam 2 is an earthfill dam four miles downstream of Dam 1. Dam 2 was completed in 1962 and the reservoir has a maximum capacity of 6.8 billion gallons. In 2014 a selective withdrawal structure was completed on the intake towers at Dam 2. The city tries to keep the reservoir at Dam 2 as full as possible throughout the year, including the summer months. The surface elevation varies between 840 and 860 feet above mean sea level.")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("The project has a license to produce electricity (FERC License No. 2821). Most of the time water is routed through the powerhouses, located immediately downstream of the dams before being returned to the Bull Run River.  Less frequently, water is routed over the spillways during large winter storms that produce flows that exceed the powerhouse capacities. In 2029 the FERC license is scheduled to expire.")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("Bull Run Lake is a natural lake above the headwaters of Bull Run River, though a dam structure has been added to increase the elevation by 10 feet and the subsequent storage capacity of the lake. The lake does not have a surface water connection to Bull Run River and was formed from a landslide sometime before European settlement. Seepage through porous geologic features surrounding the lake contributes significant stream flow into the Bull Run River.  The U.S. Forest Service issues a special use permit to the City of Portland to withdrawal water from the lake for municipal water supplies. Water from the lake is used for drinking water supply only during dry years. The permit restricts the withdrawal to ensure adequate water is available to support the ecosystem.")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("Based on modeling completed for the 2005 TMDL (DEQ, 2005), the drinking water supply project results in cooler temperatures downstream of Dam 2 in August compared to temperatures under natural flows. The TMDL model focused on a single day, August 8, 2001, and did not evaluate temperature impacts during other periods. The 2005 TMDL established a surrogate measure temperature target at Larson’s Bridge. This location corresponds to where the model predicted the maximum stream temperatures occur. Based on monitoring information provided by the City of Portland to DEQ, the project typically attains the surrogate measure during the summer period and has more difficulty attaining the target in autumn when the supply of cooler water is diminished and the reservoirs become less thermally stratified.")}`
+
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}`
+
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ", tbls(name = paste0("dma.waterbody",waterbody_name),display="cite"), " summarizes the potential designated management agencies and responsible persons along the ", waterbody_name, " model extent.")}`
+
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)") & NROW(dma.waterbody)>0){dma.wb.tbl}`
+
+`r if(waterbody_name == "Bull Run River (2001)"){paste0("For the discussion of source characteristics, see Section 6.4.3 for the updated Bull Run River (2016) model.")}`
+
+`r if(waterbody_name == "Salmon River (2001)"){paste0("For the discussion of source characteristics, see Section 6.7.3 for the updated Salmon River (2016) model.")}`
+
+`r if(waterbody_name == "Sandy River (2001)"){paste0("For the discussion of source characteristics, see Section 6.9.3 for the updated Sandy River (2016) model.")}`
 
 ### Time frame of simulation
 
@@ -155,7 +180,11 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+`r if(waterbody_name %in% c("Bull Run River (2001)")){paste0("The effort currently described in the QAPP includes use of existing models and the development of new models to capture post-dam removal conditions. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2005), the model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}else{if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("Model development for the ",gsub("\\s*\\([^\\)]+\\)","", waterbody_name)," relies on deriving temperature or flow inputs from a few small tributaries (",tbls(name = paste0("t6x6_1", waterbody_name),display="cite"),"). DEQ plans to use the direct surrogate or linear regression approaches described in Section 6.2 to derive stream temperature; and a combination of a flow mass balance, drainage area ratio, and the flow-probability-probability-flow approaches to estimate stream flow. It assumed that these approaches do a reasonably good job of estimating the tributary temperature or flow. DEQ will assess the goodness of fit for these approaches where measured temperature or flow data are available.")}else{paste0("The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2005) and model user guide (Boyd and Kasper, 2003).")}}`
+
+`r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("DEQ will review the vegetation conditions at sites where effective shade measurements were made in August of 2001 (",tbls(name = "t56_sandy", display="cite"),") and compare those conditions to vegetation conditions observed in 2016. If the conditions do not appear to have changed significantly DEQ will use the effective shade measured in 2001 as a rough guide for model calibration purpose with the assumption that the shade will likely be about the same or have increased since 2001 if site conditions look similar.")}`
+
+`r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}`
 
 ### Model inputs
 
@@ -210,21 +239,32 @@ if(!model.extent == TRUE){
   t6x6_1 <- t6x6_1[,-c(3)] %>% 
     dplyr::rename(`Model Input` = Parameter)
   
-  if(NROW(t6x6_1)>0){
+if(NROW(t6x6_1)>0){
+  
+  if(waterbody_name %in% c("Bull Run River (2016)", "Salmon River (2016)", "Sandy River (2016)")){
+    
+    t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
+                                caption = tbls(name = paste0("t6x6_1", waterbody_name),
+                                               caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
+    
+  }else{
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
                                                caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
-    
   }
   
+}else{
+  
   t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  
+}
   
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the expected configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized.")}else{paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}else{t6x6_1.txt}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
@@ -281,15 +321,22 @@ if(!model.extent == TRUE){
   
   names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x7 <- t6x7[,c(1,2,5,4)]
+  t6x7 <- t6x7[,c(1,2,5,4)]  
+
+if(NROW(t6x7)>0){
   
-  if(NROW(t6x7)>0){
+  
+  if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){
     
-    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
-                             caption = tbls(name = paste0("t6x7", waterbody_name),
-                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
+    
+  } else {
+    
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
     
   }
+  
+}
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
@@ -303,6 +350,10 @@ if(!model.extent == TRUE){
 
 ```
 
+#<<<<<<< master
 `r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". The model location in the table below describes the distance of each input from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
+#=======
+`r if(!model.extent == TRUE){} else {if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("The expected temperature, and flow calibration sites for the ",waterbody_name," model are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". The model location in the table describes the distance of each input from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}else{paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), ". ", mod.loc[1], if(exists("t57")){if(NROW(t57)>0){paste0("Effective shade model calibrations sites are summarized in ",tbls(name = "t57",display="cite"),".")}}," If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}}`
+#>>>>>>> Sandy_Subbasin
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
