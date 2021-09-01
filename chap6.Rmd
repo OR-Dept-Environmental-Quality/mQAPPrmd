@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "North Umpqua River"
+# for test: waterbody_name <- "Pudding River"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -57,6 +57,17 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 ### Source characteristics
 
 ```{r, label=`sc`, include=FALSE}
+
+## 1st paragraph
+source.char.1 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_MidWillamette.xlsx",
+                                 sheet = "midW_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar1)
+
+source.char.2 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_MidWillamette.xlsx",
+                                 sheet = "midW_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar2)
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
@@ -126,7 +137,7 @@ if(NROW(dma.waterbody)>0){
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges,")}` `r if(!is.na(source.char.1)){source.char.1}` and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). `r source.char.2` The contribution of these latter potential sources may be investigated as part of the model scenarios.
 
 `r npdes.txt`
 
@@ -155,7 +166,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
 
 ### Model inputs
 
@@ -281,7 +292,7 @@ if(!model.extent == TRUE){
   
   names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x7 <- t6x7[,c(1,2,5,4)]
+  t6x7 <- t6x7[,c(1,2,5,4)] 
   
   if(NROW(t6x7)>0){
     
