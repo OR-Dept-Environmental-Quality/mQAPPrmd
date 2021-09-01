@@ -66,6 +66,9 @@ if(waterbody_name %in% "Columbia Slough (1992)"){
 
 ```
 
+#<<<<<<< master
+The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+#=======
 ```{r cs_lower_east, eval.after="fig.cap", fig.cap=cs.lower.east, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
 
 cs.lower.east <- figs(name="cs.lower.east", caption = paste0("Columbia Slough (1992) model segments for the east end of the Lower Columbia Slough (Berger and Wells, 2005)."))
@@ -103,6 +106,7 @@ if(waterbody_name %in% "Columbia Slough (1992)"){
 }
 
 ```
+#>>>>>>> Lower_Willamette_and_Clackamas_Subbasins
 
 ### Spatial and temporal resolution
 
