@@ -338,7 +338,7 @@ t51_ncei <- ncei.station.tbl %>%
 
 t51_raws <- raws.station.tbl %>% 
   dplyr::mutate(`Station` = siteName,
-                `Station ID` = wrccID,
+                `Station ID` = nwsID,
                 `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = agency,
@@ -408,6 +408,10 @@ if(NROW(t51.ncei)>0){
 t51.raws <- t51 %>% 
   dplyr::filter(tbl=="RAWS") %>% 
   dplyr::select(-c(`Available Data`,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "352916",                   # Worksheet data; station info based on https://raws.dri.edu/cgi-bin/rawMAIN.pl?orOAGN
+                 Station = "AGNESS OREGON",
+                 `Latitude/Longitude` = "42.5522/-124.058",
+                 Agency = "USFS") %>% 
   dplyr::arrange(`Station ID`)
 
 if(NROW(t51.raws)>0){
@@ -421,6 +425,9 @@ if(NROW(t51.raws)>0){
 t51.agrimet <- t51 %>% 
   dplyr::filter(tbl=="AgriMet") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "BRKO",                                # Worksheet data
+                 Station = "BROOKINGS, OREGON AGRIMET WEATHER STATION",
+                 `Latitude/Longitude` = "42.03/-124.241") %>% 
   dplyr::arrange(`Station ID`)
 
 if(NROW(t51.agrimet)>0){
@@ -462,7 +469,9 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
+  dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+  dplyr::filter(!Source == "AGNESS, RAWS") %>% 
+  dplyr::filter(!Source == "BRKO - BROOKINGS, OREGON AGRIMET WEATHER STATION")
 
 if(NROW(t51.sp)>0){
   
@@ -524,7 +533,7 @@ t52_ref <- tir %>%
 
 ```
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -756,7 +765,7 @@ if(NROW(section.npdes.gen.2)>0){
                                                                       " that are not listed in ",
                                                                       tbls(name = "t55_gen1", display="cite")),
                                                                paste0("Summary of the current number of registrants for all the general NPDES permits in the ",
-                                                                      qapp_project_area))))
+                                                                      qapp_project_area,"."))))
   
 }
 
@@ -821,7 +830,7 @@ if(NROW(tmdl.mod.b)>0){
   
   tmdl.mod.b.tbl <- knitr::kable(tmdl.mod.b, format = "pandoc", padding = 2,
                                  caption = tbls(name = "tmdl.mod.b",
-                                                caption = paste0("Waterbodies and year for which new models are expected to be developed.")))
+                                                caption = paste0("Waterbodies which new models are expected to be developed.")))
   
   tmdl.mod.b.txt <- "**[Update: new model information - See the narratives in the Sandy QAPP]**"
   
@@ -1050,8 +1059,6 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
 
-The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
-
 It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
 ## Model acceptance
@@ -1128,7 +1135,9 @@ Management scenarios described in this section summarize the means by which the 
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-**[List specific changes that will be made]**
+*	Updating the Rogue River model to include current discharges from Allweather Wood, Gold Hill STP, Medford Regional Water Reclamation Facility, Riviera Mobile Park, Rogue River STP, and Shady Cove STP.       
+
+*	Updating the landcover inputs on the Applegate and Little Applegate models so they are based on more recent LiDAR data.  
 
 ## Background
 
@@ -1454,7 +1463,7 @@ other.ref <- data.frame(reference = c(
   'Bond, R.M, A.P. Stubblefields, and R.W. Van Kirk. 2015. “Sensitivity of summer stream temperatures to climate variability and riparian reforestation strategies.” Journal of Hydrology: Regional Studies. 4(B): 267-279.',
   'Boyd, M. and B. Kasper. 2003. “Analytical Methods for Dynamic Open Channel Heat and Mass Transfer: Methodology for Heat Source Model Version 7.0.”',
   'Boyd, M.S. 1996. “Heat Source: Stream, River, and Open Channel Temperature Prediction (Master\'s Thesis).” Oregon State University: Corvallis.',
-  'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” Accessed at http://www.deq.state.or.us/wq/tmdls/heatsource.htm.',
+  'DEQ (Oregon Department of Environmental Quality). 1999a. “Heat Source methodology review and comments.” Accessed at http://www.deq.state.or.us/wq/tmdls/heatsource.htm.',
   'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version5.0." http://www.oregon.gov/deq/FilterDocs/DataQualMatrix.pdf',
   'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
   'Diabat, M., R. Haggerty, and S.M. Wondzell. 2013. “Diurnal timing of warmer air under climate-change affects magnitude, timing and duration of stream temperature change.” Hydrological. Processes. 27(16): 2367–2.',
@@ -1483,7 +1492,8 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J. and T.W. Hawkins. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., M. Diabat, and R. Haggerty. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
-  'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.'
+  'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
+  'DEQ (Oregon Department of Environmental Quality). 1999b. "Water Quality Management Plan, Rogue River Basin,  Illinois River Sub Basin."'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 

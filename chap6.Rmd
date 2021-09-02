@@ -124,16 +124,17 @@ if(NROW(dma.waterbody)>0){
   
 }
 
-if(waterbody_name %in% c("Antelope Creek","Applegate River","Little Applegate River",
+if(waterbody_name %in% c("Antelope Creek","Applegate River","Bear Creek","Little Applegate River",
                          "Little Butte Creek and North Fork Little Butte Creek","Rogue River")){
   
-  sc_txt <- "and background sources (DEQ, 2008). Other potential sources include channel modification and widening, and warming caused by climate change. "
+  sc_txt <- paste0("reductions to the stream flow rate or volume, and background sources (",strip_alpha(section.model.info$'Abbreviated Reference'),"). Other potential sources include channel modification and widening, and warming caused by climate change. ")
+  
   
 } else {
   
-  sc_txt <- "reductions to the stream flow rate or volume and background sources (DEQ, 2007). Other potential sources include channel modification and widening,  and warming caused by climate change. "                         
+  sc_txt <- paste0("and background sources (",strip_alpha(section.model.info$'Abbreviated Reference'),"). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. ")                     
   
-                         }
+}
 
 ```
 
@@ -166,7 +167,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-`r if(waterbody_name %in% c("Applegate River","Little Applegate River")){paste0("Model development for the ",waterbody_name," will be completed by DEQ and assumptions will be documented in the TMDL. Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}else{paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL ",paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")"),", the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))," or in Section 6 and Section 7 of this document.")}`
+`r if(waterbody_name %in% c("Applegate River","Little Applegate River")){paste0("Model development for the ",waterbody_name," will be completed by DEQ and assumptions will be documented in the TMDL. Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}else{paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDLs ",paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")"),", the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))," or in Section 6 and Section 7 of this document.")}`
 
 ### Model inputs
 
