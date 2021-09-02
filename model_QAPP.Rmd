@@ -342,7 +342,7 @@ t51_ncei <- ncei.station.tbl %>%
 
 t51_raws <- raws.station.tbl %>% 
   dplyr::mutate(`Station` = siteName,
-                `Station ID` = wrccID,
+                `Station ID` = nwsID,
                 `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = agency,
@@ -761,7 +761,7 @@ if(NROW(section.npdes.gen.2)>0){
                                                                       " that are not listed in ",
                                                                       tbls(name = "t55_gen1", display="cite")),
                                                                paste0("Summary of the current number of registrants for all the general NPDES permits in the ",
-                                                                      qapp_project_area))))
+                                                                      qapp_project_area,"."))))
   
 }
 
