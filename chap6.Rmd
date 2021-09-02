@@ -124,13 +124,20 @@ if(NROW(dma.waterbody)>0){
   
 }
 
-sc_txt_1 <- "reductions to the stream flow rate or volume, and background sources (DEQ, 2010). Other potential sources include channel modification and widening, and warming caused by climate change."
+if(waterbody_name %in% c("John Day River")){
+  
+  sc_txt <- "reductions to the stream flow rate or volume, and background sources (DEQ, 2010). Other potential sources include channel modification and widening, and warming caused by climate change. "
+  
+} else {
+  
+  sc_txt <- "and background sources (DEQ, 2010). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. "                      
+  
+}
 
-sc_txt_2 <- "and background sources (DEQ, 2010). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change."
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}` `r if(waterbody_name == "John Day River"){sc_txt_1}else{sc_txt_2}` The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}` `r sc_txt` The contribution of these latter potential sources may be investigated as part of the model scenarios. 
 
 `r npdes.txt`
 
