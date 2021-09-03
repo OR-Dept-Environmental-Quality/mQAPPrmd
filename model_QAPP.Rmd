@@ -471,7 +471,8 @@ t51.sp <- t51 %>%
   dplyr::rename(Source = Station) %>% 
   dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
   dplyr::filter(!Source == "AGNESS, RAWS") %>% 
-  dplyr::filter(!Source == "BRKO - BROOKINGS, OREGON AGRIMET WEATHER STATION")
+  dplyr::filter(!Source == "BRKO - BROOKINGS, OREGON AGRIMET WEATHER STATION") %>% 
+  dplyr::filter(!Source == "KMFR - MEDFORD AIRPORT, NCDC")
 
 if(NROW(t51.sp)>0){
   
