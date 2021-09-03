@@ -370,7 +370,7 @@ t51_ncei <- ncei.station.tbl %>%
 
 t51_raws <- raws.station.tbl %>% 
   dplyr::mutate(`Station` = siteName,
-                `Station ID` = nwsID,
+                `Station ID` = wrccID,
                 `Latitude/Longitude` = paste0(round(lat,4), "/",round(long,3)),
                 `Available Data` = NA,
                 Agency = agency,
