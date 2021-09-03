@@ -96,6 +96,12 @@ map_hs_sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Tempera
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
 
+map_hs_walla_walla_2017 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/walla_walla_2017.shp",
+                                       layer = "walla_walla_2017") %>% 
+  sf::st_transform(2992) %>% 
+  sf::st_zm() %>%
+  dplyr::select(Stream, Project_Na)
+
 lookup_model_extents <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/Lookup_model_extents.xlsx", 
                                           sheet = "model_extent") 
 
@@ -122,7 +128,8 @@ model_extents <- rbind(map_hs_temp_model_extent,
                        map_ce_model_extent, 
                        map_hs_sandy_2016, 
                        map_hs_fish_creek_2009,
-                       map_bes_model_extent) %>%
+                       map_bes_model_extent,
+                       map_hs_walla_walla_2017) %>%
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins", "Bear Creek (Wallowa)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Rogue River Basin", "Bear Creek (Rogue)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "Rogue River Basin", "Elk Creek (Rogue)", Stream)) %>% 
