@@ -93,6 +93,7 @@ if(npdes.ind.n > 1) {
 
 # NLCD
 nlcd.waterbody <- nlcd.pro.area %>% 
+  dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land),"Open Water",NLCD_Land)) %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
