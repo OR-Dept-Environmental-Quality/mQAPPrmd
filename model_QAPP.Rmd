@@ -1577,10 +1577,15 @@ knitr::kable(rev, format = "pandoc", padding = 2,
 
 ```{r, echo=FALSE}
 
+start <- function(x){x = ifelse(x>31,paste0(x,"*"),x)}
+
 if(NROW(temp.data.sample.count)>0){
   
-  app_a_tbl <- knitr::kable(temp.data.sample.count, format = "pandoc", padding = 2,
-                            caption = tbls(name = "temp.data.sample.count",
+  app.a <- temp.data.sample.count %>% 
+    dplyr::mutate_at(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),start)
+  
+  app_a_tbl <- knitr::kable(app.a, format = "pandoc", padding = 2,
+                            caption = tbls(name = "app.a",
                                            caption = paste0("Summary of existing temperature data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month.")))
   
 }
