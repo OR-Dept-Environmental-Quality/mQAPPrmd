@@ -552,7 +552,8 @@ t53_1 <- rbind(temp.stations,st_model) %>%
   dplyr::mutate(`Latitude/Longitude`= ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
   dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>%
-  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization)
+  dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization) %>% 
+  dplyr::mutate_at("Station", str_replace_all, "@", " at ") # remove email link format for the station names
 
 if(NROW(t53_1)>0){
   
@@ -1518,7 +1519,8 @@ start <- function(x){x = ifelse(x>31,paste0(x,"*"),x)}
 if(NROW(temp.data.sample.count)>0){
   
   app.a <- temp.data.sample.count %>% 
-    dplyr::mutate_at(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),start)
+    dplyr::mutate_at(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),start) %>% 
+    dplyr::mutate_at("Station", str_replace_all, "@", " at ") # remove email link format for the station names
   
   app_a_tbl <- knitr::kable(app.a, format = "pandoc", padding = 2,
                             caption = tbls(name = "app.a",
