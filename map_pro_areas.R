@@ -1388,7 +1388,7 @@ for (qapp_project_area in project.areas$areas) {
                          weight = 3,
                          color = "#3690c0",
                          opacity = 1) %>% 
-            # __ Temp Calibration Sites ----
+      # __ Temp Calibration Sites ----
     leaflet::addMarkers(data = temp_cal_sites,
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
