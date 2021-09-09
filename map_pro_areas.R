@@ -473,6 +473,16 @@ for (qapp_project_area in project.areas$areas) {
                           color = "#045a8d",
                           opacity = 1,
                           weight = 4) %>% 
+      # __ hs_solar_model_extent ----
+    leaflet::addPolylines(data = hs_solar_model_extent,
+                          group = "Heat Source Solar Model Extent",
+                          options = leaflet::leafletOptions(pane="mod"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#3690c0",
+                          opacity = 1,
+                          weight = 4) %>% 
       # __ Temp Calibration Sites ----
     leaflet::addMarkers(data = temp_cal_sites,
                         group = "Stream Temperature Calibration Sites",
@@ -514,6 +524,7 @@ for (qapp_project_area in project.areas$areas) {
                                         "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
+                                                  "Heat Source Solar Model Extent",
                                                   "Stream Temperature Stations",
                                                   "Stream Temperature Calibration Sites",
                                                   "Stream Temperature Model Boundary Conditions and Tributary Inputs",
@@ -529,7 +540,8 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-      leaflet::hideGroup(c("Stream Temperature Stations",
+      leaflet::hideGroup(c("Heat Source Solar Model Extent",
+                           "Stream Temperature Stations",
                            "Stream Temperature Calibration Sites",
                            "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                            "Stream Flow Stations",
@@ -1376,7 +1388,7 @@ for (qapp_project_area in project.areas$areas) {
                          weight = 3,
                          color = "#3690c0",
                          opacity = 1) %>% 
-            # __ Temp Calibration Sites ----
+      # __ Temp Calibration Sites ----
     leaflet::addMarkers(data = temp_cal_sites,
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
