@@ -1085,25 +1085,6 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 # Model development and calibration
 
-Data on surface water diversion rates (usage) and the points of diversion (location) are available from the Oregon Water Resources Department (OWRD). OWRD regulates all commercial, industrial, domestic, and agricultural water use in the state of Oregon through water rights.
-
-Estimates of water diversion rates and location of points of diversion can be derived from the following OWRD sources:
-
-* [Water Rights Information System][WRIS] (WRIS) – the WRIS database contains all permitted or certificated water rights. Data in the WRIS corresponding to quantities of water for use are expressed as maximum use allowable, generally as monthly, seasonal or annual rates or volumes. These maximum values may not correspond to actual usage, which will likely vary based on factors such as irrigation application rate or household consumer demand. DEQ may choose to incorporate the maximum amount allowable or some lesser quantity provided sufficient information is available to support those rates in the modeling.  Water rights information can also be accessed using their online mapping application (https://apps.wrd.state.or.us/apps/gis/wr/Default.aspx).
-
-* [Water Use Reports][Water Use Reports] – some, but not all, water rights holders must monitor and report the water they use to the state, typically on a monthly or yearly basis, as a requirement of their water rights. These water use reports will be used to develop withdrawal time series based on the information at hand.
-
-[WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
-[Water Use Reports]: https://apps.wrd.state.or.us/apps/wr/wateruse_query/
-
-## Effective shade measurements
-
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
-
-`r if(NROW(t57)>0){t57_tbl}`
-
-# Model development and calibration
-
 Waterbodies where model development was initiated for the `r pro.area.tmdls` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}` The extent and location of these models is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
