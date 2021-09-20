@@ -229,7 +229,7 @@ if(!model.extent == TRUE){
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  t6x6_1.txt <- "**[Update for SHADE model]**"
   
 }
 
@@ -308,7 +308,7 @@ if(!model.extent == TRUE){
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
   
-  t6x7_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  t6x7_1.txt <- "**[Update for SHADE model]**"
   
 }
 
