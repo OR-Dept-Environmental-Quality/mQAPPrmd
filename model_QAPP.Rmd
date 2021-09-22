@@ -183,7 +183,14 @@ t51 <- t51[!duplicated(t51$`Station`),]
 t51.ncei <- t51 %>% 
   dplyr::filter(tbl=="NCDC") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "WBAN 04236",
+                 Station = "CORVALLIS AIRPORT",
+                 `Latitude/Longitude` = "44.42/-123.33") %>% 
+  dplyr::add_row(`Station ID` = "WBAN 24221",
+                 Station = "EUGENE AIRPORT",
+                 `Latitude/Longitude` = "44.13/-123.22") %>% 
   dplyr::arrange(`Station ID`)
+  
 
 if(NROW(t51.ncei)>0){
   
@@ -251,7 +258,9 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
+  dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+  dplyr::filter(Source == "") # aim to filter out all stations
+  
 
 if(NROW(t51.sp)>0){
   
@@ -1068,7 +1077,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 
 ## Thermal Infrared Radiometry (TIR) data
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1094,7 +1103,7 @@ Appendix A summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Point source discharges
 
-`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}`**[Update: If there are no individual and general NPDES permit, please update this paragraph.]** The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
+`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}` The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
