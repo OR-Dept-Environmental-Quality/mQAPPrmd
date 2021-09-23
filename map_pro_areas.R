@@ -193,6 +193,14 @@ for (qapp_project_area in project.areas$areas) {
     dplyr::filter(!nrow == 0) %>% 
     pull(data)
   
+  pal <- colorFactor(palette = c("blue","green","orange","pink"),
+                     levels = c("12", # Bull Trout Spawning and Juvenile Rearing
+                                "16", # Core Cold Water Habitat
+                                "18", # Salmon and Trout Rearing and Migration
+                                "20"  # Salmon and Streelhead Migration Corridors
+                                )
+                     )
+  
   print(qapp_project_area)
   
   # Basic layers ----
@@ -216,6 +224,7 @@ for (qapp_project_area in project.areas$areas) {
     leaflet::addMapPane("wqs2", zIndex = -500) %>%
     leaflet::addMapPane("ir", zIndex = -400) %>%
     leaflet::addMapPane("mod", zIndex = -300) %>%
+    leaflet::addMapPane("modbes", zIndex = -350) %>%
     leaflet::addMapPane("mod2016", zIndex = -200) %>%
     leaflet::addMapPane("mod2009", zIndex = -200) %>%
     leaflet::addMapPane("node", zIndex = -100) %>%
@@ -277,27 +286,62 @@ for (qapp_project_area in project.areas$areas) {
     # __ WQS ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                    useServiceSymbology = TRUE,
                                     group = "Fish Use Designations",
-                                    pathOptions = leaflet::pathOptions(pane="wqs1")) %>% 
+                                    pathOptions = leaflet::pathOptions(pane="wqs1"),
+                                    weight = 1,
+                                    opacity = 1,
+                                    fill=FALSE,
+                                    highlightOptions = leaflet::highlightOptions(color="black",
+                                                                                 weight = 4,
+                                                                                 fillOpacity = 0.8,
+                                                                                 bringToFront = TRUE,
+                                                                                 sendToBack = TRUE),
+                                    labelOptions = leaflet::labelOptions(offset = c(0,0),
+                                                                         opacity = 0.9,
+                                                                         textsize = "14px",
+                                                                         sticky = FALSE),
+                                    popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.GNIS_Name+\" \"}"),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>Waterbody.Name:</b> \"+props.GNIS_Name+\"',
+                                                                           '<br><b>Temperature.Criteria:</b> \"+props.Temperature_Criteria+\"',
+                                                                           '<br><b>Temperature.Criterion.7dADM.deg-C:</b> \"+props.Temperature_Criterion_7dADM_C+\"',
+                                                                           '<br><b>Temperature.Spawn.Dates:</b> \"+props.Temperature_Spawn_dates+\"',
+                                                                           ' \"}'))
+  ) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
                                       options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                      useServiceSymbology = TRUE,
                                       group = "Salmon and Steelhead Spawning Use Designations",
-                                      pathOptions = leaflet::pathOptions(pane="wqs2")) %>% 
+                                      pathOptions = leaflet::pathOptions(pane="wqs2"),
+                                      weight = 1,
+                                      opacity = 1,
+                                      fill=FALSE) %>% 
     # __ IR ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                    useServiceSymbology = TRUE,
                                     group = "2018/2020 IR Temperature Status - Streams",
                                     pathOptions = leaflet::pathOptions(pane="ir"),
+                                    weight = 1,
+                                    opacity = 1,
                                     fill=FALSE) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/2",
                                       options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Waterbodies",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
+                                      weight = 3,
+                                      opacity = 1,
                                       fill=FALSE) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/4",
                                       options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Watershed",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
+                                      weight = 1,
+                                      opacity = 1,
                                       fill=FALSE) %>% 
     # __ Meteorological Stations ----
   leaflet::addMarkers(data = met_stations,
@@ -383,22 +427,42 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Flow Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = flow_model_bc_tri,
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -414,7 +478,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -433,7 +497,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -449,7 +513,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -488,15 +552,28 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -512,7 +589,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -531,7 +608,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Stations",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -547,7 +624,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Stations",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -578,7 +655,8 @@ for (qapp_project_area in project.areas$areas) {
                                                                    "font-size" = "20px")),
                           color = "#045a8d",
                           opacity = 1,
-                          weight = 4) %>% 
+                          weight = 4,
+                          fill=FALSE) %>% 
       # __ ce_model_extent ----
     leaflet::addPolylines(data = ce_model_extent,
                           group = "CE-QUAL-W2 Temperature Model Extent",
@@ -588,7 +666,8 @@ for (qapp_project_area in project.areas$areas) {
                                                                    "font-size" = "20px")),
                           color = "#8c510a",
                           opacity = 1,
-                          weight = 4) %>% 
+                          weight = 4,
+                          fill=FALSE) %>% 
       # __ BES (2019) ----
     leaflet::addPolylines(data = bes_model_extent,
                           group = "Heat Source Shade Model Extent (New Models)",
@@ -596,30 +675,51 @@ for (qapp_project_area in project.areas$areas) {
                           label = ~Stream,
                           labelOptions = labelOptions(style = list("color" = "black",
                                                                    "font-size" = "20px")),
-                          color = "#993404",
-                          opacity = 0.5,
-                          weight = 10) %>% 
+                          color = "#3690c0",
+                          opacity = 1,
+                          weight = 5,
+                          fill=FALSE) %>% 
       # __ Temp Calibration Sites ----
     leaflet::addMarkers(data = temp_cal_sites,
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Flow Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = flow_model_bc_tri,
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -635,7 +735,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -647,7 +747,7 @@ for (qapp_project_area in project.areas$areas) {
                                         "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (Existing Models)",
-                                                  "Heat Source Temperature Model Extent (New Models)",
+                                                  "Heat Source Shade Model Extent (New Models)",
                                                   "CE-QUAL-W2 Temperature Model Extent",
                                                   "Stream Temperature Stations",
                                                   "Stream Temperature Calibration Sites",
@@ -656,7 +756,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -665,7 +765,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-      leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::hideGroup(c("Heat Source Shade Model Extent (New Models)",
                            "CE-QUAL-W2 Temperature Model Extent",
                            "Stream Temperature Stations",
                            "Stream Temperature Calibration Sites",
@@ -674,7 +774,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -703,8 +803,14 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -765,22 +871,42 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Flow Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = flow_model_bc_tri,
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -796,7 +922,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -815,7 +941,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -831,7 +957,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -870,15 +996,28 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -975,15 +1114,28 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -999,7 +1151,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -1019,7 +1171,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Stations",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -1036,7 +1188,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Stations",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -1075,22 +1227,42 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Flow Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = flow_model_bc_tri,
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -1106,7 +1278,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -1126,7 +1298,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -1143,7 +1315,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -1189,22 +1361,42 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Flow Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = flow_model_bc_tri,
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -1220,7 +1412,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -1240,7 +1432,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -1257,7 +1449,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -1286,22 +1478,42 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Flow Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = flow_model_bc_tri,
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -1317,7 +1529,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -1336,7 +1548,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -1352,7 +1564,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -1393,22 +1605,42 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Flow Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = flow_model_bc_tri,
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",flow_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -1424,7 +1656,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -1444,7 +1676,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Stream Flow Model Boundary Conditions and Tributary Inputs",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -1461,7 +1693,7 @@ for (qapp_project_area in project.areas$areas) {
                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -1500,8 +1732,14 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
                                                   "Heat Source Solar Model Extent",
                                                   "Stream Temperature Stations",
@@ -1534,26 +1772,33 @@ for (qapp_project_area in project.areas$areas) {
   # Willamette River Mainstem and Major Tributaries ----
   if(qapp_project_area == "Willamette River Mainstem and Major Tributaries") {
     map_area <- map_basic %>% 
-      # __ hs_temp_model_extent ----
-    leaflet::addPolylines(data = hs_temp_model_extent,
-                          group = "Heat Source Temperature Model Extent",
+      # __ ce_model_extent ----
+    leaflet::addPolylines(data = ce_model_extent,
+                          group = "CE-QUAL-W2 Temperature Model Extent",
                           options = leaflet::leafletOptions(pane="mod"),
                           label = ~Stream,
                           labelOptions = labelOptions(style = list("color" = "black",
                                                                    "font-size" = "20px")),
-                          color = "#045a8d",
+                          color = "#8c510a",
                           opacity = 1,
-                          weight = 4) %>% 
-      # __ hs_solar_model_extent ----
-    leaflet::addPolylines(data = hs_solar_model_extent,
-                          group = "Heat Source Solar Model Extent",
-                          options = leaflet::leafletOptions(pane="mod"),
-                          label = ~Stream,
-                          labelOptions = labelOptions(style = list("color" = "black",
-                                                                   "font-size" = "20px")),
-                          color = "#3690c0",
-                          opacity = 1,
-                          weight = 4) %>% 
+                          weight = 4,
+                          fill=FALSE) %>% 
+      # __ Gage Height Stations----
+    leaflet::addMarkers(data = gage_height_stations_map,
+                        group = "Gage Height Stations",
+                        options = leaflet::leafletOptions(pane="marker"),
+                        #clusterOptions = markerClusterOptions(),
+                        label = paste0("USGS: ", gage_height_stations_map$Station, " (", gage_height_stations_map$`Station ID`,")"),
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("<b>", 
+                                        "USGS Station Name: ",
+                                        gage_height_stations_map$Station,"<br>",
+                                        "Station ID: ", gage_height_stations_map$`Station ID`,
+                                        #"<br>",
+                                        #"<br>",
+                                        sapply(gage_height_stations_map$Station, 
+                                               popupTable.gageHeight, USE.NAMES = FALSE)),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
@@ -1569,7 +1814,7 @@ for (qapp_project_area in project.areas$areas) {
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
-                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                        group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
                         label = paste0(gen_ps$`Facility Name (Facility Number)`),
@@ -1584,9 +1829,10 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Heat Source Solar Model Extent",
                                                   "Stream Temperature Stations",
                                                   "Stream Flow Stations",
+                                                  "Gage Height Stations",
                                                   "Meteorological Stations",
                                                   "Individual NPDES Point Sources",
-                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                                                  "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                                                   "HUC8","HUC10","HUC12",
                                                   "2018/2020 IR Temperature Status - Streams",
                                                   "2018/2020 IR Temperature Status - Waterbodies",
@@ -1598,9 +1844,10 @@ for (qapp_project_area in project.areas$areas) {
       leaflet::hideGroup(c("Heat Source Solar Model Extent",
                            "Stream Temperature Stations",
                            "Stream Flow Stations",
+                           "Gage Height Stations",
                            "Meteorological Stations",
                            "Individual NPDES Point Sources",
-                           "General NPDES Point Sources (GEN01, GEN03, GEN04, or GEN05)",
+                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                            "HUC8","HUC10","HUC12",
                            "2018/2020 IR Temperature Status - Streams",
                            "2018/2020 IR Temperature Status - Waterbodies",
@@ -1629,16 +1876,28 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`, " (", temp_cal_sites$Parameter,")"),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
+                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Calibration Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Temp Model Boundary Conditions and Tributary Inputs ----
     leaflet::addMarkers(data = temp_model_bc_tri,
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0("Model Location: ",temp_model_bc_tri$`Model Location Name`),
-                        labelOptions = labelOptions(textsize = "15px")) %>% 
-      
+                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        labelOptions = labelOptions(textsize = "15px"),
+                        popup = ~paste0("Station: ", `Model Location Name`,
+                                        '<br>', "Station ID: ", `Station ID`,
+                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Input Type: ", `Model Location Type`,
+                                        '<br>', "Model Input Parameter: ", Parameter,
+                                        '<br>', "Data Source: ", `Data Source`),
+                        popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Ind NPDES PS ----
     leaflet::addMarkers(data = ind_ps,
                         group = "Individual NPDES Point Sources",
