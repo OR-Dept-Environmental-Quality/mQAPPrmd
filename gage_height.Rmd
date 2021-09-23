@@ -22,25 +22,6 @@ options(knitr.kable.NA = '')
 
 ## Gage Height
 
-```{r, label=`tgh`, echo=FALSE}
-
-tgh.usgs <- station.usgs.gh %>% 
-  # dplyr::filter(`Data Source` %in% c("USGS")) %>% 
-  dplyr::mutate(`Latitude/Longitude` = paste0(round(as.numeric(Lat),5), "/",round(as.numeric(Long),4))) %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`)
-
-rownames(tgh.usgs) <- NULL
-
-if(NROW(tgh.usgs)>0){
-  
-  tgh_usgs_tbl <- knitr::kable(tgh.usgs, format = "pandoc", padding = 2, row.names = NA,
-                                   caption = tbls(name = "tgh.usgs",
-                                                  caption = paste0("Gage height data available from the USGS monitoring stations in the ", qapp_project_area, ".")))
-  
-}
-
-```
-
 `r if(NROW(tgh.usgs)>0){paste0(tbls(name="tgh.usgs", display="cite")," lists the stations for gage height data that were available in USGS databases.")}`
 
 `r if(NROW(tgh.usgs)>0){tgh_usgs_tbl}`
