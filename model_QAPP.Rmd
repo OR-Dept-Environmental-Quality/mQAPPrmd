@@ -869,7 +869,7 @@ if(NROW(temp.data.sample.count)>0){
 ```
 
 ```{r, label=`t54-tbl`, echo=FALSE}
-# Appendix C Continuous flow data summary - stations
+# Appendix C Flow data summary - stations
 
 # Continuous flow
 if(NROW(t54_usgs)>0){
@@ -916,7 +916,7 @@ if(NROW(t54_ins_flow)>0){
 ```
 
 ```{r, label=`appC`, echo=FALSE}
-# Appendix C Continuous flow data summary - data
+# Appendix C Flow data summary - data
 
 if(NROW(flow.data.sample.count)>0){
   
@@ -1694,7 +1694,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r if(NROW(t51.sp)>0){t51_sp_tbl}`
 
 \newpage
-# Appendix B Continuous temperature data summary
+# Appendix B Continuous stream temperature data summary
 
 `r t53_1_tbl`
 `r app_b_tbl`
@@ -1702,7 +1702,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 **[Update: Delete this note if there is no data count > 31.]** * Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
-# Appendix C Continuous flow data summary
+# Appendix C Stream flow data summary
 
 `r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
 `r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
