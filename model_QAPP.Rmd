@@ -844,7 +844,7 @@ if(NROW(temp.data.sample.count)>0){
 ```
 
 ```{r, label=`t54-tbl`, echo=FALSE}
-# Appendix C Continuous flow data summary - stations
+# Appendix C Flow data summary - stations
 
 # Continuous flow
 if(NROW(t54_usgs)>0){
@@ -891,7 +891,7 @@ if(NROW(t54_ins_flow)>0){
 ```
 
 ```{r, label=`appC`, echo=FALSE}
-# Appendix C Continuous flow data summary
+# Appendix C Flow data summary - data
 
 if(NROW(flow.data.sample.count)>0){
   
@@ -959,13 +959,13 @@ Multiple waterbodies in the `r qapp_project_area` do not meet the water quality 
 *	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
 *	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
 
-Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
 
 The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
 As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
 
-Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r tbls(name = "tcat5", display="cite")`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
+Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r tbls(name = "tcat5", display="cite")`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D.
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
@@ -1116,7 +1116,7 @@ All available continuous stream temperature data were retrieved from DEQ’s Amb
 
 The data retrieval period for continuous stream temperature data covers from January 1, 1999 to December 31, 2020. The data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E for parameters measured in the field and a result status of “Final” or “Provisional” which are assigned following the Oregon Water Quality Monitoring Data Portal (DEQ, 2021). We relied on the quality control checks implemented by OWEB for data obtained from OWRI.
 
-Appendix A summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.b", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
+Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.b", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D.
 
 ## Stream flow data
 
@@ -1126,7 +1126,7 @@ Appendix C `r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name
 
 ## Point source discharges
 
-`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}`**[Update: If there are no individual and general NPDES permit, please update this paragraph.]** The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
+`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}`**[Update: If there are no individual and general NPDES permit, please update this paragraph.]** The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -1153,7 +1153,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 # Model development and calibration
 
-Waterbodies where model development was initiated for the `r pro.area.tmdls` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}` The extent and location of these models is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+Waterbodies where model development was initiated for the `r pro.area.tmdls` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}` The extent and location of these models is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
@@ -1639,7 +1639,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r if(NROW(t51.sp)>0){t51_sp_tbl}`
 
 \newpage
-# Appendix B Continuous temperature data summary
+# Appendix B Continuous stream temperature data summary
 
 `r t53_1_tbl`
 `r app_b_tbl`
@@ -1647,7 +1647,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 **[Update: Delete this note if there is no data count > 31.]** * Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
-# Appendix C Continuous flow data summary
+# Appendix C Stream flow data summary
 
 `r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
 `r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
