@@ -213,11 +213,18 @@ t51.ncei <- t51 %>%
 t51.raws <- t51 %>% 
   dplyr::filter(tbl=="RAWS") %>% 
   dplyr::select(-c(`Available Data`,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "orOAGN", 
+                 Station = "AGNESS",
+                 `Latitude/Longitude` = "42.5522/-124.058",
+                 Agency = "USFS") %>% 
   dplyr::arrange(`Station ID`)
 
 t51.agrimet <- t51 %>% 
   dplyr::filter(tbl=="AgriMet") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "BRKO",                                # Worksheet data
+                 Station = "BROOKINGS, OREGON AGRIMET WEATHER STATION",
+                 `Latitude/Longitude` = "42.03/-124.241") %>% 
   dplyr::arrange(`Station ID`)
 
 t51.hydromet <- t51 %>% 
@@ -235,7 +242,10 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
+  dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+  dplyr::filter(!Source == "AGNESS, RAWS") %>% 
+  dplyr::filter(!Source == "BRKO - BROOKINGS, OREGON AGRIMET WEATHER STATION") %>% 
+  dplyr::filter(!Source == "KMFR - MEDFORD AIRPORT, NCDC")
 
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
@@ -915,7 +925,7 @@ if(NROW(flow.data.sample.count)>0){
 \newpage
 # Introduction
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. **[Update: This QAPP project area excludes the (list rivers if applicable).]**
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. 
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -951,14 +961,10 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as Category 5, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r tbls(name = "tcat5", display="cite")`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum.
 
-**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**
-
-* Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
 *	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
 *	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
 *	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
-*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
-
+  
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
 
 The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
@@ -1063,7 +1069,7 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 ## Overview
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the Rogue River is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance, removal, or channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
@@ -1087,9 +1093,7 @@ The modeling framework needs for this project include:
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-7)	**[Update as needed]**
-
-**[Update this paragraph where CE-QUAL-W2 is used].** The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
@@ -1126,7 +1130,7 @@ Appendix C `r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name
 
 ## Point source discharges
 
-`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}`**[Update: If there are no individual and general NPDES permit, please update this paragraph.]** The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
+`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}` The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -1147,7 +1151,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 ## Effective shade measurements
 
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected. Data were collected in Elk Creek in August 2007, in Evans Creek and West Fork Evans Creek in July 2003, and in Little Butte Creek and tributaries in July 2001.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -1157,10 +1161,13 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
+The setup and calibration for the Heat Source models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. The SHADOW models were setup and calibrated by the BLM, USFS, and Lower Rogue Watershed Council. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
+
+Not listed in `r tbls(name = "tmdl.mod.a", display="cite")` are existing SHADOW models for various streams in Sucker Creek Watershed, a Heat Source temperature model for Sucker Creek, and Heat Source shade models for Cheney Creek, Thompson Creek, Slate Creek, and Waters Creek in the Applegate Subbasin. These models were documented in their respective TMDLs but unfortunately have gone missing from DEQ’s files. DEQ does not plan to replace these models with new ones.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
-`r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
+
+New calibrated temperature models are being developed for the Applegate River and the Little Applegate River. Models were originally developed for these rivers in support of the Applegate Subbasin TMDL (DEQ, 2004) but they too have gone missing from DEQ’s files. The new models will support estimating background conditions for a longer period of time compared to the original models. The original models only simulated a single day. Data from the same year (1999) will be used to develop the new models. DEQ considered developing models for a more recent time period but there are insufficient temperature data available. The Little Applegate River is a major tributary to the Applegate River. The new calibrated model on the Little Applegate River will support development of tributary boundary conditions under various management scenarios.
 
 ## General model inputs and parameters
 
@@ -1195,8 +1202,6 @@ Reducing uncertainty in measured field parameters used for model input and calib
 *	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review. For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and prepost accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
-
-The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
 
 It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
@@ -1274,7 +1279,9 @@ Management scenarios described in this section summarize the means by which the 
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-**[List specific changes that will be made]**
+*	Updating the Rogue River model to include current discharges from Allweather Wood, Gold Hill STP, Medford Regional Water Reclamation Facility, Riviera Mobile Park, Rogue River STP, and Shady Cove STP.       
+
+*	Updating the landcover inputs on the Applegate and Little Applegate models so they are based on more recent LiDAR data.  
 
 ## Background
 
@@ -1607,7 +1614,8 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J. and T.W. Hawkins. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., M. Diabat, and R. Haggerty. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
-  'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.'
+  'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
+  'DEQ (Oregon Department of Environmental Quality). 1999b. "Water Quality Management Plan, Rogue River Basin,  Illinois River Sub Basin."'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
