@@ -94,10 +94,35 @@ if(NROW(tcat5)>0){
   
 }
 
+if(qapp_project_area == "North Umpqua Subbasin"){
+  
+  tcat4a <- pro.cat.45.tbl %>% 
+    dplyr::filter(IR_categor == "Category 4A") %>% 
+    dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
+    dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::rename(Waterbody = AU_Name,
+                  `Assessment Unit ID` = AU_ID,
+                  `Year Listed` = Year_liste,
+                  `Criterion Period` = Period) %>% 
+    dplyr::select(Waterbody,`Assessment Unit ID`,`Year Listed`,`Criterion Period`) %>% 
+    dplyr::arrange(Waterbody,`Year Listed`)
+  
+  if(NROW(tcat4a)>0){
+    
+    tcat4a <- knitr::kable(tcat4a, format = "pandoc", padding = 2,
+                           caption = tbls(name = "tcat4a",
+                                          caption = paste0("Waterbodies listed for temperature impairment based on Section 303(d) Category 4A in the 2018/20 Integrated Report.")))
+    
+  }
+  
+}
+
 ```
 
 ```{r, label=`t51`, echo=FALSE}
 # 5.1	Meteorology
+## Table in Appendix A
 
 t51_sp <- model.input %>% 
   dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
@@ -185,66 +210,25 @@ t51.ncei <- t51 %>%
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
   dplyr::arrange(`Station ID`)
 
-if(NROW(t51.ncei)>0){
-  
-  t51_ncei_tbl <- knitr::kable(t51.ncei, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_ncei",
-                                              caption = paste0("Meteorological stations and data available in the National Climatic Data Center (NCDC) database in the ",
-                                                               qapp_project_area, ".")))
-  
-}
-
 t51.raws <- t51 %>% 
   dplyr::filter(tbl=="RAWS") %>% 
   dplyr::select(-c(`Available Data`,tbl)) %>% 
   dplyr::arrange(`Station ID`)
-
-if(NROW(t51.raws)>0){
-  
-  t51_raws_tbl <- knitr::kable(t51.raws, format = "pandoc", padding = 2,
-                               caption = tbls(name = "t51_raws",
-                                              caption = paste0("Meteorological stations and data, including ", knitr::combine_words(unique(sort(tolower(raws.station.tbl$Parameter)))), ", available in the Remote Automatic Weather Station (RAWS) database in the ", qapp_project_area, ".")))
-  
-}
 
 t51.agrimet <- t51 %>% 
   dplyr::filter(tbl=="AgriMet") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
   dplyr::arrange(`Station ID`)
 
-if(NROW(t51.agrimet)>0){
-  
-  t51_agrimet_tbl <- knitr::kable(t51.agrimet, format = "pandoc", padding = 2,
-                                  caption = tbls(name = "t51_agrimet",
-                                                 caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity and wind, available in the USBR AgriMet database in the ", qapp_project_area, ".")))
-  
-}
-
 t51.hydromet <- t51 %>% 
   dplyr::filter(tbl=="Hydromet") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl))%>% 
   dplyr::arrange(`Station ID`)
 
-if(NROW(t51.hydromet)>0){
-  
-  t51_hydromet_tbl <- knitr::kable(t51.hydromet, format = "pandoc", padding = 2,
-                                   caption = tbls(name = "t51_hydromet",
-                                                  caption = paste0("Meteorological stations and data available in the USBR Hydromet database in the ", qapp_project_area, ".")))
-  
-}
-
 t51.mw <- t51 %>% 
   dplyr::filter(tbl=="MesoWest") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl))%>% 
   dplyr::arrange(`Station ID`)
-
-if(NROW(t51.mw)>0){
-  
-  t51_mw_tbl <- knitr::kable(t51.mw, format = "pandoc", padding = 2,
-                             caption = tbls(name = "t51_mw",
-                                            caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area, ".")))
-  
-}
 
 t51.sp <- t51 %>% 
   dplyr::filter(tbl=="DEQ File") %>% 
@@ -253,22 +237,15 @@ t51.sp <- t51 %>%
   dplyr::rename(Source = Station) %>% 
   dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
 
-if(NROW(t51.sp)>0){
-  
-  t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
-                             caption = tbls(name = "t51_sp",
-                                            caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
-  
-}
-
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
-                         txt = c("National Oceanic and Atmospheric Association (NOAA)’s National Climatic Data Center (NCDC)",
+                         source = c("National Oceanic and Atmospheric Association (NOAA)’s National Climatic Data Center (NCDC)",
                                  "National Interagency Fire Center’s Remote Automatic Weather Stations (RAWS)",
                                  "Bureau of Reclamation Cooperative Agricultural Weather Network (AgriMet)",
                                  "Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet)",
                                  "University of Utah MesoWest database",
                                  "DEQ database")) %>% 
+  dplyr::mutate(txt = paste0(tbl_rows, " stations from ", source)) %>% 
   dplyr::filter(tbl_rows != "0")
 
 t51_txt <- knitr::combine_words(tables.met$txt)
@@ -302,7 +279,7 @@ t52_ref <- tir %>%
 
 ```{r, label=`t53`, echo=FALSE}
 # 5.3	Continuous stream temperature data
-## Table in Appendix A
+## Table in Appendix B
 
 st_model <- model.input %>% 
   dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
@@ -329,6 +306,7 @@ t53_1 <- rbind(temp.stations,st_model) %>%
 
 ```{r, label=`t54`, echo=FALSE}
 # 5.4	Stream flow data
+## Table in Appendix C
 
 # Continuous flow
 t54_usgs <- flow.stations %>% 
@@ -388,54 +366,18 @@ t54_sp <- t54 %>%
   dplyr::arrange(`Data Source`,`Station ID`,Station)
 row.names(t54_sp) <- NULL
 
-if(NROW(t54_usgs)>0){
-  
-  t54_usgs_tbl <- knitr::kable(t54_usgs, format = "pandoc", padding = 2, row.names = NA,
-                               caption = tbls(name = "t54_usgs",
-                                              caption = paste0("Continuous flow measurements available from the USGS flow gaging stations in the ", qapp_project_area, ".")))
-  
-}
+tables.flow <- data.frame(tbl_name = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
+                          tbl_rows = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp)),
+                          source = c("USGS", "OWRD", "Hydromet","DEQ File")) %>% 
+  dplyr::mutate(txt = paste0(tbl_rows, " stations from ", source)) %>% 
+  dplyr::filter(!tbl_rows == 0)
 
-if(NROW(t54_owrd)>0){
-  
-  t54_owrd_tbl <- knitr::kable(t54_owrd, format = "pandoc", padding = 2, row.names = NA,
-                               caption = tbls(name = "t54_owrd",
-                                              caption = paste0("Continuous flow measurements available from the OWRD flow gaging stations in the ", qapp_project_area, ".")))
-  
-}
-
-if(NROW(t54_hydromet)>0){
-  
-  t54_hydromet_tbl <- knitr::kable(t54_hydromet, format = "pandoc", padding = 2, row.names = NA,
-                                   caption = tbls(name = "t54_hydromet",
-                                                  caption = paste0("Continuous flow measurements available from the USBR Hydromet monitoring stations in the ", qapp_project_area, ".")))
-  
-}
-
-if(NROW(t54_sp)>0){
-  
-  t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2, row.names = NA,
-                             caption = tbls(name = "t54_sp",
-                                            caption = paste0("Flow measurements from DEQ and other public databases in the ", qapp_project_area, ".")))
-  
-}
-
-t54.tbl.num <- data.frame(table = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
-                          `nrow` = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp))) %>% 
-  dplyr::filter(!`nrow` == 0)
+t54_txt <- knitr::combine_words(tables.flow$txt)
 
 # Instantaneous flow
 t54_ins_flow <- inst.flow.pro.area %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3))) %>%
   dplyr::select(`Station ID`,Station,Date,Time,`Flow (cfs)`,`Latitude/Longitude`)
-
-if(NROW(t54_ins_flow)>0){
-  
-  t54_ins_flow_tbl <- knitr::kable(t54_ins_flow, format = "pandoc", padding = 2, row.names = NA,
-                                   caption = tbls(name = "t54_ins_flow",
-                                                  caption = paste0("Instantaneous flow measurements made by DEQ in the ", qapp_project_area, ".")))
-  
-}
 
 ```
 
@@ -583,9 +525,13 @@ tmdl.mod.b<- model.info %>%
 
 tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
 
-tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
-                               caption = tbls(name = "tmdl.mod.a",
-                                              caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+if(NROW(tmdl.mod.a)>0){
+  
+  tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
+                                 caption = tbls(name = "tmdl.mod.a",
+                                                caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+  
+}
 
 if(NROW(tmdl.mod.b)>0){
   
@@ -766,11 +712,11 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
     
   } else {
     
-    if(!waterbody_name == "Fish Creek (2009)"){
+    #if(!waterbody_name == "Fish Creek (2009)"){
       
       chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
       
-    }
+    #}
   }
   
 }
@@ -811,8 +757,62 @@ trev <- knitr::kable(rev, format = "pandoc", padding = 2,
 
 ```
 
+```{r, label=`t51-tbl`, echo=FALSE}
+# Appendix A Meteorology data summary
+
+if(NROW(t51.ncei)>0){
+  
+  t51_ncei_tbl <- knitr::kable(t51.ncei, format = "pandoc", padding = 2,
+                               caption = tbls(name = "t51_ncei",
+                                              caption = paste0("Meteorological stations and data available in the National Climatic Data Center (NCDC) database in the ",
+                                                               qapp_project_area, ".")))
+  
+}
+
+if(NROW(t51.raws)>0){
+  
+  t51_raws_tbl <- knitr::kable(t51.raws, format = "pandoc", padding = 2,
+                               caption = tbls(name = "t51_raws",
+                                              caption = paste0("Meteorological stations and data, including ", knitr::combine_words(unique(sort(tolower(raws.station.tbl$Parameter)))), ", available in the Remote Automatic Weather Station (RAWS) database in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t51.agrimet)>0){
+  
+  t51_agrimet_tbl <- knitr::kable(t51.agrimet, format = "pandoc", padding = 2,
+                                  caption = tbls(name = "t51_agrimet",
+                                                 caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity and wind, available in the USBR AgriMet database in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t51.hydromet)>0){
+  
+  t51_hydromet_tbl <- knitr::kable(t51.hydromet, format = "pandoc", padding = 2,
+                                   caption = tbls(name = "t51_hydromet",
+                                                  caption = paste0("Meteorological stations and data available in the USBR Hydromet database in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t51.mw)>0){
+  
+  t51_mw_tbl <- knitr::kable(t51.mw, format = "pandoc", padding = 2,
+                             caption = tbls(name = "t51_mw",
+                                            caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t51.sp)>0){
+  
+  t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
+                             caption = tbls(name = "t51_sp",
+                                            caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area, ".")))
+  
+}
+
+```
+
 ```{r, label=`t53-tbl`, echo=FALSE}
-# Appendix A Continuous temperature data summary Table 1
+# Appendix B Continuous temperature data summary - stations
 
 if(NROW(t53_1)>0){
   
@@ -824,31 +824,78 @@ if(NROW(t53_1)>0){
 
 ```
 
-```{r, label=`appA`,  echo=FALSE}
-# Appendix A Continuous temperature data summary Table 2
+```{r, label=`appB`,  echo=FALSE}
+# Appendix B Continuous temperature data summary - data
 
 start <- function(x){x = ifelse(x>31,paste0(x,"*"),x)}
 
 if(NROW(temp.data.sample.count)>0){
   
-  app.a <- temp.data.sample.count %>% 
+  app.b <- temp.data.sample.count %>% 
     dplyr::mutate_at(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),start) %>% 
     dplyr::mutate_at("Station", str_replace_all, "@", " at ") # remove email link format for the station names
   
-  app_a_tbl <- knitr::kable(app.a, format = "pandoc", padding = 2,
-                            caption = tbls(name = "app.a",
+  app_b_tbl <- knitr::kable(app.b, format = "pandoc", padding = 2,
+                            caption = tbls(name = "app.b",
                                            caption = paste0("Summary of existing temperature data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month. Data from the DEQ files that are not in the databases were not summarized in the table.")))
   
 }
 
 ```
 
-```{r, label=`appB`, echo=FALSE}
-# Appendix B Continuous flow data summary
+```{r, label=`t54-tbl`, echo=FALSE}
+# Appendix C Continuous flow data summary - stations
+
+# Continuous flow
+if(NROW(t54_usgs)>0){
+  
+  t54_usgs_tbl <- knitr::kable(t54_usgs, format = "pandoc", padding = 2, row.names = NA,
+                               caption = tbls(name = "t54_usgs",
+                                              caption = paste0("Continuous flow measurements available from the USGS flow gaging stations in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t54_owrd)>0){
+  
+  t54_owrd_tbl <- knitr::kable(t54_owrd, format = "pandoc", padding = 2, row.names = NA,
+                               caption = tbls(name = "t54_owrd",
+                                              caption = paste0("Continuous flow measurements available from the OWRD flow gaging stations in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t54_hydromet)>0){
+  
+  t54_hydromet_tbl <- knitr::kable(t54_hydromet, format = "pandoc", padding = 2, row.names = NA,
+                                   caption = tbls(name = "t54_hydromet",
+                                                  caption = paste0("Continuous flow measurements available from the USBR Hydromet monitoring stations in the ", qapp_project_area, ".")))
+  
+}
+
+if(NROW(t54_sp)>0){
+  
+  t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2, row.names = NA,
+                             caption = tbls(name = "t54_sp",
+                                            caption = paste0("Flow measurements from DEQ and other public databases in the ", qapp_project_area, ".")))
+  
+}
+
+# Instantaneous flow
+if(NROW(t54_ins_flow)>0){
+  
+  t54_ins_flow_tbl <- knitr::kable(t54_ins_flow, format = "pandoc", padding = 2, row.names = NA,
+                                   caption = tbls(name = "t54_ins_flow",
+                                                  caption = paste0("Instantaneous flow measurements made by DEQ in the ", qapp_project_area, ".")))
+  
+}
+
+```
+
+```{r, label=`appC`, echo=FALSE}
+# Appendix C Continuous flow data summary
 
 if(NROW(flow.data.sample.count)>0){
   
-  app_b_tbl <- knitr::kable(flow.data.sample.count, format = "pandoc", padding = 2,
+  app_c_tbl <- knitr::kable(flow.data.sample.count, format = "pandoc", padding = 2,
                             caption = tbls(name = "flow.data.sample.count",
                                            caption = paste0("Summary of existing flow data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily mean flow results in each month.")))
   
@@ -1048,18 +1095,9 @@ We do not anticipate any new software development or model code changes as part 
 
 ## Meteorology
 
-Meteorological data, including air temperature, sky conditions, cloudiness, relative humidity, and wind speed, are available from `r t51_txt`.
+Meteorological data includes air temperature, sky conditions, cloudiness, relative humidity, and wind speed. Appendix A `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` list `r t51_txt` where meteorological data available in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. The station IDs in Table 3 are the NCDC ID, which may differ from the station identifiers used by other sources.
 
 The meteorological data obtained from the NCDC includes the Local Climatological Dataset (NOAA, 2005) and the Global Integrated Surface Dataset (NOAA, 2001). The Local Climatological Dataset includes quality controlled meteorological data from airports and other prominent weather stations managed by the National Weather Service, Federal Aviation Administration, and the U.S. Department of Defense. The Global Integrated Surface Dataset provides a long-term record of hourly, sub-hourly and synoptic weather observations from a variety of meteorological networks around the world. The dataset includes observations from the World Meteorological Organization, Automated Surface Observing System, Automated Weather Observing Stations, U.S. Climate Reference Network, and others. 
-
-`r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` list available meteorological data from these sources in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C. The station IDs in `r tbls(name = "t51_ncei", display="cite")` are the NCDC ID, which may differ from the station identifiers used by other sources.
-
-`r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
-`r if(NROW(t51.raws)>0){t51_raws_tbl}`
-`r if(NROW(t51.agrimet)>0){t51_agrimet_tbl}`
-`r if(NROW(t51.hydromet)>0){t51_hydromet_tbl}`
-`r if(NROW(t51.mw)>0){t51_mw_tbl}`
-`r if(NROW(t51.sp)>0){t51_sp_tbl}`
 
 ## Thermal Infrared Radiometry (TIR) data
 
@@ -1073,17 +1111,11 @@ All available continuous stream temperature data were retrieved from DEQ’s Amb
 
 The data retrieval period for continuous stream temperature data covers from January 1, 1999 to December 31, 2020. The data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E for parameters measured in the field and a result status of “Final” or “Provisional” which are assigned following the Oregon Water Quality Monitoring Data Portal (DEQ, 2021). We relied on the quality control checks implemented by OWEB for data obtained from OWRI.
 
-Appendix A summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.a", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
+Appendix A summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.b", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C.
 
 ## Stream flow data
 
-`r if(NROW(t54.tbl.num) == 1){paste0(tbls(name = t54.tbl.num$table, display="cite"), " lists")} else {paste0(tbls(name = t54.tbl.num$table[1], display="cite"), " through ", tbls(name = t54.tbl.num$table[length(t54.tbl.num$table)], display="cite"), " list")}` the stations where continuous flow volume data were available in USGS, DEQ, and other public databases. Appendix B summarizes when data were collected at each of the stations with continuous flow measurements. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix C. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_lw", display="cite"), "lists the locations where instantaneous flow volume measurements made by DEQ were available.")}`
-
-`r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
-`r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
-`r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
-`r if(NROW(t54_sp)>0){t54_sp_tbl}`
-`r if(NROW(t54_ins_flow)>0){t54_ins_flow_tbl}`
+Appendix C `r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " list")}` `r t54_txt` where continuous flow volume data were available in the `r qapp_project_area`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_lw", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}`
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
@@ -1584,24 +1616,38 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r trev`
 
 \newpage
-# Appendix A Continuous temperature data summary
+# Appendix A Meteorology data summary
+
+`r if(NROW(t51.ncei)>0){t51_ncei_tbl}`
+`r if(NROW(t51.raws)>0){t51_raws_tbl}`
+`r if(NROW(t51.agrimet)>0){t51_agrimet_tbl}`
+`r if(NROW(t51.hydromet)>0){t51_hydromet_tbl}`
+`r if(NROW(t51.mw)>0){t51_mw_tbl}`
+`r if(NROW(t51.sp)>0){t51_sp_tbl}`
+
+\newpage
+# Appendix B Continuous temperature data summary
 
 `r t53_1_tbl`
-`r app_a_tbl`
+`r app_b_tbl`
 
 **[Update: Delete this note if there is no data count > 31.]** * Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
-# Appendix B Continuous flow data summary
+# Appendix C Continuous flow data summary
 
-`r app_b_tbl`
+`r if(NROW(t54_usgs)>0){t54_usgs_tbl}`
+`r if(NROW(t54_owrd)>0){t54_owrd_tbl}`
+`r if(NROW(t54_hydromet)>0){t54_hydromet_tbl}`
+`r if(NROW(t54_sp)>0){t54_sp_tbl}`
+`r if(NROW(t54_ins_flow)>0){t54_ins_flow_tbl}`
+`r app_c_tbl`
 
 \newpage
-
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "appendixC.Rmd", envir = globalenv())}`
 
 \newpage
-# Appendix C HTML map
+# Appendix D HTML map
 
 DEQ prepared an interactive HTML map to display relevant information described in this QAPP. The map will be posted to DEQ’s website alongside this QAPP and saved in same location as the QAPP in DEQ’s files. The interactive map contains the following layers and location information:
 
