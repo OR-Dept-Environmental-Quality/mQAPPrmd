@@ -48,7 +48,7 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 ```
 
-`r if(waterbody_name == "Southern Willamette Subbasins"){paste0(model.domain, " The model extent is shown in Figure 3 in addition to the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}else{paste0("The extent of the model domain is  ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}`
+`r if(waterbody_name == "Southern Willamette Subbasins"){paste0(model.domain, " The model extent is shown in Figure 3 in addition to the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}else{paste0("The extent of the model domain is  ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
 
 ```{r sw_solar_map, eval.after="fig.cap", fig.cap=sw.solar.map, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
 
