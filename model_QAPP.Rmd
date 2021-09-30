@@ -90,7 +90,7 @@ if(NROW(tcat5)>0){
   
   tcat5 <- knitr::kable(tcat5, format = "pandoc", padding = 2,
                         caption = tbls(name = "tcat5",
-                                       caption = paste0("Assessment units that are classified as water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
+                                       caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
   
 }
 
@@ -112,7 +112,7 @@ if(qapp_project_area == "North Umpqua Subbasin"){
     
     tcat4a <- knitr::kable(tcat4a, format = "pandoc", padding = 2,
                            caption = tbls(name = "tcat4a",
-                                          caption = paste0("Waterbodies listed for temperature impairment based on Section 303(d) Category 4A in the 2018/20 Integrated Report.")))
+                                          caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 4A for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
     
   }
   
@@ -127,8 +127,7 @@ if(qapp_project_area == "North Umpqua Subbasin"){
 t51_sp <- model.input %>% 
   dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
   dplyr::filter(!is.na(`Data Source`) | is.na(`Interpolated Data`)) %>%
-  dplyr::mutate(Station = ifelse(is.na(`Station ID`),paste0("No Station ID, ", `Data Source`),
-                                 paste0(`Station ID`, ", ", `Data Source`)),
+  dplyr::mutate(Station = ifelse(is.na(`Station ID`),`Data Source`,paste0(`Station ID`, ", ", `Data Source`)),
                 `Station ID` = NA,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
                 `Available Data` = Parameter,
@@ -509,19 +508,24 @@ if(NROW(t57)>0){
 
 tmdl.mod.a<- model.info %>% 
   dplyr::filter(is.na(`New Model`)) %>% 
-  dplyr::group_by(Model_version) %>% 
+  dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
-  dplyr::rename(`Model Version` = Model_version) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Version` == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`))
+  dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Version` = ifelse(Model_version == "SHADOW", 
+                                         Model_version, 
+                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model")))
+  
 
 tmdl.mod.b<- model.info %>% 
   dplyr::filter(!is.na(`New Model`)) %>% 
   dplyr::group_by(Model_version) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
-  dplyr::rename(`Model Version` = Model_version) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Version` == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`))
+  dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Version` = ifelse(Model_version == "SHADOW", 
+                                         Model_version, 
+                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model")))
 
 tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
 
@@ -919,7 +923,7 @@ This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to b
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
-Load allocations are portions of the loading capacity that are attributed to either natural background sources or from non-point sources, such as urban, rural agriculture, or forestry activities. Wasteload allocations are portions of the total load that are allocated to point sources of pollution, such as wastewater treatment plants or industries. Wasteload allocations are used to establish effluent limits in NPDES discharge permits. Allocations may also be reserved for future uses, called reserve capacity. Allocations are quantified measures that assure water quality standards will be met and may distribute the pollutant loads between nonpoint and point sources. This general TMDL concept is represented by Equation 1.
+Load allocations are portions of the loading capacity that are allocated to natural background sources or non-point sources, such as urban, rural agriculture, or forestry activities. Wasteload allocations are portions of the total load that are allocated to point sources of pollution, such as wastewater treatment plants or industries. Wasteload allocations are used to establish effluent limits in NPDES discharge permits. Allocations may also be reserved for future uses, called reserve capacity. Allocations are quantified measures that assure water quality standards will be met and may distribute the pollutant loads between nonpoint and point sources. This general TMDL concept is represented by Equation 1.
 
 $$TMDL = \sum WLA + \sum LA + \textit {Reserve Capacity} + MOS  \hspace{3em}\text{Equation 1}$$
 
@@ -969,25 +973,25 @@ Since the issuance of the original TMDL, the extent and number of waterbodies th
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
-1) Complete a source assessment and cumulative effects analysis.       
+1) Complete a source assessment and cumulative effects analysis to characterize or identify:       
 
-    a. Identify anthropogenic sources of stream temperature warming.
-    b. Characterize how much warming comes from background sources.
-    c. Characterize how much warming comes from each anthropogenic source or source category.
-    d. Characterize the cumulative warming from all anthropogenic sources combined.
-    e. Identify where along the stream anthropogenic warming occurs.
-    f. Identify where the point of maximum stream warming is located.
-    g. Identify the amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
+    a. Anthropogenic sources of stream temperature warming;
+    b. How much warming comes from background sources;
+    c. How much warming comes from each anthropogenic source or source category;
+    d. The cumulative warming from all anthropogenic sources combined;
+    e. Where along the stream anthropogenic warming occurs;
+    f. Where the point of maximum stream warming is located; and
+    g. The amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
 
-2) Determine TMDL elements and allocations that attain the applicable temperature criteria.        
+2) 2)	Determine TMDL elements and allocations that attain the applicable temperature criteria by identifying:        
 
-    a. Identify the thermal loading capacity for each temperature listed waterbody.
-    b. Identify the excess thermal load exceeding the loading capacity for each temperature listed waterbody.
-    c. Identify the thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody.
-    d. Identify any surrogate measures.
-    e. Identify any reserve capacity.
-    f. Identify any margin of safety.
-    g. Identify the seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
+    a. The thermal loading capacity for each temperature listed waterbody;
+    b. The excess thermal load exceeding the loading capacity for each temperature listed waterbody;
+    c. The thermal load and waste load allocations necessary to meet the applicable water quality standards for each listed waterbody;
+    d. Any surrogate measures;
+    e. Any reserve capacity;
+    f. Any margin of safety; and
+    g. The seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
 
 3) Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.       
 
@@ -1063,7 +1067,7 @@ knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 ## Overview
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all major tributaries in Oregon are included in the TMDL analysis and TMDL allocations are applied throughout the entire stream network.
 
 An important step in the TMDL is to perform a source assessment which quantifies the anthropogenic contributions to stream heating. One anthropogenic contribution to solar radiation heat loading results from decreased stream surface shade. Decreased stream shade may be caused by near stream vegetation disturbance, removal, or channel morphology changes. Other anthropogenic sources of stream warming may include stream flow reductions and warm water point source effluent.
 
@@ -1157,7 +1161,7 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7.
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Chapter 7.2.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
@@ -1210,7 +1214,7 @@ This section identifies the model acceptance criteria. Model acceptance relies o
 
 3)	Model predicted results have been compared with the associated observed measurements using graphical presentations. Visual comparisons are useful in evaluating model performance over the appropriate temporal or spatial scales.    
 
-4)	Goodness of fit statistics have been calculated comparing the model predicted results to the associated observed measurements. The calibration goodness of fit statistics are shown in Equation 5 through Equation 8.    
+4)	Goodness of fit statistics have been calculated comparing the model predicted results to the associated observed measurements. The calibration goodness of fit statistics are shown in Equation 4 through Equation 8.    
 
 5)  Goodness of fit statistics have been used to inform the appropriate use of the model. Where a model achieves an excellent or good fit it can generally assume a strong role in decision making about appropriate management options. Conversely, where a model achieves only a fair or poor fit it should assume a much less prominent role in decision making about appropriate management options. If a desired level of quality is not achieved on some or all measures, the model might still be useful; however, a detailed description of its potential range of applicability will be provided.    
 

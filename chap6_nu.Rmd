@@ -74,7 +74,7 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 6: Steamboat Creek to Mouth.")}`
 
-`r if(!waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.")}`
+`r if(!waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
 
 ### Spatial and temporal resolution
 
