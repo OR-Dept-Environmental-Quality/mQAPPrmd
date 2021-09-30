@@ -46,7 +46,7 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 ```
 
-The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
 
 ### Spatial and temporal resolution
 
