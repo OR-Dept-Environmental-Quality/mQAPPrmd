@@ -677,12 +677,17 @@ station.usgs.gh <- usgs.gh.stations %>%
                 `Long` = dec_long_va) %>% 
   dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
   dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
-  dplyr::mutate_at("Station", str_replace_all, " Nr ", " Near ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " Or", " OR") %>% 
   dplyr::mutate_at("Station", str_replace_all, "ORegon", " Oregon") %>% 
+  dplyr::mutate_at("Station", str_replace_all, ", Wa", ", WA") %>% 
   dplyr::mutate_at("Station", str_replace_all, " Cr ", " Creek ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " Crk ", " Creek ") %>% 
-  dplyr::mutate_at("Station", str_replace_all, " R ", " River ")
+  dplyr::mutate_at("Station", str_replace_all, " R ", " River ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Nr ", " near ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " At ", " at ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Below ", " below ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Blw ", " below ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Above ", " above ")
 
 usgs.data.gh <- usgs.gh.data %>% 
   dplyr::filter(site_no %in% station.usgs.gh$`Station ID`) %>% 

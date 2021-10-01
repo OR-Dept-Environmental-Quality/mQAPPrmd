@@ -56,6 +56,8 @@ The extent of the model domain is `r model.domain` The model extent is shown in 
 
 `r if(waterbody_name == "Willamette River: Lower"){paste0("The model is comprised of two waterbodies, with a total of 13 branches. The first water body consists of two branches; the first is the main stem of the Willamette River and the second is Multnomah Channel. The Columbia River represents the second water body with 11 branches. The first branch in water body two is the main channel of the Columbia River and the remaining 10 branches are tributary inflow reaches or side channels around islands. Segment size was based on the spacing of the bathymetry data cross sections (PSU report Annear, et. al 2004). The model’s vertical grid resolution is 2 meters throughout, with a maximum of 28 layers.")}`
 
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){paste0("[Update:] The model setup and calibration process are documented in the USGS report (citation).")}`
+
 ### Source characteristics
 
 ```{r, label=`sc`, include=FALSE}
@@ -153,7 +155,9 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ```
 
-Data availability during the year 2015 and 2016 were evaluated. The proposed model simulation period is the year 2015. The modeling period will cover the months from April to November to be consistent with the existing USGS v4.2 models.
+`r if(waterbody_name %in% c("Clackamas River","Long Tom River","Willamette River: Lower")){paste0("Data availability during the year 2015 and 2016 were evaluated. The proposed model simulation period is the year 2015. The modeling period will cover the months from April to November to be consistent with the existing USGS v4.2 models.")}`
+
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}}`
 
 ### Important assumptions
 
@@ -237,15 +241,15 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-      rbind(t6x6_met) %>% 
-      dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
+      rbind(t6x6_met) #%>% 
+      #dplyr::arrange(`Input Type`,Parameter,`Model Location Name (Station ID)`) # W. MS
     
   }
   
   t6x6_col <- t6x6_1 %>% 
     dplyr::filter(!is.na(`Location Units`))
   
-  names(t6x6_1)[names(t6x6_1) == "Model Location"] <- if(NROW(t6x6_col)>0){paste0("Model Location (",unique(t6x6_col$`Location Units`),")")}else{paste0("Model Location")}
+  names(t6x6_1)[names(t6x6_1) == "Model Location"] <- if(NROW(t6x6_col)>0){paste0("Model River Mile /Segment Number")}else{paste0("Model Location")}
   
   t6x6_1 <- t6x6_1[,-c(3)] %>% 
     dplyr::rename(`Model Input` = Parameter)
@@ -269,7 +273,7 @@ if(!model.extent == TRUE){
 
 `r if(waterbody_name == "Clackamas River"){paste0("Daily flow values were developed for Deep, Clear, and Eagle Creeks by Kent Doughty with EES, a consultant in the modeling effort for the Lower Clackamas River for Portland General Electric. Further flow relationships were also developed with the USGS gage at Estacada to fill in gags during the development of the current conditions calibration model. It is anticipated that these flow correlations will be used to develop tributary flow boundaries for the 4 tributaries – Eagle Creek, Deep Creek, Clear Creek, and Rock Creek in the 2015 model.")}`
 
-`r if(waterbody_name == "Clackamas River"){paste0("There is one point source, the Clackamas River Fish Hatchery, for which flow and water temperaturedata will be updated using DMR data provided by DEQ. This point source input is not discussed in the PSU model documentation (Annear et. al, 2004) but this input is included in the model received by Tt from DEQ. Further the model includes withdrawals at five specific locations which are not discussed in the PSU documentation (Annear et. al, 2004). Withdrawal information will be required for 2015 for model development.")}`
+`r if(waterbody_name == "Clackamas River"){paste0("There is one point source, the Clackamas River Fish Hatchery, for which flow and water temperature data will be updated using DMR data provided by DEQ. This point source input is not discussed in the PSU model documentation (Annear et. al, 2004) but this input is included in the model received by Tt from DEQ. Further the model includes withdrawals at five specific locations which are not discussed in the PSU documentation (Annear et. al, 2004). Withdrawal information will be required for 2015 for model development.")}`
 
 `r if(waterbody_name == "Clackamas River"){paste0("The distributed flows were estimated. The daily tributary flows and the daily upstream flow at Estacada were summed and then subtracted from the flow measured at Oregon City to estimate any additional inflow to the river attributable to the ungaged drainage areas. The total distributed flow was then divided in two based on the lengths of the two model branches. The five withdrawals identified in the model would also need to be included in the flow balance.")}`
 
@@ -304,7 +308,9 @@ if(!model.extent == TRUE){
 
 `r if(waterbody_name == "Willamette River: Lower"){paste0("Point Source data are needed for configuring the model for 2015. DMR data will be queried and processed for specifying in the model. In addition to existing point sources currently in the model, there are nine new point sources that have been identified for inclusion into the model. All existing and new point sources have been identified in the ",tbls(name = paste0("t6x6_1", waterbody_name),display="cite"),".")}`
 
-`r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
+`r if(waterbody_name %in% c("Clackamas River","Long Tom River","Willamette River: Lower")){if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}}`
+
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){paste0("[Update:] The model inputs are documented in the USGS report (citation).")}`
 
 ```{r, label=`t6x6_2`, echo=FALSE}
 
@@ -373,10 +379,10 @@ if(!model.extent == TRUE){
                     `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                                 `Model Location Name`,
                                                                 paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
-      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`,Note) %>% 
       dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
       dplyr::ungroup() %>% 
-      dplyr::arrange(desc(`Model Location`)) %>% #
+      #dplyr::arrange(`Model Location Name (Station ID)`) %>% # W. MS
       dplyr::rename(`Calibration Parameter` = `Parameter`)
     
   }
@@ -384,15 +390,28 @@ if(!model.extent == TRUE){
   t6x7_col <- t6x7 %>% 
     dplyr::filter(!is.na(`Location Units`))
   
-  names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
+  names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model River Mile /Segment Number")}else{paste0("Model Location")}
   
-  t6x7 <- t6x7[,c(1,2,5,4)]
+  # Modified for W. MS:
+  t6x7 <- t6x7[,c(1,2,6,4,5)] #
   
   if(NROW(t6x7)>0){
     
-    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+    if(waterbody_name %in% c("Clackamas River")){
+      
+          t6x7_tbl <- knitr::kable(t6x7[,-c(5)], format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("t6x7", waterbody_name),
                                             caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+          
+    }
+    
+    if(waterbody_name %in% c("Long Tom River","Willamette River: Lower")){
+      
+          t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                             caption = tbls(name = paste0("t6x7", waterbody_name),
+                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+          
+    }
     
   }
   
@@ -423,4 +442,6 @@ if(!model.extent == TRUE){
 
 `r if(waterbody_name == "Willamette River: Lower"){paste0("The current condition calibration parameters (i.e. from 2001/2002) may need to be updated in the 2015 model to reflect spawning period conditions.  Potential calibration adjustments may be made to Manning’s coefficient , wind sheltering, evaporation, and sediment temperatures. Vegetative and topographic shade characteristics will not be adjusted since the model input was developed using a detailed GIS analysis. The model calibration location and available data during the years 2015 are shown below in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),".")}`
 
-`r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
+`r if(waterbody_name %in% c("Clackamas River","Long Tom River","Willamette River: Lower")){if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}}`
+
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){paste0("[Update:] The model calibration is documented in the USGS report (citation).")}`
