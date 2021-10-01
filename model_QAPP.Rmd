@@ -207,7 +207,14 @@ t51 <- t51[!duplicated(t51$`Station`),]
 t51.ncei <- t51 %>% 
   dplyr::filter(tbl=="NCDC") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "WBAN 04236",
+                 Station = "CORVALLIS AIRPORT",
+                 `Latitude/Longitude` = "44.42/-123.33") %>% 
+  dplyr::add_row(`Station ID` = "WBAN 24221",
+                 Station = "EUGENE AIRPORT",
+                 `Latitude/Longitude` = "44.13/-123.22") %>% 
   dplyr::arrange(`Station ID`)
+  
 
 t51.raws <- t51 %>% 
   dplyr::filter(tbl=="RAWS") %>% 
@@ -234,7 +241,9 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "NO STATION ID, DEQ FILE")
+  dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+  dplyr::filter(Source == "") # aim to filter out all stations
+  
 
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
@@ -526,7 +535,7 @@ tmdl.mod.b<- model.info %>%
   dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
   dplyr::mutate(`Model Version` = ifelse(Model_version == "SHADOW", 
                                          Model_version, 
-                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model"))) %>% 
+                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model")))%>% 
   dplyr::select(`Model Version`,`Model Waterbody`)
 
 tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
@@ -543,7 +552,7 @@ if(NROW(tmdl.mod.b)>0){
   
   tmdl.mod.b.tbl <- knitr::kable(tmdl.mod.b, format = "pandoc", padding = 2,
                                  caption = tbls(name = "tmdl.mod.b",
-                                                caption = paste0("Waterbodies and year for which new models are expected to be developed.")))
+                                                caption = paste0("Waterbodies for which new models are expected to be developed.")))
   
   tmdl.mod.b.txt <- "**[Update: new model information - See the narratives in the Sandy QAPP]**"
   
@@ -1121,7 +1130,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 
 ## Thermal Infrared Radiometry (TIR) data
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1141,7 +1150,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Point source discharges
 
-`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}`**[Update: If there are no individual and general NPDES permit, please update this paragraph.]** The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
+`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}` The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -1168,11 +1177,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 # Model development and calibration
 
-Waterbodies where model development was initiated for the `r pro.area.tmdls` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}` The extent and location of these models is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
-
-`r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
-
-The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Chapter 7.2.
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.b", display="cite")` will be developed by Tetra Tech and USGS. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Chapter 7.2.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
@@ -1188,7 +1193,11 @@ Non-steady state stream models typically require a significant amount of data be
 To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the sections of model inputs in the current Chapter 6 Model development and calibration.
 
 `r tgap`
+
 `r if(qapp_project_area == "Rogue River Basin"){paste(chap6_shadow, collapse = "\n")}`
+
+`r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){paste0("The temperature models for the Coast Fork and Middle Fork Willamette River, the lower McKenzie River, the North Santiam and Santiam River, the South Santiam River, and upper and middle Willamette River will be developed using CE-QUAL-W2 4.2 by USGS ([Update: cite the USGS report.]).")}`
+
 `r paste(chap6, collapse = "\n")`
 
 # Model evaluation and acceptance
