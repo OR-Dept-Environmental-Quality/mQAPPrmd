@@ -677,12 +677,17 @@ station.usgs.gh <- usgs.gh.stations %>%
                 `Long` = dec_long_va) %>% 
   dplyr::distinct(`Station ID`,.keep_all=TRUE) %>% 
   dplyr::mutate(`Station` = stringr::str_to_title(`Station`)) %>% 
-  dplyr::mutate_at("Station", str_replace_all, " Nr ", " Near ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " Or", " OR") %>% 
   dplyr::mutate_at("Station", str_replace_all, "ORegon", " Oregon") %>% 
+  dplyr::mutate_at("Station", str_replace_all, ", Wa", ", WA") %>% 
   dplyr::mutate_at("Station", str_replace_all, " Cr ", " Creek ") %>% 
   dplyr::mutate_at("Station", str_replace_all, " Crk ", " Creek ") %>% 
-  dplyr::mutate_at("Station", str_replace_all, " R ", " River ")
+  dplyr::mutate_at("Station", str_replace_all, " R ", " River ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Nr ", " near ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " At ", " at ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Below ", " below ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Blw ", " below ") %>% 
+  dplyr::mutate_at("Station", str_replace_all, " Above ", " above ")
 
 usgs.data.gh <- usgs.gh.data %>% 
   dplyr::filter(site_no %in% station.usgs.gh$`Station ID`) %>% 
@@ -961,10 +966,19 @@ pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_T
   sf::st_transform(4326) %>% 
   sf::st_zm()
 
+# _ Model Extents ----
+map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent_Willamette.shp"),
+                                   layer = "ce_model_extent_Willamette")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
+
+ce_model_extent <- map_ce_model_extent %>% 
+  dplyr::filter(Project_Na == qapp_project_area)
+
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
 save(pro_area,
      pro_reaches,
-     gh.data.sample.count,
+     ce_model_extent,
      file = paste0(data.dir,"RData/map_",file.name,".RData"))
 
