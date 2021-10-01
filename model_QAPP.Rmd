@@ -515,18 +515,20 @@ tmdl.mod.a<- model.info %>%
   dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
   dplyr::mutate(`Model Version` = ifelse(Model_version == "SHADOW", 
                                          Model_version, 
-                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model")))
+                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model"))) %>% 
+  dplyr::select(`Model Version`,`Model Waterbody`)
   
 
 tmdl.mod.b<- model.info %>% 
   dplyr::filter(!is.na(`New Model`)) %>% 
-  dplyr::group_by(Model_version) %>% 
+  dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
   dplyr::mutate(`Model Version` = ifelse(Model_version == "SHADOW", 
                                          Model_version, 
-                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model")))
+                                         paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model"))) %>% 
+  dplyr::select(`Model Version`,`Model Waterbody`)
 
 tmdl.mod.1 <- rbind(tmdl.mod.a,tmdl.mod.b)
 
@@ -713,7 +715,16 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
   
   if(!qapp_project_area == "North Umpqua Subbasin"){
     
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+    #if(!waterbody_name %in% c("Coast Fork and Middle Fork Willamette River", # for Willamette MS USGS model
+    #                          "McKenzie River: Lower",
+    #                          "North Santiam and Santiam River",
+    #                          "South Santiam River",
+    #                          "Willamette River: Middle",
+    #                          "Willamette River: Upper")){
+      
+      chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+      
+    #} 
     
   } else {
     
@@ -982,7 +993,7 @@ To the extent existing data and information allow, the primary analysis and mode
     f. Where the point of maximum stream warming is located; and
     g. The amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
 
-2) 2)	Determine TMDL elements and allocations that attain the applicable temperature criteria by identifying:        
+2) Determine TMDL elements and allocations that attain the applicable temperature criteria by identifying:        
 
     a. The thermal loading capacity for each temperature listed waterbody;
     b. The excess thermal load exceeding the loading capacity for each temperature listed waterbody;
@@ -1109,7 +1120,7 @@ We do not anticipate any new software development or model code changes as part 
 
 ## Meteorology
 
-Meteorological data includes air temperature, sky conditions, cloudiness, relative humidity, and wind speed. Appendix A `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` list `r t51_txt` where meteorological data available in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. The station IDs in Table 3 are the NCDC ID, which may differ from the station identifiers used by other sources.
+Meteorological data includes air temperature, sky conditions, cloudiness, relative humidity, and wind speed. `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` in Appendix A list `r t51_txt` where meteorological data available in the `r qapp_project_area`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. The station IDs in `r tbls(name = tables.met$tbl_name[1], display="cite")` are the NCDC ID, which may differ from the station identifiers used by other sources.
 
 The meteorological data obtained from the NCDC includes the Local Climatological Dataset (NOAA, 2005) and the Global Integrated Surface Dataset (NOAA, 2001). The Local Climatological Dataset includes quality controlled meteorological data from airports and other prominent weather stations managed by the National Weather Service, Federal Aviation Administration, and the U.S. Department of Defense. The Global Integrated Surface Dataset provides a long-term record of hourly, sub-hourly and synoptic weather observations from a variety of meteorological networks around the world. The dataset includes observations from the World Meteorological Organization, Automated Surface Observing System, Automated Weather Observing Stations, U.S. Climate Reference Network, and others. 
 
@@ -1129,7 +1140,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Stream flow data
 
-Appendix C `r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " list")}` `r t54_txt` where continuous flow volume data were available in the `r qapp_project_area`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_lw", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}`
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` `r t54_txt` where continuous flow volume data were available in the `r qapp_project_area`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_lw", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}`
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
