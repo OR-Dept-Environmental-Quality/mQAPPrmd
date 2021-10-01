@@ -966,10 +966,19 @@ pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_T
   sf::st_transform(4326) %>% 
   sf::st_zm()
 
+# _ Model Extents ----
+map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent_Willamette.shp"),
+                                   layer = "ce_model_extent_Willamette")%>% 
+  sf::st_transform(4326) %>% 
+  sf::st_zm()
+
+ce_model_extent <- map_ce_model_extent %>% 
+  dplyr::filter(Project_Na == qapp_project_area)
+
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
 save(pro_area,
      pro_reaches,
-     gh.data.sample.count,
+     ce_model_extent,
      file = paste0(data.dir,"RData/map_",file.name,".RData"))
 
