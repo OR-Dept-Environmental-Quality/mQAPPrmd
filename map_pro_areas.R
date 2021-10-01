@@ -1825,8 +1825,7 @@ for (qapp_project_area in project.areas$areas) {
                                         "<br>",
                                         "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent",
-                                                  "Heat Source Solar Model Extent",
+      leaflet::addLayersControl(overlayGroups = c("CE-QUAL-W2 Temperature Model Extent",
                                                   "Stream Temperature Stations",
                                                   "Stream Flow Stations",
                                                   "Gage Height Stations",
