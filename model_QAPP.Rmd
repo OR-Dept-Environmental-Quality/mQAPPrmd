@@ -1672,7 +1672,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r app_c_tbl`
 
 \newpage
-`r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "appendixC.Rmd", envir = globalenv())}`
+`r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height_appendix.Rmd", envir = globalenv())}`
 
 \newpage
 # Appendix D HTML map
