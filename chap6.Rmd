@@ -46,7 +46,7 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 ```
 
-The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
+The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix E.
 
 ### Spatial and temporal resolution
 
@@ -206,7 +206,7 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-      rbind(t6x6_met) %>% 
+      rbind(t6x6_met) #%>% 
       dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
     
   }

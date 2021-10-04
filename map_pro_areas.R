@@ -1840,8 +1840,7 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-      leaflet::hideGroup(c("Heat Source Solar Model Extent",
-                           "Stream Temperature Stations",
+      leaflet::hideGroup(c("Stream Temperature Stations",
                            "Stream Flow Stations",
                            "Gage Height Stations",
                            "Meteorological Stations",

@@ -830,9 +830,13 @@ nlcd.pro.area <- nlcd.tbl %>%
   dplyr::filter(Project_Na == qapp_project_area) %>% 
   dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
   dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
-  dplyr::arrange(desc(as.numeric(Acres)))
+  dplyr::arrange(desc(as.numeric(Acres))) %>% 
+  dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land), "Open Water",NLCD_Land)) %>% 
+  tidyr::drop_na(Stream)
 nlcd.text.pro.area <- nlcd.text %>% 
-  dplyr::filter(Project_Na == qapp_project_area) 
+  dplyr::filter(Project_Na == qapp_project_area) %>% 
+  dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
+  tidyr::drop_na(Stream)
 # _ DMA ----
 dma.pro.area <- dma.tbl %>% 
   dplyr::ungroup() %>% 
@@ -957,8 +961,12 @@ pro_area_huc12 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperatur
   dplyr::filter(Project_Na == qapp_project_area) %>% 
   sf::st_transform(4326) #4326 4269
 
-pro_area <- sf::st_union(pro_area_huc12)
-pro_area <- sf::st_transform(pro_area, 4326)
+pro_area_huc12_union <- sf::st_union(pro_area_huc12)
+pro_area_lines <- st_cast(pro_area_huc12_union,"LINESTRING") # clean the lines in the polygon
+pro_area_lines <- sf::st_transform(pro_area_lines, 4326)
+pro_area_lines_wms <- pro_area_lines[[1]]
+pro_area <- st_polygonize(pro_area_lines_wms)
+pro_area <- pro_area[[1]]
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
                            layer = "TempTMDL_QAPP_Reaches") %>% 
@@ -980,5 +988,6 @@ file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$fil
 save(pro_area,
      pro_reaches,
      ce_model_extent,
+     gh.data.sample.count,
      file = paste0(data.dir,"RData/map_",file.name,".RData"))
 
