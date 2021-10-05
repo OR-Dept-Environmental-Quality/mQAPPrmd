@@ -198,8 +198,8 @@ for (qapp_project_area in project.areas$areas) {
                                 "16", # Core Cold Water Habitat
                                 "18", # Salmon and Trout Rearing and Migration
                                 "20"  # Salmon and Streelhead Migration Corridors
-                                )
                      )
+  )
   
   print(qapp_project_area)
   
@@ -1804,26 +1804,26 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Individual NPDES Point Sources",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(ind_ps$`Facility Name (Facility Number)`),
+                        label = paste0(ind_ps$`Facility Name and Number`),
                         labelOptions = labelOptions(textsize = "15px"),
-                        popup = ~paste0("Facility Name (Facility Number): ", ind_ps$`Facility Name (Facility Number)`,
+                        popup = ~paste0("Facility Name and Number: ", ind_ps$`Facility Name and Number`,
                                         "<br>", 
                                         "Permit Type and Description: ", ind_ps$`Permit Type and Description`,
                                         "<br>",
-                                        "Stream/River Mile: ", ind_ps$`Stream/River Mile`),
+                                        "Stream River Mile: ", ind_ps$`Stream River Mile`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       # __ Gen NPDES PS (GEN01, GEN03, GEN04, GEN05) ----
     leaflet::addMarkers(data = gen_ps,
                         group = "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(gen_ps$`Facility Name (Facility Number)`),
+                        label = paste0(gen_ps$`Facility Name and Number`),
                         labelOptions = labelOptions(textsize = "15px"),
-                        popup = ~paste0("Facility Name (Facility Number): ", gen_ps$`Facility Name (Facility Number)`,
+                        popup = ~paste0("Facility Name and Number: ", gen_ps$`Facility Name and Number`,
                                         "<br>", 
                                         "Permit Type and Description: ", gen_ps$`Permit Type and Description`,
                                         "<br>",
-                                        "Stream/River Mile: ", gen_ps$`Stream/River Mile`),
+                                        "Stream River Mile: ", gen_ps$`Stream River Mile`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
       leaflet::addLayersControl(overlayGroups = c("CE-QUAL-W2 Temperature Model Extent",
                                                   "Stream Temperature Stations",
@@ -1840,7 +1840,8 @@ for (qapp_project_area in project.areas$areas) {
                                                   "Salmon and Steelhead Spawning Use Designations",
                                                   "Oregon Imagery"),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-      leaflet::hideGroup(c("Stream Temperature Stations",
+      leaflet::hideGroup(c("Heat Source Solar Model Extent",
+                           "Stream Temperature Stations",
                            "Stream Flow Stations",
                            "Gage Height Stations",
                            "Meteorological Stations",

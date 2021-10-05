@@ -951,6 +951,7 @@ writexl::write_xlsx(list(Temp= temp.data.sample.count,
 library(tidyverse)
 library(httr)
 library(geojsonsf)
+library(sf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 load(paste0(data.dir,"RData/lookup.RData"))
@@ -962,7 +963,7 @@ pro_area_huc12 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperatur
   sf::st_transform(4326) #4326 4269
 
 pro_area_huc12_union <- sf::st_union(pro_area_huc12)
-pro_area_lines <- st_cast(pro_area_huc12_union,"LINESTRING") # clean the lines in the polygon
+pro_area_lines <- sf::st_cast(pro_area_huc12_union,"LINESTRING") # clean the lines in the polygon
 pro_area_lines <- sf::st_transform(pro_area_lines, 4326)
 pro_area_lines_wms <- pro_area_lines[[1]]
 pro_area <- st_polygonize(pro_area_lines_wms)
