@@ -198,8 +198,8 @@ for (qapp_project_area in project.areas$areas) {
                                 "16", # Core Cold Water Habitat
                                 "18", # Salmon and Trout Rearing and Migration
                                 "20"  # Salmon and Streelhead Migration Corridors
-                                )
                      )
+  )
   
   print(qapp_project_area)
   
