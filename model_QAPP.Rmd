@@ -726,23 +726,15 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
   
   if(!qapp_project_area == "North Umpqua Subbasin"){
     
-    #if(!waterbody_name %in% c("Coast Fork and Middle Fork Willamette River", # for Willamette MS USGS model
-    #                          "McKenzie River: Lower",
-    #                          "North Santiam and Santiam River",
-    #                          "South Santiam River",
-    #                          "Willamette River: Middle",
-    #                          "Willamette River: Upper")){
-      
-      chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
-      
-    #} 
+    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+    
     
   } else {
     
     #if(!waterbody_name == "Fish Creek (2009)"){
-      
-      chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
-      
+    
+    chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+    
     #}
   }
   

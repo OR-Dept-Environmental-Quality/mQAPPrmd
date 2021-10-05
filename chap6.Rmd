@@ -206,9 +206,9 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-      rbind(t6x6_met) #%>% 
-      dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
-    
+      dplyr::arrange(`Input Type`,Parameter,desc(as.numeric(`Model Location`))) %>% 
+      rbind(t6x6_met)
+   
   }
   
   if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
@@ -241,9 +241,9 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-      rbind(t6x6_met) #%>% 
-      #dplyr::arrange(`Input Type`,Parameter,`Model Location Name (Station ID)`) # W. MS
-    
+      dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`)) %>% 
+      rbind(t6x6_met)
+   
   }
   
   t6x6_col <- t6x6_1 %>% 

@@ -191,7 +191,7 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP")
-  
+
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
 
 # _ Lookup table & Project areas ----
@@ -909,8 +909,8 @@ station.output.gage <- station.usgs.gh %>%
 
 station.worksheet.temp <- model.input %>% 
   dplyr::filter(`Parameter` %in%  c("Water Temperature")) %>% 
-    dplyr::filter(!is.na(`Data Source`)) %>% 
-    dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::filter(!is.na(`Data Source`)) %>% 
+  dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::filter(!`Station ID` == "TIR") %>% 
   dplyr::mutate(Station = ifelse(is.na(Station),`Model Location Name`,Station),
                 Organization = ifelse(is.na(Organization),`Data Source`,Organization),
@@ -924,8 +924,8 @@ station.worksheet.temp <- model.input %>%
 station.worksheet.flow <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
   dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
-    dplyr::filter(!`Data Source` == "USGS") %>% 
-    dplyr::filter(!is.na(`Data Source`)) %>% 
+  dplyr::filter(!`Data Source` == "USGS") %>% 
+  dplyr::filter(!is.na(`Data Source`)) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::mutate(Station = `Model Location Name`,
                 Organization = `Data Source`,
@@ -991,4 +991,3 @@ save(pro_area,
      ce_model_extent,
      gh.data.sample.count,
      file = paste0(data.dir,"RData/map_",file.name,".RData"))
-
