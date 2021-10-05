@@ -120,6 +120,18 @@ if(qapp_project_area == "North Umpqua Subbasin"){
 
 ```
 
+```{r, label=`figs`, echo=FALSE}
+# 3. Conceptual model: key processes and variables
+## Figure captions
+
+heat.cap <- figs(name="heat.transfer", caption = paste0("Major heat transfer processes."))
+temp.cap <- figs(name="temp.cd", caption = paste0("Conceptual diagram that identifies the key processes and variables that drive stream temperature changes and the biological responses (Schofield and Sappington, 2010)."))
+
+heat.fig <- figs(name = "heat.transfer", display="cite")
+temp.fig <- figs(name = "temp.cd", display="cite")
+
+```
+
 ```{r, label=`t51`, echo=FALSE}
 # 5.1	Meteorology
 ## Table in Appendix A
@@ -147,7 +159,8 @@ t51_ncei <- ncei.station.tbl %>%
                 tbl = "NCDC") %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
   dplyr::distinct(Station, .keep_all=TRUE) %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl)
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
+  dplyr::mutate(Station = ifelse(`Station ID` == "20015887", "Diamond Lake Lodge", Station))
 
 t51_raws <- raws.station.tbl %>% 
   dplyr::mutate(`Station` = siteName,
@@ -234,12 +247,14 @@ t51.mw <- t51 %>%
   dplyr::arrange(`Station ID`)
 
 t51.sp <- t51 %>% 
-    dplyr::filter(tbl=="DEQ File") %>% 
-    dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
-    dplyr::arrange(Station) %>% 
-    dplyr::rename(Source = Station) %>% 
-    dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
-    dplyr::filter(!Source == "353036, RAWS") # NU: add this site to the RAWS table
+  dplyr::filter(tbl=="DEQ File") %>% 
+  dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
+  dplyr::arrange(Station) %>% 
+  dplyr::rename(Source = Station) %>% 
+  dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+  dplyr::filter(!Source == "353036, RAWS") %>% # NU: add this site to the RAWS table
+  dplyr::filter(!Source %in% c("RAWS/NCDC/MESOWEST","STATION ID TBD, RAWS/NCDC/MESOWEST")) %>% # NU
+  dplyr::mutate(Source = ifelse(Source == "NO STATION ID, USFS", "Lake Creek near mouth (No Station ID), USFS")) # NU
   
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
@@ -381,7 +396,8 @@ t54_txt <- knitr::combine_words(tables.flow$txt)
 # Instantaneous flow
 t54_ins_flow <- inst.flow.pro.area %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3))) %>%
-  dplyr::select(`Station ID`,Station,Date,Time,`Flow (cfs)`,`Latitude/Longitude`)
+  dplyr::mutate(`Latitude/Longitude` = ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% # NU
+  dplyr::select(Station,Date,Time,`Flow (cfs)`,`Latitude/Longitude`) # NU: removed "Station ID"
 
 ```
 
@@ -523,7 +539,7 @@ tmdl.mod.a<- model.info %>%
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)"),"North Umpqua River",`Model Waterbody`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Rock Creek (Summer period)","Rock Creek (Spawning period)"),"Rock Creek",`Model Waterbody`)) %>%
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`)) %>% 
-  dplyr::group_by(Model_version) %>% 
+  dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
@@ -739,24 +755,12 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
   
   if(!qapp_project_area == "North Umpqua Subbasin"){
     
-    #if(!waterbody_name %in% c("Coast Fork and Middle Fork Willamette River", # for Willamette MS USGS model
-    #                          "McKenzie River: Lower",
-    #                          "North Santiam and Santiam River",
-    #                          "South Santiam River",
-    #                          "Willamette River: Middle",
-    #                          "Willamette River: Upper")){
-      
-      chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
-      
-    #} 
+    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
     
   } else {
     
-    #if(!waterbody_name == "Fish Creek (2009)"){
-      
-      chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
-      
-    #}
+    chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+
   }
   
 }
@@ -1055,16 +1059,15 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
-
-**Heat transfer** relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
+<br>
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
-
-heat.cap <- figs(name="heat.transfer", caption = paste0("Major heat transfer processes."))
 
 knitr::include_graphics(path = "./fig/Heat_Transfer_Diagram.jpg")
 
 ```
+
+**Heat transfer** relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in `r heat.fig`.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
 
 <br>
 
@@ -1088,15 +1091,15 @@ $\Phi_{evaporation}$ = Evaporation (+/-)
 * Surface water exchange (e.g. tributary input, precipitation), and
 * Other human related activities that alter stream flow volume.
 
-Stream temperature is influenced by both human and natural factors. Figure 2 is a conceptual diagram that identifies the key process and variables that drive stream temperature. Human sources and natural sources are identified. Near the bottom of the diagram the biological responses are identified.
+<br>
 
 ```{r temp-cd, eval.after="fig.cap", fig.cap=temp.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
-
-temp.cap <- figs(name="temp.cd", caption = paste0("Conceptual diagram that identifies the key processes and variables that drive stream temperature changes and the biological responses (Schofield and Sappington, 2010)."))
 
 knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 ```
+
+Stream temperature is influenced by both human and natural factors. `r temp.fig` is a conceptual diagram that identifies the key process and variables that drive stream temperature. Human sources and natural sources are identified. Near the bottom of the diagram the biological responses are identified.
 
 **Anthropogenic Nonpoint Sources**: Temperature increases from human-caused nonpoint sources are caused by increases in solar radiation loading to the stream network from the disturbance or removal of near-stream vegetation, channel modification and widening, reductions to the stream flow rate or volume, changes in hyporheic flows and channel connectivity, reductions in cold groundwater inflows, and changes to meteorological conditions, such as those caused by climate change.
 
@@ -1151,7 +1154,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 
 ## Thermal Infrared Radiometry (TIR) data
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1203,6 +1206,8 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
 The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Chapter 7.2.
+
+Additional Heat Source version 7 models will be built to simulate stream temperature during the spawning period for all water bodies that support spawning in the North Umpqua Subbasin.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
