@@ -23,6 +23,7 @@ dmaGIS <- list(
   "Baker"=paste0(dma_dir, "Baker_DMAs_2019-1"),
   "Benton"=paste0(dma_dir, "Benton_DMAs_2019-1"),
   "Clackamas"=paste0(dma_dir, "Clackamas_DMAs_2019-1"),
+  "Clatsop"=paste0(dma_dir, "Clatsop_DMAs_2019-1"),
   "Columbia"=paste0(dma_dir, "Columbia_DMAs_2019-1"),
   "Curry"=paste0(dma_dir, "Curry_DMAs_2019-1"),
   "Douglas"=paste0(dma_dir, "Douglas_DMAs_2017-1"),
@@ -44,7 +45,7 @@ dmaGIS <- list(
   "Umatilla"=paste0(dma_dir, "Umatilla_DMAs_2019-1"),
   "Union"=paste0(dma_dir, "Union_DMAs_2019-1"),
   "Wallowa"=paste0(dma_dir, "Wallowa_DMAs_2019-1"),
-  "Wasco"=paste0(dma_dir, "Wasco_DMAs_2019-1"),
+  "Wasco"=paste0(dma_dir, "Wasco_DMAs_2019-2"),
   "Wheeler"=paste0(dma_dir, "Wheeler_DMAs_2019-1"),
   "Yamhill"=paste0(dma_dir, "Yamhill_DMAs_2019-1"))
 
