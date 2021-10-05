@@ -302,8 +302,8 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-      rbind(t6x6_met) %>% 
-      dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
+      dplyr::arrange(`Input Type`,Parameter,desc(as.numeric(`Model Location`))) %>% 
+      rbind(t6x6_met)
     
   }
   
@@ -337,8 +337,9 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-      rbind(t6x6_met) %>% 
-      dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
+      dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`)) %>% 
+      rbind(t6x6_met)
+
     
   }
   
@@ -477,10 +478,14 @@ if(!model.extent == TRUE){
 
 ```
 
+#<<<<<<< master
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". The model location in the table below describes the distance of each calibration site from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
+#=======
 `r if(waterbody_name %in% "Columbia Slough (1992)"){paste0("Model calibration was completed by PSU (Berger, 2003; Berger and Wells, 2005). Please refer to these reports for more information.")}`
 
 `r if(waterbody_name %in% c("Johnson Creek Watershed (2019)","Columbia Slough Subwatershed (2019)","Tualatin Mountains (2019)","Tryon Creek Watershed (2019)")){paste0("Model calibration will be completed by the City of Portland Bureau of Environmental Services. DEQ and the City of Portland will coordinate and communicate on model development and quality assurance procedures outlined in this QAPP. The model will be calibrated primarily by comparing the model effective shade predictions to field measured effective shade values and canopy cover values measured with a densitometer by the City of Portland.  Canopy cover will be the primary calibration parameter. Other calibration parameters identified in Section 6.1.3 (landcover height and landcover overhang) will be determined directly from LiDAR with minimal adjustment. DEQ will review the model and model assumptions and recommend adjustments as necessary. The model and final calibration report will be made available to DEQ upon completion (COP BES personal communication August 2021).")}`
 
 `r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". The model location in the table below describes the distance of each input from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}}`
+#>>>>>>> Lower_Willamette_and_Clackamas_Subbasins
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
