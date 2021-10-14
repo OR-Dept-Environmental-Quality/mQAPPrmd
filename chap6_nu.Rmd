@@ -19,7 +19,8 @@ options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
 # for test: waterbody_name <- "North Umpqua River (Spawning period)"
-# for test: waterbody_name <- "Canton Creek (Summer Period)"
+# for test: waterbody_name <- "North Umpqua River (Summer period)"
+# for test: waterbody_name <- "Lake Creek (Spawning period)"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -63,6 +64,10 @@ waterbody_spawning_nu <- c("Canton Creek (Spawning period)",
                            "Steamboat Creek (Spawning period)")
 
 ```
+
+`r if(waterbody_name == "Clearwater River (Summer period)"){paste0("## Clearwater River (Spawning Period)")}`
+
+`r if(waterbody_name == "Clearwater River (Summer period)"){paste0("Clearwater River will not be modeled for the spawning period. It is listed as attaining temperature standards in the 2018 Integrated Report.")}`
 
 ## `r waterbody_name`
 
@@ -116,7 +121,7 @@ if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
 
 `r if(waterbody_name %in% "Fish Creek (2001) (Summer Period)"){paste0("[Update: From the older version. Please review.] Fish Creek is part of Pacific Power hydroelectric project area and enters the North Umpqua River below Slide Creek Dam and above Soda Springs Dam. The Umpqua River Basin TMDL (DEQ, 2006) found Fish Creek to be slightly below the numeric criterion (18°C). The assimilative capacity was allocated to PacifiCorp, in the form of their 401 certification.")}`
 
-`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")`
+`r if(!waterbody_name == "Fish Creek (2009) (Spawning period)"){paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")}else{paste0("The existing PacifiCorp 2009 model will be adapted for the spawning period and adapted as needed.")}`
 
 ### Model domain
 
@@ -126,7 +131,9 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 ```
 
-`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek. Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")}`
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)")){paste0("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek. Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated. The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Spawning period)")){paste0("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek (Figure 8-10). Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")}`
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 1: Lemolo Reservoir to Lemolo Powerhouse #1.")}`
 
@@ -140,7 +147,12 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 6: Steamboat Creek to Mouth.")}`
 
-`r if(!waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){if(waterbody_name %in% waterbody_spawning_nu){paste0("The extent of the model domain is the ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"),"). The extent differs from the summer model due to data availability.")}else{paste0("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}}`
+`r if(waterbody_name %in% c("Canton Creek (Spawning period)","Rock Creek (Spawning period)")){paste0("The extent of the model domain is the ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"),"). The extent differs from the summer model due to data availability.")}`
+
+
+`r if(waterbody_name %in% c("Cavitt Creek (Spawning period)","Fish Creek (2009) (Spawning period)","Lake Creek (Spawning period)","Little River (Spawning period)","Steamboat Creek (Spawning period)")){paste0("The extent of the model domain is the ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"), ").")}`
+
+`r if(waterbody_name %in% c("Canton Creek (Summer period)","Cavitt Creek (Summer period)","Clearwater River (Summer period)","Fish Creek (2001) (Summer period)","Fish Creek (2009) (Summer period)","Lake Creek (Summer period)","Little River (Summer period)","Rock Creek (Summer period)","Steamboat Creek (Summer period)")){paste0("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
 
 ### Spatial and temporal resolution
 
@@ -247,11 +259,11 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)")){paste0("The model period for North Umpqua Models 1-5 is July 8-11, 2001. The model period for North Umpqua Model 6 is July 12-31, 2002.")}`
 
-`r if(!waterbody_name %in% c("North Umpqua River (Summer period)")){if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}}`
+`r if(!waterbody_name %in% c("North Umpqua River (Summer period)")){if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{if(waterbody_name %in% c(waterbody_spawning_nu,"North Umpqua River (Spawning period)")){paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ", and the exact dates will be adjusted based on the data availability.")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}}}`
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+`r if(waterbody_name %in% waterbody_spawning_nu){paste0("Due to the limited availability of temperature data for the spawning period, surrogate relationships will be determined to establish model inputs. The method will rely on relationships established for stations with data available during both the summer and spawning model periods, and estimations will be based on the assumption that the established relationships will also be true for tributaries without data.")}else{paste0("[Update this section if any changes are proposed to the current condition calibration model.] The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ") the model user guide ", knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))), " or in Section 6 and Section 7 of this document.")}`
 
 ### Model inputs
 
@@ -277,7 +289,7 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
     dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
-    dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
+    dplyr::summarize(`Model Location` = toString(unique(sort(round(as.numeric(`Model Location`),2)))),
                      Parameter = toString(unique(sort(Parameter))))%>% 
     dplyr::ungroup() %>%
     dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
@@ -289,7 +301,7 @@ if(!model.extent == TRUE){
     dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                  `Model Location` = round(`Model Location`,2),
+                  `Model Location` = round(as.numeric(`Model Location`),2),
                   `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -311,7 +323,7 @@ if(!model.extent == TRUE){
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name_nu, " Heat Source Model.")))
+                                               caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
     
   }
   
@@ -360,7 +372,7 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
                   Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
-                  `Model Location` = round(`Model Location`,2),
+                  `Model Location` = round(as.numeric(`Model Location`),2),
                   `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
                   `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
                   `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
@@ -370,7 +382,7 @@ if(!model.extent == TRUE){
     dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
     dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
     dplyr::ungroup() %>% 
-    dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
+    dplyr::arrange(Parameter, desc(as.numeric(`Model Location`))) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
   
   t6x7_col <- t6x7 %>% 
@@ -384,7 +396,7 @@ if(!model.extent == TRUE){
     
     t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("t6x7", waterbody_name),
-                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name_nu, " Heat Source Model.")))
+                                            caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
     
   }
   
