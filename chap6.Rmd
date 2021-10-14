@@ -258,7 +258,7 @@ if(!model.extent == TRUE){
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
+                                               caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
     
   }
   
@@ -358,7 +358,7 @@ if(!model.extent == TRUE){
       dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
       dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
       dplyr::ungroup() %>% 
-      dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
+      dplyr::arrange(Parameter,desc(as.numeric(`Model Location`))) %>% 
       dplyr::rename(`Calibration Parameter` = `Parameter`)
     
   }
@@ -401,7 +401,7 @@ if(!model.extent == TRUE){
       
           t6x7_tbl <- knitr::kable(t6x7[,-c(5)], format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("t6x7", waterbody_name),
-                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+                                            caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
           
     }
     
@@ -409,7 +409,7 @@ if(!model.extent == TRUE){
       
           t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("t6x7", waterbody_name),
-                                            caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+                                            caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
           
     }
     
