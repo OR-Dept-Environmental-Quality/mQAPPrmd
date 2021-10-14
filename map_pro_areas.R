@@ -208,9 +208,11 @@ for (qapp_project_area in project.areas$areas) {
   map_basic <- leaflet::leaflet() %>%
     leaflet::addControl(map.title, position = "topleft", className="map-title")%>% 
     leaflet::addMiniMap(position = "bottomright",
-                        width = 405,
-                        height = 250,
-                        zoomLevelFixed = 5) %>% 
+                        width = 200,
+                        height = 150,
+                        zoomLevelFixed = 5,
+                        toggleDisplay = TRUE,
+                        minimized = TRUE) %>% 
     leaflet.extras::addResetMapButton() %>% 
     leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                        lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
@@ -1940,6 +1942,35 @@ for (qapp_project_area in project.areas$areas) {
                            "Oregon Imagery"))
     
   }
+  
+  map_area <- map_area %>% 
+    leaflet::addEasyButton(leaflet::easyButton(
+      position = "topright",
+      icon = "fa-align-justify",
+      title = "Toggle Layers Control",
+      id = 'layerToggle',
+      onClick = JS("function(btn, map){
+    var elements = document.getElementsByClassName('leaflet-control-layers leaflet-control-layers-expanded leaflet-control');
+    var index;
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+    if (isElementHidden(element)) {
+      element.style.display = '';
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+               }"
+      )
+    ))
   
   print(dta.stations.mod)
   
