@@ -1,10 +1,10 @@
-# The script organizes the data that are used for the Source characteristics section.
+# The script organizes the data that are used for the Source characteristics section for Willamette Mainstem Only.
 # The outputs include :
-# -GIS shapefile of DMAs/RPs within 100 meters of the model extent stream centerline
+# -GIS shapefile of DMAs/RPs within 300 meters of the model extent stream centerline
 # -Rdata file summarizing for each DMA the total area (acres) and the percentage of area within 
-#  100 meters of the model extent stream centerline
+#  300 meters of the model extent stream centerline
 # -Rdata file summarizing for each NLCD landcover class the total area (acres) and the percentage of area within 
-#  100 meters of the model extent stream centerline
+#  300 meters of the model extent stream centerline
 
 library(sf)
 library(rgdal)
@@ -86,13 +86,13 @@ lookup_model_extents <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temp
 
 # Combine into one feature and dissolve by stream and project area
 model_extents <- rbind(#map_hs_temp_model_extent, 
-                       #map_hs_solar_model_extent, 
-                       map_ce_model_extent#, 
-                       #map_hs_sandy_2016, 
-                       #map_hs_fish_creek_2009,
-                       #map_bes_model_extent,
-                       #map_hs_walla_walla_2017
-                       ) %>%
+  #map_hs_solar_model_extent, 
+  map_ce_model_extent#, 
+  #map_hs_sandy_2016, 
+  #map_hs_fish_creek_2009,
+  #map_bes_model_extent,
+  #map_hs_walla_walla_2017
+) %>%
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins", "Bear Creek (Wallowa)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Rogue River Basin", "Bear Creek (Rogue)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "Rogue River Basin", "Elk Creek (Rogue)", Stream)) %>% 
