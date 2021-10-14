@@ -242,7 +242,6 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River")
 
-
 # _ NCDC met data ----
 load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
 ncei.stations <- ncei %>% 
@@ -326,7 +325,6 @@ bes.data <- bes.data %>%
                 "Reachcode","Result_Comment","Result_Depth","Result_Depth_Unit","Result_Operator","Result_Type",
                 "Result_Unit","SampleStartTime","SampleStartTZ","SamplingMethod","Statistical_Base","Time_Basis")
 
-
 # _ Project areas and HUCs ----
 #pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
 #                         layer = "project_areas")
@@ -391,7 +389,6 @@ station.awqms.usgs.or <- station.awqms %>%
 station.awqms.temp <- station.awqms %>% 
   dplyr::filter(!Organization == "USGS") %>% 
   rbind(station.awqms.usgs.or)
-
 
 ## _ (2) OWRD ----
 station.owrd <- owrd.stations %>%
