@@ -539,7 +539,7 @@ if(NROW(tmdl.mod.a)>0){
   
   tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
                                  caption = tbls(name = "tmdl.mod.a",
-                                                caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+                                                caption = paste0("Waterbodies where a model has already been developed.")))
   
 }
 
@@ -1285,7 +1285,7 @@ Management scenarios described in this section summarize the means by which the 
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-* Updating the John Day River model to include current discharges from City of Dayville and Mt Vernon STP.
+* Updating the John Day River model to characterize current discharges from City of Dayville and Mt Vernon STP.
 
 ## Background
 
@@ -1655,7 +1655,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r t53_1_tbl`
 `r app_b_tbl`
 
-**[Update: Delete this note if there is no data count > 31.]** * Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
+* Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
 # Appendix C Stream flow data summary
