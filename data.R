@@ -965,6 +965,7 @@ qapp_project_area = "Middle Willamette Subbasins"
 library(tidyverse)
 library(httr)
 library(geojsonsf)
+library(sf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 load(paste0(data.dir,"RData/lookup.RData"))
