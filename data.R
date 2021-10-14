@@ -192,7 +192,7 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP")
-  
+
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
 
 # _ Lookup table & Project areas ----
@@ -248,7 +248,6 @@ cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamet\\*", "Willamette River") %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
   dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River")
-
 
 # _ NCDC met data ----
 load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
@@ -332,7 +331,6 @@ bes.data <- bes.data %>%
                 "Measure","Method_Code","MonLocType","Org_Name","OrganizationID","Project1","QualifierAbbr",
                 "Reachcode","Result_Comment","Result_Depth","Result_Depth_Unit","Result_Operator","Result_Type",
                 "Result_Unit","SampleStartTime","SampleStartTZ","SamplingMethod","Statistical_Base","Time_Basis")
-
 
 # _ Project areas and HUCs ----
 pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/project_areas.shp",
@@ -490,7 +488,7 @@ qapp_project_area = "Middle Willamette Subbasins"
       dplyr::filter(!Reachcode %in% snake_reachcodes)
     
   }
-
+  
   ## _ (2) OWRD ----
   station.owrd <- owrd.stations %>%
     dplyr::mutate(`Station ID` = as.character(station_nbr),
@@ -587,7 +585,7 @@ qapp_project_area = "Middle Willamette Subbasins"
     dplyr::select(Year, `Station ID`, Station, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec) %>% 
     dplyr::distinct(Year, `Station ID`,.keep_all=TRUE) %>% 
     dplyr::arrange(Year, `Station ID`)
-
+  
   # _ Flow data ----
   ## _ (1) USGS ----
   station.usgs.flow <- usgs.flow.stations %>%  # Discharge [ft3/s]
@@ -930,7 +928,7 @@ qapp_project_area = "Middle Willamette Subbasins"
                   Track = "TRUE") %>% 
     dplyr::distinct(Station, .keep_all = TRUE) %>% 
     dplyr::select(`Station ID`,Station,Latitude,Longitude,Organization,Data,Track)
-
+  
   station.worksheet.flow <- model.input %>% 
     dplyr::filter(`Parameter` %in% c("Flow")) %>%
     dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
@@ -1059,7 +1057,7 @@ qapp_project_area = "Middle Willamette Subbasins"
   
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
-
+  
   hs_temp_model_extent <- map_hs_temp_model_extent %>% 
     dplyr::filter(Project_Na == qapp_project_area)
   
