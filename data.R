@@ -965,6 +965,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
 library(tidyverse)
 library(httr)
 library(geojsonsf)
+library(sf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 load(paste0(data.dir,"RData/lookup.RData"))
