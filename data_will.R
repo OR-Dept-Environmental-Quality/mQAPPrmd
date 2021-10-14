@@ -278,11 +278,11 @@ mw.stations <- mw.meta$STATION %>%
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
 
 # _ NLCD Land Cover data ----
-load(paste0(data.dir,"/RData/nlcd.tbl.RData")) # nlcd.tbl
-load(paste0(data.dir,"/RData/nlcd.text.RData")) # nlcd.text
+load(paste0(data.dir,"/RData/nlcd.tbl_wms.RData")) # nlcd.tbl
+load(paste0(data.dir,"/RData/nlcd.text_wms.RData")) # nlcd.text
 
 # _ DMAs ----
-load(paste0(data.dir,"/RData/dmas.RData")) # dma.tbl
+load(paste0(data.dir,"/RData/dmas_wms.RData")) # dma.tbl
 
 # _ BES temp ----
 load(paste0(data.dir,"/download/bes.RData")) # bes.stations & bes.data
