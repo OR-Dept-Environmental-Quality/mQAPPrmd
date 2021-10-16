@@ -1274,10 +1274,13 @@ Management scenarios described in this section summarize the means by which the 
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-* Updating the Umpqua River model to include current discharges from Brandy Bar Landing, Reedsport STP, and Winchester Bay STP.       
-* Updating the South Umpqua River model to include current discharges from Canyonville STP, Winston Green Waste Water Treatment Facility, Hoover Treated Wood Products, Myrtle Creek STP, Roseburg STP, and the Umpqua National Forest Tiller Ranger Station STP.       
-* Updating the Calapooya Creek model to include current discharges from Oakland STP, and Sutherlin STP.       
-* Updating the Cow Creek model to include current discharges from Glendale STP, and Riddle STP.       
+* Updating the South Umpqua River model to characterize current discharges from Canyonville STP, Winston Green Waste Water Treatment Facility, Hoover Treated Wood Products, Myrtle Creek STP, R.U.S.A. Roseburg STP, and the Umpqua National Forest Tiller Ranger Station STP.       
+
+* Updating the Calapooya Creek model to characterize current discharges from Oakland STP, and Sutherlin STP.        
+
+* Updating the Cow Creek model to characterize current discharges from Glendale STP, and Riddle STP.        
+
+* Updating the Elk Creek model to characterize the current discharge from Drain STP.        
 
 ## Background
 
