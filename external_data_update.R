@@ -72,9 +72,9 @@ for (id in unique(sort(usgs.gh.stations$site_no))) {
   
   print(id)
   usgs.gh.data.i <- dataRetrieval::readNWISdata(siteNumber = id,
-                                                   parameterCd = "00065",
-                                                   startDate = "2010-01-01", # Ryan's suggestion
-                                                   endDate = "2020-12-31")
+                                                parameterCd = "00065",
+                                                startDate = "2010-01-01", # Ryan's suggestion
+                                                endDate = "2020-12-31")
   usgs.gh.data <- dplyr::bind_rows(usgs.gh.data,usgs.gh.data.i)
   
 }
@@ -117,11 +117,11 @@ owrd.stations.nbr <- owrd.stations.or %>%
 
 owrd.data.or <- NULL
 for(station in owrd.stations.nbr) {
-owrd.data.ind <- owrd_data(station = station,
-                       startdate = "1/1/1990",
-                       enddate = "12/31/2020",
-                       char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
-owrd.data.or <- rbind(owrd.data.or,owrd.data.ind)
+  owrd.data.ind <- owrd_data(station = station,
+                             startdate = "1/1/1990",
+                             enddate = "12/31/2020",
+                             char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
+  owrd.data.or <- rbind(owrd.data.or,owrd.data.ind)
 }
 
 save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 3/4/2021
