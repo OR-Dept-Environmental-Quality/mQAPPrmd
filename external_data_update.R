@@ -72,9 +72,9 @@ for (id in unique(sort(usgs.gh.stations$site_no))) {
   
   print(id)
   usgs.gh.data.i <- dataRetrieval::readNWISdata(siteNumber = id,
-                                                   parameterCd = "00065",
-                                                   startDate = "2010-01-01", # Ryan's suggestion
-                                                   endDate = "2020-12-31")
+                                                parameterCd = "00065",
+                                                startDate = "2010-01-01", # Ryan's suggestion
+                                                endDate = "2020-12-31")
   usgs.gh.data <- dplyr::bind_rows(usgs.gh.data,usgs.gh.data.i)
   
 }
@@ -117,18 +117,19 @@ owrd.stations.nbr <- owrd.stations.or %>%
 
 owrd.data.or <- NULL
 for(station in owrd.stations.nbr) {
-owrd.data.ind <- owrd_data(station = station,
-                       startdate = "1/1/1990",
-                       enddate = "12/31/2020",
-                       char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
-owrd.data.or <- rbind(owrd.data.or,owrd.data.ind)
+  owrd.data.ind <- owrd_data(station = station,
+                             startdate = "1/1/1990",
+                             enddate = "12/31/2020",
+                             char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
+  owrd.data.or <- rbind(owrd.data.or,owrd.data.ind)
 }
 
 save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 3/4/2021
 
 # NCEI Station Meta ----
 # https://www.ncdc.noaa.gov/homr/reports
-ncei <- read.delim(paste0(file.dir,"emshr_lite.txt"))
+#ncei <- read.delim(paste0(file.dir,"emshr_lite.txt"))
+ncei <- readxl::read_xlsx(paste0(file.dir, "emshr_lite.xlsx"), sheet = "1990-2020")
 
 ncei.databases <- c("NCDC","COOP","WBAN","ICAO","FAA","NWSLI","WMO   TRANS","GHCND") 
 
@@ -236,11 +237,15 @@ for(stationID in unique(sort(hydromet$Station.ID))){
                   `Station ID` = stationID)
   hydromet.data <- rbind(hydromet.data,df)
 }
+hydromet <- hydromet %>% 
+  dplyr::filter(Station.ID %in% hydromet.data$`Station ID`) # only keep the stations with the data from 1990-2020
 save(hydromet,hydromet.data, file=paste0(file.dir,"hydromet.RData"))# updated date: 5/8/2021
 
 # MesoWest Met Data ----
 ## Github: https://github.com/fickse/mesowest
-mw.meta <- mesowest::mw(service = "metadata", state = "OR")
+mw.meta.download <- mesowest::mw(service = "metadata", state = "OR")
+mw.meta <- mw.meta.download$STATION %>% 
+  dplyr::filter(as.numeric(substring(mw.meta.download$STATION$PERIOD_OF_RECORD$start, 1, 4))>=1990 & as.numeric(substring(mw.meta.download$STATION$PERIOD_OF_RECORD$start, 1, 4))<=2020)
 mw.variables.list  <- mesowest::mwvariables()
 mw.variables <- data.frame(matrix(unlist(mw.variables.list$VARIABLES)))
 mw.variables.clean <- mw.variables %>% 
