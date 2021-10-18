@@ -272,7 +272,7 @@ hydromet.stations <- hydromet %>%
 
 # _ MesoWest met data ----
 load(paste0(data.dir,"/download/mw.RData")) # mw.meta & mw.variables.list
-mw.stations <- mw.meta$STATION %>%
+mw.stations <- mw.meta %>%
   dplyr::mutate(lat = LATITUDE, long = LONGITUDE) %>% 
   sf::st_as_sf(coords = c("LONGITUDE", "LATITUDE"), crs = sf::st_crs("+init=EPSG:4269"))
 
