@@ -128,7 +128,8 @@ save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 3/4/2021
 
 # NCEI Station Meta ----
 # https://www.ncdc.noaa.gov/homr/reports
-ncei <- read.delim(paste0(file.dir,"emshr_lite.txt"))
+#ncei <- read.delim(paste0(file.dir,"emshr_lite.txt"))
+ncei <- readxl::read_xlsx(paste0(file.dir, "emshr_lite.xlsx"), sheet = "1990-2020")
 
 ncei.databases <- c("NCDC","COOP","WBAN","ICAO","FAA","NWSLI","WMO   TRANS","GHCND") 
 
@@ -236,11 +237,15 @@ for(stationID in unique(sort(hydromet$Station.ID))){
                   `Station ID` = stationID)
   hydromet.data <- rbind(hydromet.data,df)
 }
+hydromet <- hydromet %>% 
+  dplyr::filter(Station.ID %in% hydromet.data$`Station ID`) # only keep the stations with the data from 1990-2020
 save(hydromet,hydromet.data, file=paste0(file.dir,"hydromet.RData"))# updated date: 5/8/2021
 
 # MesoWest Met Data ----
 ## Github: https://github.com/fickse/mesowest
-mw.meta <- mesowest::mw(service = "metadata", state = "OR")
+mw.meta.download <- mesowest::mw(service = "metadata", state = "OR")
+mw.meta <- mw.meta.download$STATION %>% 
+  dplyr::filter(as.numeric(substring(mw.meta.download$STATION$PERIOD_OF_RECORD$start, 1, 4))>=1990 & as.numeric(substring(mw.meta.download$STATION$PERIOD_OF_RECORD$start, 1, 4))<=2020)
 mw.variables.list  <- mesowest::mwvariables()
 mw.variables <- data.frame(matrix(unlist(mw.variables.list$VARIABLES)))
 mw.variables.clean <- mw.variables %>% 
