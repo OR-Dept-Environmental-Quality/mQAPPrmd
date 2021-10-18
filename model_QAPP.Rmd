@@ -127,7 +127,8 @@ if(qapp_project_area == "North Umpqua Subbasin"){
 t51_sp <- model.input %>% 
   dplyr::filter(`Model Location Type` %in% c("Meteorological")) %>%
   dplyr::filter(!is.na(`Data Source`) | is.na(`Interpolated Data`)) %>%
-  dplyr::mutate(Station = ifelse(is.na(`Station ID`),`Data Source`,paste0(`Station ID`, ", ", `Data Source`)),
+  dplyr::mutate(`Station ID` = ifelse(`Station ID` %in% "No Station ID", NA, `Station ID`),
+                Station = ifelse(is.na(`Station ID`),`Data Source`,paste0(`Station ID`, ", ", `Data Source`)),
                 `Station ID` = NA,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
                 `Available Data` = Parameter,
@@ -241,7 +242,7 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+  dplyr::filter(!Source == "DEQ FILE") %>%
   dplyr::filter(!Source == "AGNESS, RAWS") %>% 
   dplyr::filter(!Source == "BRKO - BROOKINGS, OREGON AGRIMET WEATHER STATION") %>% 
   dplyr::filter(!Source == "KMFR - MEDFORD AIRPORT, NCDC")
