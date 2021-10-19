@@ -23,6 +23,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
+# run master ----
 for (qapp_project_area in project.areas$areas) {
   
   print(qapp_project_area)
@@ -31,6 +32,21 @@ for (qapp_project_area in project.areas$areas) {
   load(paste0(file.name,".RData"))
   
   rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/master/mQAPPrmd/model_QAPP.Rmd",
+                    output_format = "word_document",
+                    output_dir = output.dir,
+                    output_file=paste0("QAPP_",file.name, ".docx"))
+  
+}
+
+# run branches ----
+for (qapp_project_area in project.areas$areas) {
+  
+  print(qapp_project_area)
+  
+  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
+  load(paste0(file.name,".RData"))
+  
+  rmarkdown::render(input=paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/",file.name,"/mQAPPrmd/model_QAPP.Rmd"),
                     output_format = "word_document",
                     output_dir = output.dir,
                     output_file=paste0("QAPP_",file.name, ".docx"))
