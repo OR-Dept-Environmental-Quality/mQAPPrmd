@@ -252,16 +252,11 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-#<<<<<<< master
-#  dplyr::filter(!Source == "DEQ FILE")
-
-#=======
-  dplyr::filter(!Source == "NO STATION ID, DEQ FILE") %>% 
+  dplyr::filter(!Source == "DEQ FILE") %>% 
   dplyr::filter(!Source == "353036, RAWS") %>% # NU: add this site to the RAWS table
-  dplyr::filter(!Source %in% c("RAWS/NCDC/MESOWEST","STATION ID TBD, RAWS/NCDC/MESOWEST")) %>% # NU
-  dplyr::mutate(Source = ifelse(Source == "NO STATION ID, USFS", "Lake Creek near mouth (No Station ID), USFS")) # NU
+  dplyr::filter(!Source %in% c("STATION ID TBD, RAWS/NCDC/MESOWEST")) %>% # NU
+  dplyr::mutate(Source = ifelse(Source == "USFS", "Lake Creek near mouth (No Station ID), USFS")) # NU
   
-#>>>>>>> North_Umpqua_Subbasin
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
                          source = c("National Oceanic and Atmospheric Association (NOAA)’s National Climatic Data Center (NCDC)",
