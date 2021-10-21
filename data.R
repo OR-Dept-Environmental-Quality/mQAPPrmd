@@ -745,8 +745,11 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::filter(!is.na(`TMDL Document`)) %>% 
     dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
     dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",`Abbreviated Reference`,")")) %>% 
-    dplyr::distinct(tmdls.ref) 
+    dplyr::group_by(`TMDL Document`) %>% 
+    dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",Reference,")")) %>% 
+    dplyr::distinct(tmdls.ref)  
   
   pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
   
@@ -843,17 +846,19 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
   #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
   #sf::st_drop_geometry()
   
-  # _ NLCD ----
-  nlcd.pro.area <- nlcd.tbl %>% 
-    dplyr::ungroup() %>% 
-    dplyr::filter(Project_Na == qapp_project_area) %>% 
-    dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
-    dplyr::arrange(desc(as.numeric(Acres)))
-  
-  nlcd.text.pro.area <- nlcd.text %>% 
-    dplyr::filter(Project_Na == qapp_project_area) 
-  
+# _ NLCD ----
+nlcd.pro.area <- nlcd.tbl %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(Project_Na == qapp_project_area) %>% 
+  dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
+  dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
+  dplyr::arrange(desc(as.numeric(Acres))) %>% 
+  dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land), "Open Water",NLCD_Land)) %>% 
+  tidyr::drop_na(Stream)
+nlcd.text.pro.area <- nlcd.text %>% 
+  dplyr::filter(Project_Na == qapp_project_area) %>% 
+  dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
+  tidyr::drop_na(Stream)
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 

@@ -1076,7 +1076,7 @@ An important step in the TMDL is to perform a source assessment which quantifies
 
 The pollutant addressed in the temperature TMDL is heat. Anthropogenic nonpoint and point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable criteria, cumulatively at the point of maximum impact. Allocated conditions are expressed as solar heat load and solar heat flux (watts, and watts per square meter, respectively). Nonpoint source heat allocations are translated into effective shade surrogate measures. Effective shade surrogate measures provide site-specific targets for land managers. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations. Point source waste load allocations are based on the applicable temperature criteria plus a portion of the 0.3 deg-C human use allowance. The portion of the human use allowance allocated to each point source will be determined in the TMDL. Generally, all human sources (point and nonpoint) combined cannot have a cumulative increase greater than 0.3 deg-C above the applicable temperature criteria.
 
-Stream temperatures were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.a$'Model Version')`) for the Columbia Slough and Johnson Creek. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective shade.
+Stream temperatures were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.a$'Model Version')`) for the Columbia Slough and Johnson Creek, respectively. Site-specific load allocations have been developed for the streams that were simulated. Other streams are assigned generalized load allocations based on potential vegetation and effective shade.
 
 ## Model selection
 
@@ -1292,7 +1292,7 @@ This scenario evaluates the stream temperature response from background sources 
 
 This scenario evaluates the stream temperature response with streamside vegetation at restored conditions. The stream temperature warming or cooling contributed by removal of streamside vegetation is evaluated by comparing this scenario to the current condition model. Elements of this scenario or scenarios may include:
 
-* Restoring streamside vegetation in areas along the model extent that are currently characterized as lacking streamside vegetation because of anthropogenic disturbance. The restored vegetation type, height, density, and overhang are identified in the `r pro.area.tmdls`.
+* Restoring streamside vegetation in areas along the model extent that are currently characterized as lacking streamside vegetation because of anthropogenic disturbance. The restored vegetation type, height, density, and overhang are identified in the Willamette Basin TMDL and WQMP (DEQ, 2006).
 
 *	Model inputs for land cover height, canopy density, and overhang will be modified to reflect the restored conditions.
 
@@ -1350,7 +1350,7 @@ This scenario evaluates stream temperature response from improvements to channel
 
 ## TMDL waste load allocations
 
-This scenario evaluates stream temperature warming or cooling from the TMDL Waste Load Allocations. These scenarios will be compared to the background model scenario to evaluating attainment of the human use allowance allocations. Elements of this scenario or scenarios may include:    
+This scenario evaluates stream temperature warming or cooling from the TMDL Waste Load Allocations. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations. Elements of this scenario or scenarios may include:    
 
 *	Modifying point source discharges to reflect proposed or existing TMDL Waste Load Allocations.    
 
