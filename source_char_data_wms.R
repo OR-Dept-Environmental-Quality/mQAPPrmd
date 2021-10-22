@@ -1,10 +1,10 @@
-# The script organizes the data that are used for the Source characteristics section.
+# The script organizes the data that are used for the Source characteristics section for Willamette Mainstem Only.
 # The outputs include :
-# -GIS shapefile of DMAs/RPs within 100 meters of the model extent stream centerline
+# -GIS shapefile of DMAs/RPs within 300 meters of the model extent stream centerline
 # -Rdata file summarizing for each DMA the total area (acres) and the percentage of area within 
-#  100 meters of the model extent stream centerline
+#  300 meters of the model extent stream centerline
 # -Rdata file summarizing for each NLCD landcover class the total area (acres) and the percentage of area within 
-#  100 meters of the model extent stream centerline
+#  300 meters of the model extent stream centerline
 
 library(sf)
 library(rgdal)
@@ -58,47 +58,8 @@ nlcd_df <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QA
 nlcd_df <- foreign::read.dbf(nlcd_df, as.is = TRUE)
 
 # Read in Model polyline extents
-map_hs_temp_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis",
-                                        layer = "hs_temp_model_extent", stringsAsFactors = FALSE) %>%
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>% 
-  dplyr::select(Stream, Project_Na) %>% 
-  dplyr::mutate(Stream = dplyr::case_when(Stream == "Sandy River" ~ "Sandy River (2001)",
-                                          Stream == "Bull Run River" ~ "Bull Run River (2001)", 
-                                          TRUE ~ Stream))
-
-map_hs_solar_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis",
-                                         layer = "hs_solar_model_extent", stringsAsFactors = FALSE) %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream, Project_Na)
-
 map_ce_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis",
                                    layer = "ce_model_extent_Willamette", stringsAsFactors = FALSE) %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream, Project_Na)
-
-map_bes_model_extent <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/bes_pro_reaches.shp",
-                                    layer = "bes_pro_reaches")  %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream = NAME, Project_Na)
-
-map_hs_fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
-                                      layer = "fish_creek_2009")  %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream, Project_Na)
-
-map_hs_sandy_2016 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/sandy_2016.shp",
-                                 layer = "sandy_2016") %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream, Project_Na)
-
-map_hs_walla_walla_2017 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/walla_walla_2017.shp",
-                                       layer = "walla_walla_2017") %>% 
   sf::st_transform(2992) %>% 
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
@@ -124,13 +85,14 @@ lookup_model_extents <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temp
 # end check
 
 # Combine into one feature and dissolve by stream and project area
-model_extents <- rbind(map_hs_temp_model_extent, 
-                       map_hs_solar_model_extent, 
-                       map_ce_model_extent, 
-                       map_hs_sandy_2016, 
-                       map_hs_fish_creek_2009,
-                       map_bes_model_extent,
-                       map_hs_walla_walla_2017) %>%
+model_extents <- rbind(#map_hs_temp_model_extent, 
+  #map_hs_solar_model_extent, 
+  map_ce_model_extent#, 
+  #map_hs_sandy_2016, 
+  #map_hs_fish_creek_2009,
+  #map_bes_model_extent,
+  #map_hs_walla_walla_2017
+) %>%
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins", "Bear Creek (Wallowa)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Rogue River Basin", "Bear Creek (Rogue)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "Rogue River Basin", "Elk Creek (Rogue)", Stream)) %>% 
@@ -143,7 +105,7 @@ model_extents <- rbind(map_hs_temp_model_extent,
   dplyr::summarise()
 
 # check
-sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE)
+sf::st_write(model_extents, paste0(output_gis_dir,"model_extents_wms.shp"), delete_layer=TRUE)
 
 # Read in county outline feature
 county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
@@ -151,11 +113,11 @@ county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnt
   dplyr::select(County=COUNTY_NAM) %>%
   dplyr::mutate(County=stringr::str_to_title(County))
 
-# Buffer streams by 100 m
-model_buff <- sf::st_buffer(model_extents, dist = units::set_units(100, m))
+# Buffer streams by 300 m for Willamette MS
+model_buff <- sf::st_buffer(model_extents, dist = units::set_units(300, m))
 
 # check
-sf::st_write(model_buff, paste0(output_gis_dir,"model_buff.shp"), delete_layer=TRUE)
+sf::st_write(model_buff, paste0(output_gis_dir,"model_buff_wms.shp"), delete_layer=TRUE)
 
 # intersect stream buffer with counties. The purpose is the get a list of 
 # all the counties that need to be loaded for each stream
@@ -171,7 +133,7 @@ sort(unique(model_buff_county$County))
 model_buff_nlcd <- sf::st_transform(model_buff, crs = sf::st_crs(nlcd))
 
 # check
-sf::st_write(model_buff_nlcd, paste0(output_gis_dir,"model_buff_nlcd.shp"), delete_layer=TRUE)
+sf::st_write(model_buff_nlcd, paste0(output_gis_dir,"model_buff_nlcd_wms.shp"), delete_layer=TRUE)
 
 # intersect stream buffer with NCLD, only return a data frame
 extract_fun <- function(y, x=nlcd) {
@@ -259,8 +221,8 @@ nlcd.text <- nlcd.text.tbl %>%
                                       n==3 ~ gsub("((?:[^,]+, ){1}[^,]+),", "\\1, and", text),
                                       TRUE ~ text))
 
-save(nlcd.tbl, file = paste0(output_rdata_dir,"nlcd.tbl.RData"))
-save(nlcd.text, file = paste0(output_rdata_dir,"nlcd.text.RData"))
+save(nlcd.tbl, file = paste0(output_rdata_dir,"nlcd.tbl_wms.RData"))
+save(nlcd.text, file = paste0(output_rdata_dir,"nlcd.text_wms.RData"))
 
 # -- DMA area along the model extent -----------------------------------------
 
@@ -322,7 +284,7 @@ model_buff_dma <- model_buff_dma_rp %>%
   dplyr::left_join(dmaLU)
 
 # Output to shapefile
-sf::st_write(model_buff_dma , paste0(output_gis_dir,"model_buff_dma.shp"), delete_layer=TRUE)
+sf::st_write(model_buff_dma , paste0(output_gis_dir,"model_buff_dma_wms.shp"), delete_layer=TRUE)
 
 # Summarize by DMA/RP. Total Acres in buffer and percentage
 dma.tbl <- model_buff_dma %>%
@@ -339,7 +301,7 @@ dma.tbl <- model_buff_dma %>%
 
 sum(dma.tbl$Percentage)
 
-save(dma.tbl, file = paste0(output_rdata_dir, "dmas.RData"))
+save(dma.tbl, file = paste0(output_rdata_dir, "dmas_wms.RData"))
 
 # only for checking
 #save.image(file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/source_char_",Sys.Date(),".RData"))

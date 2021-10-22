@@ -13,6 +13,7 @@ library(RAWSmet) # RAWS
 library(mesowest) # MesoWest
 mesowest::requestToken(apikey = "KyGeNUAVnZg7VgSnUe9zVv15e1yg2hxTUnZ4SdZw0y") # MesoWest
 library(rvest)
+library(lubridate)
 
 file.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/download/"
 ### for Willamette Mainstem QAPP: 
@@ -71,9 +72,9 @@ for (id in unique(sort(usgs.gh.stations$site_no))) {
   
   print(id)
   usgs.gh.data.i <- dataRetrieval::readNWISdata(siteNumber = id,
-                                                   parameterCd = "00065",
-                                                   startDate = "2010-01-01", # Ryan's suggestion
-                                                   endDate = "2020-12-31")
+                                                parameterCd = "00065",
+                                                startDate = "2010-01-01", # Ryan's suggestion
+                                                endDate = "2020-12-31")
   usgs.gh.data <- dplyr::bind_rows(usgs.gh.data,usgs.gh.data.i)
   
 }
@@ -116,18 +117,19 @@ owrd.stations.nbr <- owrd.stations.or %>%
 
 owrd.data.or <- NULL
 for(station in owrd.stations.nbr) {
-owrd.data.ind <- owrd_data(station = station,
-                       startdate = "1/1/1990",
-                       enddate = "12/31/2020",
-                       char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
-owrd.data.or <- rbind(owrd.data.or,owrd.data.ind)
+  owrd.data.ind <- owrd_data(station = station,
+                             startdate = "1/1/1990",
+                             enddate = "12/31/2020",
+                             char = c("MDF", "WTEMP_MAX")) # MDF - Mean Daily Flow
+  owrd.data.or <- rbind(owrd.data.or,owrd.data.ind)
 }
 
 save(owrd.stations.or, owrd.data.or, file="owrd.RData") # updated date: 3/4/2021
 
 # NCEI Station Meta ----
 # https://www.ncdc.noaa.gov/homr/reports
-ncei <- read.delim(paste0(file.dir,"emshr_lite.txt"))
+#ncei <- read.delim(paste0(file.dir,"emshr_lite.txt"))
+ncei <- readxl::read_xlsx(paste0(file.dir, "emshr_lite.xlsx"), sheet = "1990-2020")
 
 ncei.databases <- c("NCDC","COOP","WBAN","ICAO","FAA","NWSLI","WMO   TRANS","GHCND") 
 
@@ -235,11 +237,15 @@ for(stationID in unique(sort(hydromet$Station.ID))){
                   `Station ID` = stationID)
   hydromet.data <- rbind(hydromet.data,df)
 }
+hydromet <- hydromet %>% 
+  dplyr::filter(Station.ID %in% hydromet.data$`Station ID`) # only keep the stations with the data from 1990-2020
 save(hydromet,hydromet.data, file=paste0(file.dir,"hydromet.RData"))# updated date: 5/8/2021
 
 # MesoWest Met Data ----
 ## Github: https://github.com/fickse/mesowest
-mw.meta <- mesowest::mw(service = "metadata", state = "OR")
+mw.meta.download <- mesowest::mw(service = "metadata", state = "OR")
+mw.meta <- mw.meta.download$STATION %>% 
+  dplyr::filter(as.numeric(substring(mw.meta.download$STATION$PERIOD_OF_RECORD$start, 1, 4))>=1990 & as.numeric(substring(mw.meta.download$STATION$PERIOD_OF_RECORD$start, 1, 4))<=2020)
 mw.variables.list  <- mesowest::mwvariables()
 mw.variables <- data.frame(matrix(unlist(mw.variables.list$VARIABLES)))
 mw.variables.clean <- mw.variables %>% 
@@ -291,9 +297,16 @@ save(doe.stations.pro.area, doe.data.pro.area, file=paste0(file.dir,"doe.RData")
 ## COP: https://aquarius.portlandoregon.gov/
 devtools::install_github("TravisPritchardODEQ/odeqIRextdata")
 library(odeqIRextdata)
-library (readr)
-urlfile <- "https://raw.githubusercontent.com/TravisPritchardODEQ/odeqIRextdata/master/BES_stations.csv"
-bes.stations <- read_csv(url(urlfile))
+#library (readr)
+#urlfile <- "https://raw.githubusercontent.com/TravisPritchardODEQ/odeqIRextdata/master/BES_stations.csv"
+#bes.stations <- readr::read_csv(url(urlfile))
+
+# Use the station list provided by Peter Bryant from COP.
+bes.stations <- readxl::read_xlsx(paste0(file.dir, "cop_stations.xlsx"), sheet = "2021-08-03 Surface Water Time S") %>% 
+  dplyr::filter(Parameter == "Temperature",
+                Label == "Primary",
+                Unit == "degC") %>% 
+  dplyr::select("LocationIdentifier","LocationName","Latitude","Longitude","LocationType")
 bes.stations.id <- bes.stations %>% 
   dplyr::pull(LocationIdentifier)
 
@@ -304,7 +317,32 @@ char=c("Temperature.Primary") # 'Temperature.Primary' - Continuous Water tempera
 
 bes.data <- odeqIRextdata::copbes_data(station, startdate, enddate, char) %>% 
   dplyr::filter(Grade.Code == 100, # 100=Good
-                Approval.Level == 1200) # 1200=Approved
+                Approval.Level == 1200) %>%  # 1200=Approved
+  dplyr::mutate(date = lubridate::date(as.Date(datetime))) %>% 
+  dplyr::group_by(date, Monitoring_Location_ID, Result.Unit) %>% 
+  dplyr::summarize(Result_Numeric = max(Result.Value)) %>% 
+  dplyr::mutate(Char_Name = "daily_max_water_temp")
 
-save(bes.stations, bes.data, file=paste0(file.dir,"bes.RData")) # download date: 7/9/2021
+# check ----
+station <- bes.stations.id
+startdate <- "2015-01-01"
+enddate <- "2016-12-31"
+char=c("Temperature.Primary") # 'Temperature.Primary' - Continuous Water temperature (deg C)
 
+bes.data.1516 <- odeqIRextdata::copbes_data(station, startdate, enddate, char) %>% 
+  dplyr::filter(Grade.Code == 100, # 100=Good
+                Approval.Level == 1200) %>%  # 1200=Approved
+  dplyr::mutate(date = lubridate::date(as.Date(datetime))) %>% 
+  dplyr::group_by(date, Monitoring_Location_ID, Result.Unit) %>% 
+  dplyr::summarize(Result_Numeric = max(Result.Value)) %>% 
+  dplyr::mutate(Char_Name = "daily_max_water_temp")
+
+bes.data.check <- bes.data %>% 
+  dplyr::group_by(Monitoring_Location_ID) %>% 
+  dplyr::summarise(date_range = paste(range(date)[1]," - ",range(date)[2])) %>% 
+  dplyr::ungroup()
+
+write.csv(bes.data.check, paste0(file.dir,"bes_data_check.csv"))
+# end check ----
+
+save(bes.stations, bes.data, file=paste0(file.dir,"bes.RData")) # download date: 8/11/2021

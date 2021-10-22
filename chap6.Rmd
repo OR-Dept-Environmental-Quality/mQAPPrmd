@@ -1,7 +1,7 @@
 ---
 output: 
   word_document:
-    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -36,22 +36,17 @@ model.extent <- na.omit(model.extent)
 
 ## `r waterbody_name`
 
+`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")`
+
 ### Model domain
 
 ```{r, label=`t6x1`, include=FALSE}
 
-if(length(section.model.info$`Model Extent Text`)>1){
-  
-  model.domain <- unique(sort(section.model.info$`Model Extent Text`))
-  
-} else {
-  
-  model.domain <- section.model.info$`Model Extent Text`
-  
-} 
+model.domain <- unique(sort(section.model.info$`Model Extent Text`))
+
 ```
 
-The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
 
 ### Spatial and temporal resolution
 
@@ -64,7 +59,7 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 ```{r, label=`sc`, include=FALSE}
 
 ## 1st paragraph
-source.char <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",
+source.char <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_Sandy.xlsx",
                                  sheet = "sandy_sourceChar") %>%
   dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
   dplyr::pull()
@@ -107,7 +102,6 @@ if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salm
 nlcd.waterbody <- nlcd.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
                 "Percent of Total Acres" = Percentage)
 
@@ -126,7 +120,6 @@ nlcd.text.waterbody <- nlcd.text.pro.area %>%
 dma.waterbody <- dma.pro.area %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("DMA or Responsible Person" = DMA_RP,
                 "Percent of Total Acres" = Percentage) 
 
@@ -134,7 +127,7 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                            caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                                            caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
   
 }
 
@@ -146,7 +139,7 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
 
 `r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)") & npdes.ind.n > 0){npdes.ind.tbl}`
 
-`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The majority land use ", if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}, " along the ",waterbody_name, " ", if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}, " ", if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}, " accounting for about ", if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}, " percent of the near stream area. ", tbls(name =paste0("nlcd.waterbody_",waterbody_name),display="cite"), " summarizes all the land uses within 100 meters of the digitized ", waterbody_name, " centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al., 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.")}`
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The majority land use ", if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}, " along the ",waterbody_name, " ", if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}, " ", if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}, " accounting for about ", if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}, " percent of the near stream area. ", if(NROW(nlcd.waterbody)>0){tbls(name =paste0("nlcd.waterbody_",waterbody_name),display="cite")}, " summarizes all the land uses within 100 meters of the digitized ", waterbody_name, " centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al., 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.")}`
 
 `r if(waterbody_name == "Bull Run River (2016)"){paste0("There are no permitted NPDES point sources in the Bull Run Watershed.")}`
 
@@ -162,9 +155,9 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
 
 `r if(waterbody_name == "Bull Run River (2016)"){paste0("Based on modeling completed for the 2005 TMDL (DEQ, 2005), the drinking water supply project results in cooler temperatures downstream of Dam 2 in August compared to temperatures under natural flows. The TMDL model focused on a single day, August 8, 2001, and did not evaluate temperature impacts during other periods. The 2005 TMDL established a surrogate measure temperature target at Larson’s Bridge. This location corresponds to where the model predicted the maximum stream temperatures occur. Based on monitoring information provided by the City of Portland to DEQ, the project typically attains the surrogate measure during the summer period and has more difficulty attaining the target in autumn when the supply of cooler water is diminished and the reservoirs become less thermally stratified.")}`
 
-`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("Anthropogenic warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}`
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}`
 
-`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ", tbls(name = paste0("dma.waterbody",waterbody_name),display="cite"), " summarizes the potential designated management agencies and responsible persons along the ", waterbody_name, " model extent.")}`
+`r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)")){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ", if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}, " summarizes the potential designated management agencies and responsible persons along the ", waterbody_name, " model extent.")}`
 
 `r if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy River (2001)") & NROW(dma.waterbody)>0){dma.wb.tbl}`
 
@@ -178,13 +171,12 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
 
 ```{r, label=`tf`, include=FALSE}
 
-tf <- tmdl.mod.2 %>% 
-  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
-  pull(Model_version)
+model_period_start <- as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30")
+model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30")
 
 ```
 
-`r if(tf == "Heat Source Version 6"){paste0("The model period is for a single day: ",format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"),".")}else{paste0("The model period is ", format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y"), " to ", format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y"), ".")}`
+`r if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}`
 
 ### Important assumptions
 
@@ -211,33 +203,72 @@ if(!model.extent == TRUE){
   
 } else {
   
-  t6x6_met <- section.model.input %>% 
-    dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>%
-    dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
-    dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
-    dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
-                     Parameter = toString(unique(sort(Parameter))))%>% 
-    dplyr::ungroup() %>%
-    dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
-                  `Input Type` = `Model Location Type`)
+  if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+    
+    t6x6_met <- section.model.input %>% 
+      dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>%
+      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
+      dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
+      dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
+                       Parameter = toString(unique(sort(Parameter))))%>% 
+      dplyr::ungroup() %>%
+      dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
+                    `Input Type` = `Model Location Type`)
+    
+    t6x6_1 <- section.model.input %>% 
+      dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
+      dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
+                                                                `Model Location Name`,
+                                                                paste0(`Model Location Name`, " (", `Station ID`, ")")),
+                    `Model Location` = round(`Model Location`,2),
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
+      dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
+      dplyr::rename(`Input Type` = `Model Location Type`) %>% 
+      dplyr::arrange(`Input Type`,Parameter,desc(as.numeric(`Model Location`))) %>% 
+      rbind(t6x6_met)
+    
+  }
   
-  t6x6_1 <- section.model.input %>% 
-    dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
-    dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
-                                                              `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                  `Model Location` = round(`Model Location`,2),
-                  `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
-    dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
-    dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-    rbind(t6x6_met) %>% 
-    dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
+  if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+    
+    t6x6_met <- section.model.input %>% 
+      dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>%
+      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
+      dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
+                                                                `Model Location Name`,
+                                                                paste0(`Model Location Name`, " (", `Station ID`, ")"))) %>% # Willamette MS
+      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`, `Location Units`, `Model Location Type`, `Data Source`,Note) %>%    # Willamette MS
+      dplyr::summarize(#`Model Location` = toString(unique(sort(round(`Model Location`,2)))),                                # Willamette MS
+        Parameter = toString(unique(sort(Parameter))))%>% 
+      dplyr::ungroup() %>%
+      dplyr::rename(# `Model Location Name (Station ID)` = `Station ID`,                                                     # Willamette MS
+        `Input Type` = `Model Location Type`)
+    
+    t6x6_1 <- section.model.input %>% 
+      dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
+      dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
+                                                                `Model Location Name`,
+                                                                paste0(`Model Location Name`, " (", `Station ID`, ")")),
+                    #`Model Location` = round(`Model Location`,2),                                                           # Willamette MS
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
+      dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
+      dplyr::rename(`Input Type` = `Model Location Type`) %>% 
+      dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`)) %>% 
+      rbind(t6x6_met)
+    
+  }
   
   t6x6_col <- t6x6_1 %>% 
     dplyr::filter(!is.na(`Location Units`))
@@ -254,15 +285,9 @@ if(NROW(t6x6_1)>0){
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
                                                caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
-    
-  }else{
-    
-    t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
-                                caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
-  }
+}
   
-}else{
+} else {
   
   t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
@@ -285,7 +310,7 @@ t6x6_2 <- section.model.input %>%
 
 `r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
 
-`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
+`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
 
 ### Model calibration
 
@@ -304,25 +329,53 @@ if(!model.extent == TRUE){
   
 } else {
   
-  t6x7 <- section.model.input %>% 
-    dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-    dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                  `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                  `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                  `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
-                  Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
-                  `Model Location` = round(`Model Location`,2),
-                  `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
-                  `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
-                  `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                  `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
-                                                              `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
-    dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
-    dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
-    dplyr::rename(`Calibration Parameter` = `Parameter`)
+  if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+    
+    t6x7 <- section.model.input %>% 
+      dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                    Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                    `Model Location` = round(`Model Location`,2),
+                    `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                    `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
+                    `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                    `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                                `Model Location Name`,
+                                                                paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
+      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+      dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+      dplyr::ungroup() %>% 
+      dplyr::arrange(Parameter,desc(as.numeric(`Model Location`))) %>% 
+      dplyr::rename(`Calibration Parameter` = `Parameter`)
+    
+  }
+  
+  if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+    
+    t6x7 <- section.model.input %>% 
+      dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                    Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                    #`Model Location` = round(`Model Location`,2),
+                    `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                    `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
+                    `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                    `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                                `Model Location Name`,
+                                                                paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
+      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+      dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+      dplyr::ungroup() %>% 
+      dplyr::arrange(Parameter,desc(`Model Location`)) %>% #
+      dplyr::rename(`Calibration Parameter` = `Parameter`)
+    
+  }
   
   t6x7_col <- t6x7 %>% 
     dplyr::filter(!is.na(`Location Units`))
@@ -333,16 +386,11 @@ if(!model.extent == TRUE){
 
 if(NROW(t6x7)>0){
   
+ if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){
   
-  if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){
-    
-    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
-    
-  } else {
-    
-    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
-    
-  }
+  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
+  
+}
   
 }
   
@@ -358,6 +406,6 @@ if(NROW(t6x7)>0){
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("The expected temperature, and flow calibration sites for the ",waterbody_name," model are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". The model location in the table describes the distance of each input from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}else{paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1 General model inputs and parameters.")}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], " The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`

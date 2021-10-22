@@ -1,7 +1,7 @@
 ---
 output: 
   word_document:
-    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -40,7 +40,7 @@ The following bulleted list of input categories and specific inputs describes th
 
     +	Channel hydraulics – These inputs include stream gradient, bottom width, side slope angle, and Manning’s *n*. Channel hydraulics are important for predicting stream temperatures because they govern the surface area of water that could be exposed to solar radiation, the residence time for exposure, and the degree of light penetration into the water column. An alternative input to channel side slope input in Heat Source version 7 is the input of a width to depth ratio. Field data for these inputs are often difficult to collect over large spatial scales, and values can vary significantly on a small scale. Heat Source is a one-dimensional model and complex channel configurations are represented as a trapezoidal pattern. Adjustments to inputs that affect channel hydraulic are often necessary to calibrate the model.    
   
-    +	Bed conduction – These inputs include hyporheic zone thickness, percent hyporheic exchange, and porosity. Bottom width and side slope angle also affect these inputs by controlling the wetted perimeter of the channel (i.e., the portion or lateral length of the channel bed in direct contact with the stream). These stream morphological characteristics largely govern heat and mass transfer across the stream bed. Typically information on the waterbody sediment size class (e.g. bedrock, gravel, sand, silt) is used as the basis for selecting literature values for these inputs.    
+    +	Bed conduction – These inputs include hyporheic zone thickness, percent hyporheic exchange, and porosity. Bottom width and side slope angle also affect these inputs by controlling the wetted perimeter of the channel (i.e., the portion or lateral length of the channel bed in direct contact with the stream). These stream morphological characteristics largely govern heat and mass transfer across the stream bed. Typically, information on the waterbody sediment size class (e.g. bedrock, gravel, sand, silt) is used as the basis for selecting literature values for these inputs.    
   
 *	Meteorology – The two meteorological inputs typically modified in calibration are percent cloudiness and wind speed. Both cloudiness and wind speed can vary significantly on a small geographic scale and the distance to the source of the meteorological data is often much greater than the small-scale localized weather. Hence, adjusting wind and cloudiness is an appropriate calibration method to account for more site-specific weather patterns.    
 

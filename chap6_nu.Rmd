@@ -1,7 +1,7 @@
 ---
 output: 
   word_document:
-    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/Report_Template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -18,7 +18,9 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "North Umpqua River"
+# for test: waterbody_name <- "North Umpqua River (Spawning period)"
+# for test: waterbody_name <- "North Umpqua River (Summer period)"
+# for test: waterbody_name <- "Lake Creek (Spawning period)"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -32,30 +34,129 @@ model.extent <- ifelse(NROW(section.model.input)>0,
 
 model.extent <- na.omit(model.extent)
 
+section.model.info.nu <- section.model.info %>% 
+  dplyr::mutate(figName = ifelse(`Model Waterbody` %in% c("Canton Creek (Spawning period)"),"North_Umpqua_Canton_Creek.jpg",
+                                 ifelse(`Model Waterbody` %in% c("Cavitt Creek (Spawning period)"),"North_Umpqua_Cavitt_Creek.jpg",
+                                        ifelse(`Model Waterbody` %in% c("Fish Creek (2009) (Spawning period)"),"North_Umpqua_Fish_Creek.jpg",
+                                               ifelse(`Model Waterbody` %in% c("Lake Creek (Spawning period)"),"North_Umpqua_Lake_Creek.jpg",
+                                                      ifelse(`Model Waterbody` %in% c("Little River (Spawning period)"),"North_Umpqua_Little_River.jpg",
+                                                             ifelse(`Model Waterbody` %in% c("Rock Creek (Spawning period)"),"North_Umpqua_Rock_Creek.jpg",
+                                                                    ifelse(`Model Waterbody` %in% c("Steamboat Creek (Spawning period)"),"North_Umpqua_Steamboat_Creek.jpg",NA)))))))) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Canton Creek (Summer period)","Canton Creek (Spawning period)"),"Canton Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Cavitt Creek (Summer period)","Cavitt Creek (Spawning period)"),"Cavitt Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Clearwater River (Summer period)"),"Clearwater River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2001) (Summer period)"),"Fish Creek (2001)",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2009) (Summer period)","Fish Creek (2009) (Spawning period)"),"Fish Creek (2009)",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Lake Creek (Summer period)","Lake Creek (Spawning period)"),"Lake Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Little River (Summer period)","Little River (Spawning period)"),"Little River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)"),"North Umpqua River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Rock Creek (Summer period)","Rock Creek (Spawning period)"),"Rock Creek",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`))
+
+waterbody_name_nu <- unique(section.model.info.nu$`Model Waterbody`)
+
+waterbody_spawning_nu <- c("Canton Creek (Spawning period)",
+                           "Cavitt Creek (Spawning period)",
+                           "Fish Creek (2009) (Spawning period)",
+                           "Lake Creek (Spawning period)",
+                           "Little River (Spawning period)",
+                           "Rock Creek (Spawning period)",
+                           "Steamboat Creek (Spawning period)")
+
 ```
 
-## `r paste0(waterbody_name, " (Summer Period)")`
+`r if(waterbody_name == "Clearwater River (Summer period)"){paste0("## Clearwater River (Spawning Period)")}`
+
+`r if(waterbody_name == "Clearwater River (Summer period)"){paste0("Clearwater River will not be modeled for the spawning period. It is listed as attaining temperature standards in the 2018 Integrated Report.")}`
+
+## `r waterbody_name`
+
+```{r tt-fig, eval.after="fig.cap", fig.cap=tt_fig.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+
+if(waterbody_name %in% waterbody_spawning_nu){
+  
+  tt_fig.cap <- figs(name=paste0("tt.fig",waterbody_name), caption = paste0("Map of ",waterbody_name," Model Inputs."))
+  knitr::include_graphics(path = paste0("./fig/",section.model.info.nu$figName))
+  
+}
+
+```
+
+```{r tt-nua, eval.after="fig.cap", fig.cap=tt_nua.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+
+if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
+  
+  tt_nua.cap <- figs(name="tt_fig_nu1", caption = "Map of North Umpqua River Spawning Period Models 1-4 Inputs.")
+  knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_1-4.jpg")
+  
+}
+
+```
+
+```{r tt-nub, eval.after="fig.cap", fig.cap=tt_nub.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+
+if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
+  
+  tt_nub.cap <- figs(name="tt_fig_nu2", caption = "Map of North Umpqua River Spawning Period Model 5 Inputs.")
+  knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_5.jpg")
+  
+}
+
+```
+
+```{r tt-nuc, eval.after="fig.cap", fig.cap=tt_nuc.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+
+if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
+  
+  tt_nuc.cap <- figs(name="tt_fig_nu3", caption = "Map of North Umpqua River Spawning Period Model 6 Inputs.")
+  knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_6.jpg")
+  
+}
+
+```
+
+`r if(waterbody_name %in% "Cavitt Creek (Summer period)"){paste0("[Update: From the older version. Please review.] Cavitt Creek is a major tributary to the Little River and was modeled in both the Little River TMDL as well as the Umpqua River Basin TMDL. As described in the Umpqua River Basin TMDL (DEQ, 2006), the Cavitt Creek watershed has experienced timber harvest activities resulting in current temperatures that are warmer than the natural thermal potential of the stream.")}`
+
+`r if(waterbody_name %in% "Clearwater River (Summer period)"){paste0("[Update: From the older version. Please review.] Clearwater River is a tributary to the North Umpqua River at Toketee Reservoir. Clearwater River is part of Pacific Power hydroelectric project area and flow below Stump Lake has been reduced by hydroelectric water diversion. As described in the Umpqua River Basin TMDL (DEQ, 2006), the Clearwater River simulation begins at Stump Lake (near river mile 8.1). Since the natural thermal potential scenario has more instream flow than the current condition, there is less variability in the temperature profile. Powerhouse #1 is located near river mile 5, where the current temperature drops approximately 5°C. This temperature decrease is a result of previously diverted water coming back to the Clearwater River through Powerhouse #1.")}`
+
+`r if(waterbody_name %in% "Fish Creek (2001) (Summer Period)"){paste0("[Update: From the older version. Please review.] Fish Creek is part of Pacific Power hydroelectric project area and enters the North Umpqua River below Slide Creek Dam and above Soda Springs Dam. The Umpqua River Basin TMDL (DEQ, 2006) found Fish Creek to be slightly below the numeric criterion (18°C). The assimilative capacity was allocated to PacifiCorp, in the form of their 401 certification.")}`
+
+`r if(!waterbody_name == "Fish Creek (2009) (Spawning period)"){paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")}else{paste0("The existing PacifiCorp 2009 model will be adapted for the spawning period and adapted as needed.")}`
 
 ### Model domain
 
-```{r, label=`t6x1`, include=FALSE}
+```{r, label=`t6x1`, echo=FALSE}
 
-if(length(section.model.info$`Model Extent Text`)>1){
-  
-  model.domain <- unique(sort(section.model.info$`Model Extent Text`))
-  
-} else {
-  
-  model.domain <- section.model.info$`Model Extent Text`
-  
-} 
+model.domain <- unique(sort(section.model.info$`Model Extent Text`))
+
 ```
 
-The extent of the model domain is the `r model.domain`
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)")){paste0("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek. Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated. The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Spawning period)")){paste0("The North Umpqua River simulation consists of six separate Heat Source models, separated by each reservoir or diversion dam and Steamboat Creek (Figure 8-10). Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 1: Lemolo Reservoir to Lemolo Powerhouse #1.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 2: Lemolo Powerhouse #1 to Toketee Reservoir.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 3: Toketee Reservoir to Slide Powerhouse.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 4: Slide Powerhouse to Soda Springs Reservoir.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 5: Soda Springs Reservoir to Steamboat Creek.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 6: Steamboat Creek to Mouth.")}`
+
+`r if(waterbody_name %in% c("Canton Creek (Spawning period)","Rock Creek (Spawning period)")){paste0("The extent of the model domain is the ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"),"). The extent differs from the summer model due to data availability.")}`
+
+
+`r if(waterbody_name %in% c("Cavitt Creek (Spawning period)","Fish Creek (2009) (Spawning period)","Lake Creek (Spawning period)","Little River (Spawning period)","Steamboat Creek (Spawning period)")){paste0("The extent of the model domain is the ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"), ").")}`
+
+`r if(waterbody_name %in% c("Canton Creek (Summer period)","Cavitt Creek (Summer period)","Clearwater River (Summer period)","Fish Creek (2001) (Summer period)","Fish Creek (2009) (Summer period)","Lake Creek (Summer period)","Little River (Summer period)","Rock Creek (Summer period)","Steamboat Creek (Summer period)")){paste0("The extent of the model domain is the ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
 
 ### Spatial and temporal resolution
 
-The model input sampling rate (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Output is generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")`.
+The model input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
 
 A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.
 
@@ -65,7 +166,7 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
-  dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name), x=`Stream Name`, ignore.case = TRUE)) %>% 
+  dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name_nu), x=`Stream Name`, ignore.case = TRUE)) %>% 
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
@@ -80,7 +181,7 @@ if(npdes.ind.n>0){
   
   npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+                                               caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name_nu, ".")))
   
 }
 
@@ -98,9 +199,8 @@ if(npdes.ind.n > 1) {
 
 # NLCD
 nlcd.waterbody <- nlcd.pro.area %>% 
-  dplyr::filter(Stream == waterbody_name) %>% 
+  dplyr::filter(Stream == waterbody_name_nu) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
                 "Percent of Total Acres" = Percentage)
 
@@ -108,18 +208,17 @@ if(NROW(nlcd.waterbody)>0){
   
   nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
+                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name_nu, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
   
 }
 
 nlcd.text.waterbody <- nlcd.text.pro.area %>% 
-  dplyr::filter(Stream == waterbody_name)
+  dplyr::filter(Stream == waterbody_name_nu)
 
 # DMA
 dma.waterbody <- dma.pro.area %>% 
-  dplyr::filter(Stream == waterbody_name) %>% 
+  dplyr::filter(Stream == waterbody_name_nu) %>% 
   dplyr::select(DMA_RP,Acres,Percentage) %>% 
-  dplyr::arrange(desc(Acres)) %>% 
   dplyr::rename("DMA or Responsible Person" = DMA_RP,
                 "Percent of Total Acres" = Percentage) 
 
@@ -127,31 +226,44 @@ if(NROW(dma.waterbody)>0){
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                            caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                                            caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name_nu, " centerline.")))
   
 }
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include, channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these later sources will be investigated as part of the model scenarios. `r npdes.txt`
+The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name_nu` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+
+`r npdes.txt`
 
 `r if(npdes.ind.n > 0){npdes.ind.tbl}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percentage of the near stream area. `r tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name_nu` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name_nu` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
 
 `r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically persons, including designated management agency that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name` model extent. 
+Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.
+
+A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along the `r waterbody_name_nu` model extent. 
 
 `r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
 
 ### Time frame of simulation
 
-The model period is `r format(as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30"), format="%B %d, %Y")` to `r format(as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30"), format="%B %d, %Y")`.
+```{r, label=`timeframe`, echo=FALSE}
+
+model_period_start <- as.Date(as.numeric(unique(section.model.info$"Model Period Start")), origin = "1899-12-30")
+model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period End")), origin = "1899-12-30")
+
+```
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)")){paste0("The model period for North Umpqua Models 1-5 is July 8-11, 2001. The model period for North Umpqua Model 6 is July 12-31, 2002.")}`
+
+`r if(!waterbody_name %in% c("North Umpqua River (Summer period)")){if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{if(waterbody_name %in% c(waterbody_spawning_nu,"North Umpqua River (Spawning period)")){paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ", and the exact dates will be adjusted based on the data availability.")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}}}`
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference")))), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+`r if(waterbody_name %in% waterbody_spawning_nu){paste0("Due to the limited availability of temperature data for the spawning period, surrogate relationships will be determined to establish model inputs. The method will rely on relationships established for stations with data available during both the summer and spawning model periods, and estimations will be based on the assumption that the established relationships will also be true for tributaries without data.")}else{paste0("[Update this section if any changes are proposed to the current condition calibration model.] The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ") the model user guide ", knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))), " or in Section 6 and Section 7 of this document.")}`
 
 ### Model inputs
 
@@ -177,26 +289,27 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
     dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
-    dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
+    dplyr::summarize(`Model Location` = toString(unique(sort(round(as.numeric(`Model Location`),2)))),
                      Parameter = toString(unique(sort(Parameter))))%>% 
     dplyr::ungroup() %>%
     dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
-                  `Input Type` = `Model Location Type`)
+                  `Input Type` = `Model Location Type`) %>% 
+    dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Data Source` == "USFS", "Lake Creek near mouth (No Station ID)", `Model Location Name (Station ID)`)) # NU
   
   t6x6_1 <- section.model.input %>% 
     dplyr::filter(!`Model Location Type` %in%  c("Calibration Site", "Meteorological")) %>% 
     dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
                                                               paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                  `Model Location` = round(`Model Location`,2),
+                  `Model Location` = round(as.numeric(`Model Location`),2),
                   `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                   `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
     dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
     dplyr::rename(`Input Type` = `Model Location Type`) %>% 
-    rbind(t6x6_met) %>% 
-    dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`))
+    dplyr::arrange(`Input Type`,Parameter,desc(as.numeric(`Model Location`))) %>% 
+    rbind(t6x6_met)
   
   t6x6_col <- t6x6_1 %>% 
     dplyr::filter(!is.na(`Location Units`))
@@ -210,17 +323,17 @@ if(!model.extent == TRUE){
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the existing ", waterbody_name, " Heat Source Model.")))
+                                               caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  #t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
@@ -231,9 +344,9 @@ t6x6_2 <- section.model.input %>%
 
 ```
 
-`r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
+`r if(!model.extent == TRUE){}else{if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}}`
 
-`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("Near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
+`r if(!model.extent == TRUE){}else{if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}}`
 
 ### Model calibration
 
@@ -259,16 +372,17 @@ if(!model.extent == TRUE){
                   `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                   `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
                   Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                  `Model Location` = round(as.numeric(`Model Location`),2),
+                  `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                  `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
                   `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                  `Model Location Name` = ifelse(`Model Location Name` %in% c("Mouth to Headwaters","Headwaters to mouth"),"Model extent",`Model Location Name`),
                   `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                               `Model Location Name`,
-                                                              paste0(`Model Location Name`, " (",`Station ID`,")")),
-                  `Model Location` = round(`Model Location`,2)) %>% 
+                                                              paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
     dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
     dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
     dplyr::ungroup() %>% 
-    dplyr::arrange(desc(`Model Location`)) %>% 
+    dplyr::arrange(Parameter, desc(as.numeric(`Model Location`))) %>% 
     dplyr::rename(`Calibration Parameter` = `Parameter`)
   
   t6x7_col <- t6x7 %>% 
@@ -278,9 +392,13 @@ if(!model.extent == TRUE){
   
   t6x7 <- t6x7[,c(1,2,5,4)]
   
-  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
-                           caption = tbls(name = paste0("t6x7", waterbody_name),
-                                          caption = paste0("Calibration sites and parameters used in the existing ", waterbody_name, " Heat Source Model.")))
+  if(NROW(t6x7)>0){
+    
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                             caption = tbls(name = paste0("t6x7", waterbody_name),
+                                            caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
+    
+  }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
@@ -288,26 +406,12 @@ if(!model.extent == TRUE){
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
   
+  t6x7_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {paste0("Model calibration was completed by ", knitr::combine_words(unique(sort(section.model.info$"Calibration Org")))," (", knitr::combine_words(strip_alpha(unique(sort(section.model.info$"Abbreviated Reference")))),"). The model calibration sites and data sources are summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), " to improve documentation of the TMDL approach. ", mod.loc[1], " If it is determined that the model calibration needs to be updated, the model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.2 General model inputs and parameters.")}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". The model location in the table below describes the distance of each calibration site from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
-
-## `r paste0(waterbody_name, " (Spawning period)")`
-
-### Model domain
-
-### Spatial and temporal resolution
-
-### Source characteristics
-
-### Time frame of simulation
-
-### Important assumptions
-
-### Model inputs
-
-### Model calibration

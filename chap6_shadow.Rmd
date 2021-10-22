@@ -1,0 +1,50 @@
+---
+output: 
+  word_document:
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
+    keep_md: yes
+    toc: yes
+    fig_caption: yes
+    fig_width: 12
+    fig_height: 6
+---
+
+```{r, label=`setup-chap6`, include=FALSE}
+knitr::opts_chunk$set(results = "asis",
+                      warning = FALSE,
+                      error = FALSE,
+                      message = FALSE,
+                      autodep = TRUE)
+options(kableExtra.auto_format = F)
+options(knitr.kable.NA = '')
+
+# for test: waterbody_name <- "North Umpqua River"
+
+section.model.info <- model.info %>% 
+  dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+
+section.model.input <- model.input %>% 
+  dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+
+model.extent <- ifelse(NROW(section.model.input)>0,
+                       ifelse(section.model.input$`Model Waterbody` == section.model.input$`Model Extent`, TRUE, FALSE),
+                       TRUE)
+
+model.extent <- na.omit(model.extent)
+
+```
+
+## `r waterbody_name`
+
+`r paste0("The ",gsub("SHADOW ","",waterbody_name)," SHADOW models are shade models developed by the ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),". DEQ does not intend to update these models. If the need arises to revisit some of the modeling, this QAPP will be updated as needed.")`
+
+### Model domain
+
+```{r, label=`t6x1`, include=FALSE}
+
+model.domain <- unique(sort(section.model.info$`Model Extent Text`))
+
+```
+
+The extent of the model domain is the `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
+
