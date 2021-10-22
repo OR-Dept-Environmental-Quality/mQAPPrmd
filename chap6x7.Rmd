@@ -72,7 +72,7 @@ if(NROW(t6x7j)>0){
 
 ```
 
-`r if(NROW(t6x7j)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7j", model_extent, waterbody_name),display="cite"),". The model location in the table below describes the distance of each input from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}`
+`r if(NROW(t6x7j)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7j", model_extent, waterbody_name),display="cite"),". ", mod.loc[1], " The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}`
 
 `r if(NROW(t6x7j)>0){t6x7j_tbl}`
 
