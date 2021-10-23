@@ -30,7 +30,7 @@ qapp_project_area = "Sandy Subbasin"
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   load(paste0(file.name,".RData"))
   
-  rmarkdown::render(input=paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/",file.name,"/mQAPPrmd/model_QAPP.Rmd"),
+  rmarkdown::render(input=paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/Sandy_Subbasin_DEQ21-HQ-0028-QAPP_Version1.0/mQAPPrmd/model_QAPP.Rmd"),
                     output_format = "word_document",
                     output_dir = output.dir,
                     output_file=paste0("QAPP_",file.name, ".docx"))

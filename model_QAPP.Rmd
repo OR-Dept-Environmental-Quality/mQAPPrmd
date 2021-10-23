@@ -1,7 +1,6 @@
 ---
 date: "`r paste0(format(Sys.Date(), '%m/%d/%Y'), ' - DRAFT version XX')`"
 output:
-  officedown::rdocx_document:
   word_document:
     reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
@@ -9,6 +8,7 @@ output:
     fig_caption: yes
     fig_width: 12
     fig_height: 7
+  officedown::rdocx_document:
   html_document:
     toc: yes
     df_print: paged
@@ -44,7 +44,6 @@ library(stringr);library(stringi)
 library(english)
 library(pacman)
 library(httr)
-library(scales)
 
 tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
@@ -519,6 +518,7 @@ tmdl.mod.a<- model.info %>%
                                          paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model"))) %>% 
   dplyr::select(`Model Version`,`Model Waterbody`)
   
+
 tmdl.mod.b<- model.info %>% 
   dplyr::filter(!is.na(`New Model`)) %>% 
   dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
@@ -728,6 +728,17 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
   }
   
 }
+
+```
+
+```{r, label=`t1011`, echo=FALSE}
+# 13.11 No dams
+
+t1011_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_Sandy.xlsx",sheet = "sandy_nodam")
+
+t1011_sandy_tbl <- knitr::kable(t1011_sandy, format = "pandoc", padding = 2,
+                              caption = tbls(name = "t1011_sandy",
+                                             caption = paste0("Boundary condition and tributary inputs to the no dam scenario on the Bull Run River.")))
 
 ```
 
@@ -1124,7 +1135,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Stream flow data
 
-`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` `r t54_txt` where continuous flow volume data were available in the `r qapp_project_area`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_lw", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}`
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` `r t54_txt` where continuous flow volume data were available in the `r qapp_project_area`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}`
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
@@ -1343,13 +1354,13 @@ This scenario evaluates stream temperature response from improvements to channel
 
 This scenario evaluates the stream temperature response from removing point source heat load. The stream temperature warming or cooling from permitted NPDES point sources is evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:    
 
-*	Removal of all point sources from the Sandy River model.    
+* Removal of all point sources from the Sandy River model including adjustments to the Cedar Creek tributary temperatures to remove the ODFW Sandy River Fish Hatchery.
 
-*	All other model inputs will be the same as the current condition model.     
+* All other model inputs will be the same as the current condition model.
 
 ## TMDL waste load allocations
 
-This scenario evaluates stream temperature warming or cooling from the TMDL Waste Load Allocations. These scenarios will be compared to the background model scenario to evaluating attainment of the human use allowance allocations. Elements of this scenario or scenarios may include:    
+This scenario evaluates stream temperature warming or cooling from the TMDL Waste Load Allocations. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations. Elements of this scenario or scenarios may include:    
 
 *	Modifying point source discharges to reflect proposed or existing TMDL Waste Load Allocations.    
 
@@ -1365,32 +1376,17 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 
 * Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.        
 
-*	All other model inputs will be the same as the current calibrated model.        
+* All other model inputs will be the same as the current calibrated model.        
 
 DEQ may also rely upon the results of relevant studies, reports, or published articles to supplement the model scenario; or as the primary source of information for locations or situations where the model results are not applicable.
 
 ## No dams
 
-```{r, label=`t1011`, echo=FALSE}
-
-t1011_sandy <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables.xlsx",sheet = "sandy_nodam")
-
-t1011_sandy_tbl <- knitr::kable(t1011_sandy, format = "pandoc", padding = 2,
-                              caption = tbls(name = "t1011_sandy",
-                                             caption = paste0("Boundary condition and tributary inputs to the no dam scenario on the Bull Run River.")))
-
-```
-
-This scenario is specific to the Bull Run River and Sandy River. This scenario estimates the stream temperatures on the Bull Run River without Bull Run Dam and Reservoir Number One and Bull Run Dam and Reservoir Number Two. The model extent will be from the Bull Run River mouth to just upstream of Bull Run Reservoir Number One at USGS Gage 14138850. No changes are proposed on the Sandy River model except for setting the Bull Run River input to the no dam temperature outputs. The stream temperature warming or cooling caused by the dams is evaluated by comparing the results of this scenario to the current condition model run and data collected at the various temperature monitoring locations downstream of Bull Run Reservoir Number Two including the following:        
-
-* PWB_BR_DNSTM_PP: Bull Run River approximately 600 feet downstream of Bull Run Dam 2 spillway plunge pool        
-* USGS Gage 14140000: Bull Run River Near Bull Run (River Only), OR       
-* USGS Gage 14140020: Bull Run River at Larson's Bridge, Near Bull Run, OR        
-* PWB_BR_DODGE: Bull Run River approximately 500 feet upstream of Sandy River confluence        
+This scenario is specific to the Bull Run River and Sandy River. This scenario estimates the stream temperatures on the Bull Run River without Bull Run Dam and Reservoir Number One and Bull Run Dam and Reservoir Number Two. The model extent will be from the Bull Run River mouth to just upstream of Bull Run Reservoir Number One at USGS Gage 14138850. No changes are proposed on the Sandy River model except for setting the Bull Run River input to the no dam temperature outputs. The stream temperature warming or cooling caused by the dams is evaluated by comparing the results of this scenario to the current condition model run.     
 
 This scenario will also be used to estimate the background rate of warming that occurs within the reaches where the reservoirs and dams are currently located. This warming rate may be used, in conjunction with data collected at the various gages in the Bull Run and Little Sandy Rivers to develop management targets for the Bull Run Reservoirs similar to the current temperature target surrogate measures in the 2006 Sandy TMDL (DEQ, 2005).
 
-To complete this scenario, DEQ anticipates extending the 2016 current condition Heat Source model upstream through the reservoir reaches but may also consider using a CE-QUAL-W2 model developed by Portland State University for The City of Portland (Annear, et al., 1999, City of Portland, 2004). The CE-QUAL-W2 model was developed as a no dam scenario for the 2001 model year. The City of Portland has updated this model over time and currently uses it for management objectives. Use of this model at minimum would require updates to the boundary conditions and meteorological inputs. At the current time the CE-QUAL-W2 model is not available to DEQ. Should this model become available DEQ will review the model to make a determination on its use considering the current model setup, data availability, and the amount of time and work required to update the model.
+To complete this scenario, DEQ anticipates extending the 2016 current condition Heat Source model upstream through the reservoir reaches but may also consider using a CE-QUAL-W2 model developed by Portland State University for The City of Portland (Annear, et al., 1999, City of Portland, 2004). The CE-QUAL-W2 model was developed as a no dam scenario for the 2001 model year. Use of this model at minimum would require updates to the boundary conditions and meteorological inputs. At the current time the CE-QUAL-W2 model is not available to DEQ. Should this model become available DEQ will review the model to make a determination on its use considering the current model setup, data availability, and the amount of time and work required to update the model.
 
 Development of a riverine model in place of the Bull Run Reservoirs will require information about channel position, width, slope, substrate, and manning’s roughness coefficients. Existing bathymetry and any pre-dam channel measurements, if available, will be used to develop the model setup. `r tbls(name = "t1011_sandy", display="cite")` summarizes the various data sources to be used for the boundary conditions, tributary, and meteorological inputs for the no dam scenario. All other inputs downstream of Bull Run Dam Number Two will be the same as the current condition model.    
 
@@ -1635,7 +1631,7 @@ other.ref <- data.frame(reference = c(
   'Woltemade, C.J. and T.W. Hawkins. 2016. “Stream temperature impacts because of changes in air temperature, land cover, and stream discharge: Navarro River watershed, California, USA.” River Research Applications. 32(10): 2020-2031.',
   'Wondzell, S.M., M. Diabat, and R. Haggerty. 2019. “What matters most: Are future stream temperatures more sensitive to changing air temperatures, discharge, or riparian vegetation?” Journal of the American Water Resources Association. 55(1): 116-132.',
   'Wunderlich, T.E. 1972. “Heat and mass transfer between a water surface and the atmosphere.”  Water Resources Research Laboratory, Tennessee Valley Authority. Report No. 14, Norris Tennessee. Pp 4.20.',
-  'Yang, L., Jin, S., Danielson, P., Homer, C., Gass, L., Bender, S.M., Case, A., Costello, C. Dewitz, J., Fry, J., Funk, M. Granneman, B., Liknes, G.C.,Rigge, M., Xian, G. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
+  'Yang, L., S. Jin, P. Danielson, C. Homer, L. Gass, S.M. Bender, A. Case, C. Costello, J. Dewitz, J. Fry, M. Funk, B. Granneman, G.C. Liknes, M. Rigge, and G. Xian. 2018. “A new generation of the United States National Land Cover Database: Requirements, research priorities, design, and implementation strategies.” Journal of Photogrammetry and Remote Sensing 146: 108-123.',
   'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
   'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
   'Annear, Robert L., Scott A. Wells and David T. Evonuk. 1999. “Bull Run River – Reservoir Model: Boundary Conditions and Model Setup.” Portland State University Technical Report EWR-6-99.',

@@ -182,7 +182,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 `r if(waterbody_name %in% c("Bull Run River (2001)")){paste0("The effort currently described in the QAPP includes use of existing models and the development of new models to capture post-dam removal conditions. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2005), the model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}else{if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("Model development for the ",gsub("\\s*\\([^\\)]+\\)","", waterbody_name)," relies on deriving temperature or flow inputs from a few small tributaries (",tbls(name = paste0("t6x6_1", waterbody_name),display="cite"),"). DEQ plans to use the direct surrogate or linear regression approaches described in Section 6.2 to derive stream temperature; and a combination of a flow mass balance, drainage area ratio, and the flow-probability-probability-flow approaches to estimate stream flow. It assumed that these approaches do a reasonably good job of estimating the tributary temperature or flow. DEQ will assess the goodness of fit for these approaches where measured temperature or flow data are available.")}else{paste0("The effort currently described in the QAPP includes use of existing models with no changes to the models since their previous calibration. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2005) and model user guide (Boyd and Kasper, 2003).")}}`
 
-`r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("DEQ will review the vegetation conditions at sites where effective shade measurements were made in August of 2001 (",tbls(name = "t56_sandy", display="cite"),") and compare those conditions to vegetation conditions observed in 2016. If the conditions do not appear to have changed significantly DEQ will use the effective shade measured in 2001 as a rough guide for model calibration purpose with the assumption that the shade will likely be about the same or have increased since 2001 if site conditions look similar.")}`
+`r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("DEQ will review the vegetation conditions at sites where effective shade measurements were made in August of 2001 (",tbls(name = "t57", display="cite"),") and compare those conditions to vegetation conditions observed in 2016. If the conditions do not appear to have changed significantly DEQ will use the effective shade measured in 2001 as a rough guide for model calibration purposes with the assumption that the shade will likely be about the same or have increased since 2001 if site conditions look similar.")}`
 
 `r if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){paste0("Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003) or in Section 6 and Section 7 of this document.")}`
 
@@ -278,20 +278,17 @@ if(!model.extent == TRUE){
   t6x6_1 <- t6x6_1[,-c(3)] %>% 
     dplyr::rename(`Model Input` = Parameter)
   
-if(NROW(t6x6_1)>0){
-  
-  if(waterbody_name %in% c("Bull Run River (2016)", "Salmon River (2016)", "Sandy River (2016)")){
+  if(NROW(t6x6_1)>0){
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
                                                caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
-}
-  
-} else {
-  
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
-  
-}
+    
+  } else {
+    
+    t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+    
+  }
   
 }
 
@@ -384,15 +381,12 @@ if(!model.extent == TRUE){
   
   t6x7 <- t6x7[,c(1,2,5,4)]  
 
-if(NROW(t6x7)>0){
-  
- if(waterbody_name %in% c("Bull Run River (2016)","Salmon River (2016)", "Sandy River (2016)")){
-  
-  t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
-  
-}
-  
-}
+  if(NROW(t6x7)>0){
+    
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
+    
+    
+  }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
                     print("The model location in the table below describes the distance of each input from the most downstream model node."),
@@ -408,4 +402,4 @@ if(NROW(t6x7)>0){
 
 `r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], " The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
 
-`r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
+`r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {t6x7_tbl}`
