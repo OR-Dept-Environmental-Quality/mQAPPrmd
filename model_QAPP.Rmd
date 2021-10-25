@@ -301,7 +301,8 @@ t53_1 <- rbind(temp.stations,st_model) %>%
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
   dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>%
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization) %>% 
-  dplyr::mutate_at("Station", str_replace_all, "@", " at ") # remove email link format for the station names
+  dplyr::mutate_at("Station", str_replace_all, "@", " at ") %>%  # remove email link format for the station names
+  dplyr::mutate_at("Station ID", str_replace_all, "@", " at ") # remove email link format for the station IDs
 
 ```
 
