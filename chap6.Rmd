@@ -282,7 +282,10 @@ if(!model.extent == TRUE){
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
+                                               caption = paste0("Boundary condition and tributary inputs to the ", 
+                                                                ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
+                                                                waterbody_name, 
+                                                                " Heat Source Model.")))
     
   } else {
     
@@ -330,6 +333,7 @@ if(!model.extent == TRUE){
     
     t6x7 <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+      dplyr::filter(!Parameter %in% "Effective Shade") %>% 
       dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                     `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -354,6 +358,7 @@ if(!model.extent == TRUE){
     
     t6x7 <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+      dplyr::filter(!Parameter %in% "Effective Shade") %>% 
       dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                     `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -383,7 +388,12 @@ if(!model.extent == TRUE){
 
   if(NROW(t6x7)>0){
     
-    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,caption = tbls(name = paste0("t6x7", waterbody_name),caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                             caption = tbls(name = paste0("t6x7", waterbody_name),
+                                            caption = paste0("Calibration sites and parameters used in the ", 
+                                                             ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
+                                                             waterbody_name, 
+                                                             " Heat Source Model.")))
     
     
   }
@@ -400,6 +410,6 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], " The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {t6x7_tbl}`

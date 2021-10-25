@@ -131,6 +131,7 @@ t51_sp <- model.input %>%
                 Station = ifelse(is.na(`Station ID`),`Data Source`,paste0(`Station ID`, ", ", `Data Source`)),
                 `Station ID` = NA,
                 `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(round(Latitude,4), "/",round(Longitude,3))),
+                `Latitude/Longitude` = ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`),
                 `Available Data` = Parameter,
                 Agency = NA,
                 tbl = "DEQ File") %>% 
@@ -331,7 +332,8 @@ t54_sp <- model.input %>%
   dplyr::filter(!is.na(`Data Source`)) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
   dplyr::mutate(Station = `Model Location Name`,
-                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude))) %>% 
+                `Latitude/Longitude` = ifelse(is.na(Latitude), NA, paste0(Latitude, "/", Longitude)),
+                `Latitude/Longitude` = ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% 
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, `Data Source`)
 
 t54 <- rbind(t54_usgs,t54_owrd,t54_hydromet,t54_sp)
@@ -376,8 +378,9 @@ t54_txt <- knitr::combine_words(tables.flow$txt)
 
 # Instantaneous flow
 t54_ins_flow <- inst.flow.pro.area %>% 
-  dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3))) %>%
-  dplyr::select(`Station ID`,Station,Date,Time,`Flow (cfs)`,`Latitude/Longitude`)
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
+                `Latitude/Longitude` = ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>%
+  dplyr::select(`Station ID`,Station,Date,`Flow (cfs)`,`Latitude/Longitude`)
 
 ```
 
@@ -1121,7 +1124,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 
 ## Thermal Infrared Radiometry (TIR) data
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1188,7 +1191,7 @@ A new calibrated model is being developed on the Sandy River to characterize the
 
 Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
 
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the sections of model inputs in the current Chapter 6 Model development and calibration.
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the sections of model inputs in the current Chapter 6.
 
 `r tgap`
 `r if(qapp_project_area == "Rogue River Basin"){paste(chap6_shadow, collapse = "\n")}`
@@ -1805,8 +1808,8 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        met_stations,
        ind_ps,
        gen_ps,
-       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
-                     file.name,"_qapp.RData"))
+       file = paste0("./data/map_",file.name,"_qapp.RData"))
+  
 } else {
   
   save(temp.data.sample.count,
@@ -1820,8 +1823,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        met_stations,
        ind_ps,
        gen_ps,
-       file = paste0("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData/map_",
-                     file.name,"_qapp.RData"))
+       file = paste0("./data/map_",file.name,"_qapp.RData"))
   
 }
 
