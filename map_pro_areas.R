@@ -1363,11 +1363,11 @@ qapp_project_area = "Sandy Subbasin"
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1376,11 +1376,11 @@ qapp_project_area = "Sandy Subbasin"
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1390,7 +1390,7 @@ qapp_project_area = "Sandy Subbasin"
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
@@ -1979,7 +1979,7 @@ qapp_project_area = "Sandy Subbasin"
   htmlwidgets::saveWidget(map_area, paste0(map.dir,map.file.name,".html"), 
                           background = "grey", selfcontained = TRUE)
   
-}
+#}
 
 # *************** -----
 # DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
