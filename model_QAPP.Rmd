@@ -845,7 +845,8 @@ if(NROW(temp.data.sample.count)>0){
   
   app.b <- temp.data.sample.count %>% 
     dplyr::mutate_at(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),start) %>% 
-    dplyr::mutate_at("Station", str_replace_all, "@", " at ") # remove email link format for the station names
+    dplyr::mutate_at("Station", str_replace_all, "@", " at ") %>%  # remove email link format for the station names
+    dplyr::mutate_at("Station ID", str_replace_all, "@", " at ") # remove email link format for the station IDs
   
   app_b_tbl <- knitr::kable(app.b, format = "pandoc", padding = 2,
                             caption = tbls(name = "app.b",
