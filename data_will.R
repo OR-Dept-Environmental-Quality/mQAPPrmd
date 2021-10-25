@@ -207,7 +207,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>%
 # _ * general data for leaflet map ----
 save(lookup.huc,
      project.areas,
-     file = paste0(data.dir,"RData/lookup.RData"))
+     file = paste0("./data/lookup.RData"))
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
@@ -888,7 +888,7 @@ save(df.stations,
      s,
      is.are,
      numbers.to.words,
-     file = paste0(data.dir,"RData/",file.name,".RData"))
+     file = paste0("./data/",file.name,".RData"))
 
 # _ Data output to Excel ----
 station.output.temp <- temp.stations %>% 
@@ -995,4 +995,4 @@ save(pro_area,
      pro_reaches,
      ce_model_extent,
      gh.data.sample.count,
-     file = paste0(data.dir,"RData/map_",file.name,".RData"))
+     file = paste0("./data/map_",file.name,".RData"))

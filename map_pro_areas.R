@@ -15,7 +15,7 @@ library(httr)
 library(geojsonsf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"RData/lookup.RData"))
+load(paste0("./data/lookup.RData"))
 
 map.dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
 
@@ -137,8 +137,8 @@ qapp_project_area = "Sandy Subbasin"
 #for (qapp_project_area in project.areas$areas) {
 
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
-  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  load(paste0("./data/",map.file.name,".RData")) # data.R
+  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
@@ -1984,15 +1984,15 @@ qapp_project_area = "Sandy Subbasin"
 # *************** -----
 # DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"RData/lookup.RData")) #lookup.huc; project.areas
+load(paste0("./data/lookup.RData")) #lookup.huc; project.areas
 
 dta.check <- NULL
 for (qapp_project_area in project.areas$areas) {
   #qapp_project_area = "Southern Willamette Subbasins"
   
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
-  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  load(paste0("./data/",map.file.name,".RData")) # data.R
+  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   
   dta.check.area <- data.frame("Project Area"=qapp_project_area,
                                "hs_temp_model_extent" = nrow(hs_temp_model_extent),

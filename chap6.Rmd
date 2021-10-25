@@ -287,11 +287,9 @@ if(!model.extent == TRUE){
                                                                 waterbody_name, 
                                                                 " Heat Source Model.")))
     
-  } else {
-    
-    t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
-    
   }
+  
+  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
 
@@ -394,7 +392,6 @@ if(!model.extent == TRUE){
                                                              ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
                                                              waterbody_name, 
                                                              " Heat Source Model.")))
-    
     
   }
   
