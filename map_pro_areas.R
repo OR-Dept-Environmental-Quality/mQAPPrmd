@@ -149,28 +149,36 @@ for (qapp_project_area in project.areas$areas) {
   where_huc10 <- ""
   where_huc12 <- ""
   reachcode <- ""
-  for(huc_8 in sort(subbasin_huc8)){
+  
+  for(huc_8 in subbasin_huc8){
+    
+    
+    for(x in 1:length(subbasin_huc8)-1){
+      where_next_8 <- paste0("HUC8 = '", subbasin_huc8[x], "' OR ")
+      where_huc8 <- paste0(where_huc8, where_next_8)}
+    
+    for(y in 1:length(subbasin_huc10)-1){
+      where_next_10 <- paste0("HUC10 = '", subbasin_huc10[y], "' OR ")
+      where_huc10 <- paste0(where_huc10, where_next_10)}
+    
+    for(z in 1:length(subbasin_huc12)-1){
+      where_next_12 <- paste0("HUC12 = '", subbasin_huc12[z], "' OR ")
+      where_huc12 <- paste0(where_huc12, where_next_12)}
+    
+    where_last_8 <- paste0("HUC8 = '", last(subbasin_huc8), "'")
+    where_huc8 <- paste0(where_huc8,where_last_8)
+    where_last_10 <- paste0("HUC10 = '", last(subbasin_huc10), "'")
+    where_huc10 <- paste0(where_huc10,where_last_10)
+    where_last_12 <- paste0("HUC12 = '", last(subbasin_huc12), "'")
+    where_huc12 <- paste0(where_huc12,where_last_12)
+    
     query_min <- paste0(huc_8,"000000")
     query_max <- paste0(huc_8,"999999")
-    if(huc_8 == last(sort(subbasin_huc8))){
-      where_last_8 <- paste0("HUC8 LIKE '", huc_8, "'")
-      where_huc8 <- paste0(where_huc8,where_last_8)
-      where_last_10 <- paste0("HUC10 LIKE '", huc_8, "%'")
-      where_huc10 <- paste0(where_huc10,where_last_10)
-      where_last_12 <- paste0("HUC12 LIKE '", huc_8, "%'")
-      where_huc12 <- paste0(where_huc12,where_last_12)
-      reachcode_last <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ")")
-      reachcode <- paste0(reachcode,reachcode_last)
-    } else {
-      where_next_8 <- paste0("HUC8 LIKE '", huc_8, "' OR ")
-      where_huc8 <- paste0(where_huc8, where_next_8)
-      where_next_10 <- paste0("HUC10 LIKE '", huc_8, "%' OR ")
-      where_huc10 <- paste0(where_huc10, where_next_10)
-      where_next_12 <- paste0("HUC12 LIKE '", huc_8, "%' OR ")
-      where_huc12 <- paste0(where_huc12, where_next_12)
-      reachcode_next <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ") OR ")
-      reachcode <- paste0(reachcode,reachcode_next)
-    }
+    reachcode_next <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ") OR ")
+    reachcode <- paste0(reachcode,reachcode_next)
+    reachcode_last <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ")")
+    reachcode <- paste0(reachcode,reachcode_last)
+    
   }
   
   dta.check.area <- data.frame("Project Area"=qapp_project_area,
