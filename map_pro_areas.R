@@ -140,37 +140,45 @@ qapp_project_area = "Sandy Subbasin"
   load(paste0("./data/",map.file.name,".RData")) # data.R
   load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
-  subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
-  subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
-  subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
+  subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
+  subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
+  subbasin_huc12 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12))
   
   # where clause used in querying the feature layers from the REST Server
   where_huc8 <- ""
   where_huc10 <- ""
   where_huc12 <- ""
   reachcode <- ""
-  for(huc_8 in sort(subbasin_huc8)){
+  
+  for(huc_8 in subbasin_huc8){
+    
+    
+    for(x in 1:length(subbasin_huc8)-1){
+      where_next_8 <- paste0("HUC8 = '", subbasin_huc8[x], "' OR ")
+      where_huc8 <- paste0(where_huc8, where_next_8)}
+    
+    for(y in 1:length(subbasin_huc10)-1){
+      where_next_10 <- paste0("HUC10 = '", subbasin_huc10[y], "' OR ")
+      where_huc10 <- paste0(where_huc10, where_next_10)}
+    
+    for(z in 1:length(subbasin_huc12)-1){
+      where_next_12 <- paste0("HUC12 = '", subbasin_huc12[z], "' OR ")
+      where_huc12 <- paste0(where_huc12, where_next_12)}
+    
+    where_last_8 <- paste0("HUC8 = '", last(subbasin_huc8), "'")
+    where_huc8 <- paste0(where_huc8,where_last_8)
+    where_last_10 <- paste0("HUC10 = '", last(subbasin_huc10), "'")
+    where_huc10 <- paste0(where_huc10,where_last_10)
+    where_last_12 <- paste0("HUC12 = '", last(subbasin_huc12), "'")
+    where_huc12 <- paste0(where_huc12,where_last_12)
+    
     query_min <- paste0(huc_8,"000000")
     query_max <- paste0(huc_8,"999999")
-    if(huc_8 == last(sort(subbasin_huc8))){
-      where_last_8 <- paste0("HUC8 LIKE '", huc_8, "'")
-      where_huc8 <- paste0(where_huc8,where_last_8)
-      where_last_10 <- paste0("HUC10 LIKE '", huc_8, "%'")
-      where_huc10 <- paste0(where_huc10,where_last_10)
-      where_last_12 <- paste0("HUC12 LIKE '", huc_8, "%'")
-      where_huc12 <- paste0(where_huc12,where_last_12)
-      reachcode_last <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ")")
-      reachcode <- paste0(reachcode,reachcode_last)
-    } else {
-      where_next_8 <- paste0("HUC8 LIKE '", huc_8, "' OR ")
-      where_huc8 <- paste0(where_huc8, where_next_8)
-      where_next_10 <- paste0("HUC10 LIKE '", huc_8, "%' OR ")
-      where_huc10 <- paste0(where_huc10, where_next_10)
-      where_next_12 <- paste0("HUC12 LIKE '", huc_8, "%' OR ")
-      where_huc12 <- paste0(where_huc12, where_next_12)
-      reachcode_next <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ") OR ")
-      reachcode <- paste0(reachcode,reachcode_next)
-    }
+    reachcode_next <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ") OR ")
+    reachcode <- paste0(reachcode,reachcode_next)
+    reachcode_last <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ")")
+    reachcode <- paste0(reachcode,reachcode_last)
+    
   }
   
   dta.check.area <- data.frame("Project Area"=qapp_project_area,
@@ -254,8 +262,18 @@ qapp_project_area = "Sandy Subbasin"
                                     group = "HUC8",
                                     pathOptions = leaflet::pathOptions(pane="huc8"),
                                     labelProperty = "Name",
-                                    labelOptions = leaflet::labelOptions(style = list("color" = "red",
-                                                                                      "font-size" = "20px")),
+                                    labelOptions = leaflet::labelOptions(
+                                      style = list("color" = "red","font-size" = "20px")),
+                                    popupProperty = JS(paste0(
+                                      "function(feature) {",
+                                      " return L.Util.template(",
+                                      " \"<h3>{Name}</h3><hr />",
+                                      " <p> HUC8: {HUC8} </p>",
+                                      " \",",
+                                      " feature.properties",
+                                      " );",
+                                      "}"
+                                    )),
                                     weight = 3,
                                     color = "red",
                                     opacity = 3,
@@ -268,6 +286,16 @@ qapp_project_area = "Sandy Subbasin"
                                       labelProperty = "Name",
                                       labelOptions = leaflet::labelOptions(style = list("color" = "orange",
                                                                                         "font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{Name}</h3><hr />",
+                                        " <p> HUC10: {HUC10} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
                                       weight = 2,
                                       color = "orange",
                                       opacity = 1,
@@ -280,6 +308,16 @@ qapp_project_area = "Sandy Subbasin"
                                       labelProperty = "Name",
                                       labelOptions = leaflet::labelOptions(style = list("color" = "grey",
                                                                                         "font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{Name}</h3><hr />",
+                                        " <p> HUC12: {HUC12} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
                                       weight = 1,
                                       color = "grey",
                                       opacity = 1,
