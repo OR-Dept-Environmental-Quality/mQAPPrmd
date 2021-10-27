@@ -1466,7 +1466,7 @@ Data: All field data organized or collected in support of the TMDL project. This
 
 Models: All models used for the TMDL project including calibration and scenario models. The models should be organized into subfolders for each model domain and model scenario. Draft models and the final TMDL model will be clearly identified and ideally in separate folders. The model folders should include:
 
-*	The model with all input and outputs files; and any executable code used    
+*	The model with all input and outputs files, and any executable code used    
 
 *	Copy of all raw and summarized data (including GIS files) used for model input with data source and location metadata included    
 
