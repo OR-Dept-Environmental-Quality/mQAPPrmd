@@ -301,8 +301,7 @@ t53_1 <- rbind(temp.stations,st_model) %>%
   dplyr::mutate(Org_order = ifelse(Organization == "DEQ","DEQ","Others")) %>% 
   dplyr::arrange(match(Org_order,c("DEQ","Others")),Organization,`Station ID`) %>%
   dplyr::select(`Station ID`,Station,`Latitude/Longitude`, Organization) %>% 
-  dplyr::mutate_at("Station", str_replace_all, "@", " at ") %>%  # remove email link format for the station names
-  dplyr::mutate_at("Station ID", str_replace_all, "@", " at ") # remove email link format for the station IDs
+  dplyr::mutate_at("Station", str_replace_all, "@", " at ") # remove email link format for the station names
 
 ```
 
@@ -845,9 +844,8 @@ if(NROW(temp.data.sample.count)>0){
   
   app.b <- temp.data.sample.count %>% 
     dplyr::mutate_at(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),start) %>% 
-    dplyr::mutate_at("Station", str_replace_all, "@", " at ") %>%  # remove email link format for the station names
-    dplyr::mutate_at("Station ID", str_replace_all, "@", " at ") # remove email link format for the station IDs
-  
+    dplyr::mutate_at("Station", str_replace_all, "@", " at ") # remove email link format for the station names
+
   app_b_tbl <- knitr::kable(app.b, format = "pandoc", padding = 2,
                             caption = tbls(name = "app.b",
                                            caption = paste0("Summary of existing temperature data in the ", qapp_project_area,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month. Data from the DEQ files that are not in the databases were not summarized in the table.")))
@@ -991,7 +989,7 @@ To the extent existing data and information allow, the primary analysis and mode
     e. Where along the stream anthropogenic warming occurs;
     f. Where the point of maximum stream warming is located; and
     g. The amount of stream warming that exceeds the human use allowance and applicable water quality standards.        
-
+<br>
 2) Determine TMDL elements and allocations that attain the applicable temperature criteria by identifying:        
 
     a. The thermal loading capacity for each temperature listed waterbody;
@@ -1001,7 +999,7 @@ To the extent existing data and information allow, the primary analysis and mode
     e. Any reserve capacity;
     f. Any margin of safety; and
     g. The seasonal variation and critical conditions corresponding to the time period when the applicable temperature criteria are exceeded.      
-
+<br>
 3) Evaluate proposed management strategies and TMDL implementation options to support development of the TMDL Water Quality Management plan.       
 
     a. Evaluate existing land management plans, TMDL implementation plans, or rules for sufficiency in minimizing anthropogenic warming to the level established by the TMDL allocations.
@@ -1127,7 +1125,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 
 All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS), the Oregon Watershed Restoration Inventory (OWRI) database, and the DEQ files. The AWQMS database integrates DEQ water quality data with other publicly available data sources, including data from USEPA’s WQX/STORET database, USGS’s National Water Information System (NWIS), and other federal agencies, Tribes, and various third parties, and including data obtained during the data solicitation for DEQ’s Temperature TMDL Replacement Project.
 
-The data retrieval period for continuous stream temperature data covers from January 1, 1999 to December 31, 2020. The data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E for parameters measured in the field and a result status of “Final” or “Provisional” which are assigned following the Oregon Water Quality Monitoring Data Portal (DEQ, 2021). We relied on the quality control checks implemented by OWEB for data obtained from OWRI.
+The data retrieval period for continuous stream temperature data covers from January 1, 1990 to December 31, 2020. The data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E for parameters measured in the field and a result status of “Final” or “Provisional” which are assigned following the Oregon Water Quality Monitoring Data Portal (DEQ, 2021). We relied on the quality control checks implemented by OWEB for data obtained from OWRI.
 
 Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.b", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D.
 
@@ -1207,7 +1205,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 *	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review. For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and pre and post accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
-Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated.
+Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code, and models that have had their methodologies peer reviewed and evaluated.
 
 The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
 
@@ -1263,7 +1261,7 @@ $n$ = The sample size.
 
 Model documentation will consist of a series of TMDL technical appendices describing the model setup, model calibration results, model scenario setup, and model scenario results. 
 
-The model setup and calibration documentation will include details on the calibrated model domain and layout; spatial and temporal resolution; timeframe of simulation; summary of data used for model inputs; summary of methods used to fill data gaps; summary of data used for calibration; timeseries plots comparing observed and model predicted temperatures and other parameters as appropriate; goodness-of-fit statistics, and plots and tables summarizing temperature and effective shade model results.
+The model setup and calibration documentation will include details on the calibrated model domain and layout; spatial and temporal resolution; timeframe of simulation; summary of data used for model inputs; summary of methods used to fill data gaps; summary of data used for calibration; time series plots comparing observed and model predicted temperatures and other parameters as appropriate; goodness-of-fit statistics, and plots and tables summarizing temperature and effective shade model results.
 
 The model scenario setup and scenario results documentation will include a description of the scenario, what model elements were modified for the scenario; tables, plots, or narrative summarizing the final values for any modified inputs or parameters; methods or data sources used to setup the scenario; and plots and tables that summarize the scenario results.
 
@@ -1309,9 +1307,9 @@ This scenario evaluates the stream temperature response from only streamside veg
 
 *	Identifying streamside vegetation areas along the model extent that are protected and will not be removed. The exact definition of a protected area will be determined during the TMDL process.    
 
-*	Model inputs for land cover height, density, and overhang will be set to zero outside of protected areas.     
+*	Model inputs for land cover height, density, and overhang outside protected areas will be set to zero.     
 
-*	Model inputs for land cover height, density, and overhang inside a protected areas will be set to current conditions.    
+*	Model inputs for land cover height, density, and overhang inside protected areas will be set to current conditions.  
 
 *	All other model inputs will be the same as the current condition model.    
 
@@ -1335,7 +1333,7 @@ This scenario evaluates the stream temperature response from restoration actions
 
 ## Climate
 
-This scenario evaluates the stream temperature response from changes in air temperature and relative humidity connected to human caused changes to global or micro climate conditions. Warming or cooling from climate related impacts will be evaluated by comparing this scenario to the current conditions model scenario. Assumptions and methods used to develop this scenario will be documented in the TMDL Elements of this scenario or scenarios may include:
+This scenario evaluates the stream temperature response from changes in air temperature and relative humidity connected to human caused changes to global or micro climate conditions. Warming or cooling from climate related impacts will be evaluated by comparing this scenario to the current conditions model scenario. Assumptions and methods used to develop this scenario will be documented in the TMDL. Elements of this scenario or scenarios may include:
 
 *	Model inputs for air temperature and relative humidity may be modified to reflect potential conditions or conditions without climate change impacts assuming enough information exists that would allow downscaling to the site specific conditions in model extent.    
 
@@ -1375,7 +1373,7 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 
 * Modifying streamside vegetation, instream flow, and/or channel morphology to reflect the proposed or existing implementation plan. Translating the plan elements to the modeled landscape conditions will be determined during the TMDL process.       
 
-* Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s n, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.        
+* Model inputs for land cover height, density, overhang, boundary condition flow and temperature, channel width, bank angle, Manning’s *n*, porosity, percent hyporheic flow, and hyporheic zone thickness, may be modified.        
 
 *	All other model inputs will be the same as the current calibrated model.        
 
@@ -1434,7 +1432,7 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **Task P5** Development of template TMDL and WQMP section outlines and language.     
 
-**Task P6** Implement Modeling QAPPs. This task a follow-up to Task P2. Gathering of new data and completion of new technical work described in the modeling QAPPs.     
+**Task P6** Implement Modeling QAPPs. This task is a follow-up to Task P2. Gathering of new data and completion of new technical work described in the modeling QAPPs.     
 
 **TMDL and WQMP development phase**    
 
@@ -1464,7 +1462,7 @@ The project folder will contain at minimum the following subfolders:
 
 Project Plans: All documents related to project planning, project proposals, project schedules, and the QAPPs. Each will reside in their relevant subfolders. The final versions of documents will be clearly identified from drafts and ideally located in separate folders.
 
-Data: All field data organized or collected in support of the TMDL project. This may include water quality samples, NPDES effluent data, field sheets, photos, monitoring metadata, sampling project plans, QAPPS, or other documentation. The data should be organized by parameter and data source if possible.
+Data: All field data organized or collected in support of the TMDL project. This may include water quality samples, NPDES effluent data, field sheets, photos, monitoring metadata, sampling project plans, QAPPs, or other documentation. The data should be organized by parameter and data source if possible.
 
 Models: All models used for the TMDL project including calibration and scenario models. The models should be organized into subfolders for each model domain and model scenario. Draft models and the final TMDL model will be clearly identified and ideally in separate folders. The model folders should include:
 
@@ -1484,65 +1482,41 @@ Meetings: All documents produced for external meetings including agendas, presen
 
 TMDL documents: At each key stage of TMDL and WQMP development copies of the following documents will be saved in separate subfolders within the project folder on the Master TMDL directory.
 
-*	Briefing Memo to DEQ Water Quality Division Administrator or Director.    
+*	Briefing Memo to DEQ Water Quality Division Administrator or Director   
 
 *	Public Comment Draft:     
 
-+	Public Comment Draft TMDL and WQMP Report (Both Word and PDF)    
-
-+	Draft TMDL Appendices (Both Word and PDF)    
-
-+	Public Notice document    
-
-+	TMDL Summary Fact Sheet    
-
-+	News release    
-
-+	GovDelivery Notice and email    
-
-+	Other public notification emails    
-
-+	Mailing List (if used)    
-
-+	Public Comments Errata    
-
+    *	Draft TMDL and WQMP Report (Both Word and PDF)
+    *	Draft TMDL Appendices (Both Word and PDF)
+    *	Public Notice document
+    *	TMDL Summary Fact Sheet
+    *	News release
+    *	GovDelivery Notice and email
+    *	Other public notification emails
+    *	Mailing List (if used)
+    *	Public Comments Errata        
+<br>
 *	Public Comments Received: Copy of all public comments received    
 
 *	Final TMDL and WQMP documents:    
 
-+	TMDL signed Order (both Word and PDF)    
-
-+	TMDL issuance letter to USEPA (both Word and PDF)    
-
-+	USEPA approval letter (USEPA)    
-
-+	Response to Comment Document (both Word and PDF)    
-
-+	TMDL and WQMP Report (both Word and PDF)    
-
-+	TMDL Appendices (both Word and PDF)    
-
-+	TMDL Summary Fact Sheet    
-
-+	News release    
-
-+	GovDelivery Notice and email    
-
-+	Other public notification emails    
-
-+	Designated Management Agency/Responsible Person notification letters (both Word and PDF)    
-
-+	Addendums    
-
-+	Errata    
-
-+	Petitions    
-
-+	Director’s Petition Action (acceptance or rejection of petition)    
-
-+	Response to Petition    
-
-+	Attains upload files    
+    *	TMDL signed Order (both Word and PDF)
+    *	TMDL issuance letter to USEPA (both Word and PDF)
+    *	USEPA approval letter (USEPA)
+    *	Response to Comment Document (both Word and PDF)
+    *	TMDL and WQMP Report (both Word and PDF)
+    *	TMDL Appendices (both Word and PDF)
+    *	TMDL Summary Fact Sheet
+    *	News release
+    *	GovDelivery Notice and email
+    *	Other public notification emails
+    *	Designated Management Agency/Responsible Person notification letters (both Word and PDF)
+    *	Addendums
+    *	Errata
+    *	Petitions
+    *	Director’s Petition Action (acceptance or rejection of petition)
+    *	Response to Petition
+    *	ATTAINS upload files
 
 # QAPP review and approval
 

@@ -181,6 +181,9 @@ for (qapp_project_area in project.areas$areas) {
     
   }
   
+  WQS_reachcode <- paste0("(Temperature_Spawn_dates NOT LIKE '%No Spawning%') AND (",reachcode, ")")
+  IR_where_huc12 <- paste0(where_huc12," AND Category_5_parameters LIKE 'Temperature%'")
+  
   dta.check.area <- data.frame("Project Area"=qapp_project_area,
                                "hs_temp_model_extent" = nrow(hs_temp_model_extent),
                                "hs_solar_model_extent" = nrow(hs_solar_model_extent),
@@ -262,8 +265,18 @@ for (qapp_project_area in project.areas$areas) {
                                     group = "HUC8",
                                     pathOptions = leaflet::pathOptions(pane="huc8"),
                                     labelProperty = "Name",
-                                    labelOptions = leaflet::labelOptions(style = list("color" = "red",
-                                                                                      "font-size" = "20px")),
+                                    labelOptions = leaflet::labelOptions(
+                                      style = list("color" = "red","font-size" = "20px")),
+                                    popupProperty = JS(paste0(
+                                      "function(feature) {",
+                                      " return L.Util.template(",
+                                      " \"<h3>{Name}</h3><hr />",
+                                      " <p> HUC8: {HUC8} </p>",
+                                      " \",",
+                                      " feature.properties",
+                                      " );",
+                                      "}"
+                                    )),
                                     weight = 3,
                                     color = "red",
                                     opacity = 3,
@@ -276,6 +289,16 @@ for (qapp_project_area in project.areas$areas) {
                                       labelProperty = "Name",
                                       labelOptions = leaflet::labelOptions(style = list("color" = "orange",
                                                                                         "font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{Name}</h3><hr />",
+                                        " <p> HUC10: {HUC10} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
                                       weight = 2,
                                       color = "orange",
                                       opacity = 1,
@@ -288,6 +311,16 @@ for (qapp_project_area in project.areas$areas) {
                                       labelProperty = "Name",
                                       labelOptions = leaflet::labelOptions(style = list("color" = "grey",
                                                                                         "font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{Name}</h3><hr />",
+                                        " <p> HUC12: {HUC12} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
                                       weight = 1,
                                       color = "grey",
                                       opacity = 1,
@@ -321,37 +354,100 @@ for (qapp_project_area in project.areas$areas) {
                                                                            ' \"}'))
   ) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
-                                      options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                      options = leaflet.esri::featureLayerOptions(where = WQS_reachcode),
                                       useServiceSymbology = TRUE,
                                       group = "Salmon and Steelhead Spawning Use Designations",
                                       pathOptions = leaflet::pathOptions(pane="wqs2"),
                                       weight = 1,
                                       opacity = 1,
-                                      fill=FALSE) %>% 
+                                      fill=FALSE,
+                                      highlightOptions = leaflet::highlightOptions(color="black",
+                                                                                   weight = 4,
+                                                                                   fillOpacity = 0.8,
+                                                                                   bringToFront = TRUE,
+                                                                                   sendToBack = TRUE),
+                                      labelOptions = leaflet::labelOptions(offset = c(0,0),
+                                                                           opacity = 0.9,
+                                                                           textsize = "14px",
+                                                                           sticky = FALSE),
+                                      popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
+                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.GNIS_Name+\" \"}"),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>Waterbody.Name:</b> \"+props.GNIS_Name+\"',
+                                                                             '<br><b>Temperature.Criteria:</b> \"+props.Temperature_Criteria+\"',
+                                                                             '<br><b>Temperature.Criterion.7dADM.deg-C:</b> \"+props.Temperature_Criterion_7dADM_C+\"',
+                                                                             '<br><b>Temperature.Spawn.Dates:</b> \"+props.Temperature_Spawn_dates+\"',
+                                                                             ' \"}'))
+    ) %>% 
     # __ IR ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3",
-                                    options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                    options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 IR Temperature Status - Streams",
                                     pathOptions = leaflet::pathOptions(pane="ir"),
-                                    weight = 1,
-                                    opacity = 1,
-                                    fill=FALSE) %>% 
+                                    labelProperty = "AU_Name",
+                                    labelOptions = leaflet::labelOptions(
+                                      style = list("color" = "deeppink","font-size" = "20px")),
+                                    popupProperty = JS(paste0(
+                                      "function(feature) {",
+                                      " return L.Util.template(",
+                                      " \"<h3>{AU_Name}</h3><hr />",
+                                      " <p> AU ID: {AU_ID} </p>",
+                                      " <p> Category 5 Parameters: {Category_5_parameters} </p>",
+                                      " \",",
+                                      " feature.properties",
+                                      " );",
+                                      "}"
+                                    )),
+                                    color = "deeppink",
+                                    weight = 3,
+                                    opacity = 0.8,
+                                    fill=FALSE,) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/2",
-                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
                                       useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Waterbodies",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
+                                      labelProperty = "AU_Name",
+                                      labelOptions = leaflet::labelOptions(
+                                        style = list("color" = "deeppink","font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{AU_Name}</h3><hr />",
+                                        " <p> AU ID: {AU_ID} </p>",
+                                        " <p> Category 5 Parameters: {Category_5_parameters} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
+                                      color = "deeppink",
                                       weight = 3,
-                                      opacity = 1,
+                                      opacity = 0.8,
                                       fill=FALSE) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/4",
-                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
                                       useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Watershed",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
-                                      weight = 1,
-                                      opacity = 1,
+                                      labelProperty = "AU_Name",
+                                      labelOptions = leaflet::labelOptions(
+                                        style = list("color" = "deeppink","font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{AU_Name}</h3><hr />",
+                                        " <p> AU ID: {AU_ID} </p>",
+                                        " <p> Category 5 Parameters: {Category_5_parameters} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
+                                      color = "deeppink",
+                                      weight = 3,
+                                      opacity = 0.8,
                                       fill=FALSE) %>% 
     # __ Meteorological Stations ----
   leaflet::addMarkers(data = met_stations,
