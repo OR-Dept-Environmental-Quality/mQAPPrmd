@@ -15,7 +15,7 @@ library(httr)
 library(geojsonsf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"RData/lookup.RData"))
+load(paste0("./data/lookup.RData"))
 
 map.dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
 
@@ -137,8 +137,8 @@ popupTable.gageHeight <- function(station_name = NULL){
 for (qapp_project_area in project.areas$areas) {
   
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
-  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  load(paste0("./data/",map.file.name,".RData")) # data.R
+  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
@@ -149,29 +149,40 @@ for (qapp_project_area in project.areas$areas) {
   where_huc10 <- ""
   where_huc12 <- ""
   reachcode <- ""
-  for(huc_8 in sort(subbasin_huc8)){
+  
+  for(huc_8 in subbasin_huc8){
+    
+    
+    for(x in 1:length(subbasin_huc8)-1){
+      where_next_8 <- paste0("HUC8 = '", subbasin_huc8[x], "' OR ")
+      where_huc8 <- paste0(where_huc8, where_next_8)}
+    
+    for(y in 1:length(subbasin_huc10)-1){
+      where_next_10 <- paste0("HUC10 = '", subbasin_huc10[y], "' OR ")
+      where_huc10 <- paste0(where_huc10, where_next_10)}
+    
+    for(z in 1:length(subbasin_huc12)-1){
+      where_next_12 <- paste0("HUC12 = '", subbasin_huc12[z], "' OR ")
+      where_huc12 <- paste0(where_huc12, where_next_12)}
+    
+    where_last_8 <- paste0("HUC8 = '", last(subbasin_huc8), "'")
+    where_huc8 <- paste0(where_huc8,where_last_8)
+    where_last_10 <- paste0("HUC10 = '", last(subbasin_huc10), "'")
+    where_huc10 <- paste0(where_huc10,where_last_10)
+    where_last_12 <- paste0("HUC12 = '", last(subbasin_huc12), "'")
+    where_huc12 <- paste0(where_huc12,where_last_12)
+    
     query_min <- paste0(huc_8,"000000")
     query_max <- paste0(huc_8,"999999")
-    if(huc_8 == last(sort(subbasin_huc8))){
-      where_last_8 <- paste0("HUC8 LIKE '", huc_8, "'")
-      where_huc8 <- paste0(where_huc8,where_last_8)
-      where_last_10 <- paste0("HUC10 LIKE '", huc_8, "%'")
-      where_huc10 <- paste0(where_huc10,where_last_10)
-      where_last_12 <- paste0("HUC12 LIKE '", huc_8, "%'")
-      where_huc12 <- paste0(where_huc12,where_last_12)
-      reachcode_last <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ")")
-      reachcode <- paste0(reachcode,reachcode_last)
-    } else {
-      where_next_8 <- paste0("HUC8 LIKE '", huc_8, "' OR ")
-      where_huc8 <- paste0(where_huc8, where_next_8)
-      where_next_10 <- paste0("HUC10 LIKE '", huc_8, "%' OR ")
-      where_huc10 <- paste0(where_huc10, where_next_10)
-      where_next_12 <- paste0("HUC12 LIKE '", huc_8, "%' OR ")
-      where_huc12 <- paste0(where_huc12, where_next_12)
-      reachcode_next <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ") OR ")
-      reachcode <- paste0(reachcode,reachcode_next)
-    }
+    reachcode_next <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ") OR ")
+    reachcode <- paste0(reachcode,reachcode_next)
+    reachcode_last <- paste0("(ReachCode >= ", query_min, " AND ReachCode <= ", query_max, ")")
+    reachcode <- paste0(reachcode,reachcode_last)
+    
   }
+  
+  WQS_reachcode <- paste0("(Temperature_Spawn_dates NOT LIKE '%No Spawning%') AND (",reachcode, ")")
+  IR_where_huc12 <- paste0(where_huc12," AND Category_5_parameters LIKE 'Temperature%'")
   
   dta.check.area <- data.frame("Project Area"=qapp_project_area,
                                "hs_temp_model_extent" = nrow(hs_temp_model_extent),
@@ -254,8 +265,18 @@ for (qapp_project_area in project.areas$areas) {
                                     group = "HUC8",
                                     pathOptions = leaflet::pathOptions(pane="huc8"),
                                     labelProperty = "Name",
-                                    labelOptions = leaflet::labelOptions(style = list("color" = "red",
-                                                                                      "font-size" = "20px")),
+                                    labelOptions = leaflet::labelOptions(
+                                      style = list("color" = "red","font-size" = "20px")),
+                                    popupProperty = JS(paste0(
+                                      "function(feature) {",
+                                      " return L.Util.template(",
+                                      " \"<h3>{Name}</h3><hr />",
+                                      " <p> HUC8: {HUC8} </p>",
+                                      " \",",
+                                      " feature.properties",
+                                      " );",
+                                      "}"
+                                    )),
                                     weight = 3,
                                     color = "red",
                                     opacity = 3,
@@ -268,6 +289,16 @@ for (qapp_project_area in project.areas$areas) {
                                       labelProperty = "Name",
                                       labelOptions = leaflet::labelOptions(style = list("color" = "orange",
                                                                                         "font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{Name}</h3><hr />",
+                                        " <p> HUC10: {HUC10} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
                                       weight = 2,
                                       color = "orange",
                                       opacity = 1,
@@ -280,6 +311,16 @@ for (qapp_project_area in project.areas$areas) {
                                       labelProperty = "Name",
                                       labelOptions = leaflet::labelOptions(style = list("color" = "grey",
                                                                                         "font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{Name}</h3><hr />",
+                                        " <p> HUC12: {HUC12} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
                                       weight = 1,
                                       color = "grey",
                                       opacity = 1,
@@ -313,37 +354,100 @@ for (qapp_project_area in project.areas$areas) {
                                                                            ' \"}'))
   ) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
-                                      options = leaflet.esri::featureLayerOptions(where = reachcode),
+                                      options = leaflet.esri::featureLayerOptions(where = WQS_reachcode),
                                       useServiceSymbology = TRUE,
                                       group = "Salmon and Steelhead Spawning Use Designations",
                                       pathOptions = leaflet::pathOptions(pane="wqs2"),
                                       weight = 1,
                                       opacity = 1,
-                                      fill=FALSE) %>% 
+                                      fill=FALSE,
+                                      highlightOptions = leaflet::highlightOptions(color="black",
+                                                                                   weight = 4,
+                                                                                   fillOpacity = 0.8,
+                                                                                   bringToFront = TRUE,
+                                                                                   sendToBack = TRUE),
+                                      labelOptions = leaflet::labelOptions(offset = c(0,0),
+                                                                           opacity = 0.9,
+                                                                           textsize = "14px",
+                                                                           sticky = FALSE),
+                                      popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
+                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.GNIS_Name+\" \"}"),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>Waterbody.Name:</b> \"+props.GNIS_Name+\"',
+                                                                             '<br><b>Temperature.Criteria:</b> \"+props.Temperature_Criteria+\"',
+                                                                             '<br><b>Temperature.Criterion.7dADM.deg-C:</b> \"+props.Temperature_Criterion_7dADM_C+\"',
+                                                                             '<br><b>Temperature.Spawn.Dates:</b> \"+props.Temperature_Spawn_dates+\"',
+                                                                             ' \"}'))
+    ) %>% 
     # __ IR ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3",
-                                    options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                    options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 IR Temperature Status - Streams",
                                     pathOptions = leaflet::pathOptions(pane="ir"),
-                                    weight = 1,
-                                    opacity = 1,
-                                    fill=FALSE) %>% 
+                                    labelProperty = "AU_Name",
+                                    labelOptions = leaflet::labelOptions(
+                                      style = list("color" = "deeppink","font-size" = "20px")),
+                                    popupProperty = JS(paste0(
+                                      "function(feature) {",
+                                      " return L.Util.template(",
+                                      " \"<h3>{AU_Name}</h3><hr />",
+                                      " <p> AU ID: {AU_ID} </p>",
+                                      " <p> Category 5 Parameters: {Category_5_parameters} </p>",
+                                      " \",",
+                                      " feature.properties",
+                                      " );",
+                                      "}"
+                                    )),
+                                    color = "deeppink",
+                                    weight = 3,
+                                    opacity = 0.8,
+                                    fill=FALSE,) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/2",
-                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
                                       useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Waterbodies",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
+                                      labelProperty = "AU_Name",
+                                      labelOptions = leaflet::labelOptions(
+                                        style = list("color" = "deeppink","font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{AU_Name}</h3><hr />",
+                                        " <p> AU ID: {AU_ID} </p>",
+                                        " <p> Category 5 Parameters: {Category_5_parameters} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
+                                      color = "deeppink",
                                       weight = 3,
-                                      opacity = 1,
+                                      opacity = 0.8,
                                       fill=FALSE) %>% 
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/4",
-                                      options = leaflet.esri::featureLayerOptions(where = where_huc12),
+                                      options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
                                       useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Watershed",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
-                                      weight = 1,
-                                      opacity = 1,
+                                      labelProperty = "AU_Name",
+                                      labelOptions = leaflet::labelOptions(
+                                        style = list("color" = "deeppink","font-size" = "20px")),
+                                      popupProperty = JS(paste0(
+                                        "function(feature) {",
+                                        " return L.Util.template(",
+                                        " \"<h3>{AU_Name}</h3><hr />",
+                                        " <p> AU ID: {AU_ID} </p>",
+                                        " <p> Category 5 Parameters: {Category_5_parameters} </p>",
+                                        " \",",
+                                        " feature.properties",
+                                        " );",
+                                        "}"
+                                      )),
+                                      color = "deeppink",
+                                      weight = 3,
+                                      opacity = 0.8,
                                       fill=FALSE) %>% 
     # __ Meteorological Stations ----
   leaflet::addMarkers(data = met_stations,
@@ -429,11 +533,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -442,11 +546,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -456,11 +560,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -554,11 +658,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -567,11 +671,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -686,11 +790,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -699,11 +803,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -713,11 +817,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -805,11 +909,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -873,11 +977,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -886,11 +990,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -900,11 +1004,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -998,11 +1102,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1011,11 +1115,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1116,11 +1220,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1129,11 +1233,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1229,11 +1333,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1242,11 +1346,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1256,11 +1360,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1363,11 +1467,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1376,11 +1480,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1390,11 +1494,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1480,11 +1584,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1493,11 +1597,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1507,11 +1611,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1607,11 +1711,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1620,11 +1724,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1634,11 +1738,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(flow_model_bc_tri$`Station ID`),flow_model_bc_tri$`Model Location Name`,paste0(flow_model_bc_tri$`Model Location Name`," (", flow_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1734,11 +1838,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1877,11 +1981,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Calibration Sites",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_cal_sites$`Station ID`),temp_cal_sites$`Model Location Name`,paste0(temp_cal_sites$`Model Location Name`," (", temp_cal_sites$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Calibration Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
                         popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)) %>% 
@@ -1890,11 +1994,11 @@ for (qapp_project_area in project.areas$areas) {
                         group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
                         options = leaflet::leafletOptions(pane="marker"),
                         #clusterOptions = markerClusterOptions(),
-                        label = paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")"), 
+                        label = ifelse(is.na(temp_model_bc_tri$`Station ID`),temp_model_bc_tri$`Model Location Name`,paste0(temp_model_bc_tri$`Model Location Name`," (", temp_model_bc_tri$`Station ID`,")")), 
                         labelOptions = labelOptions(textsize = "15px"),
                         popup = ~paste0("Station: ", `Model Location Name`,
                                         '<br>', "Station ID: ", `Station ID`,
-                                        '<br>', "Model Location: ", round(`Model Location`,1), " ", `Location Units`,
+                                        '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(`Model Location`,1), " ", `Location Units`)),
                                         '<br>', "Model Input Type: ", `Model Location Type`,
                                         '<br>', "Model Input Parameter: ", Parameter,
                                         '<br>', "Data Source: ", `Data Source`),
@@ -1984,15 +2088,15 @@ for (qapp_project_area in project.areas$areas) {
 # *************** -----
 # DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"RData/lookup.RData")) #lookup.huc; project.areas
+load(paste0("./data/lookup.RData")) #lookup.huc; project.areas
 
 dta.check <- NULL
 for (qapp_project_area in project.areas$areas) {
   #qapp_project_area = "Southern Willamette Subbasins"
   
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0(data.dir,"RData/",map.file.name,".RData")) # data.R
-  load(paste0(data.dir,"RData/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  load(paste0("./data/",map.file.name,".RData")) # data.R
+  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   
   dta.check.area <- data.frame("Project Area"=qapp_project_area,
                                "hs_temp_model_extent" = nrow(hs_temp_model_extent),

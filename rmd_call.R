@@ -1,7 +1,5 @@
 library(rmarkdown)
 
-setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
-
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/202110"
 
@@ -23,14 +21,15 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
+# run branches ----
 #for (qapp_project_area in project.areas$areas) {
   
   print(qapp_project_area)
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
-  load(paste0(file.name,".RData"))
+  load(paste0("./data/",file.name,".RData"))
   
-  rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/Lower_Willamette_and_Clackamas_Subbasins/mQAPPrmd/model_QAPP.Rmd",
+  rmarkdown::render(input=paste0("model_QAPP.Rmd"),
                     output_format = "word_document",
                     output_dir = output.dir,
                     output_file=paste0("QAPP_",file.name, ".docx"))

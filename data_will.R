@@ -207,7 +207,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>%
 # _ * general data for leaflet map ----
 save(lookup.huc,
      project.areas,
-     file = paste0(data.dir,"RData/lookup.RData"))
+     file = paste0("./data/lookup.RData"))
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
@@ -726,7 +726,15 @@ model.input  <- cal.input %>%
                 Longitude = round(Longitude,3)) %>% 
   dplyr::left_join(station.awqms.temp[,c("Station ID", "Station", "Organization")], by="Station ID")
 
-pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
+  pro.area.tmdls <- model.info %>% 
+    dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
+    dplyr::filter(!is.na(`TMDL Document`)) %>% 
+    dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
+    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
+    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",`Abbreviated Reference`,")")) %>% 
+    dplyr::distinct(tmdls.ref) 
+  
+  pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
 
 # _ NCDC met data ----
 ncei.stations.pro.area <- ncei.stations %>% 
@@ -880,7 +888,7 @@ save(df.stations,
      s,
      is.are,
      numbers.to.words,
-     file = paste0(data.dir,"RData/",file.name,".RData"))
+     file = paste0("./data/",file.name,".RData"))
 
 # _ Data output to Excel ----
 station.output.temp <- temp.stations %>% 
@@ -987,4 +995,4 @@ save(pro_area,
      pro_reaches,
      ce_model_extent,
      gh.data.sample.count,
-     file = paste0(data.dir,"RData/map_",file.name,".RData"))
+     file = paste0("./data/map_",file.name,".RData"))

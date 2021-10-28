@@ -207,7 +207,7 @@ if(NROW(dma.waterbody)>0){
     
     dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                                caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                              caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                                              caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
     
   }
   
@@ -233,7 +233,7 @@ if(NROW(dma.waterbody)>0){
 
 `r if(!waterbody_name %in% "Columbia Slough Subwatershed (2019)"){if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}}`
 
-`r if(!waterbody_name %in% "Columbia Slough Subwatershed (2019)"){paste0("Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, activity, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}`
+`r if(!waterbody_name %in% "Columbia Slough Subwatershed (2019)"){paste0("Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, the activities, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies.")}`
 
 `r if(!waterbody_name %in% "Columbia Slough Subwatershed (2019)"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ",if(!waterbody_name %in% "Tualatin Mountains (2019)"){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}," summarizes the potential designated management agencies and responsible persons along the ",waterbody_name," model extent. ",if(waterbody_name %in% "Columbia Slough (1992)"){paste0("This table is based on land ownership and does not include special districts like the MCDD. The MCDD area overlaps with much of the Columbia Slough.")})}`
 
@@ -356,7 +356,10 @@ if(!model.extent == TRUE){
 
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the ", waterbody_name, " Heat Source Model.")))
+                                               caption = paste0("Boundary condition and tributary inputs to the ", 
+                                                                ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
+                                                                waterbody_name, 
+                                                                " Heat Source Model.")))
     
     
   }
@@ -405,6 +408,7 @@ if(!model.extent == TRUE){
     
     t6x7 <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+      dplyr::filter(!Parameter %in% "Effective Shade") %>% 
       dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                     `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -429,6 +433,7 @@ if(!model.extent == TRUE){
     
     t6x7 <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+      dplyr::filter(!Parameter %in% "Effective Shade") %>% 
       dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                     `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -460,7 +465,10 @@ if(!model.extent == TRUE){
     
     t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("t6x7", waterbody_name),
-                                            caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
+                                            caption = paste0("Calibration sites and parameters used in the ", 
+                                                             ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
+                                                             waterbody_name, 
+                                                             " Heat Source Model.")))
     
     
     
@@ -482,6 +490,6 @@ if(!model.extent == TRUE){
 
 `r if(waterbody_name %in% c("Johnson Creek Watershed (2019)","Columbia Slough Subwatershed (2019)","Tualatin Mountains (2019)","Tryon Creek Watershed (2019)")){paste0("Model calibration will be completed by the City of Portland Bureau of Environmental Services. DEQ and the City of Portland will coordinate and communicate on model development and quality assurance procedures outlined in this QAPP. The model will be calibrated primarily by comparing the model effective shade predictions to field measured effective shade values and canopy cover values measured with a densiometer by the City of Portland. Canopy cover will be the primary calibration parameter. Other calibration parameters identified in Section 6.1.3 (landcover height and landcover overhang) will be determined directly from LiDAR with minimal adjustment. DEQ will review the model and model assumptions and recommend adjustments as necessary. The model and final calibration report will be made available to DEQ upon completion (COP BES personal communication August 2021).")}`
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc, " The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
