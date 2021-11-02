@@ -89,7 +89,7 @@ tcat5 <- pro.cat.45.tbl %>%
 
 if(NROW(tcat5)>0){
   
-  tcat5 <- knitr::kable(tcat5, format = "pandoc", padding = 2,
+  tcat5_tbl <- knitr::kable(tcat5, format = "pandoc", padding = 2,
                         caption = tbls(name = "tcat5",
                                        caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
   
@@ -111,13 +111,25 @@ if(qapp_project_area == "North Umpqua Subbasin"){
   
   if(NROW(tcat4a)>0){
     
-    tcat4a <- knitr::kable(tcat4a, format = "pandoc", padding = 2,
+    tcat4a_tbl <- knitr::kable(tcat4a, format = "pandoc", padding = 2,
                            caption = tbls(name = "tcat4a",
                                           caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 4A for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
     
   }
   
 }
+
+```
+
+```{r, label=`figs`, echo=FALSE}
+# 3. Conceptual model: key processes and variables
+## Figure captions
+
+heat.cap <- figs(name="heat.transfer", caption = paste0("Major heat transfer processes."))
+temp.cap <- figs(name="temp.cd", caption = paste0("Conceptual diagram that identifies the key processes and variables that drive stream temperature changes and the biological responses (Schofield and Sappington, 2010)."))
+
+heat.fig <- figs(name = "heat.transfer", display="cite")
+temp.fig <- figs(name = "temp.cd", display="cite")
 
 ```
 
@@ -1007,7 +1019,7 @@ To the extent existing data and information allow, the primary analysis and mode
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
-`r if(NROW(tcat5)>0){tcat5}`
+`r if(NROW(tcat5)>0){tcat5_tbl}`
 
 # Conceptual model: key processes and variables
 
@@ -1020,16 +1032,15 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
-
-**Heat transfer** relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
+<br>
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
-
-heat.cap <- figs(name="heat.transfer", caption = paste0("Major heat transfer processes."))
 
 knitr::include_graphics(path = "./fig/Heat_Transfer_Diagram.jpg")
 
 ```
+
+**Heat transfer** relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in `r heat.fig`.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
 
 <br>
 
@@ -1053,15 +1064,15 @@ $\Phi_{evaporation}$ = Evaporation (+/-)
 * Surface water exchange (e.g. tributary input, precipitation), and
 * Other human related activities that alter stream flow volume.
 
-Stream temperature is influenced by both human and natural factors. Figure 2 is a conceptual diagram that identifies the key process and variables that drive stream temperature. Human sources and natural sources are identified. Near the bottom of the diagram the biological responses are identified.
+<br>
 
 ```{r temp-cd, eval.after="fig.cap", fig.cap=temp.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
-
-temp.cap <- figs(name="temp.cd", caption = paste0("Conceptual diagram that identifies the key processes and variables that drive stream temperature changes and the biological responses (Schofield and Sappington, 2010)."))
 
 knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 ```
+
+Stream temperature is influenced by both human and natural factors. `r temp.fig` is a conceptual diagram that identifies the key process and variables that drive stream temperature. Human sources and natural sources are identified. Near the bottom of the diagram the biological responses are identified.
 
 **Anthropogenic Nonpoint Sources**: Temperature increases from human-caused nonpoint sources are caused by increases in solar radiation loading to the stream network from the disturbance or removal of near-stream vegetation, channel modification and widening, reductions to the stream flow rate or volume, changes in hyporheic flows and channel connectivity, reductions in cold groundwater inflows, and changes to meteorological conditions, such as those caused by climate change.
 
@@ -1105,7 +1116,7 @@ The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets the mo
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
 
-The CE-QUAL-W2 model (Cole and Wells, 2000) meets the model framework needs for stratified waterbodies with flow control structures, and was used to model the Columbia Slough for the development of the 2006 Willamette Basin TMDL (DEQ, 2006). Although this model exists and meets model framework needs, numerous changes have occurred in the Columbia Slough since 1992 when the model was last calibrated. See Section 6.4 for additional details on these changes. DEQ staff believe the changes are significant enough that a new model calibration is needed in order to simulate current water management and temperature conditions in the system. A summary of the recommended model updates is included in Appendix D. Due to resource constraints and the rigorous project schedule, the existing Columbia Slough CE-QUAL-W2 model will not be used for TMDL development at this time.
+The CE-QUAL-W2 model (Cole and Wells, 2000) meets the model framework needs for stratified waterbodies with flow control structures, and was used to model the Columbia Slough for the development of the 2006 Willamette Basin TMDL (DEQ, 2006). Although this model exists and meets model framework needs, numerous changes have occurred in the Columbia Slough since 1992 when the model was last calibrated. See Section 6.4 for additional details on these changes. DEQ staff believe the changes are significant enough that a new model calibration is needed in order to simulate current water management and temperature conditions in the system. A summary of the recommended model updates is included in Appendix E. Due to resource constraints and the rigorous project schedule, the existing Columbia Slough CE-QUAL-W2 model will not be used for TMDL development at this time.
 
 CE-QUAL-W2 is a laterally averaged U.S. Army Corps of Engineers model that consists of directly coupled hydrodynamic and water quality transport algorithms. Developed for reservoirs and narrow, stratified estuaries, CE-QUAL-W2 can handle a branched and/or looped system with flow and/or head boundary conditions. CE-QUAL-W2 simulates temperature, phytoplankton, dissolved oxygen, pH, organic matter, nutrients and residence time.
 
@@ -1173,13 +1184,11 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the Johnson Creek (2002) model was completed by DEQ and documented in the `r pro.area.tmdls`. The setup and calibration of the Columbia Slough (1992) model was completed by Portland State University and documented in Wells and Berger, 1995; Berger, 2003; Berger and Wells, 2005; and DEQ, 2006. Adjustments to the existing Johnson Creek (2002) and Columbia Slough (1992) calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Chapter 7.2.
+The setup and calibration for the Johnson Creek (2002) model was completed by DEQ and documented in the Willamette Basin TMDL and WQMP (DEQ, 2006). The setup and calibration of the Columbia Slough (1992) model was completed by Portland State University and documented in Wells and Berger, 1995; Berger, 2003; Berger and Wells, 2005; and DEQ, 2006. Adjustments to the existing Johnson Creek (2002) calibrated model is unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. An improved model fit is defined as an improvement to the model fit statistics described in Chapter 7. The Columbia Slough (1992) model will not be used to support the updated TMDL. More details can be found in Section 6.3 and Appendix E.
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
-The Johnson Creek (2002) model was originally developed for the `r paste0(pro.area.tmdls, " (", knitr::combine_words(strip_alpha(unique(sort(ref[which(ref$'Project Area' == qapp_project_area),]$"Abbreviated Reference")))), ")")` and will also be used to support the updated TMDL. The Columbia Slough (1992) model was originally developed to support the Multnomah County Drainage District’s flow management decisions and will not be used to support the updated TMDL. The models for Johnson Creek (2019), Columbia Slough (2019) and Balch Creek-Willamette River Subwatershed (2019) (`r tbls(name = "tmdl.mod.b", display="cite")`) are new and will supplement the models that were developed for the 2006 TMDL.
-
-New calibrated models are being developed for various streams located in the Columbia Slough, Johnson Creek, Balch Creek–Willamette River, and Tryon Creek subwatersheds. The models are being developed by the City of Portland Bureau of Environmental Services to characterize the current riparian conditions and effective shade on streams within the city. These models will simulate shade but not stream temperature.
+The models named Johnson Creek Watershed (2019), Columbia Slough Watershed (2019), Tryon Creek Watershed (2019), and Tualatin Mountains (2019) (`r tbls(name = "tmdl.mod.b", display="cite")`) are new and will supplement the models that were developed for the 2006 TMDL. The models are being developed by the City of Portland Bureau of Environmental Services to characterize the current riparian conditions and effective shade on streams within the city. These models will simulate shade but not stream temperature.
 
 ## General model inputs and parameters
 
@@ -1418,7 +1427,7 @@ The pre TMDL project phase will generally occur between January 2020 through the
 
 **Task P2** Develop modeling Quality Assurance Project Plans (QAPPs).  The modeling QAPPs will identify the available data and overall technical approach to be taken for each TMDL project.     
 
-**Task P3** Mapping of Designated Management Agencies (DMAs) and Responsible Persons for counties that are within the project area. All Oregon counties are within the project area except Tillamook, Clatsop, and Deschutes counties.     
+**Task P3** Mapping of Designated Management Agencies (DMAs) and Responsible Persons for counties that are within the project area.     
 
 **Task P4** Development of computer code to streamline analysis tasks and TMDL document production.     
 
@@ -1686,7 +1695,7 @@ DEQ prepared an interactive HTML map to display relevant information described i
 `r if(!is.na(project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B)){paste0("18. Salmon and Steelhead spawning use extent and period depicted in OAR ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B, ".")}`    
 
 \newpage
-# Appendix D Columbia Slough model updates
+# Appendix E Columbia Slough model updates
 
 ```{r, label=`app_d`, echo=FALSE}
 
@@ -1795,6 +1804,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        met_stations,
        ind_ps,
        gen_ps,
+       tcat5,
        file = paste0("./data/map_",file.name,"_qapp.RData"))
   
   
@@ -1811,6 +1821,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        met_stations,
        ind_ps,
        gen_ps,
+       tcat5,
        file = paste0("./data/map_",file.name,"_qapp.RData"))
   
 }

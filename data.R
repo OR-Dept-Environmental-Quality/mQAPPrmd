@@ -348,9 +348,10 @@ pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_T
 
 ## Get Willamette Mainstem AU IDs and reachcodes
 will_auid <- pro.reaches %>%
-  filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
-  distinct(AU_ID) %>%
-  pull(AU_ID)
+  dplyr::filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
+  dplyr::distinct(AU_ID) %>% 
+  subset(AU_ID != "OR_WS_170900120103_02_104552") %>% # add Lower Johnson Creek AU back to the Lower Willamette and Clackamas Subbasins
+  dplyr::pull(AU_ID)
 
 will_reachcodes <- pro.reaches %>%
   filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
@@ -749,7 +750,7 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
     dplyr::ungroup() %>% 
     dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",Reference,")")) %>% 
-    dplyr::distinct(tmdls.ref)  
+    dplyr::distinct(tmdls.ref) 
   
   pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
   
@@ -971,7 +972,7 @@ library(geojsonsf)
 library(sf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"RData/lookup.RData"))
+load(paste0("./data/lookup.RData"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                          layer = "project_areas") %>% 
