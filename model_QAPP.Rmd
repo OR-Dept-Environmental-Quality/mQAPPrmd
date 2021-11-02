@@ -88,7 +88,7 @@ tcat5 <- pro.cat.45.tbl %>%
 
 if(NROW(tcat5)>0){
   
-  tcat5 <- knitr::kable(tcat5, format = "pandoc", padding = 2,
+  tcat5_tbl <- knitr::kable(tcat5, format = "pandoc", padding = 2,
                         caption = tbls(name = "tcat5",
                                        caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
   
@@ -110,7 +110,7 @@ if(qapp_project_area == "North Umpqua Subbasin"){
   
   if(NROW(tcat4a)>0){
     
-    tcat4a <- knitr::kable(tcat4a, format = "pandoc", padding = 2,
+    tcat4a_tbl <- knitr::kable(tcat4a, format = "pandoc", padding = 2,
                            caption = tbls(name = "tcat4a",
                                           caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 4A for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
     
@@ -1008,7 +1008,7 @@ To the extent existing data and information allow, the primary analysis and mode
 
 The effort currently described in the QAPP includes use of existing models and the development of new models or new model scenarios.
 
-`r if(NROW(tcat5)>0){tcat5}`
+`r if(NROW(tcat5)>0){tcat5_tbl}`
 
 # Conceptual model: key processes and variables
 
@@ -1754,21 +1754,10 @@ gen_ps <- section.npdes.gen.1 %>%
 
 if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
-  save(temp.data.sample.count,
-       flow.data.sample.count,
-       temp_stations,
-       temp_cal_sites,
-       temp_model_bc_tri,
-       flow_model_bc_tri,
-       flow_stations,
-       met_stations,
-       ind_ps,
-       gen_ps,
-       file = paste0("./data/map_",file.name,"_qapp.RData"))
+  gage_height_stations_map <- data.frame()
   
-  
-} else {
-  
+}
+
   save(temp.data.sample.count,
        flow.data.sample.count,
        temp_stations,
@@ -1782,6 +1771,6 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        gen_ps,
        file = paste0("./data/map_",file.name,"_qapp.RData"))
   
-}
+
 
 ```
