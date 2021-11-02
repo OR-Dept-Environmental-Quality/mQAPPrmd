@@ -43,22 +43,22 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
-# qapp_project_area = "Sandy Subbasin"
+qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
 # qapp_project_area = "Southern Willamette Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
-  
+#for (qapp_project_area in project.areas$areas) {
+
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
   load(paste0("./data/",map.file.name,".RData")) # data.R
   load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
-  subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
-  subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
-  subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
+  subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
+  subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
+  subbasin_huc12 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12))
   
   # where clause ----
   ## used in querying the feature layers from the REST Server
@@ -748,7 +748,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
                           background = "grey", selfcontained = TRUE)
   
-}
+#}
 
 # *************** -----
 # DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
@@ -788,3 +788,4 @@ for (qapp_project_area in project.areas$areas) {
 
 temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
 write.csv(dta.check,paste0(temp.dir,"dta.check.csv"))
+
