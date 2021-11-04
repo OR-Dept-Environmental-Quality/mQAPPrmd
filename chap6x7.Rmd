@@ -31,6 +31,7 @@ options(knitr.kable.NA = '')
 t6x7j <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+  dplyr::filter(!Parameter %in% "Effective Shade") %>% 
   dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
                 `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                 `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
@@ -72,7 +73,7 @@ if(NROW(t6x7j)>0){
 
 ```
 
-`r if(NROW(t6x7j)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7j", model_extent, waterbody_name),display="cite"),". The model location in the table below describes the distance of each input from the most downstream model node. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}`
+`r if(NROW(t6x7j)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7j", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}`
 
 `r if(NROW(t6x7j)>0){t6x7j_tbl}`
 
