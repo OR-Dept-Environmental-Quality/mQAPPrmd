@@ -726,15 +726,7 @@ model.input  <- cal.input %>%
                 Longitude = round(Longitude,3)) %>% 
   dplyr::left_join(station.awqms.temp[,c("Station ID", "Station", "Organization")], by="Station ID")
 
-  pro.area.tmdls <- model.info %>% 
-    dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
-    dplyr::filter(!is.na(`TMDL Document`)) %>% 
-    dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",`Abbreviated Reference`,")")) %>% 
-    dplyr::distinct(tmdls.ref) 
-  
-  pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
+pro.area.tmdls <- knitr::combine_words(unique(model.info$"TMDL Document"))
 
 # _ NCDC met data ----
 ncei.stations.pro.area <- ncei.stations %>% 
@@ -991,8 +983,17 @@ ce_model_extent <- map_ce_model_extent %>%
 
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
+hs_temp_model_extent <- data.frame()
+hs_solar_model_extent <- data.frame()
+hs_solar_model_area <- data.frame()
+sh_model_extent <- data.frame()
+
 save(pro_area,
      pro_reaches,
+     hs_temp_model_extent,
+     hs_solar_model_extent,
+     hs_solar_model_area,
      ce_model_extent,
+     sh_model_extent,
      gh.data.sample.count,
      file = paste0("./data/map_",file.name,".RData"))

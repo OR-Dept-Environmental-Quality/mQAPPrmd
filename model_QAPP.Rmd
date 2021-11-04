@@ -1794,22 +1794,10 @@ gen_ps <- section.npdes.gen.1 %>%
 
 if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
-  save(temp.data.sample.count,
-       flow.data.sample.count,
-       temp_stations,
-       temp_cal_sites,
-       temp_model_bc_tri,
-       flow_model_bc_tri,
-       flow_stations,
-       met_stations,
-       ind_ps,
-       gen_ps,
-       tcat5,
-       file = paste0("./data/map_",file.name,"_qapp.RData"))
+  gage_height_stations_map <- data.frame()
   
-  
-} else {
-  
+}
+
   save(temp.data.sample.count,
        flow.data.sample.count,
        temp_stations,
@@ -1824,6 +1812,6 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        tcat5,
        file = paste0("./data/map_",file.name,"_qapp.RData"))
   
-}
+
 
 ```

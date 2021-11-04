@@ -1080,7 +1080,7 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
   
   #tir_extent
-  
+
   save(pro_area,
        hs_temp_model_extent,
        hs_solar_model_extent,
@@ -1088,6 +1088,7 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
        ce_model_extent,
        sh_model_extent,
        #tir_extent,
+       pro.cat.45.tbl,
        file = paste0("./data/map_",file.name,".RData"))
   
   
