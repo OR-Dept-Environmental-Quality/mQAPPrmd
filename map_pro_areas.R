@@ -84,8 +84,18 @@ qapp_project_area = "Sandy Subbasin"
   where_huc10 <- paste0(where_huc10,where_last_10)
   where_last_12 <- paste0("HUC12 = '", last(subbasin_huc12), "'")
   where_huc12 <- paste0(where_huc12,where_last_12)
-  IR_where_huc12 <- paste0("(Category_5_parameters LIKE '%Temperature%' AND AU_status = 'Impaired') AND (", where_huc12, ")")
   
+  #Use this line to check between the REST map and the QAPP table; if both are matched, use QAPP IR table to pull data to the map
+  #IR_where <- paste0("(Char_Name = 'Temperature' AND IR_category = 'Category 5') AND (", where_huc12, ")") 
+  
+  where_au <- ""
+  for(i in 1:(length(pro.cat.45.tbl$AU_ID)-1)){
+    where_au_next <- paste0("AU_ID = '", pro.cat.45.tbl$AU_ID[i], "' OR ")
+    where_au <- paste0(where_au, where_au_next)}
+  where_au_last <- paste0("AU_ID = '", last(pro.cat.45.tbl$AU_ID), "'")
+  where_au <- paste0(where_au,where_au_last)
+  IR_where <- paste0("(Char_Name = 'Temperature' AND IR_category = 'Category 5') AND (", where_au, ")")
+
   reachcode <- ""
   for(huc_8 in subbasin_huc8){
     query_min <- paste0(huc_8,"000000")
@@ -255,8 +265,8 @@ qapp_project_area = "Sandy Subbasin"
                                                                              '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                              ' \"}'))) %>% 
     # __ IR ----
-  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/3",
-                                    options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/0",
+                                    options = leaflet.esri::featureLayerOptions(where = IR_where),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 IR Temperature Status - Streams",
                                     pathOptions = leaflet::pathOptions(pane="ir"),
@@ -266,63 +276,76 @@ qapp_project_area = "Sandy Subbasin"
                                     fill=FALSE,
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 4,
-                                                                                 fillOpacity = 0.8,
+                                                                                 fillOpacity = 0.5,
                                                                                  bringToFront = TRUE,
                                                                                  sendToBack = TRUE),
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
-                                    labelOptions = leaflet::labelOptions(style = list("color" = "deeppink","font-size" = "14px")),
+                                    labelOptions = leaflet::labelOptions(noHide = T,
+                                                                         style = list("color" = "deeppink","font-size" = "8px")),
                                     popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                            '<b>AU.Name:</b> \"+props.AU_Name+\"',
                                                                            '<br><b>AU.ID:</b> \"+props.AU_ID+\"',
-                                                                           '<br><b>AU.Status:</b> \"+props.AU_Status+\"',
-                                                                           '<br><b>Year.Listed:</b> \"+props.year_listed+\"',
-                                                                           '<br><b>Category.5.Parameters:</b> \"+props.Category_5_parameters+\"',
+                                                                           '<br><b>Impaired.Parameter:</b> \"+props.Char_Name+\"',
+                                                                           '<br><b>IR.Category:</b> \"+props.IR_category+\"',
+                                                                           '<br><b>Year.Listed:</b> \"+props.Year_listed+\"',
+                                                                           '<br><b>Use.Period:</b> \"+props.Period+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                            ' \"}'))) %>% 
-    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/2",
-                                      options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/1",
+                                      options = leaflet.esri::featureLayerOptions(where = IR_where),
                                       useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Waterbodies",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
                                       color = "deeppink",
                                       weight = 3,
                                       opacity = 0.8,
-                                      fill=FALSE,
+                                      fill=TRUE,
+                                      fillColor = "deeppink",
+                                      fillOpacity = 0.01,
                                       highlightOptions = leaflet::highlightOptions(color="red",
                                                                                    weight = 4,
-                                                                                   fillOpacity = 0.8,
+                                                                                   fillOpacity = 0.5,
                                                                                    bringToFront = TRUE,
                                                                                    sendToBack = TRUE),
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
-                                      labelOptions = leaflet::labelOptions(style = list("color" = "deeppink","font-size" = "14px")),
+                                      labelOptions = leaflet::labelOptions(noHide = T,
+                                                                           style = list("color" = "deeppink","font-size" = "8px")),
                                       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                              '<b>AU.Name:</b> \"+props.AU_Name+\"',
                                                                              '<br><b>AU.ID:</b> \"+props.AU_ID+\"',
-                                                                             '<br><b>AU.Status:</b> \"+props.AU_status+\"',
-                                                                             '<br><b>Year.Listed:</b> \"+props.year_listed+\"',
-                                                                             '<br><b>Category.5.Parameters:</b> \"+props.Category_5_parameters+\"',
+                                                                             '<br><b>Impaired.Parameter:</b> \"+props.Char_Name+\"',
+                                                                             '<br><b>IR.Category:</b> \"+props.IR_category+\"',
+                                                                             '<br><b>Year.Listed:</b> \"+props.Year_listed+\"',
+                                                                             '<br><b>Use.Period:</b> \"+props.Period+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                              ' \"}'))) %>% 
-    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQ_Assessment_2018_2020/MapServer/4",
-                                      options = leaflet.esri::featureLayerOptions(where = IR_where_huc12),
+    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/2",
+                                      options = leaflet.esri::featureLayerOptions(where = IR_where),
                                       useServiceSymbology = TRUE,
                                       group = "2018/2020 IR Temperature Status - Watershed",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
                                       color = "deeppink",
                                       weight = 3,
                                       opacity = 0.8,
-                                      fill=FALSE,
+                                      fill = TRUE,
+                                      fillColor = "deeppink",
+                                      fillOpacity = 0.01,
                                       highlightOptions = leaflet::highlightOptions(color="red",
                                                                                    weight = 4,
                                                                                    fillOpacity = 0.8,
                                                                                    bringToFront = TRUE,
                                                                                    sendToBack = TRUE),
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
-                                      labelOptions = leaflet::labelOptions(style = list("color" = "deeppink","font-size" = "14px")),
+                                      labelOptions = leaflet::labelOptions(noHide = T,
+                                                                           style = list("color" = "deeppink","font-size" = "8px")),
                                       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                              '<b>AU.Name:</b> \"+props.AU_Name+\"',
                                                                              '<br><b>AU.ID:</b> \"+props.AU_ID+\"',
-                                                                             '<br><b>AU.Status:</b> \"+props.AU_status+\"',
-                                                                             '<br><b>Year.Listed:</b> \"+props.year_listed+\"',
-                                                                             '<br><b>Category.5.Parameters:</b> \"+props.Category_5_parameters+\"',
+                                                                             '<br><b>Impaired.Parameter:</b> \"+props.Char_Name+\"',
+                                                                             '<br><b>IR.Category:</b> \"+props.IR_category+\"',
+                                                                             '<br><b>Year.Listed:</b> \"+props.Year_listed+\"',
+                                                                             '<br><b>Use.Period:</b> \"+props.Period+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                              ' \"}'))) %>% 
     # __ WQS ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
