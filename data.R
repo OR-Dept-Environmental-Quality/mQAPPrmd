@@ -208,7 +208,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>%
 # _ * general data for leaflet map ----
 save(lookup.huc,
      project.areas,
-     file = paste0(data.dir,"RData/lookup.RData"))
+     file = paste0("./data/lookup.RData"))
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
@@ -348,9 +348,10 @@ pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_T
 
 ## Get Willamette Mainstem AU IDs and reachcodes
 will_auid <- pro.reaches %>%
-  filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
-  distinct(AU_ID) %>%
-  pull(AU_ID)
+  dplyr::filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
+  dplyr::distinct(AU_ID) %>% 
+  subset(AU_ID != "OR_WS_170900120103_02_104552") %>% # add Lower Johnson Creek AU back to the Lower Willamette and Clackamas Subbasins
+  dplyr::pull(AU_ID)
 
 will_reachcodes <- pro.reaches %>%
   filter(Project_Na=="Willamette River Mainstem and Major Tributaries") %>%
@@ -745,7 +746,10 @@ qapp_project_area = "Middle Willamette Subbasins"
     dplyr::filter(!is.na(`TMDL Document`)) %>% 
     dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
     dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",`Abbreviated Reference`,")")) %>% 
+    dplyr::group_by(`TMDL Document`) %>% 
+    dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",Reference,")")) %>% 
     dplyr::distinct(tmdls.ref) 
   
   pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
@@ -843,17 +847,19 @@ qapp_project_area = "Middle Willamette Subbasins"
   #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
   #sf::st_drop_geometry()
   
-  # _ NLCD ----
-  nlcd.pro.area <- nlcd.tbl %>% 
-    dplyr::ungroup() %>% 
-    dplyr::filter(Project_Na == qapp_project_area) %>% 
-    dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
-    dplyr::arrange(desc(as.numeric(Acres)))
-  
-  nlcd.text.pro.area <- nlcd.text %>% 
-    dplyr::filter(Project_Na == qapp_project_area) 
-  
+# _ NLCD ----
+nlcd.pro.area <- nlcd.tbl %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(Project_Na == qapp_project_area) %>% 
+  dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
+  dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
+  dplyr::arrange(desc(as.numeric(Acres))) %>% 
+  dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land), "Open Water",NLCD_Land)) %>% 
+  tidyr::drop_na(Stream)
+nlcd.text.pro.area <- nlcd.text %>% 
+  dplyr::filter(Project_Na == qapp_project_area) %>% 
+  dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
+  tidyr::drop_na(Stream)
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
@@ -899,7 +905,7 @@ qapp_project_area = "Middle Willamette Subbasins"
        s,
        is.are,
        numbers.to.words,
-       file = paste0(data.dir,"RData/",file.name,".RData"))
+       file = paste0("./data/",file.name,".RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -966,7 +972,7 @@ library(geojsonsf)
 library(sf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"RData/lookup.RData"))
+load(paste0("./data/lookup.RData"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                          layer = "project_areas") %>% 
@@ -1074,7 +1080,7 @@ qapp_project_area = "Middle Willamette Subbasins"
     dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
   
   #tir_extent
-  
+
   save(pro_area,
        hs_temp_model_extent,
        hs_solar_model_extent,
@@ -1082,6 +1088,8 @@ qapp_project_area = "Middle Willamette Subbasins"
        ce_model_extent,
        sh_model_extent,
        #tir_extent,
-       file = paste0(data.dir,"RData/map_",file.name,".RData"))
+       pro.cat.45.tbl,
+       file = paste0("./data/map_",file.name,".RData"))
+  
   
 #}
