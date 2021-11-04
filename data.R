@@ -1088,6 +1088,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
        ce_model_extent,
        sh_model_extent,
        #tir_extent,
+       pro.cat.45.tbl,
        file = paste0("./data/map_",file.name,".RData"))
   
   

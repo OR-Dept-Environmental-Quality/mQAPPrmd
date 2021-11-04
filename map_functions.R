@@ -90,7 +90,7 @@ tempStation.markers <- function(map, data) {
                     sapply(data$Station, 
                            popupTable.temp, USE.NAMES = FALSE)),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
-    )
+  )
   
 }
 
@@ -105,13 +105,13 @@ tempCalibration.markers <- function(map, data) {
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
     labelOptions = labelOptions(textsize = "15px"),
-    popup = ~paste0("Station: ", `Model Location Name`,
-                    '<br>', "Station ID: ", `Station ID`,
-                    '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
-                    '<br>', "Calibration Parameter: ", Parameter,
-                    '<br>', "Data Source: ", `Data Source`),
+    popup = ~paste0("<b>Station:</b> ", `Model Location Name`,
+                    '<br>', "<b>Station ID:</b> ", `Station ID`,
+                    '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
+                    '<br>', "<b>Calibration Parameter:</b> ", Parameter,
+                    '<br>', "<b>Data Source:</b> ", `Data Source`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
-    )
+  )
   
 }
 
@@ -126,14 +126,14 @@ tempBoundaryTributary.markers <- function(map, data) {
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
     labelOptions = labelOptions(textsize = "15px"),
-    popup = ~paste0("Station: ", `Model Location Name`,
-                    '<br>', "Station ID: ", `Station ID`,
-                    '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
-                    '<br>', "Model Input Type: ", `Model Location Type`,
-                    '<br>', "Model Input Parameter: ", Parameter,
-                    '<br>', "Data Source: ", `Data Source`),
+    popup = ~paste0("<b>Station:</b> ", `Model Location Name`,
+                    '<br>', "<b>Station ID:</b> ", `Station ID`,
+                    '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
+                    '<br>', "<b>Model Input Type:</b> ", `Model Location Type`,
+                    '<br>', "<b>Model Input Parameter:</b> ", Parameter,
+                    '<br>', "<b>Data Source:</b> ", `Data Source`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
-    )
+  )
   
 }
 
@@ -155,7 +155,7 @@ flowStation.markers <- function(map, data) {
                     sapply(data$Station, 
                            popupTable.flow, USE.NAMES = FALSE)),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
-    )
+  )
   
 }
 
@@ -170,12 +170,12 @@ flowBoundaryTributary.markers <- function(map, data) {
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
     labelOptions = labelOptions(textsize = "15px"),
-    popup = ~paste0("Station: ", `Model Location Name`,
-                    '<br>', "Station ID: ", `Station ID`,
-                    '<br>', "Model Location: ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
-                    '<br>', "Model Input Type: ", `Model Location Type`,
-                    '<br>', "Model Input Parameter: ", Parameter,
-                    '<br>', "Data Source: ", `Data Source`),
+    popup = ~paste0("<b>Station:</b> ", `Model Location Name`,
+                    '<br>', "<b>Station ID:</b> ", `Station ID`,
+                    '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
+                    '<br>', "<b>Model Input Type:</b> ", `Model Location Type`,
+                    '<br>', "<b>Model Input Parameter:</b> ", Parameter,
+                    '<br>', "<b>Data Source:</b> ", `Data Source`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
   
@@ -206,11 +206,11 @@ indPS.markers <- function(map, data) {
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$`Facility Name (Facility Number)`),
     labelOptions = labelOptions(textsize = "15px"),
-    popup = ~paste0("Facility Name (Facility Number): ", data$`Facility Name (Facility Number)`,
+    popup = ~paste0("<b>Facility Name (Facility Number):</b> ", data$`Facility Name (Facility Number)`,
                     "<br>", 
-                    "Permit Type and Description: ", data$`Permit Type and Description`,
+                    "<b>Permit Type and Description:</b> ", data$`Permit Type and Description`,
                     "<br>",
-                    "Stream/River Mile: ", data$`Stream/River Mile`),
+                    "<b>Stream/River Mile:</b> ", data$`Stream/River Mile`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
   
@@ -227,13 +227,13 @@ genPS.markers <- function(map, data) {
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$`Facility Name (Facility Number)`),
     labelOptions = labelOptions(textsize = "15px"),
-    popup = ~paste0("Facility Name (Facility Number): ", data$`Facility Name (Facility Number)`,
+    popup = ~paste0("<b>Facility Name (Facility Number):</b> ", data$`Facility Name (Facility Number)`,
                     "<br>", 
-                    "Permit Type and Description: ", data$`Permit Type and Description`,
+                    "<b>Permit Type and Description:</b> ", data$`Permit Type and Description`,
                     "<br>",
-                    "Stream/River Mile: ", data$`Stream/River Mile`),
+                    "<b>Stream/River Mile:</b> ", data$`Stream/River Mile`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
-    )
+  )
   
 }
 
@@ -255,7 +255,7 @@ gageHeight.markers <- function(map, data) {
                     sapply(data$Station, 
                            popupTable.gageHeight, USE.NAMES = FALSE)),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
-    )
+  )
   
 }
 
@@ -275,7 +275,7 @@ hsTempModel <- function(map, data) {
     opacity = 1,
     weight = 4,
     fill=FALSE
-    )
+  )
   
 }
 
@@ -294,7 +294,7 @@ hsSolarModel <- function(map, data) {
     opacity = 1,
     weight = 4,
     fill=FALSE
-    )
+  )
   
 }
 
@@ -332,7 +332,7 @@ ceModel <- function(map, data) {
     opacity = 1,
     weight = 4,
     fill=FALSE
-    ) 
+  ) 
   
 }
 
@@ -363,6 +363,3 @@ pal <- colorFactor(palette = c("blue","green","orange","pink"),
                               "20"  # Salmon and Streelhead Migration Corridors
                    )
 )
-
-
-
