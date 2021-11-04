@@ -95,6 +95,17 @@ qapp_project_area = "Sandy Subbasin"
   where_au_last <- paste0("AU_ID = '", last(pro.cat.45.tbl$AU_ID), "'")
   where_au <- paste0(where_au,where_au_last)
   IR_where <- paste0("(Char_Name = 'Temperature' AND IR_category = 'Category 5') AND (", where_au, ")")
+  
+  #Use this line to check between the REST map and the QAPP table; if both are matched, use QAPP IR table to pull data to the map
+  #IR_where <- paste0("(Char_Name = 'Temperature' AND IR_category = 'Category 5') AND (", where_huc12, ")") 
+  
+  where_au <- ""
+  for(i in 1:(length(pro.cat.45.tbl$AU_ID)-1)){
+    where_au_next <- paste0("AU_ID = '", pro.cat.45.tbl$AU_ID[i], "' OR ")
+    where_au <- paste0(where_au, where_au_next)}
+  where_au_last <- paste0("AU_ID = '", last(pro.cat.45.tbl$AU_ID), "'")
+  where_au <- paste0(where_au,where_au_last)
+  IR_where <- paste0("(Char_Name = 'Temperature' AND IR_category = 'Category 5') AND (", where_au, ")")
 
   reachcode <- ""
   for(huc_8 in subbasin_huc8){
