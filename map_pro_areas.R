@@ -108,50 +108,55 @@ qapp_project_area = "Southern Willamette Subbasins"
   WQS_reachcode <- paste0("(Temperature_Spawn_dates NOT LIKE '%No Spawning%') AND (",reachcode, ")")
   
   # group names ----
-  dta.stations.mod <- data.frame(project_area = qapp_project_area,
-                                 data = c("hs_temp_model_extent",
-                                          "hs_solar_model_extent",
-                                          "hs_solar_model_area",
-                                          "ce_model_extent",
-                                          "sh_model_extent",
-                                          "temp_stations",
-                                          "temp_cal_sites",
-                                          "temp_model_bc_tri",
-                                          "flow_stations",
-                                          "flow_model_bc_tri",
-                                          "gage_height_stations_map",
-                                          "met_stations",
-                                          "ind_ps",
-                                          "gen_ps"),
-                                 NROW = c(nrow(hs_temp_model_extent),
-                                          nrow(hs_solar_model_extent),
-                                          nrow(hs_solar_model_area),
-                                          nrow(ce_model_extent),
-                                          nrow(sh_model_extent),
-                                          nrow(temp_stations),
-                                          nrow(temp_cal_sites),
-                                          nrow(temp_model_bc_tri),
-                                          nrow(flow_stations),
-                                          nrow(flow_model_bc_tri),
-                                          nrow(gage_height_stations_map),
-                                          nrow(met_stations),
-                                          nrow(ind_ps),
-                                          nrow(gen_ps)),
-                                 group_name = c("Heat Source Temperature Model Extent",
-                                                "Heat Source Solar Model Extent",
-                                                "Heat Source Solar Model Area",
-                                                "CE-QUAL-W2 Temperature Model Extent",
-                                                "SHADOW Model Extent",
-                                                "Stream Temperature Stations",
-                                                "Stream Temperature Calibration Sites",
-                                                "Stream Temperature Model Boundary Conditions and Tributary Inputs",
-                                                "Stream Flow Stations",
-                                                "Stream Flow Model Boundary Conditions and Tributary Inputs",
-                                                "Gage Height Stations",
-                                                "Meteorological Stations",
-                                                "Individual NPDES Point Sources",
-                                                "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)")) %>% 
+  dta.mod <- data.frame(project_area = qapp_project_area,
+                        data = c("hs_temp_model_extent",
+                                 "hs_solar_model_extent",
+                                 "hs_solar_model_area",
+                                 "ce_model_extent",
+                                 "sh_model_extent"),
+                        NROW = c(nrow(hs_temp_model_extent),
+                                 nrow(hs_solar_model_extent),
+                                 nrow(hs_solar_model_area),
+                                 nrow(ce_model_extent),
+                                 nrow(sh_model_extent)),
+                        group_name = c("Heat Source Temperature Model Extent",
+                                       "Heat Source Solar Model Extent",
+                                       "Heat Source Solar Model Area",
+                                       "CE-QUAL-W2 Temperature Model Extent",
+                                       "SHADOW Model Extent")) %>% 
     dplyr::filter(!NROW == 0)
+  
+  dta.stations <- data.frame(project_area = qapp_project_area,
+                             data = c("temp_stations",
+                                      "temp_cal_sites",
+                                      "temp_model_bc_tri",
+                                      "flow_stations",
+                                      "flow_model_bc_tri",
+                                      "gage_height_stations_map",
+                                      "met_stations",
+                                      "ind_ps",
+                                      "gen_ps"),
+                             NROW = c(nrow(temp_stations),
+                                      nrow(temp_cal_sites),
+                                      nrow(temp_model_bc_tri),
+                                      nrow(flow_stations),
+                                      nrow(flow_model_bc_tri),
+                                      nrow(gage_height_stations_map),
+                                      nrow(met_stations),
+                                      nrow(ind_ps),
+                                      nrow(gen_ps)),
+                             group_name = c("Stream Temperature Stations",
+                                            "Stream Temperature Calibration Sites",
+                                            "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+                                            "Stream Flow Stations",
+                                            "Stream Flow Model Boundary Conditions and Tributary Inputs",
+                                            "Gage Height Stations",
+                                            "Meteorological Stations",
+                                            "Individual NPDES Point Sources",
+                                            "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)")) %>% 
+    dplyr::filter(!NROW == 0)
+  
+  dta.stations.mod <- rbind(dta.mod,dta.stations)
   
   group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
                    "HUC8","HUC10","HUC12",
@@ -170,6 +175,8 @@ qapp_project_area = "Southern Willamette Subbasins"
                         "Fish Use Designations",
                         "Salmon and Steelhead Spawning Use Designations",
                         "Oregon Imagery")
+  
+  group.names.search <- dta.stations %>% dplyr::pull(group_name)
   
   print(qapp_project_area)
   
@@ -711,8 +718,10 @@ qapp_project_area = "Southern Willamette Subbasins"
   # Add-ons ----
   map_final <- map_area %>% 
     # __ Search function ----
-  leaflet.extras::addSearchFeatures(targetGroups = c("Stream Temperature Stations","Stream Flow Stations"),
-                                    options = searchFeaturesOptions(openPopup = TRUE)) %>% 
+  leaflet.extras::addSearchFeatures(targetGroups = group.names.search,
+                                    options = searchFeaturesOptions(zoom = 10, 
+                                                                    #hideMarkerOnCollapse = TRUE,
+                                                                    openPopup = TRUE)) %>% 
     htmlwidgets::onRender(jsCode = "function(el, x){
     var elements = document.getElementsByClassName('Station');
     var index;
@@ -764,7 +773,7 @@ qapp_project_area = "Southern Willamette Subbasins"
                }"
     )
   )) %>% 
-    leaflet::hideGroup(c("Stream Temperature Stations","Stream Flow Stations"))
+    leaflet::hideGroup(group.names.search)
   
   # SAVE DATA ----
   print(paste0(qapp_project_area,"...Save the map"))

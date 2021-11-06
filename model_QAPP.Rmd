@@ -1736,12 +1736,14 @@ met_stations <- t51 %>%
 # Individual NPDES Point Sources
 ind_ps <- section.npdes.ind %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  dplyr::mutate(Station = "Facility Name (Facility Number)") %>% # for map search
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
 # General NPDES Point Sources (GEN01, GEN03, GEN04 and GEN05)
 gen_ps <- section.npdes.gen.1 %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  dplyr::mutate(Station = "Facility Name (Facility Number)") %>% # for map search
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
