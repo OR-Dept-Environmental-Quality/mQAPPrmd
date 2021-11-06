@@ -930,7 +930,7 @@ This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to b
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
-Load allocations are portions of the loading capacity that are allocated to background sources or non-point sources, such as urban, rural agriculture, or forestry activities. Wasteload allocations are portions of the total load that are allocated to NPDES permitted sources, such as wastewater treatment plants or industries. Wasteload allocations are used to establish effluent limits in NPDES discharge permits. Allocations may also be reserved for future uses, called reserve capacity. Allocations are quantified measures that assure water quality standards will be met and may distribute the pollutant loads between nonpoint and point sources. This general TMDL concept is represented by Equation 1.
+Load allocations are portions of the loading capacity that are allocated to background sources or non-point sources, such as urban, rural agriculture, or forestry activities. Wasteload allocations are portions of the total load, which are allocated to NPDES permitted sources, such as wastewater treatment plants or industries. Wasteload allocations are used to establish effluent limits in NPDES discharge permits. Allocations may also be reserved for future uses, called reserve capacity. Allocations are quantified measures that assure water quality standards will be met and may distribute the pollutant loads between nonpoint and point sources. This general TMDL concept is represented by Equation 1.
 
 $$TMDL = \sum WLA + \sum LA + \textit {Reserve Capacity} + MOS  \hspace{3em}\text{Equation 1}$$
 
@@ -1014,7 +1014,7 @@ The current theory to explain the nature of heat is called the kinetic-molecular
 
 Temperature is an intensive property and much like concentration measures the “strength” rather than “quantity” of kinetic energy. The temperature of an object is the measure of the average kinetic energy of all the molecules in that object. Hot water has greater average kinetic energy than cold water but may not have greater total kinetic energy. For example, a small pot of water with a temperature near the boiling point has a higher average kinetic energy than a swimming pool at room temperature. The swimming pool has a much larger quantity of molecules and therefore a higher total kinetic energy than the pot of water.
 
-Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Water temperature change ($\Delta Tw$) is a function of the heat transfer in a discrete volume and may be described in terms of changes in heat per unit volume. Conversely, a change in volume can result in water temperature change for a defined amount of heat exchange. With this basic conceptual framework of water temperature change it is possible to discuss stream temperature change as a function of two variables: heat and mass transfer.
+Temperature is the water quality parameter of concern, but heat, in particular heat from human activities or anthropogenic sources, is the pollutant of concern. Water temperature change ($\Delta Tw$) is a function of the heat transfer in a discrete volume and may be described in terms of changes in heat per unit volume. Conversely, a change in volume can result in water temperature change for a defined amount of heat exchange. With this basic conceptual framework of water temperature change, it is possible to discuss stream temperature change as a function of two variables: heat and mass transfer.  
 
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
@@ -1147,7 +1147,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 * [Water Rights Information System][WRIS] (WRIS) – the WRIS database contains all permitted or certificated water rights. Data in the WRIS corresponding to quantities of water for use are expressed as maximum use allowable, generally as monthly, seasonal or annual rates or volumes. These maximum values may not correspond to actual usage, which will likely vary based on factors such as irrigation application rate or household consumer demand. DEQ may choose to incorporate the maximum amount allowable or some lesser quantity provided sufficient information is available to support those rates in the modeling.  Water rights information can also be accessed using their online mapping application (https://apps.wrd.state.or.us/apps/gis/wr/Default.aspx).
 
-* [Water Use Reports][Water Use Reports] – some, but not all, water rights holders must monitor and report the water they use to the state, typically on a monthly or yearly basis, as a requirement of their water rights. These water use reports will be used to develop withdrawal time series based on the information at hand.
+* [Water Use Reports][Water Use Reports] – some, but not all, water rights holders must monitor and report the water they use to the state, typically on a monthly or yearly basis, as a requirement of their water rights. These water use reports will be used to develop withdrawal time series based on available information.
 
 [WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
 [Water Use Reports]: https://apps.wrd.state.or.us/apps/wr/wateruse_query/
@@ -1175,7 +1175,7 @@ The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", 
 
 ## Data gaps
 
-Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parametrize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parametrize the model.
+Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parameterize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parameterize the model.
 
 To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in the sections of model inputs in the current Chapter 6.
 
@@ -1739,12 +1739,14 @@ met_stations <- t51 %>%
 # Individual NPDES Point Sources
 ind_ps <- section.npdes.ind %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  dplyr::mutate(Station = "Facility Name (Facility Number)") %>% # for map search
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
 # General NPDES Point Sources (GEN01, GEN03, GEN04 and GEN05)
 gen_ps <- section.npdes.gen.1 %>% 
   dplyr::filter(!is.na(`Latitude/Longitude`)) %>% 
+  dplyr::mutate(Station = "Facility Name (Facility Number)") %>% # for map search
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
