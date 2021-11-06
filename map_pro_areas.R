@@ -45,12 +45,12 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
-# qapp_project_area = "Southern Willamette Subbasins"
+qapp_project_area = "Southern Willamette Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
   
   map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
   load(paste0("./data/",map.file.name,".RData")) # data.R
@@ -780,7 +780,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
                           background = "grey", selfcontained = TRUE)
   
-  }
+#}
 
 # *************** -----
 # DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
