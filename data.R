@@ -847,25 +847,25 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
   #sf::st_drop_geometry()
   
-# _ NLCD ----
-nlcd.pro.area <- nlcd.tbl %>% 
-  dplyr::ungroup() %>% 
-  dplyr::filter(Project_Na == qapp_project_area) %>% 
-  dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-  dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
-  dplyr::arrange(desc(as.numeric(Acres))) %>% 
-  dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land), "Open Water",NLCD_Land)) %>% 
-  tidyr::drop_na(Stream)
-nlcd.text.pro.area <- nlcd.text %>% 
-  dplyr::filter(Project_Na == qapp_project_area) %>% 
-  dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
-  tidyr::drop_na(Stream)
+  # _ NLCD ----
+  nlcd.pro.area <- nlcd.tbl %>% 
+    dplyr::ungroup() %>% 
+    dplyr::filter(Project_Na == qapp_project_area) %>% 
+    dplyr::mutate(Acres = ifelse(Acres == 0.0,"<0.05",Acres)) %>% 
+    dplyr::mutate(Percentage = ifelse(Percentage == 0.0,"<0.05",Percentage)) %>% 
+    dplyr::arrange(desc(as.numeric(Acres))) %>% 
+    dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land), "Open Water",NLCD_Land)) %>% 
+    tidyr::drop_na(Stream)
+  nlcd.text.pro.area <- nlcd.text %>% 
+    dplyr::filter(Project_Na == qapp_project_area) %>% 
+    dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
+    tidyr::drop_na(Stream)
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
-    dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-    dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage))%>% 
+    dplyr::mutate(Acres = ifelse(Acres == 0.0,"<0.05",Acres)) %>% 
+    dplyr::mutate(Percentage = ifelse(Percentage == 0.0,"<0.05",Percentage))%>% 
     dplyr::arrange(desc(as.numeric(Acres)))
   
   # _ Save Data ----
@@ -1080,7 +1080,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
     dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
   
   #tir_extent
-
+  
   save(pro_area,
        hs_temp_model_extent,
        hs_solar_model_extent,
