@@ -1775,6 +1775,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        met_stations,
        ind_ps,
        gen_ps,
+       tcat5,
        file = paste0("./data/map_",file.name,"_qapp.RData"))
   
 
