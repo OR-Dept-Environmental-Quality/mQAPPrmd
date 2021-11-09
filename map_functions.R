@@ -355,11 +355,54 @@ shModel <- function(map, data) {
   
 }
 
-# Color factor ----
-pal <- colorFactor(palette = c("blue","green","orange","pink"),
-                   levels = c("12", # Bull Trout Spawning and Juvenile Rearing
-                              "16", # Core Cold Water Habitat
-                              "18", # Salmon and Trout Rearing and Migration
-                              "20"  # Salmon and Streelhead Migration Corridors
-                   )
-)
+# stroke color for temp non spawning lines. Same as fish use maps
+tempWQScolor <- htmlwidgets::JS("function tempWQScolor(feature) {
+    var colorToUse;
+    var zdadm = feature.properties.Temperature_Criterion_7dADM_C;
+                      
+                      if (zdadm === \"12\") colorToUse = \"blue\";  
+                      else if (zdadm === \"16\") colorToUse = \"darkgreen\"; 
+                      else if (zdadm === \"18\") colorToUse = \"orange\";
+                      else if (zdadm === \"20\") colorToUse = \"deeppink\";
+                      else colorToUse = \"darkgrey\";
+                      
+    return {color: colorToUse};
+    }")
+
+# stroke color for spawning lines
+# Hex colors generated using viridis::plasma(24)
+tempSpawncolor <- htmlwidgets::JS("function tempSpawncolor(feature) {
+    var colorToUse;
+    var code = feature.properties.SpawnCode;
+    
+                      if (code === 0) colorToUse = \"darkgrey\";
+                      else if (code === 11) colorToUse = \"darkgrey\";
+                      else if (code === 12) colorToUse = \"#0D0887FF\";
+                      else if (code === 13) colorToUse = \"#280592FF\";
+                      else if (code === 14) colorToUse = \"#3C049BFF\";
+                      else if (code === 15) colorToUse = \"#4F02A2FF\";
+                      else if (code === 16) colorToUse = \"#6001A6FF\";
+                      else if (code === 17) colorToUse = \"#7100A8FF\";
+                      else if (code === 18) colorToUse = \"#8205A7FF\";
+                      else if (code === 19) colorToUse = \"#920FA3FF\";
+                      else if (code === 20) colorToUse = \"#A11B9BFF\";
+                      else if (code === 21) colorToUse = \"#AE2892FF\";
+                      else if (code === 22) colorToUse = \"#BB3488FF\";
+                      else if (code === 23) colorToUse = \"#C6417DFF\";
+                      else if (code === 24) colorToUse = \"#D04D73FF\";
+                      else if (code === 25) colorToUse = \"#DA5A6AFF\";
+                      else if (code === 26) colorToUse = \"#E26660FF\";
+                      else if (code === 27) colorToUse = \"#EA7457FF\";
+                      else if (code === 28) colorToUse = \"#F1824DFF\";
+                      else if (code === 29) colorToUse = \"#F79044FF\";
+                      else if (code === 30) colorToUse = \"#FBA039FF\";
+                      else if (code === 31) colorToUse = \"#FDB030FF\";
+                      else if (code === 32) colorToUse = \"#FDC229FF\";
+                      else if (code === 33) colorToUse = \"#FBD324FF\";
+                      else if (code === 34) colorToUse = \"#F6E626FF\";
+                      else if (code === 35) colorToUse = \"#F0F921FF\";
+                      else if (code === 99) colorToUse = \"darkgrey\";
+                      else colorToUse = \"darkgrey\";
+                      
+    return {color: colorToUse};
+    }")
