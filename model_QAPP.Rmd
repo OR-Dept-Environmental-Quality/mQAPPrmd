@@ -120,6 +120,18 @@ if(qapp_project_area == "North Umpqua Subbasin"){
 
 ```
 
+```{r, label=`figs`, echo=FALSE}
+# 3. Conceptual model: key processes and variables
+## Figure captions
+
+heat.cap <- figs(name="heat.transfer", caption = paste0("Major heat transfer processes."))
+temp.cap <- figs(name="temp.cd", caption = paste0("Conceptual diagram that identifies the key processes and variables that drive stream temperature changes and the biological responses (Schofield and Sappington, 2010)."))
+
+heat.fig <- figs(name = "heat.transfer", display="cite")
+temp.fig <- figs(name = "temp.cd", display="cite")
+
+```
+
 ```{r, label=`t51`, echo=FALSE}
 # 5.1	Meteorology
 ## Table in Appendix A
@@ -1021,16 +1033,15 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
 $$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
-
-**Heat transfer** relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in Figure 1.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
+<br>
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
-
-heat.cap <- figs(name="heat.transfer", caption = paste0("Major heat transfer processes."))
 
 knitr::include_graphics(path = "./fig/Heat_Transfer_Diagram.jpg")
 
 ```
+
+**Heat transfer** relates to processes that change heat in a defined water volume. There are several thermodynamic pathways that can introduce or remove heat from a stream. These different processes are shown in `r heat.fig`.  For any given stream reach heat exchange is closely related to the season, time of day and the surrounding environment and the stream characteristics.  Heat transfer can be dynamic and change over relatively small distances and time periods.  Equation 3 describes the several heat transfer processes that change stream temperature (Wunderlich, 1972; Jobson and Keefer, 1979; Beschta and Weatherred, 1984; Sinokrot and Stefan, 1993; Boyd, 1996; Hannah et al., 2008, Benyahya et al., 2012, Johnson, 2004).
 
 <br>
 
@@ -1054,15 +1065,15 @@ $\Phi_{evaporation}$ = Evaporation (+/-)
 * Surface water exchange (e.g. tributary input, precipitation), and
 * Other human related activities that alter stream flow volume.
 
-Stream temperature is influenced by both human and natural factors. Figure 2 is a conceptual diagram that identifies the key process and variables that drive stream temperature. Human sources and natural sources are identified. Near the bottom of the diagram the biological responses are identified.
+<br>
 
 ```{r temp-cd, eval.after="fig.cap", fig.cap=temp.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
-
-temp.cap <- figs(name="temp.cd", caption = paste0("Conceptual diagram that identifies the key processes and variables that drive stream temperature changes and the biological responses (Schofield and Sappington, 2010)."))
 
 knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
 ```
+
+Stream temperature is influenced by both human and natural factors. `r temp.fig` is a conceptual diagram that identifies the key process and variables that drive stream temperature. Human sources and natural sources are identified. Near the bottom of the diagram the biological responses are identified.
 
 **Anthropogenic Nonpoint Sources**: Temperature increases from human-caused nonpoint sources are caused by increases in solar radiation loading to the stream network from the disturbance or removal of near-stream vegetation, channel modification and widening, reductions to the stream flow rate or volume, changes in hyporheic flows and channel connectivity, reductions in cold groundwater inflows, and changes to meteorological conditions, such as those caused by climate change.
 
@@ -1771,6 +1782,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
        met_stations,
        ind_ps,
        gen_ps,
+       tcat5,
        file = paste0("./data/map_",file.name,"_qapp.RData"))
   
 
