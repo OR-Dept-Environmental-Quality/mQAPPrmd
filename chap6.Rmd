@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Clackamas River"
+# for test: waterbody_name <- "Southern Willamette Subbasins"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -357,27 +357,50 @@ if(!model.extent == TRUE){
   
   if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
     
-    t6x7 <- section.model.input %>% 
-      dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-      dplyr::filter(!Parameter %in% "Effective Shade") %>% 
-      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
-                    `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
-                    Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
-                    `Model Location` = round(`Model Location`,2),
-                    `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
-                    `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
-                    `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
-                    `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
-                                                                `Model Location Name`,
-                                                                paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
-      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
-      dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
-      dplyr::ungroup() %>% 
-      dplyr::arrange(Parameter,desc(as.numeric(`Model Location`))) %>% 
-      dplyr::rename(`Calibration Parameter` = `Parameter`)
-    
+    if(!waterbody_name == "Southern Willamette Subbasins"){
+      t6x7 <- section.model.input %>% 
+        dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+        dplyr::filter(!Parameter %in% "Effective Shade") %>% 
+        dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                      `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                      `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                      `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                      Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                      `Model Location` = round(`Model Location`,2),
+                      `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                      `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
+                      `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                      `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                                  `Model Location Name`,
+                                                                  paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
+        dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+        dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+        dplyr::ungroup() %>% 
+        dplyr::arrange(Parameter,desc(as.numeric(`Model Location`))) %>% 
+        dplyr::rename(`Calibration Parameter` = `Parameter`)
+      
+    } else{
+      t6x7 <- section.model.input %>% 
+        dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
+        dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
+                      `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                      `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
+                      `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                      Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
+                      `Model Location` = round(`Model Location`,2),
+                      `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
+                      `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
+                      `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
+                      `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
+                                                                  `Model Location Name`,
+                                                                  paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
+        dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+        dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+        dplyr::ungroup() %>% 
+        dplyr::arrange(Parameter,desc(as.numeric(`Model Location`))) %>% 
+        dplyr::rename(`Calibration Parameter` = `Parameter`)
+      
+    }
   }
   
   if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
@@ -413,16 +436,16 @@ if(!model.extent == TRUE){
   t6x7 <- t6x7[,c(1,2,5,4)]
   
   if(NROW(t6x7)>0){    
-  
-      t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
-                               caption = tbls(name = paste0("t6x7", waterbody_name),
-                                              caption = ifelse(waterbody_name == "McKenzie River: Upper", 
-                                                                paste0("Calibration sites and parameters used in the Heat Source Model for the upper portion of the McKenzie River."),
-                                                                paste0("Calibration sites and parameters used in the ", 
-                                                             ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
-                                                             waterbody_name, 
-                                                             " Heat Source Model."))))
-
+    
+    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                             caption = tbls(name = paste0("t6x7", waterbody_name),
+                                            caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                             paste0("Calibration sites and parameters used in the Heat Source Model for the upper portion of the McKenzie River."),
+                                                             paste0("Calibration sites and parameters used in the ", 
+                                                                    ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
+                                                                    waterbody_name, 
+                                                                    " Heat Source Model."))))
+    
   }
   
   mod.loc <- ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs7","hs8","hs9"),
@@ -439,6 +462,6 @@ if(!model.extent == TRUE){
 
 `r if(!waterbody_name == "Southern Willamette Subbasins"){if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}}`
 
-`r if(waterbody_name == "Southern Willamette Subbasins"){paste0("The model was calibrated primarily by comparing the model effective shade predictions to the field measured effective shade values summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". To improve the calibration results global changes to the canopy cover parameter were made iteratively. Canopy cover was the only calibration parameter. The final calibrated canopy cover value was 0.80 (80%). Other calibration parameters identified in Section 6.2 (landcover height and landcover overhang) were determined directly from LiDAR and were not adjusted. If it is determined that the model calibration needs to be modified to improve model fit the same three calibration parameters described in Section 6.1 General model inputs and parameters will be candidates for adjustment.")}`
+`r if(waterbody_name == "Southern Willamette Subbasins"){paste0("The model was calibrated primarily by comparing the model effective shade predictions to the field measured effective shade values summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". To improve the calibration results global changes to the canopy cover parameter were made iteratively. Canopy cover was the only calibration parameter. The final calibrated canopy cover value was 0.80 (80%). Other calibration parameters identified in Section 6.2 (landcover height and landcover overhang) were determined directly from LiDAR and were not adjusted. If it is determined that the model calibration needs to be modified to improve model fit the same three calibration parameters described in Section 6.1 will be candidates for adjustment.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
