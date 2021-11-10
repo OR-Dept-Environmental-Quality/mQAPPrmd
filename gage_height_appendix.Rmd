@@ -20,7 +20,7 @@ options(knitr.kable.NA = '')
 
 ```
 
-# Appendix C Gage height data summary
+# Appendix D Gage height data summary
 
 ```{r, echo=FALSE}
 

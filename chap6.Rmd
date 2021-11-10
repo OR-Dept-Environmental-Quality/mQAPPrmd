@@ -46,13 +46,17 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 ```
 
-The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
+The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix E.
 
 ### Spatial and temporal resolution
 
-The model input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
+`r if(waterbody_name == "Clackamas River"){paste0("The existing 2001/2002 model input bathymetry uses one water body and two branches. The branches were selected based on changes in the channel bottom slope. The model grid has 149 segments; 145 of which are active (Branch 1 Segments 2 to 94 and Branch 2 Segments 97 to 148); and each segment has a length of 251.06 meters. The upstream boundary is configured using the flow and temperature from the USGS gage station at Estacada. The downstream boundary condition is configured as an artificial spillway which discharges to the Lower Willamette River.")}`
 
-A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.
+`r if(waterbody_name == "Long Tom River"){paste0("The existing current conditions model input bathymetry uses one water body and 13 branches along the main river and one branch representing a side channel. The branches were incorporated into the model to accurately predict the flow peak timings due to the several weirs/dams that lie along the model domain. The model grid has 187 segments, with each segment lengths ranging from 83.88 meters to 251.06 meters. The side channel is comprised of 3 segments of 1897, 2590, and 1427 meters. The upstream boundary is configured using the flow and temperature from the USGS gage station near Alvadore (USGS 1416999) at RM 23.5. There are ten spillway structures defined along the systems, and three gates.  The downstream boundary condition is configured as an artificial gate which discharges to the Willamette River. The model also includes one withdrawal from segment 91 (RM 12.9) of 4 cfs.  It should be noted that the PSU documentation (Annear et. al, 2004) notes that there were no withdrawals, however the 2001 and 2002 model do have this withdrawal. In addition, the PSU model documentation also does not discuss the gates in the model.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("The model is comprised of two waterbodies, with a total of 13 branches. The first water body consists of two branches; the first is the main stem of the Willamette River and the second is Multnomah Channel. The Columbia River represents the second water body with 11 branches. The first branch in water body two is the main channel of the Columbia River and the remaining 10 branches are tributary inflow reaches or side channels around islands. Segment size was based on the spacing of the bathymetry data cross sections (PSU report Annear, et. al 2004). The model’s vertical grid resolution is 2 meters throughout, with a maximum of 28 layers.")}`
+
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){paste0("[Update:] The model setup and calibration process are documented in the USGS report (citation).")}`
 
 ### Source characteristics
 
@@ -102,7 +106,7 @@ if(NROW(nlcd.waterbody)>0){
   
   nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
+                                             caption = paste0("Summary of land uses within 300 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al 2018).")))
   
 }
 
@@ -120,7 +124,7 @@ if(NROW(dma.waterbody)>0){
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                            caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                                            caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons within 300 meters of the digitized ", waterbody_name, " centerline.")))
   
 }
 
@@ -132,7 +136,7 @@ The primary sources of thermal loading contributing to temperatures exceedances 
 
 `r if(npdes.ind.n > 0){npdes.ind.tbl}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 300 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
 
 `r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
@@ -151,7 +155,9 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ```
 
-`r if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}`
+`r if(waterbody_name %in% c("Clackamas River","Long Tom River","Willamette River: Lower")){paste0("Data availability during the year 2015 and 2016 were evaluated. The proposed model simulation period is the year 2015. The modeling period will cover the months from April to November to be consistent with the existing USGS v4.2 models.")}`
+
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}}`
 
 ### Important assumptions
 
@@ -161,7 +167,6 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ```{r, label=`t6x6_1`, include=FALSE}
 options(knitr.kable.NA = '') # hide NAs in table
-
 if(!model.extent == TRUE){
   
   chap6x6 <- NULL
@@ -203,7 +208,7 @@ if(!model.extent == TRUE){
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
       dplyr::arrange(`Input Type`,Parameter,desc(as.numeric(`Model Location`))) %>% 
       rbind(t6x6_met)
-    
+   
   }
   
   if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
@@ -238,14 +243,13 @@ if(!model.extent == TRUE){
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
       dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`)) %>% 
       rbind(t6x6_met)
-
-    
+   
   }
   
   t6x6_col <- t6x6_1 %>% 
     dplyr::filter(!is.na(`Location Units`))
   
-  names(t6x6_1)[names(t6x6_1) == "Model Location"] <- if(NROW(t6x6_col)>0){paste0("Model Location (",unique(t6x6_col$`Location Units`),")")}else{paste0("Model Location")}
+  names(t6x6_1)[names(t6x6_1) == "Model Location"] <- if(NROW(t6x6_col)>0){paste0("Model River Mile /Segment Number")}else{paste0("Model Location")}
   
   t6x6_1 <- t6x6_1[,-c(3)] %>% 
     dplyr::rename(`Model Input` = Parameter)
@@ -264,12 +268,52 @@ if(!model.extent == TRUE){
   t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
-
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(waterbody_name == "Clackamas River"){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the model configuration of the model input parameters and the source of these data. Meteorological, flow, and temperature input parameters are summarized in the table along with relevant data gaps.")}`
 
-`r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
+`r if(waterbody_name == "Clackamas River"){paste0("For Meteorological input development, previously PGE data from River Mill Dam was used for Air Temperature in conjunction with Eagle Creek to fill in gaps. Air Temperature data from River Mill Dam is not currently available. Air temperature data from Eagle Creek in conjunction with Aurora State Airport will potentially be used.")}`
+
+`r if(waterbody_name == "Clackamas River"){paste0("Daily flow values were developed for Deep, Clear, and Eagle Creeks by Kent Doughty with EES, a consultant in the modeling effort for the Lower Clackamas River for Portland General Electric. Further flow relationships were also developed with the USGS gage at Estacada to fill in gags during the development of the current conditions calibration model. It is anticipated that these flow correlations will be used to develop tributary flow boundaries for the 4 tributaries – Eagle Creek, Deep Creek, Clear Creek, and Rock Creek in the 2015 model.")}`
+
+`r if(waterbody_name == "Clackamas River"){paste0("There is one point source, the Clackamas River Fish Hatchery, for which flow and water temperature data will be updated using DMR data provided by DEQ. This point source input is not discussed in the PSU model documentation (Annear et. al, 2004) but this input is included in the model received by Tt from DEQ. Further the model includes withdrawals at five specific locations which are not discussed in the PSU documentation (Annear et. al, 2004). Withdrawal information will be required for 2015 for model development.")}`
+
+`r if(waterbody_name == "Clackamas River"){paste0("The distributed flows were estimated. The daily tributary flows and the daily upstream flow at Estacada were summed and then subtracted from the flow measured at Oregon City to estimate any additional inflow to the river attributable to the ungaged drainage areas. The total distributed flow was then divided in two based on the lengths of the two model branches. The five withdrawals identified in the model would also need to be included in the flow balance.")}`
+
+`r if(waterbody_name == "Clackamas River"){paste0("Water temperature data for each of the four tributaries was previously available from PGE during 2001/2002 is not available for 2015/2016. This is an important data gap (along with the Fish Hatchery data) that needs be filled. Water Temperature at Eagle Creek and Deep Creek can potentially be estimated using regression relationships developed between the Estacada USGS site. No water temperature data is available for Clear Creek. For Rock Creek previously, data from Deep Creek were directly used for this tributary and can be used. No groundwater monitoring water temperature data is available for 2015 or 2016, similar to what was collected by PGE during 2000 and 2001 which was used to configure the distributed tributary temperatures.")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized in the table along with relevant data gaps.")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0("Meteorology data were taken from the Corvallis Airport during 2001 and from the Eugene Airport during 2002. The appropriate meteorology data will be chosen from either Eugene Airport or Corvallis Airport. Note that additional air temperature stations from MesoWest and from NCDC may be available and if necessary will be used to supplement the air temperatures in the meteorological input file.")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0("No tributary inflows were modeled in the existing model setup, rather they are included as distributed tributaries. Flow rates for the distributed tributaries were determined by balancing flows using gaging station data. The only diversion in the model setup is for the Ferguson Dam Diversion set as a constant value of 0.113 cms for 2001 (same was used for 2002). If no data is available for 2015 then the same constant value will be used for flow balance estimation.")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0("Gate flows for Old Long Tom varied slightly for 2001 and 2002, based on the existing input file. Information on this if available can be used to configure 2015. In addition Gate weir elevation for Ferguson Dam and downstream boundary condition were in the 2001/2002 model. Unless new data is available for 2015, the same data will be used for 2015.")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0("There are no point sources represented in the existing model. The City of Monroe STP, which is a new point source input, will be included in the model. DMR data will be queried for this facility and processed for specifying in the model (",tbls(name = paste0("t6x6_1", waterbody_name),display="cite"),").")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized in the table along with relevant data gaps.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("The upstream boundary condition for the Lower Willamette River near the Willamette Falls was characterized by the outflow from the Middle Willamette River model. The PSU report (Annear et. al, 2004) notes that “although there are USGS gages station monitoring stage above (USGS 14207740) and below (USGS 14207770) the Willamette Falls, the gage above the falls is not always accurate”.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("Some of the missing boundary inputs include water temperature data for the Columbia near Beaver Terminal, water temperature for the Columbia Slough, and water temperature for several tributaries that were previously monitored by Washington Ecology.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("Water Temperature at Columbia River at Port Westward, near Quincy, OR (14246900) (previously called Beaver Terminal) ends at 9/30/2003. This station was previously used to configure one of the downstream boundaries for the Columbia River. Potentially stations upstream (Astoria, OR) and downstream (Longview, WA) of this location can be considered for use to configure the model for the year 2015. The NOAA station Astoria, OR ([Station ID: 9439040][9439040]) is located approximately 35 miles upstream of Beaver Terminal and has hourly data from 11/4/1993 to current. The Longview, WA station ([Station ID: 9440422][9440422]) is located approximately 12 miles downstream of Beaver Terminal and has hourly data for the period from 6/3/2005 to 7/24/2014 and from 10/16/2015 to current. Note that the Longview station alone cannot be used since it has a gap during 2015, which would need to be filled (potentially using the Astoria station). Or alternatively, if appropriate the Astoria station alone can be used to configure the model boundary.  All water temperature data would first need to be plotted and analyzed for correlations before using it for configuring the model.")}`
+
+[9439040]: https://tidesandcurrents.noaa.gov/stationhome.html?id=9439040
+[9440422]: https://tidesandcurrents.noaa.gov/stationhome.html?id=9440422
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("The water temperature data for the Columbia Slough during 2001/2002 was characterized using two monitoring instruments at same location LASAR 11201 and Metro Regional Govt (SJB). Data collected by the City of Portland from North Vancouver St. Bridge (Main Channel – Columbia Slough) VNB will be used to configure the water temperature for the Columbia Slough. Data for the year 2015 is only available for a few months and is not available from May through Oct during 2015. Data is available for other years (2016) at this station. Available data from other years will be use to develop correlations for filling gaps or will be filled by directly supplementing the data from other years for the missing periods.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("Additionally monthly water temperature for several tributaries that were previously monitored by the Washington Ecology in the Monthly Baseflow Characteristics of Selected Washington Rivers and Streams report (Water Supply Bulletin No. 60, Publication No. 99-327, October 1999) would be used for 2015, if no data is available.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("The PSU report states that flow contributions from the smaller basins were not determined individually and were incorporated as distributed tributaries (i.e. distributed input in the W2 model). However, in a separate distributed tributaries section in the report it is noted that “the total drainage area not considered in the model was about 0.34% of the entire watershed drainage and hence not considered in the model as it was relatively small”. This was confirmed by looking at the current W2 model in which the distributed tributaries were turned off.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("Point Source data are needed for configuring the model for 2015. DMR data will be queried and processed for specifying in the model. In addition to existing point sources currently in the model, there are nine new point sources that have been identified for inclusion into the model. All existing and new point sources have been identified in the ",tbls(name = paste0("t6x6_1", waterbody_name),display="cite"),".")}`
+
+`r if(waterbody_name %in% c("Clackamas River","Long Tom River","Willamette River: Lower")){if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}}`
+
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){paste0("[Update:] The model inputs are documented in the USGS report (citation).")}`
 
 ```{r, label=`t6x6_2`, echo=FALSE}
 
@@ -286,7 +330,6 @@ t6x6_2 <- section.model.input %>%
 
 ```{r, label=`t6x7`, include=FALSE}
 options(knitr.kable.NA = '') # hide NAs in table
-
 if(!model.extent == TRUE){
   
   chap6x7 <- NULL
@@ -341,10 +384,10 @@ if(!model.extent == TRUE){
                     `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                                 `Model Location Name`,
                                                                 paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
-      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
+      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`,Note) %>% 
       dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
       dplyr::ungroup() %>% 
-      dplyr::arrange(Parameter,desc(`Model Location`)) %>% #
+      #dplyr::arrange(`Model Location Name (Station ID)`) %>% # W. MS
       dplyr::rename(`Calibration Parameter` = `Parameter`)
     
   }
@@ -352,18 +395,31 @@ if(!model.extent == TRUE){
   t6x7_col <- t6x7 %>% 
     dplyr::filter(!is.na(`Location Units`))
   
-  names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
+  names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model River Mile /Segment Number")}else{paste0("Model Location")}
   
-  t6x7 <- t6x7[,c(1,2,5,4)]
+  # Modified for W. MS:
+  t6x7 <- t6x7[,c(1,2,6,4,5)] #
   
   if(NROW(t6x7)>0){
     
-    t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+    if(waterbody_name %in% c("Clackamas River")){
+      
+          t6x7_tbl <- knitr::kable(t6x7[,-c(5)], format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("t6x7", waterbody_name),
                                             caption = paste0("Calibration sites and parameters used in the ", 
                                                              ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
                                                              waterbody_name, 
                                                              " Heat Source Model.")))
+
+    }
+    
+    if(waterbody_name %in% c("Long Tom River","Willamette River: Lower")){
+      
+          t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
+                             caption = tbls(name = paste0("t6x7", waterbody_name),
+                                            caption = paste0("Calibration sites and parameters used in the ", waterbody_name, " Heat Source Model.")))
+          
+    }
     
   }
   
@@ -376,9 +432,24 @@ if(!model.extent == TRUE){
   t6x7_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
-
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
+`r if(waterbody_name == "Clackamas River"){paste0("Model calibration will focus on flow, water level, and water temperature data from calibration sites that have available data during the simulation period. Water Temperature data were available at the two USGS sites located at the upstream and downstream model extents, however data at four locations where river water temperature data were previously available from PGE, in the current conditions model during 2001/2002, are not available for 2015 or 2016 (",tbls(name = paste0("t6x7", waterbody_name),display="cite"),").  Wetted Channel widths were available during April and August of 2002 as part of field surveys done by the USGS. Wetted channel width data are not available for 2015 and/or 2016 for calibration purposes.")}`
 
-`r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
+`r if(waterbody_name == "Clackamas River"){paste0("The current condition calibration parameters (i.e. from 2001/2002) may need to be updated in the 2015 model to reflect spawning period conditions. Potential calibration adjustments may be made to Manning’s n coefficient, wind sheltering, evaporation, and sediment temperatures. Vegetative and topographic shade characteristics will not be adjusted since the model input was developed using a detailed GIS analysis. The model calibration location and available data during the years 2015 (and 2016) are shown below in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),".")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0("Model calibration will focus on flow, water level, and water temperature data from calibration sites that have available data during the simulation period.")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0("Out of the five water temperature calibration station locations only two stations have data i.e. the USGS stations at Alvadore and Monroe. The USGS station at Monroe only reports daily min/max/mean water temperatures and is supplemented with the DEQ station 10375 with data collected partially during September, October, and November. All LASAR stations (26749, 26750, and 29644) used previously in the calibration during 2001/2002 do not have data for 2015/2016. Two new calibration stations were identified that had limited data (data was only available during September, October, and November).")}`
+
+`r if(waterbody_name == "Long Tom River"){paste0("The current condition calibration parameters (i.e. from 2001/2002) may need to be updated in the 2015 model to reflect spawning period conditions.  Potential calibration adjustments may be made to Manning’s coefficient , wind sheltering, evaporation, and sediment temperatures. Vegetative and topographic shade characteristics will not be adjusted since the model input was developed using a detailed GIS analysis. The model calibration location and available data during the years 2015 are shown below in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),".")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("Model calibration will focus on flow, water level, and water temperature data from calibration sites that have available data during the simulation period.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("Hydrodynamic calibration data are available during 2015 for each of the six water level observation and one flow calibration station used during 2001/2002.  Out of the 17 water temperature stations used previously in 2001/2002, only 3 stations have data during the year 2015 and/or 2016.  Several of the water temperature stations were from Oregon’s Laboratory Analytical Storage and Retrieval Database (LASAR) and have an associated ID which is similar to the LASAR but only have data during either 2001 and/or 2002 but no data collected during 2015 and/or 2016.")}`
+
+`r if(waterbody_name == "Willamette River: Lower"){paste0("The current condition calibration parameters (i.e. from 2001/2002) may need to be updated in the 2015 model to reflect spawning period conditions.  Potential calibration adjustments may be made to Manning’s coefficient , wind sheltering, evaporation, and sediment temperatures. Vegetative and topographic shade characteristics will not be adjusted since the model input was developed using a detailed GIS analysis. The model calibration location and available data during the years 2015 are shown below in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),".")}`
+
+`r if(waterbody_name %in% c("Clackamas River","Long Tom River","Willamette River: Lower")){if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}}`
+
+`r if(waterbody_name %in% c("Coast Fork and Middle Fork Willamette River","McKenzie River: Lower","North Santiam and Santiam River","South Santiam River","Willamette River: Middle","Willamette River: Upper")){paste0("[Update:] The model calibration is documented in the USGS report (citation).")}`
