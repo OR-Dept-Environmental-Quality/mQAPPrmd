@@ -73,9 +73,9 @@ npdes.ind.n <- nrow(npdes.ind.waterbody)
 
 if(npdes.ind.n>0){
   
-  npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
-                                caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+  #npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
+  #                              caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
+  #                                             caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
   
 }
 
@@ -84,11 +84,11 @@ if(npdes.ind.n == 0) {
 } 
 
 if(npdes.ind.n == 1) {
-  npdes.txt <- paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"), ".")
+  #npdes.txt <- paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"), ".")
 }
 
 if(npdes.ind.n > 1) {
-  npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),".")
+  #npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),".")
 } 
 
 # NLCD
@@ -126,11 +126,7 @@ if(NROW(dma.waterbody)>0){
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances along the `r waterbody_name` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
-
-`r npdes.txt`
-
-`r if(npdes.ind.n > 0){npdes.ind.tbl}`
+The primary purpose of the `r waterbody_name` solar model was to characterize the status of effective shade. Effective shade is a surrogate for solar radiation loading caused by the disturbance or removal of near-stream vegetation. Other potential sources of thermal loading were not evaluated by this model. 
 
 The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along the `r waterbody_name` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
 
@@ -155,7 +151,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
+The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL `r paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")")`, the model user guide `r knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))` or in Section 6 and Section 7 of this document.
 
 ### Model inputs
 
@@ -261,7 +257,7 @@ if(!model.extent == TRUE){
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  t6x6_1.txt <- "**[Update:]** The inputs to the model include XXX derived vegetation heights and stream position."
   
 }
 
@@ -278,7 +274,7 @@ t6x6_2 <- section.model.input %>%
 
 ```
 
-`r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
+`r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}`
 
 `r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The near stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
 
