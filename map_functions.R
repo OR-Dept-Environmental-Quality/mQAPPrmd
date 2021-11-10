@@ -355,6 +355,7 @@ shModel <- function(map, data) {
   
 }
 
+# Legends ----
 # stroke color for temp non spawning lines. Same as fish use maps
 tempWQScolor <- htmlwidgets::JS("function tempWQScolor(feature) {
     var colorToUse;
