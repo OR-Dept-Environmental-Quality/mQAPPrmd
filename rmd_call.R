@@ -1,9 +1,7 @@
 library(rmarkdown)
 
-setwd("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/RData")
-
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/202110"
+output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/202111"
 
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
@@ -24,16 +22,15 @@ qapp_project_area = "South Umpqua and Umpqua Subbasins"
 # qapp_project_area = "Willow Creek Subbasin"
 
 #for (qapp_project_area in project.areas$areas) {
-  
-  print(qapp_project_area)
-  
-  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
-  load(paste0(file.name,".RData"))
-  
-  rmarkdown::render(input="E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/South_Umpqua_and_Umpqua_Subbasins/mQAPPrmd/model_QAPP.Rmd",
-                    output_format = "word_document",
-                    output_dir = output.dir,
-                    output_file=paste0("QAPP_",file.name, ".docx"))
-  
-#}
 
+print(qapp_project_area)
+
+file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
+load(paste0("./data/",file.name,".RData"))
+
+rmarkdown::render(input=paste0("model_QAPP.Rmd"),
+                  output_format = "word_document",
+                  output_dir = output.dir,
+                  output_file=paste0("QAPP_",file.name, ".docx"))
+
+#}

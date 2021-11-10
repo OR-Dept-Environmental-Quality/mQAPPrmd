@@ -80,37 +80,17 @@ if(waterbody_name %in% waterbody_spawning_nu){
   
 }
 
-```
-
-```{r tt-nua, eval.after="fig.cap", fig.cap=tt_nua.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
-
 if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
   
-  tt_nua.cap <- figs(name="tt_fig_nu1", caption = "Map of North Umpqua River Spawning Period Models 1-4 Inputs.")
-  knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_1-4.jpg")
+  model_num <- c("1-4","5","6")
   
-}
-
-```
-
-```{r tt-nub, eval.after="fig.cap", fig.cap=tt_nub.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
-
-if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
-  
-  tt_nub.cap <- figs(name="tt_fig_nu2", caption = "Map of North Umpqua River Spawning Period Model 5 Inputs.")
-  knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_5.jpg")
-  
-}
-
-```
-
-```{r tt-nuc, eval.after="fig.cap", fig.cap=tt_nuc.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
-
-if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
-  
-  tt_nuc.cap <- figs(name="tt_fig_nu3", caption = "Map of North Umpqua River Spawning Period Model 6 Inputs.")
-  knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_6.jpg")
-  
+  for(num in model_num){
+    
+    tt_fig.cap <- figs(name=paste("tt_fig_",num), caption = paste0("Map of North Umpqua River Spawning Period Models ",num," Inputs."))
+    knitr::include_graphics(path = paste0("./fig/North_Umpqua_North_Umpqua_River_",num,".jpg"))
+    
+    
+  }
 }
 
 ```
