@@ -192,7 +192,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
                                        group = "Oregon Imagery",
                                        options = leaflet::leafletOptions(pane="aerial")) %>%
-    # __ Hydro Tiles
+    # __ Hydro Tiles ----
     leaflet::addWMSTiles(baseUrl="https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
                          group = "Stream Names",
                          options = leaflet::WMSTileOptions(format = "image/png",
