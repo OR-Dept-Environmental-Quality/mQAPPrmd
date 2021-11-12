@@ -13,11 +13,15 @@ library(kableExtra)
 library(rmarkdown)
 library(httr)
 library(geojsonsf)
+library(base64enc)
 
 map.dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
 
 source("map_functions.R")
 load(paste0("./data/lookup.RData"))
+
+lgnd <- base64enc::base64encode("./fig/legend.png")
+logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
 
 tag.map.title <- tags$style(HTML("
   .leaflet-control.map-title { 
@@ -193,13 +197,13 @@ qapp_project_area = "Middle Willamette Subbasins"
                                        group = "Oregon Imagery",
                                        options = leaflet::leafletOptions(pane="aerial")) %>%
     # __ Hydro Tiles ----
-    leaflet::addWMSTiles(baseUrl="https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
-                         group = "Stream Names",
-                         options = leaflet::WMSTileOptions(format = "image/png",
-                                                           transparent = TRUE,
-                                                           pane= "hydrotiles"),
-                         attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer">USGS The National Map: National Hydrography Dataset.</a>',
-                         layers = "0") %>%
+  leaflet::addWMSTiles(baseUrl="https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
+                       group = "Stream Names",
+                       options = leaflet::WMSTileOptions(format = "image/png",
+                                                         transparent = TRUE,
+                                                         pane= "hydrotiles"),
+                       attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer">USGS The National Map: National Hydrography Dataset.</a>',
+                       layers = "0") %>%
     # __ Project area outline ----
   leaflet::addPolygons(data = pro_area,
                        options = leaflet::leafletOptions(pane="area"),
@@ -277,7 +281,7 @@ qapp_project_area = "Middle Willamette Subbasins"
                                                                              '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                              ' \"}'))) %>%
     # __ IR ----
-    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/0",
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = where_au),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 IR Temperature Listed - Streams",
@@ -357,13 +361,13 @@ qapp_project_area = "Middle Willamette Subbasins"
                                                                              '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                              ' \"}'))) %>%
     # __ WQS ----
-    leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = reachcode,
                                                                                 style = tempWQScolor),
                                     pathOptions = leaflet::pathOptions(pane="wqs1"),
                                     useServiceSymbology = FALSE,
                                     group = "Fish Use Designations",
-                                    weight = 1,
+                                    weight = 3,
                                     opacity = 1,
                                     fill=FALSE,
                                     popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
@@ -380,7 +384,7 @@ qapp_project_area = "Middle Willamette Subbasins"
                                       pathOptions = leaflet::pathOptions(pane="wqs2"),
                                       useServiceSymbology = FALSE,
                                       group = "Salmon and Steelhead Spawning Use Designations",
-                                      weight = 1,
+                                      weight = 3,
                                       opacity = 1,
                                       fill=FALSE,
                                       popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
@@ -757,7 +761,18 @@ qapp_project_area = "Middle Willamette Subbasins"
                }"
     )
   )) %>% 
-    leaflet::hideGroup(group.names.search)
+    leaflet::hideGroup(group.names.search) %>% 
+    # __ Legend ----
+  leaflet::addControl(position = "bottomleft", className = "legend",
+                      html = sprintf('<html><body><div style="opacity:0.95">
+                                        <img width="280" height="350" src="data:image/png;base64,%s">
+                                        </div></body></html>', lgnd)) %>%
+    # __ Logo ----
+  leaflet::addControl(position = "bottomright", className = "logo",
+                      html = sprintf('<html><body><div style="opacity:1">
+                                        <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
+                                        <img width="60" src="data:image/png;base64,%s">
+                                        </a></div></body></html>', logo))
   
   # SAVE DATA ----
   print(paste0(qapp_project_area,"...Save the map"))
