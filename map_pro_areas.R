@@ -20,7 +20,7 @@ map.dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_Q
 source("map_functions.R")
 load(paste0("./data/lookup.RData"))
 
-lgnd <- base64enc::base64encode("./fig/legend.png")
+#lgnd <- base64enc::base64encode("./fig/legend.png")
 logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
 
 tag.map.title <- tags$style(HTML("
@@ -284,7 +284,7 @@ qapp_project_area = "Sandy Subbasin"
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = where_au),
                                     useServiceSymbology = TRUE,
-                                    group = "2018/2020 IR Temperature Listed - Streams",
+                                    group = "2018/2020 303(d) Temperature Listed - Streams",
                                     pathOptions = leaflet::pathOptions(pane="ir3"),
                                     color = "red",
                                     weight = 3,
@@ -309,7 +309,7 @@ qapp_project_area = "Sandy Subbasin"
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/1",
                                       options = leaflet.esri::featureLayerOptions(where = where_au),
                                       useServiceSymbology = TRUE,
-                                      group = "2018/2020 IR Temperature Listed - Waterbodies",
+                                      group = "2018/2020 303(d) Temperature Listed - Waterbodies",
                                       pathOptions = leaflet::pathOptions(pane="ir2"),
                                       color = "red",
                                       weight = 2,
@@ -336,7 +336,7 @@ qapp_project_area = "Sandy Subbasin"
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/2",
                                       options = leaflet.esri::featureLayerOptions(where = where_au),
                                       useServiceSymbology = TRUE,
-                                      group = "2018/2020 IR Temperature Listed - Watershed",
+                                      group = "2018/2020 303(d) Temperature Listed - Watershed",
                                       pathOptions = leaflet::pathOptions(pane="ir1"),
                                       color = "red",
                                       weight = 1,
@@ -763,12 +763,12 @@ qapp_project_area = "Sandy Subbasin"
   )) %>% 
     leaflet::hideGroup(group.names.search) %>% 
     # __ Legend ----
-  leaflet::addControl(position = "bottomleft", className = "legend",
-                      html = sprintf('<html><body><div style="opacity:0.95">
-                                        <img width="280" height="350" src="data:image/png;base64,%s">
-                                        </div></body></html>', lgnd)) %>%
+  #leaflet::addControl(position = "bottomleft", className = "legend",
+  #                    html = sprintf('<html><body><div style="opacity:0.95">
+  #                                      <img width="280" height="350" src="data:image/png;base64,%s">
+  #                                      </div></body></html>', lgnd)) %>%
     # __ Logo ----
-  leaflet::addControl(position = "bottomright", className = "logo",
+  leaflet::addControl(position = "bottomleft", className = "logo",
                       html = sprintf('<html><body><div style="opacity:1">
                                         <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">

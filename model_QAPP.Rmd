@@ -1725,13 +1725,25 @@ temp_stations <- temp.stations %>%
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
 # Stream Temperature Calibration Sites
-temp_cal_sites <- model.input %>% 
+temp_cal_sites_temp <- model.input %>% 
   dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-  dplyr::filter(Parameter %in% c("Water Temperature","Effective Shade")) %>% 
+  dplyr::filter(Parameter == "Water Temperature") %>% 
   dplyr::filter(!is.na(Latitude)) %>% 
   dplyr::filter(!`Station ID` %in% c("TIR")) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
+  dplyr::select(`Station ID`,`Model Location Name`,`Model Location`,`Location Units`,Parameter,`Data Source`,Longitude,Latitude) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+
+temp_cal_sites_shade <- t57 %>% 
+  dplyr::rename(`Model Location Name`= Station) %>% 
+  dplyr::mutate(`Model Location`= "",
+                `Location Units`= "",
+                Parameter = "Effective Shade") %>% 
+  dplyr::select(-`Effective Shade`) %>% 
+  tidyr::separate(col="Latitude/Longitude",into=c("Latitude","Longitude"),sep="/") %>% 
+  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
+  
+temp_cal_sites <- rbind(temp_cal_sites_temp,temp_cal_sites_shade)  
 
 # Stream Temperature Model Boundary Conditions and Tributary inputs
 temp_model_bc_tri <- model.input %>% 
