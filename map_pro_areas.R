@@ -134,22 +134,22 @@ qapp_project_area = "Sandy Subbasin"
   
   group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
                    "HUC8","HUC10","HUC12",
-                   "2018/2020 IR Temperature Listed - Streams",
-                   "2018/2020 IR Temperature Listed - Waterbodies",
-                   "2018/2020 IR Temperature Listed - Watershed",
+                   "2018/2020 303(d) Temperature Listed - Streams",
+                   "2018/2020 303(d) Temperature Listed - Waterbodies",
+                   "2018/2020 303(d) Temperature Listed - Watershed",
                    "Fish Use Designations",
                    "Salmon and Steelhead Spawning Use Designations",
-                   "Stream Names",
+                   "Stream Names (USGS NHD)",
                    "Oregon Imagery")
   
   group.names.hide <- c(dta.stations.mod[-1,] %>% dplyr::pull(group_name),
                         "HUC8","HUC10","HUC12",
-                        "2018/2020 IR Temperature Listed - Streams",
-                        "2018/2020 IR Temperature Listed - Waterbodies",
-                        "2018/2020 IR Temperature Listed - Watershed",
+                        "2018/2020 303(d) Temperature Listed - Streams",
+                        "2018/2020 303(d) Temperature Listed - Waterbodies",
+                        "2018/2020 303(d) Temperature Listed - Watershed",
                         "Fish Use Designations",
                         "Salmon and Steelhead Spawning Use Designations",
-                        "Stream Names",
+                        "Stream Names (USGS NHD)",
                         "Oregon Imagery")
   
   group.names.search <- dta.stations %>% dplyr::pull(group_name)
@@ -198,7 +198,7 @@ qapp_project_area = "Sandy Subbasin"
                                        options = leaflet::leafletOptions(pane="aerial")) %>%
     # __ Hydro Tiles ----
   leaflet::addWMSTiles(baseUrl="https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
-                       group = "Stream Names",
+                       group = "Stream Names (USGS NHD)",
                        options = leaflet::WMSTileOptions(format = "image/png",
                                                          transparent = TRUE,
                                                          pane= "hydrotiles"),

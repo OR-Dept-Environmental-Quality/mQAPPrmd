@@ -217,6 +217,9 @@ t51 <- t51[!duplicated(t51$`Station`),]
 t51.ncei <- t51 %>% 
   dplyr::filter(tbl=="NCDC") %>% 
   dplyr::select(-c(`Available Data`,Agency,tbl)) %>% 
+  dplyr::add_row(`Station ID` = "10009634",
+                 Station = "PORTLAND TROUTDALE AIRPORT",
+                 `Latitude/Longitude` = "45.5511/-122.409") %>% # add from the worksheet
   dplyr::arrange(`Station ID`)
 
 t51.raws <- t51 %>% 
@@ -244,7 +247,8 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "DEQ FILE")
+  dplyr::filter(!Source == "DEQ FILE") %>% 
+  dplyr::filter(!Source == "10009634 - PORTLAND TROUTDALE AIRPORT, NCDC") # add this station to NCDC table
 
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
@@ -1046,7 +1050,7 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
-$$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
+$$\Delta Tw = \frac{\Delta Heat}{Density\times \textit {Specific Heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
 <br>
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
@@ -1107,7 +1111,7 @@ TMDLs also require identification of seasonal variation and critical conditions.
 
 The TMDL will establish a loading capacity which specifies the amount of a pollutant or pollutants that a waterbody can receive and still meet water quality standards. The pollutant addressed in the temperature TMDL is heat. The TMDL will divide the loading capacity into thermal wasteload allocations for NPDES permittees and load allocations for background and nonpoint sources of heat to ensure that the applicable temperature standards are achieved. Anthropogenic nonpoint and NPDES permitted point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable criteria, cumulatively at the point of maximum impact. The portion of the human use allowance allocated to each source will be determined in the TMDL with the modeling approach supporting assessment of different allocation options. The modeling approach may also be used to support development of TMDL surrogate measures such as effective shade targets. Nonpoint source allocations can be translated into surrogate measures when a pollutant is difficult to measure, highly variable, or difficult to monitor (OAR 340-042-0040(5)(b)). Thermal load allocations for nonpoint sources can be difficult to measure and monitor. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations.
 
-Stream temperatures for the `r pro.area.tmdls` were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.a$'Model Version')`). `r if(NROW(tmdl.mod.b)>0){paste0("New models are proposed using ", knitr::combine_words(tmdl.mod.b$'Model Version'))}`. The models extents include most of the main rivers and their larger tributaries that contain or influence primary fish habitat. Site-specific load allocations will be developed for the streams that are simulated. Other streams are assigned generalized load allocations based on effective shade surrogate measures that target site potential or restored vegetation types. Numeric or narrative wasteload allocations will be developed for all NPDES permittees.
+Stream temperatures for the 2005 `r pro.area.tmdls` were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.a$'Model Version')`). `r if(NROW(tmdl.mod.b)>0){paste0("New models are proposed using ", knitr::combine_words(tmdl.mod.b$'Model Version'))}` and potentially CE-QUAL-W2 version 4.2. The models extents include most of the main rivers and their larger tributaries that contain or influence primary fish habitat. Site-specific load allocations will be developed for the streams that are simulated. Other streams are assigned generalized load allocations based on effective shade surrogate measures that target site potential or restored vegetation types. Numeric or narrative wasteload allocations will be developed for all NPDES permittees.
 
 ## Model selection
 
@@ -1128,6 +1132,8 @@ The modeling framework needs for this project include:
 The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was used to model several streams for the development of the 2005 Sandy Basin TMDL. Because these models already exist and meet all the model framework needs, Heat Source was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013),  Lawrence et al. (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs.
+
+The CE-QUAL-W2 model (Cole and Wells, 2000) also meets the model framework needs and has been used by Portland State University and The City of Portland (Annear, et al., 1999, City of Portland, 2004) to model the Bull Run River and reservoirs.
 
 ## Software Development Quality Assessment
 We do not anticipate any new software development or model code changes as part of this project.
@@ -1204,6 +1210,10 @@ A new calibrated model is being developed on the Sandy River to characterize the
 DEQ will develop effective shade curves for all other waterbodies that were not specifically listed in `r if(NROW(tmdl.mod.b)>0){paste0(tbls(name = "tmdl.mod.a", display="cite")," and ", tbls(name = "tmdl.mod.b", display="cite"))}else{tbls(name = "tmdl.mod.a", display="cite")}`. Effective shade curves represent the maximum possible effective shade for different vegetation types, stream widths, and stream aspect. Every combination of these conditions are modeled in Heat Source to develop the estimated effective shade. The results are summarized in a shade curve plot. The results can also be summarized in a lookup table with additional combinations of vegetation height, density, and buffer width included. Effective shade curves were developed for the original `r pro.area.tmdls`. Adjustments to the existing shade curve models are unlikely to occur as part of this project. However, if it is determined that the models need to be updated DEQ will follow the procedures outlined in this QAPP.
 
 ## General model inputs and parameters
+
+### CE-QUAL-W2 version 4
+
+The CE-QUAL-W2 version 4 model is a 2-dimensional hydrodynamic and water quality model that incorporates temperature (heat) into its hydrodynamic and water quality subroutines. The heat budget for the CE-QUAL-W2, is similar to Heat Source, though its implementation in the model and the level of detail are different. CE-QUAL-W2 is two dimensional in the longitudinal and vertical directions, and the vertical dimension allows for modeling temperature profiles as a function of depth in the water column. This feature is critical for deeper water bodies, such as reservoirs, larger rivers and estuaries where light penetration and density profiles are not easily estimated uniformly throughout the water column. Documentation for CE-QUAL-W2, and the inputs used to set up and calibrate the model, are provided in the CE-QUAL-W2 user’s manual (Cole and Wells, 2000).
 
 `r paste(mod.v, collapse = "\n")`
 
@@ -1575,7 +1585,7 @@ TMDL documents: At each key stage of TMDL and WQMP development copies of the fol
 *	Final TMDL and WQMP documents:    
 
     *	Briefing memo to DEQ Water Quality Division Administrator or Director on final TMDL
-    * TMDL Order (both Word and PDF)
+    * TMDL signed order (both Word and PDF)
     *	TMDL issuance letter to USEPA (both Word and PDF)
     *	USEPA approval letter (USEPA)
     *	Response to Comment Document (both Word and PDF)
@@ -1639,9 +1649,9 @@ other.ref <- data.frame(reference = c(
   'Bond, R.M, A.P. Stubblefields, and R.W. Van Kirk. 2015. “Sensitivity of summer stream temperatures to climate variability and riparian reforestation strategies.” Journal of Hydrology: Regional Studies. 4(B): 267-279.',
   'Boyd, M. and B. Kasper. 2003. “Analytical Methods for Dynamic Open Channel Heat and Mass Transfer: Methodology for Heat Source Model Version 7.0.”',
   'Boyd, M.S. 1996. “Heat Source: Stream, River, and Open Channel Temperature Prediction (Master\'s Thesis).” Oregon State University: Corvallis.',
-  'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” http://www.deq.state.or.us/wq/tmdls/heatsource.htm.',
+  'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” https://www.oregon.gov/deq/wq/tmdls/Pages/TMDLS-Heat-Source-Review.aspx.',
   'DEQ (Oregon Department of Environmental Quality). 2009. “Water monitoring and assessment mode of operations manual (MOMs). DEQ03-LAB-0066-SOP Version 3.2.”',
-  'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version5.0."',
+  'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version 5.0."',
   'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
   'Diabat, M., R. Haggerty, and S.M. Wondzell. 2013. “Diurnal timing of warmer air under climate-change affects magnitude, timing and duration of stream temperature change.” Hydrological. Processes. 27(16): 2367–2.',
   'EPA (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
@@ -1673,7 +1683,8 @@ other.ref <- data.frame(reference = c(
   'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
   'EPA  (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
   'Annear, Robert L., Scott A. Wells and David T. Evonuk. 1999. “Bull Run River – Reservoir Model: Boundary Conditions and Model Setup.” Portland State University Technical Report EWR-6-99.',
-  'City of Portland. 2004. "Bull Run River Temperature Evaluation."'
+  'City of Portland. 2004. "Bull Run River Temperature Evaluation."',
+  'Cole, T.M., and S. A. Wells. 2000. "CE-QUAL-W2: A Two-Dimensional, Laterally Averaged, Hydrodynamic and Water Quality Model, Version 3.0." Instruction Report EL-2000. US Army Engineering and Research Development Center, Vicksburg, MS.'
 ))
 
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
@@ -1764,7 +1775,7 @@ DEQ prepared an interactive HTML map to display relevant information described i
 
 17. Twelve-digit hydrologic unit boundaries (HUC12 Subwatersheds).        
 
-18.	2018/2020 303(d) Integrated Report status that are classified as water quality limited Category 5 or Category 4A for temperature.       
+18.	2018/2020 303(d) Integrated Report status that are classified as water quality limited Category 5 and/or Category 4A for temperature.       
 
 19. Fish use designations depicted in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure.A")`.    
 
