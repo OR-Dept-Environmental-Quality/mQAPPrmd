@@ -1037,7 +1037,7 @@ Temperature is the water quality parameter of concern, but heat, in particular h
 
 $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$$
 
-$$\Delta Tw = \frac{\Delta Heat}{density\times \textit {specific heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
+$$\Delta Tw = \frac{\Delta Heat}{Density\times \textit {Specific Heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
 <br>
 
 ```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
@@ -1559,7 +1559,7 @@ TMDL documents: At each key stage of TMDL and WQMP development copies of the fol
 *	Final TMDL and WQMP documents:    
 
     *	Briefing memo to DEQ Water Quality Division Administrator or Director on final TMDL
-    * TMDL Order (both Word and PDF)
+    * TMDL signed order (both Word and PDF)
     *	TMDL issuance letter to USEPA (both Word and PDF)
     *	USEPA approval letter (USEPA)
     *	Response to Comment Document (both Word and PDF)
@@ -1623,9 +1623,9 @@ other.ref <- data.frame(reference = c(
   'Bond, R.M, A.P. Stubblefields, and R.W. Van Kirk. 2015. “Sensitivity of summer stream temperatures to climate variability and riparian reforestation strategies.” Journal of Hydrology: Regional Studies. 4(B): 267-279.',
   'Boyd, M. and B. Kasper. 2003. “Analytical Methods for Dynamic Open Channel Heat and Mass Transfer: Methodology for Heat Source Model Version 7.0.”',
   'Boyd, M.S. 1996. “Heat Source: Stream, River, and Open Channel Temperature Prediction (Master\'s Thesis).” Oregon State University: Corvallis.',
-  'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” http://www.deq.state.or.us/wq/tmdls/heatsource.htm.',
+  'DEQ (Oregon Department of Environmental Quality). 1999. “Heat Source methodology review and comments.” https://www.oregon.gov/deq/wq/tmdls/Pages/TMDLS-Heat-Source-Review.aspx.',
   'DEQ (Oregon Department of Environmental Quality). 2009. “Water monitoring and assessment mode of operations manual (MOMs). DEQ03-LAB-0066-SOP Version 3.2.”',
-  'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version5.0."',
+  'DEQ (Oregon Department of Environmental Quality). 2013. "Data validation criteria for water quality parameters measured in the field. DEQ04-LAB-0003-QAG Version 5.0."',
   'DEQ (Oregon Department of Environmental Quality). 2017. “Guidance for Quality Assurance Project Plans for Total Maximum Daily Load Modeling Projects.”',
   'Diabat, M., R. Haggerty, and S.M. Wondzell. 2013. “Diurnal timing of warmer air under climate-change affects magnitude, timing and duration of stream temperature change.” Hydrological. Processes. 27(16): 2367–2.',
   'EPA (U.S. Environmental Protection Agency). 2016. “Guidance for Quality Assurance Project Plans for Water Quality Modeling Projects”. EPA Region 10, Office of Environmental Review and Assessment, Seattle, WA. EPA 910-R-16-007.',
@@ -1744,7 +1744,7 @@ DEQ prepared an interactive HTML map to display relevant information described i
 
 17. Twelve-digit hydrologic unit boundaries (HUC12 Subwatersheds).        
 
-18.	2018/2020 303(d) Integrated Report status that are classified as water quality limited Category 5 or Category 4A for temperature.       
+18.	2018/2020 303(d) Integrated Report status that are classified as water quality limited Category 5 and/or Category 4A for temperature.       
 
 19. Fish use designations depicted in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure.A")`.    
 
