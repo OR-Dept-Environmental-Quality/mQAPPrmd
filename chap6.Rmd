@@ -36,7 +36,7 @@ model.extent <- na.omit(model.extent)
 
 ## `r waterbody_name`
 
-`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")` `r if(waterbody_name == "Bull Run River (2016)"){paste0(" The City of Portland Water Bureau is also developing a temperature model of the Bull Run River using CE-QUAL-W2 version 4.2 for the full 2016 calendar year. DEQ may consider using this model for TMDL development after DEQ has reviewed the model and determined the model setup and assumptions are consistent with this QAPP; and the calibration results achieve the quality acceptance criteria identified in Chapter 7. Documentation of the model will follow the same procedures outlined in Chapter 8.")}`
+`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")` `r if(waterbody_name == "Bull Run River (2016)"){paste0(" The City of Portland Water Bureau is also developing a temperature model of the Bull Run River using CE-QUAL-W2 version 4.2 for the full 2016 calendar year. DEQ may consider using this model instead of the Heat Source model for TMDL development after DEQ has reviewed the model and determined the model setup and assumptions are consistent with this QAPP; and the calibration results achieve the quality acceptance criteria identified in Chapter 7. Documentation of the model will follow the same procedures outlined in Chapter 8. Except where noted, the model setup and calibration described in this section are applicable to both models.")}`
 
 ### Model domain
 
@@ -50,9 +50,28 @@ The extent of the model domain is `r model.domain` The model extent is shown in 
 
 ### Spatial and temporal resolution
 
-The model input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("The Heat Source model")}else{paste("The model")}` input spatial resolution (*dx*) is `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")`. Outputs are generated every `r unique(section.model.info$"Output dx")` `r unique(section.model.info$"Output dx Units")`. The model time step (*dt*) is `r unique(section.model.info$dT)` `r unique(section.model.info$"dT Units")` and outputs are generated every hour.
 
 A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info$"Input dx Units")` was chosen to capture the range of solar flux input caused by the varied vegetation conditions along the length of the stream. The high resolution *dx* will allow evaluation of multiple vegetation management scenarios for each designated management agency.
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("The spatial and temporal resolution for the CE-QUAL-W2 model is as follows:")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Number of waterbodies in the computational grid [NWB]: 12")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Number of branches in the computational grid [NBR]: 15")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Number of segments in the computational grid [IMX]: 100 (70 active segments, 30 boundary segments)")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Number of layers in the computational grid [KMX]: 19 (17 active segments, 2 boundary segments)")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Layer height (minimum – maximum) [H]:  0.1 meters – 4 meters")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Segment length (minimum – maximum) [DLX]: 45 meters - 248 meters")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Number of timestep intervals [NDT]: 7")}`
+
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("* Minimum/Maximum timestep [DLTMIN/DLTMAX]: 0.01 – 0.7 minutes")}`
+
 
 ### Source characteristics
 
@@ -176,7 +195,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ```
 
-`r if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0("The model period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}`
+`r if(as.integer(as.numeric(as.Date(model_period_start))) == as.integer(as.numeric(as.Date(model_period_end)))){paste0("The model period is for a single day: ",format(model_period_start, format="%B %d, %Y"),".")}else{paste0(if(waterbody_name == "Bull Run River (2016)"){paste0("The Heat Source model")}else{paste0("The model")}," period is ", format(model_period_start, format="%B %d, %Y"), " to ", format(model_period_end, format="%B %d, %Y"), ".")}` `r if(waterbody_name == "Bull Run River (2016)"){paste0("The CE-QUAL-W2 model period is January 1, 2016 to December 31 2016.")}`
 
 ### Important assumptions
 
