@@ -169,6 +169,7 @@ abbr <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "abbr")
 data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
 rev <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "revision_history")
 effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+effective.shade.lookup <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Lookup")
 inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_flow")
 
 # _ NPDES ----
@@ -184,14 +185,16 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ohsu", "OHSU") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfw", "USFW") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wpcp", "WPCP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP")
+  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP")
+
 
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
 
@@ -554,14 +557,18 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::mutate(Organization = ifelse(Organization == "USGS-OR", "USGS", Organization)) %>% 
     dplyr::mutate(Organization = ifelse(Organization == "USGS-OR(INTERNAL)", "USGS", Organization)) %>% 
     dplyr::mutate(Organization = ifelse(Organization == "WALLAWALLA_WC(NOSTORETID)", "Walla Walla Basin Watershed Council", Organization)) %>%
-    dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization))
+    dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization)) %>% 
+    dplyr::mutate(Station = ifelse(Station == "Zig Zag River", "Zigzag River", Station)) %>% # Sandy
+    dplyr::mutate(Station = ifelse(Station == "ZigZag R at Forest Boundary_LTWT", "Zigzag River at Forest Boundary_LTWT", Station)) # Sandy
   
   temp.data <- awqms.data.temp %>% 
     dplyr::filter(MLocID %in% station.awqms.temp$`Station ID`) %>%
     dplyr::left_join(station.awqms.temp[,c("Station ID","Station")], by=c("MLocID"="Station ID")) %>% 
     dplyr::select(-StationDes) %>%
     dplyr::rename(StationDes = Station) %>% 
-    rbind(owrd.data.temp,bes.data.temp) 
+    rbind(owrd.data.temp,bes.data.temp) %>% 
+    dplyr::mutate(StationDes = ifelse(StationDes == "Zig Zag River", "Zigzag River", StationDes)) %>% # Sandy
+    dplyr::mutate(StationDes = ifelse(StationDes == "ZigZag R at Forest Boundary_LTWT", "Zigzag River at Forest Boundary_LTWT", StationDes)) # Sandy
   
   # Temp data.sample.count will be used in the Appendix A
   cols <- c("Year"=NA, "Station ID"=NA, "Station"=NA, 'Statistical_Base'=NA, "Org_Names"=NA,
@@ -739,7 +746,9 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(`QAPP Project Area` %in%  qapp_project_area) %>% 
     dplyr::mutate(Latitude = round(Latitude,4),
                   Longitude = round(Longitude,3)) %>% 
-    dplyr::left_join(station.awqms.temp[,c("Station ID", "Station", "Organization")], by="Station ID")
+    dplyr::left_join(station.awqms.temp[,c("Station ID", "Station", "Organization")], by="Station ID") %>% 
+    dplyr::mutate(Station = ifelse(Station == "Zig Zag River", "Zigzag River", Station)) %>% # Sandy
+    dplyr::mutate(Station = ifelse(Station == "ZigZag R at Forest Boundary_LTWT", "Zigzag River at Forest Boundary_LTWT", Station)) # Sandy
   
   pro.area.tmdls <- model.info %>% 
     dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
@@ -877,6 +886,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
        risks,
        abbr,
        data.gap,
+       effective.shade.lookup,
        rev,
        lookup.huc,
        project.areas,
