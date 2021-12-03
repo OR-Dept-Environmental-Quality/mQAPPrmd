@@ -431,11 +431,14 @@ section.npdes.ind <- npdes.ind.pro.area %>%
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
-                `River Mile` = round(`River Mile`,1),
-                `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
-  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
-  dplyr::arrange(`Facility Name (Facility Number)`)
-
+                `River Mile` = round(as.numeric(`River Mile`),1),
+                `Stream River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream River Mile`) %>% 
+  dplyr::arrange(`Facility Name (Facility Number)`) %>% 
+  dplyr::mutate(`Stream River Mile` = ifelse(`Permit Type and Description` %in% c("NPDES-DOM-MS4-1: Municipal Separate Storm Sewer System - Phase I",
+                                                                                  "NPDES-DOM-MS4-2: Municipal Separate Storm Sewer System - Phase II"),
+                                             "Multiple discharge locations",
+                                             `Stream River Mile`))
 ms4 <- section.npdes.ind %>% 
   dplyr::filter(`Permit Type and Description` %in% c("NPDES-DOM-MS4-1: Municipal Separate Storm Sewer System - Phase I",
                                                      "NPDES-DOM-MS4-2: Municipal Separate Storm Sewer System - Phase II"))
@@ -454,10 +457,13 @@ section.npdes.gen.1 <- npdes.gen.pro.area %>%
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`CommonName`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`PermitType`, ": ", `PermitDescription`),
-                `River Mile` = round(`RiverMile`,1),
-                `Stream/River Mile` = ifelse(is.na(`StreamName`), NA, paste0(`StreamName`, " ", " RM ",`River Mile`))) %>% 
-  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
-  dplyr::arrange(`Facility Name (Facility Number)`)
+                `River Mile` = round(as.numeric(RiverMile),1),
+                `Stream River Mile` = ifelse(is.na(`StreamName`), NA, paste0(`StreamName`, " ", " RM ",`River Mile`))) %>% 
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream River Mile`) %>% 
+  dplyr::arrange(`Facility Name (Facility Number)`) %>% 
+  dplyr::mutate(`Stream River Mile` = ifelse(`Permit Type and Description` == "GEN40: 4000 MS4-Phase 2 General Permit – Water Quality NPDES General Permit",
+                                             "Multiple discharge locations",
+                                             `Stream River Mile`))
 
 gen.txt <- npdes.gen.pro.area %>% 
   dplyr::filter(`Project Area` %in%  qapp_project_area) %>%
@@ -1662,9 +1668,15 @@ other.ref <- ref %>%
   dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::select(reference)
 
+qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
+  dplyr::arrange(reference) %>% 
+  dplyr::distinct(reference)
+
+if(NROW(t57)>0){
 qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref,shade.ref) %>% 
   dplyr::arrange(reference) %>% 
   dplyr::distinct(reference)
+}
 
 for(r in unique(sort(qapp.ref$reference))) {
   

@@ -168,6 +168,7 @@ abbr <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "abbr")
 data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
 rev <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "revision_history")
 effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+effective.shade.lookup <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Lookup")
 inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_flow")
 
 # _ NPDES ----
@@ -183,14 +184,15 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ohsu", "OHSU") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfw", "USFW") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wpcp", "WPCP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP")
+  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP")
 
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
 
@@ -825,8 +827,8 @@ npdes.gen.pro.area <- npdes.gen %>%
 nlcd.pro.area <- nlcd.tbl %>% 
   dplyr::ungroup() %>% 
   dplyr::filter(Project_Na == qapp_project_area) %>% 
-  dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-  dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage)) %>% 
+  dplyr::mutate(Acres = ifelse(Acres == 0.0,"<0.05",Acres)) %>% 
+  dplyr::mutate(Percentage = ifelse(Percentage == 0.0,"<0.05",Percentage)) %>% 
   dplyr::arrange(desc(as.numeric(Acres))) %>% 
   dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land), "Open Water",NLCD_Land)) %>% 
   tidyr::drop_na(Stream)
@@ -838,8 +840,8 @@ nlcd.text.pro.area <- nlcd.text %>%
 dma.pro.area <- dma.tbl %>% 
   dplyr::ungroup() %>% 
   dplyr::filter(Project_Na == qapp_project_area) %>% 
-  dplyr::mutate(Acres = ifelse(Acres < 0.01,"<0.01",Acres)) %>% 
-  dplyr::mutate(Percentage = ifelse(Percentage < 0.01,"<0.01",Percentage))%>% 
+  dplyr::mutate(Acres = ifelse(Acres == 0.0,"<0.05",Acres)) %>% 
+  dplyr::mutate(Percentage = ifelse(Percentage == 0.0,"<0.05",Percentage))%>% 
   dplyr::arrange(desc(as.numeric(Acres)))
 # _ Save Data ----
 save(df.stations,
@@ -849,6 +851,7 @@ save(df.stations,
      risks,
      abbr,
      data.gap,
+     effective.shade.lookup,
      rev,
      lookup.huc,
      project.areas,
@@ -951,7 +954,7 @@ library(geojsonsf)
 library(sf)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0(data.dir,"RData/lookup.RData"))
+load(paste0("./data/lookup.RData"))
 
 qapp_project_area <- "Willamette River Mainstem and Major Tributaries"
 pro_area_huc12 <- sf::read_sf(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches_data_query_HUC12s.shp",
@@ -996,4 +999,5 @@ save(pro_area,
      ce_model_extent,
      sh_model_extent,
      gh.data.sample.count,
+     pro.cat.45.tbl,
      file = paste0("./data/map_",file.name,".RData"))
