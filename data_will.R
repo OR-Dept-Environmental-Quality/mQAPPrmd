@@ -150,10 +150,10 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
   dplyr::mutate(mod_score = ifelse(mod_rmd == "hs6", "1",
                                    ifelse(mod_rmd == "hs7", "10",
                                           ifelse(mod_rmd == "hs8", "20", "0")))) %>% 
-  dplyr::mutate(mod_ref = ifelse(mod_rmd == "ce", 'Cole, T.M., and S. A. Wells. 2000. "CE-QUAL-W2: A Two-Dimensional, Laterally Averaged, Hydrodynamic and Water Quality Model, Version 3.0." Instruction Report EL-2000. US Army Engineering and Research Development Center, Vicksburg, MS.',
-                                 ifelse(mod_rmd == "sh", 'USFS (U.S. Forest Service). 1993. “SHADOW v. 2.3 - Stream Temperature Management Program. Prepared by Chris Park USFS, Pacific Northwest Region.”',
-                                        NA))) %>% 
-  dplyr::mutate(mod_ref_intext = ifelse(mod_rmd == "ce", "(Cole and Wells, 2000)",
+  #dplyr::mutate(mod_ref = ifelse(mod_rmd == "ce", 'Cole, T.M., and S. A. Wells. 2000. "CE-QUAL-W2: A Two-Dimensional, Laterally Averaged, Hydrodynamic and Water Quality Model, Version 3.0." Instruction Report EL-2000. US Army Engineering and Research Development Center, Vicksburg, MS.',
+  #                               ifelse(mod_rmd == "sh", 'USFS (U.S. Forest Service). 1993. “SHADOW v. 2.3 - Stream Temperature Management Program. Prepared by Chris Park USFS, Pacific Northwest Region.”',
+  #                                      NA))) %>% # WMS: Citations are summarized in the Worksheet Reference
+  dplyr::mutate(mod_ref_intext = ifelse(mod_rmd == "ce", "(Wells, 2019)", # WMS
                                         ifelse(mod_rmd == "sh", "(USFS, 1993)",
                                                ifelse(mod_rmd %in% c("hs7","hs8"), "(Boyd and Kasper, 2003)",
                                                       NA))))
@@ -184,14 +184,15 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ohsu", "OHSU") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfs", "USFS") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usfw", "USFW") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Wes ", "WES ") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wpcp", "WPCP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP") %>%
-  dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP")
+  dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP")
 
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
 
