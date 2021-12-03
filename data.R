@@ -856,7 +856,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
   #sf::st_drop_geometry()
   
-  # _ NLCD ----
+ # _ NLCD ----
   nlcd.pro.area <- nlcd.tbl %>% 
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
@@ -869,6 +869,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
     tidyr::drop_na(Stream)
+
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
