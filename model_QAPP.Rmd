@@ -1192,7 +1192,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 ## Effective shade measurements
 
-Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for [Update: Month Year].")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for July 2002.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -1670,7 +1670,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r t53_1_tbl`
 `r app_b_tbl`
 
-**[Update: Delete this note if there is no data count > 31.]** \* Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
+\* Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
 # Appendix C Stream flow data summary
