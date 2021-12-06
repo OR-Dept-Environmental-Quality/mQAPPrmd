@@ -515,7 +515,7 @@ t57 <- effective.shade.pro.area %>%
   dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
                 `Effective Shade` = paste0(round(as.numeric(Result),0),"%")) %>% 
-  dplyr::select(#`Station ID` = `Site ID`,
+  dplyr::select(`Station ID` = `Site ID`,
                 Station = `Site Name`,
                 `Latitude/Longitude`,
                 `Effective Shade`,
@@ -523,7 +523,7 @@ t57 <- effective.shade.pro.area %>%
 
 if(NROW(t57)>0){
   
-  t57_tbl <- knitr::kable(t57, format = "pandoc", padding = 2,
+  t57_tbl <- knitr::kable(t57[,-1], format = "pandoc", padding = 2,
                           caption = tbls(name = "t57",
                                          caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
   

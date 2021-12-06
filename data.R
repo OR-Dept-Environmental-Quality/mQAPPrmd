@@ -754,7 +754,8 @@ qapp_project_area = "North Umpqua Subbasin"
     dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
     dplyr::filter(!is.na(`TMDL Document`)) %>% 
     dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
+    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>%
+    dplyr::filter(substr(`Abbreviated Reference`,1,3) == "DEQ") %>% 
     dplyr::group_by(`TMDL Document`) %>% 
     dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
     dplyr::ungroup() %>% 
