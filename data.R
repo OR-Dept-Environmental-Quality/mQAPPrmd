@@ -754,12 +754,13 @@ qapp_project_area = "Lower Willamette and Clackamas Subbasins"
     dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
     dplyr::filter(!is.na(`TMDL Document`)) %>% 
     dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>% 
+    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>%
+    dplyr::filter(substr(`Abbreviated Reference`,1,3) == "DEQ") %>% 
     dplyr::group_by(`TMDL Document`) %>% 
     dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
     dplyr::ungroup() %>% 
     dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",Reference,")")) %>% 
-    dplyr::distinct(tmdls.ref) 
+    dplyr::distinct(tmdls.ref)
   
   pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
   
