@@ -760,7 +760,7 @@ qapp_project_area = "North Umpqua Subbasin"
     dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
     dplyr::ungroup() %>% 
     dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",Reference,")")) %>% 
-    dplyr::distinct(tmdls.ref) 
+    dplyr::distinct(tmdls.ref)
   
   pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
   
