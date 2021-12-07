@@ -160,7 +160,8 @@ t51_ncei <- ncei.station.tbl %>%
                 tbl = "NCDC") %>% 
   dplyr::distinct(`Station ID`, .keep_all=TRUE) %>% 
   dplyr::distinct(Station, .keep_all=TRUE) %>% 
-  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl)
+  dplyr::select(`Station ID`, Station, `Latitude/Longitude`, `Available Data`,Agency,tbl) %>% 
+  dplyr::mutate(Station = ifelse(`Station ID` == "20015887", "Diamond Lake Lodge", Station))
 
 t51_raws <- raws.station.tbl %>% 
   dplyr::mutate(`Station` = siteName,
@@ -225,7 +226,11 @@ t51.ncei <- t51 %>%
 t51.raws <- t51 %>% 
   dplyr::filter(tbl=="RAWS") %>% 
   dplyr::select(-c(`Available Data`,tbl)) %>% 
-  dplyr::arrange(`Station ID`)
+  dplyr::add_row(`Station ID` = "orOGAD", # NU: add 353036 from the worksheet to the RAWS table
+                 Station = "GRANDAD",
+                 `Latitude/Longitude` = "43.4158/122.577",
+                 Agency = "USFS") %>% 
+  dplyr::arrange(`Station ID`) 
 
 t51.agrimet <- t51 %>% 
   dplyr::filter(tbl=="AgriMet") %>% 
@@ -247,8 +252,11 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "DEQ FILE")
-
+  dplyr::filter(!Source == "DEQ FILE") %>% 
+  dplyr::filter(!Source == "353036, RAWS") %>% # NU: add this site to the RAWS table
+  dplyr::filter(!Source %in% c("STATION ID TBD, RAWS/NCDC/MESOWEST")) %>% # NU
+  dplyr::mutate(Source = ifelse(Source == "USFS", "Lake Creek near mouth (No Station ID), USFS")) # NU
+  
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
                          source = c("National Oceanic and Atmospheric Association (NOAA)’s National Climatic Data Center (NCDC)",
@@ -391,9 +399,9 @@ t54_txt <- knitr::combine_words(tables.flow$txt)
 
 # Instantaneous flow
 t54_ins_flow <- inst.flow.pro.area %>% 
-  dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
-                `Latitude/Longitude` = ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>%
-  dplyr::select(`Station ID`,Station,Date,Time,`Flow (cfs)`,`Latitude/Longitude`)
+  dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3))) %>%
+  dplyr::mutate(`Latitude/Longitude` = ifelse(`Latitude/Longitude` == "NA/NA", NA, `Latitude/Longitude`)) %>% # NU
+  dplyr::select(Station,Date,Time,`Flow (cfs)`,`Latitude/Longitude`) # NU: removed "Station ID"
 
 ```
 
@@ -508,7 +516,7 @@ if(NROW(section.npdes.gen.2)>0){
 t57 <- effective.shade.pro.area %>% 
   dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
-                `Effective Shade` = paste0(Result,"%")) %>% 
+                `Effective Shade` = paste0(round(as.numeric(Result),0),"%")) %>% 
   dplyr::select(`Station ID` = `Site ID`,
                 Station = `Site Name`,
                 `Latitude/Longitude`,
@@ -517,7 +525,7 @@ t57 <- effective.shade.pro.area %>%
 
 if(NROW(t57)>0){
   
-  t57_tbl <- knitr::kable(t57, format = "pandoc", padding = 2,
+  t57_tbl <- knitr::kable(t57[,-1], format = "pandoc", padding = 2,
                           caption = tbls(name = "t57",
                                          caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
   
@@ -537,6 +545,16 @@ t57_date <- effective.shade.pro.area %>%
 
 tmdl.mod.a<- model.info %>% 
   dplyr::filter(is.na(`New Model`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Canton Creek (Summer period)","Canton Creek (Spawning period)"),"Canton Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Cavitt Creek (Summer period)","Cavitt Creek (Spawning period)"),"Cavitt Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Clearwater River (Summer period)"),"Clearwater River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2001) (Summer period)"),"Fish Creek (2001)",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2009) (Summer period)","Fish Creek (2009) (Spawning period)"),"Fish Creek (2009)",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Lake Creek (Summer period)","Lake Creek (Spawning period)"),"Lake Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Little River (Summer period)","Little River (Spawning period)"),"Little River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)"),"North Umpqua River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Rock Creek (Summer period)","Rock Creek (Spawning period)"),"Rock Creek",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`)) %>% 
   dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
@@ -549,6 +567,16 @@ tmdl.mod.a<- model.info %>%
 
 tmdl.mod.b<- model.info %>% 
   dplyr::filter(!is.na(`New Model`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Canton Creek (Summer period)","Canton Creek (Spawning period)"),"Canton Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Cavitt Creek (Summer period)","Cavitt Creek (Spawning period)"),"Cavitt Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Clearwater River (Summer period)"),"Clearwater River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2001) (Summer period)"),"Fish Creek (2001)",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2009) (Summer period)","Fish Creek (2009) (Spawning period)"),"Fish Creek (2009)",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Lake Creek (Summer period)","Lake Creek (Spawning period)"),"Lake Creek",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Little River (Summer period)","Little River (Spawning period)"),"Little River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)"),"North Umpqua River",`Model Waterbody`)) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Rock Creek (Summer period)","Rock Creek (Spawning period)"),"Rock Creek",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`)) %>% 
   dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
@@ -572,7 +600,7 @@ if(NROW(tmdl.mod.b)>0){
   
   tmdl.mod.b.tbl <- knitr::kable(tmdl.mod.b, format = "pandoc", padding = 2,
                                  caption = tbls(name = "tmdl.mod.b",
-                                                caption = paste0("Waterbodies and year for which new models are expected to be developed.")))
+                                                caption = paste0("Waterbodies for which new models are expected to be developed.")))
   
   tmdl.mod.b.txt <- "**[Update: new model information - See the narratives in the Sandy QAPP]**"
   
@@ -753,14 +781,10 @@ for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHA
     
     chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
     
-    
   } else {
     
-    #if(!waterbody_name == "Fish Creek (2009)"){
-    
     chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
-    
-    #}
+
   }
   
 }
@@ -995,19 +1019,23 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 Multiple waterbodies in the `r qapp_project_area` do not meet the water quality standards for temperature and are listed as `r if(NROW(tcat4a)>0){paste0("Category 5 and Category 4A")}else{paste0("Category 5")}`, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r if(NROW(tcat4a)>0){paste0(tbls(name = "tcat5", display="cite"), " and ", tbls(name = "tcat4a", display="cite"))}else{tbls(name = "tcat5", display="cite")}`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum continuous measurement of temperature.
 
-**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**
+*	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))      
 
-* Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
-*	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
-*	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
-*	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
-*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
+*	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))      
+
+*	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))  
+
+*	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))   
 
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
 
 The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
 As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
+
+**[Update: From the older version. Please review.]**The existing temperature TMDL addresses temperature on streams with both point and nonpoint sources of thermal loads. 
+
+**[Update: From the older version. Please review.]**The TMDL will provide load and waste load allocations for sources of thermal loads. The existing Heat Source models from the 2006 Umpqua Basin TMDL were developed for short time periods in July 2001 and July 2002, which do not coincide with the spawning season. The simulation years are also not well harmonized among the various waterbodies. Therefore, some Heat Source models need to be updated to cover the spawning season using data collected by DEQ during the 2009 spawning season to support the TMDL modeling.
 
 Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area` QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r if(NROW(tcat4a)>0){paste0(tbls(name = "tcat5", display="cite"), " and ", tbls(name = "tcat4a", display="cite"))}else{tbls(name = "tcat5", display="cite")}`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D.
 
@@ -1103,11 +1131,13 @@ Stream temperature is influenced by both human and natural factors. `r temp.fig`
 
 **Anthropogenic Point Sources**: Temperature increases from point sources are those caused by warm water discharges from NPDES permitted facilities, such as industrial outfalls, municipal waste water treatment plants (WWTP), and other point sources.
 
+**[Update: From the older version. Please review.]**PacifiCorp’s hydroelectric project on the North Umpqua River is responsible for elevated stream temperatures between Lemolo Reservoir and the Umpqua River tidewater boundary.
+
 # Technical approach
 
 ## Overview
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all upstream waterbodies are considered in the TMDL analysis and TMDL allocations are applied throughout the entire stream network and include all waters of the state.
+Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the North Umpqua River is water quality limited for temperature. To address this listing in the TMDL, all upstream waterbodies are considered in the TMDL analysis and TMDL allocations are applied throughout the entire stream network and include all waters of the state.
 
 An important step in the TMDL is to perform a source assessment which quantifies the background and anthropogenic contributions to stream heating. Models provide a way to evaluate potential sources of stream warming and, to the extent existing data allow, the amount of pollutant loading from these sources. The model that is selected for the TMDL analysis should support the needs of the project. Section 4.2 describes the model framework needs for this project and the models that will be used to support the TMDL.
 
@@ -1119,7 +1149,7 @@ Stream temperatures for the `r pro.area.tmdls` were simulated using `r if(NROW(t
 
 ## Model selection
 
-The modeling framework needs for this project include:
+DEQ has developed Heat Source models for the riverine portions of the North Umpqua Subbasin. PacifiCorp also developed a Heat Source version 8 model for Fish Creek (PacifiCorp, 2012) and made it available for use by DEQ. Little River watershed (HUC 1710030111) was excluded from the 2006 TMDL as a TMDL had been previously developed and approved by EPA in 2002. The Little River watershed is considered in the current analysis and included in the North Umpqua Subbasin temperature TMDL replacement project area. The modeling framework needs for this project include:
 
 1)	Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.  
 
@@ -1131,13 +1161,11 @@ The modeling framework needs for this project include:
 
 5)	Ability to evaluate hourly stream temperature response from changes in channel morphology within the upstream catchment.  
 
-6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
+6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.       
 
-7)	**[Update as needed]**
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
-**[Update this paragraph where CE-QUAL-W2 is used].** The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
-
-The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
+The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002b, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
 
 ## Software Development Quality Assessment
 We do not anticipate any new software development or model code changes as part of this project.
@@ -1154,7 +1182,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 
 ## Thermal Infrared Radiometry (TIR) data
 
-**[Update: Remove this section if there is no TIR data.]** DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1174,7 +1202,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Point source discharges
 
-`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}`**[Update: If there are no individual and general NPDES permit, please update this paragraph.]** The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. The NPDES permits require data be collected and reported on the DMR using appropriate methods based on a quality assurance and quality control plan. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
+`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}` The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. The NPDES permits require data be collected and reported on the DMR using appropriate methods based on a quality assurance and quality control plan. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area)}`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -1195,7 +1223,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 ## Effective shade measurements
 
-**[Update: Remove this section if there is no effective shade data.]**Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for ",t57_date,".")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for ",t57_date,".")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -1207,6 +1235,8 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 
 The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. **[Update: It is unlikely that adjustments to the existing calibrated model will occur as part of this project.]** Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Chapter 7.2.
 
+Additional Heat Source version 7 models will be built to simulate stream temperature during the spawning period for all water bodies that support spawning in the North Umpqua Subbasin.
+
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.txt}`
 
@@ -1215,6 +1245,16 @@ DEQ will develop effective shade curves for all other waterbodies that were not 
 ## General model inputs and parameters
 
 `r paste(mod.v, collapse = "\n")`
+
+## Updating the Heat Source models
+
+Updating the Heat Source models will mainly involve the determination of inflows, water temperatures, and weather conditions. It appears that flow data are limited on the tributaries based on the preliminary review of the data that Tetra Tech received. In the case of limited availability of flow data, flow scaling with the gaged drainage area or other approaches such as the stream flow estimation tool that Tetra Tech is developing for DEQ may be used. Observed temperature probe data collected downstream of reservoirs will be used to configure the Heat Source models for North Umpqua River below the impoundments - Lemolo Lake, Toketee Lake, and Soda Springs Dam. 
+
+Weather stations are also limited. It is anticipated that air temperature measurement probes from 2009 can be used. In addition to NCDC, additional sources of weather data such as the USFS and Agrimet will also be explored if appropriate. It is expected that solar radiation will not vary too much within the watershed. Air temperature will decrease from the river mouth to headwater areas based on the elevation. Air temperature data will need to be adjusted based on elevation for each heat source model. Shading is a critical controlling factor for the water temperature change along the river. Shading information has been incorporated in the Heat Source models. We assume that the shading is not changing dramatically from July to the Fall spawning season and will not be changed in the model. The existing vegetation setup from the summer model period can also be used for the updated spawning models because the majority of trees in the North Umpqua are conifers and the leaves on the deciduous trees will still be on, since deciduous trees in Oregon do not reach peak fall color change until mid-October.
+
+Due to the change of inflows, the Heat Source model may require slight adjustment of stability related parameters such as the Manning’s *n* and time step. It is expected that limited model validation will be conducted unless under the TOCORs written technical directive. All the existing Heat Source models have been built using version 7 and will updated using the same version. PacifiCorp has recently developed a Heat Source Model for Fish Creek for the spawning period during 2009 that uses version 8 of Heat Source. This model will be made available for use by Tetra Tech. If this model is unstable or incompatible with the other Heat Source models, Tetra Tech will convert it to version 7.
+
+Modeling the water temperature for the entire North Umpqua River during the spawning season will involve running ten heat source models (twelve heat source model segments because the heat source model for the upper portion of the North Umpqua River includes three segments). For the current conditions, measured flows and temperatures at the upstream boundary for each Heat Source model will be used as the upstream boundary condition. Any tributary to the main-stem model that is configured as a Heat Source model will be calibrated using observed flow and temperature. The downstream output from tributary model will be input to the main-stem model using observed data.
 
 ## Data gaps
 
@@ -1285,11 +1325,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 *	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review (DEQ, 2021). For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and pre and post accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
-Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code, and models that have had their methodologies peer reviewed and evaluated.
-
-The existing **[Update: A, B, and C]** models were extensively evaluated to determine uncertainty in **[Update: X, and Y]**. **[Update: A sensitivity analysis was also completed on Z]**. A discussion of the methodology used to evaluate uncertainty and sensitivity is found in **[Updated: citation]**. **[Update: This paragraph should be manually edited for each QAPP with the relevant details.]**
-
-It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
+Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code; and models that have had their methodologies peer reviewed and evaluated. It is not anticipated that additional uncertainty or sensitivity analyses will be performed on the existing calibrated models. 
 
 ## Model acceptance
 
@@ -1365,7 +1401,11 @@ Management scenarios described in this section summarize the means by which the 
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-**[List specific changes that will be made]**
+* Updating the Little River model to include current discharges from the USFS-Wolf Creek Civilian Conservation Center.       
+
+*	Updating the North Umpqua River Model to include current discharges from the Glide-Idleyld Sanitary District.       
+
+*	Updating the North Umpqua Model to include Douglas County’s permitted water withdrawal of 7 cfs from the North Umpqua River below Steamboat Creek.        
 
 ## Background
 
@@ -1435,7 +1475,7 @@ This scenario evaluates stream temperature response from improvements to channel
 
 This scenario evaluates the stream temperature response from removing point source heat load. The stream temperature warming or cooling from permitted NPDES point sources is evaluated by comparing this scenario to the current conditions model scenario. Elements of this scenario or scenarios may include:    
 
-*	Removal of all point sources from the model.    
+*	Removal of all point sources from the North Umpqua and Little River models.    
 
 *	All other model inputs will be the same as the current condition model.     
 
@@ -1458,6 +1498,18 @@ This set of scenarios evaluate the stream temperature response from proposed or 
 *	All other model inputs will be the same as the current calibrated model.        
 
 DEQ may also rely upon the results of relevant studies, reports, or published articles to supplement the model scenario; or as the primary source of information for locations or situations where the model results are not applicable.
+
+* Alternative management options for the North Umpqua hydroelectric project.        
+
+## No Dams
+
+The no-dams scenario will require the development of a riverine Heat Source model in place of each of the three impoundments and running all the Heat Source models from upstream to downstream to evaluate the impacts of no dams along the system. A critical piece of information required for the development of the no-dams Heat Source model is the main channel information to identify the length, width, slope and manning’s roughness coefficient. Existing bathymetry if available will also be evaluated to identify the historic channel, if evident and/or channel shape. In addition, Tetra Tech will evaluate the shading from the upstream and downstream Heat Source models and configure the model using average shading. Minimal or no shading is expected for the riverine reaches along Lemolo Lake and Toketee Lake which are both wide, compared to the Soda Springs reservoir reach which is relatively narrow and has a lot of vegetation along the reach. In the absence of any morphological or shading information Tetra Tech will interpolate the channel characteristics upstream and downstream of the reservoir or use an average of the upstream and downstream conditions. 
+
+For the no-dams scenario each of the Heat Source model will be run sequentially from upstream to downstream with each model feeding into the model downstream.
+
+## Douglas County Water Right Withdrawal
+
+This scenario evaluates stream temperature warming or cooling from keeping Douglas County’s permitted water withdrawal of 7 cfs from the North Umpqua River below Steamboat Creek as instream flow. This scenario will be compared to the current conditions model scenario.
 
 # Project organization
 
@@ -1631,10 +1683,10 @@ mod.ref <- model.info %>%
   dplyr::rename(reference = mod_ref) %>% 
   dplyr::select(reference)
 
-tir.ref <- t52_ref %>% 
-  dplyr::select(`Full Reference`) %>% 
-  dplyr::rename(reference = `Full Reference`) %>% 
-  dplyr::distinct(reference)
+#tir.ref <- t52_ref %>% 
+#  dplyr::select(`Full Reference`) %>% 
+#  dplyr::rename(reference = `Full Reference`) %>% 
+#  dplyr::distinct(reference)
 
 if(NROW(t57)>0){
  
@@ -1647,14 +1699,19 @@ other.ref <- ref %>%
   dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::select(reference)
 
-qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
+#qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
+qapp.ref <- rbind(tmdl.ref,mod.ref,other.ref) %>% 
   dplyr::arrange(reference) %>% 
   dplyr::distinct(reference)
 
 if(NROW(t57)>0){
-qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref,shade.ref) %>% 
-  dplyr::arrange(reference) %>% 
-  dplyr::distinct(reference)
+#qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref,shade.ref) %>% 
+  qapp.ref <- rbind(tmdl.ref,mod.ref,other.ref,shade.ref) %>% 
+    dplyr::arrange(reference) %>% 
+    dplyr::distinct(reference) %>% 
+    dplyr::mutate(reference = ifelse(reference == 'DEQ (Oregon Department of Environmental Quality). 2002. "Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP)." ',
+                                     'DEQ (Oregon Department of Environmental Quality). 2002b. “Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP).”',
+                                     reference)) # NU
 }
 
 for(r in unique(sort(qapp.ref$reference))) {
@@ -1688,7 +1745,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r t53_1_tbl`
 `r app_b_tbl`
 
-**[Update: Delete this note if there is no data count > 31.]** \* Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
+\* Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
 # Appendix C Stream flow data summary
@@ -1832,6 +1889,11 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   gage_height_stations_map <- data.frame()
   
 }
+
+# Effective shade measurements
+shade <- t57 %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
 save(temp.data.sample.count,
      flow.data.sample.count,

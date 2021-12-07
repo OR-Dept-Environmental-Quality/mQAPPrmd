@@ -717,8 +717,9 @@ model.info <- cal.model %>%
   dplyr::filter(`QAPP Project Area` %in%  qapp_project_area)
 
 # Model Location in W MS TT table is not numeric.
-cal.input.mod.loc <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Inputs",col_types	
-                                       = "text") %>% 
+cal.input.mod.loc <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), 
+                                       sheet = "Calibration Inputs",
+                                       col_types = "text") %>% 
   dplyr::filter(!`QAPP Project Area` %in% "Upper Klamath and Lost Subbasins")
 cal.input <- cal.input %>% 
   mutate(`Model Location` = cal.input.mod.loc$`Model Location`)
