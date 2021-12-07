@@ -870,6 +870,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
     tidyr::drop_na(Stream)
+
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
