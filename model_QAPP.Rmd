@@ -531,6 +531,12 @@ if(NROW(t57)>0){
   
 }
 
+t57_date <- effective.shade.pro.area %>% 
+  dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
+  dplyr::mutate(date = paste0(`Shade Month`, " ", `Shade Year`)) %>% 
+  dplyr::distinct(date) %>% 
+  dplyr::pull()
+
 ```
 
 ```{r, label=`chap6`, include=FALSE}
@@ -1159,7 +1165,7 @@ DEQ has developed Heat Source models for the riverine portions of the North Umpq
 
 The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
-The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
+The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002b, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
 
 ## Software Development Quality Assessment
 We do not anticipate any new software development or model code changes as part of this project.
@@ -1217,7 +1223,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 ## Effective shade measurements
 
-Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for Septermber 2009.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for ",t57_date,".")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -1677,10 +1683,10 @@ mod.ref <- model.info %>%
   dplyr::rename(reference = mod_ref) %>% 
   dplyr::select(reference)
 
-tir.ref <- t52_ref %>% 
-  dplyr::select(`Full Reference`) %>% 
-  dplyr::rename(reference = `Full Reference`) %>% 
-  dplyr::distinct(reference)
+#tir.ref <- t52_ref %>% 
+#  dplyr::select(`Full Reference`) %>% 
+#  dplyr::rename(reference = `Full Reference`) %>% 
+#  dplyr::distinct(reference)
 
 if(NROW(t57)>0){
  
@@ -1693,14 +1699,19 @@ other.ref <- ref %>%
   dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::select(reference)
 
-qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
+#qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
+qapp.ref <- rbind(tmdl.ref,mod.ref,other.ref) %>% 
   dplyr::arrange(reference) %>% 
   dplyr::distinct(reference)
 
 if(NROW(t57)>0){
-qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref,shade.ref) %>% 
-  dplyr::arrange(reference) %>% 
-  dplyr::distinct(reference)
+#qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref,shade.ref) %>% 
+  qapp.ref <- rbind(tmdl.ref,mod.ref,other.ref,shade.ref) %>% 
+    dplyr::arrange(reference) %>% 
+    dplyr::distinct(reference) %>% 
+    dplyr::mutate(reference = ifelse(reference == 'DEQ (Oregon Department of Environmental Quality). 2002. "Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP)." ',
+                                     'DEQ (Oregon Department of Environmental Quality). 2002b. “Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP).”',
+                                     reference)) # NU
 }
 
 for(r in unique(sort(qapp.ref$reference))) {
@@ -1879,17 +1890,24 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
 }
 
-  save(temp.data.sample.count,
-       flow.data.sample.count,
-       temp_stations,
-       temp_cal_sites,
-       temp_model_bc_tri,
-       flow_model_bc_tri,
-       flow_stations,
-       gage_height_stations_map,
-       met_stations,
-       ind_ps,
-       gen_ps,
-       file = paste0("./data/map_",file.name,"_qapp.RData"))
+# Effective shade measurements
+shade <- t57 %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+save(temp.data.sample.count,
+     flow.data.sample.count,
+     temp_stations,
+     temp_cal_sites,
+     temp_model_bc_tri,
+     flow_model_bc_tri,
+     flow_stations,
+     gage_height_stations_map,
+     met_stations,
+     ind_ps,
+     gen_ps,
+     shade,
+     t57_date,
+     file = paste0("./data/map_",file.name,"_qapp.RData"))
 
 ```
