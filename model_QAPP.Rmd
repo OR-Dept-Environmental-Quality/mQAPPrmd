@@ -530,6 +530,12 @@ if(NROW(t57)>0){
   
 }
 
+t57_date <- effective.shade.pro.area %>% 
+  dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
+  dplyr::mutate(date = paste0(`Shade Month`, " ", `Shade Year`)) %>% 
+  dplyr::distinct(date) %>% 
+  dplyr::pull()
+
 ```
 
 ```{r, label=`chap6`, include=FALSE}
@@ -1824,17 +1830,19 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
 }
 
-  save(temp.data.sample.count,
-       flow.data.sample.count,
-       temp_stations,
-       temp_cal_sites,
-       temp_model_bc_tri,
-       flow_model_bc_tri,
-       flow_stations,
-       gage_height_stations_map,
-       met_stations,
-       ind_ps,
-       gen_ps,
-       file = paste0("./data/map_",file.name,"_qapp.RData"))
+save(temp.data.sample.count,
+     flow.data.sample.count,
+     temp_stations,
+     temp_cal_sites,
+     temp_model_bc_tri,
+     flow_model_bc_tri,
+     flow_stations,
+     gage_height_stations_map,
+     met_stations,
+     ind_ps,
+     gen_ps,
+     shade,
+     t57_date,
+     file = paste0("./data/map_",file.name,"_qapp.RData"))
 
 ```
