@@ -261,8 +261,9 @@ tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_h
                                  "Automated Hydrologic and Meteorological Monitoring Stations Network (Hydromet)",
                                  "University of Utah MesoWest database",
                                  "DEQ's files")) %>% 
-  dplyr::mutate(txt = paste0(tbl_rows, " stations from ", source)) %>% 
-  dplyr::filter(tbl_rows != "0")
+  dplyr::mutate(station = ifelse(tbl_rows == 1, "station", "stations")) %>% 
+  dplyr::mutate(txt = paste0(tbl_rows, " ", station, " from ", source)) %>% 
+  dplyr::filter(!tbl_rows == 0)
 
 t51_txt <- knitr::combine_words(tables.met$txt)
 
@@ -386,7 +387,8 @@ row.names(t54_sp) <- NULL
 tables.flow <- data.frame(tbl_name = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
                           tbl_rows = c(NROW(t54_usgs),NROW(t54_owrd),NROW(t54_hydromet),NROW(t54_sp)),
                           source = c("USGS", "OWRD", "Hydromet","DEQ's files")) %>% 
-  dplyr::mutate(txt = paste0(tbl_rows, " stations from ", source)) %>% 
+  dplyr::mutate(station = ifelse(tbl_rows == 1, "station", "stations")) %>% 
+  dplyr::mutate(txt = paste0(tbl_rows, " ", station, " from ", source)) %>% 
   dplyr::filter(!tbl_rows == 0)
 
 t54_txt <- knitr::combine_words(tables.flow$txt)
@@ -524,6 +526,12 @@ if(NROW(t57)>0){
                                          caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
   
 }
+
+t57_date <- effective.shade.pro.area %>% 
+  dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
+  dplyr::mutate(date = paste0(`Shade Month`, " ", `Shade Year`)) %>% 
+  dplyr::distinct(date) %>% 
+  dplyr::pull()
 
 ```
 
@@ -1158,13 +1166,13 @@ DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrare
 
 All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS), USGS’s National Water Information System (NWIS), or were obtained during the data solicitation for DEQ’s Temperature TMDL Replacement Project. Some temperature data presented in this QAPP were retrieved from DEQ’s files and were not available in AWQMS or USGS’s database.
 
-The data retrieval period for continuous stream temperature data is from January 1, 1990 to December 31, 2020. Data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E and a result status of “Final” or “Provisional”. The data quality level criteria are outlined in DEQ’s Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results with a data quality level of A, B, or E. Data of unknown quality are used after careful review.
+The data retrieval period for continuous stream temperature data is from January 1, 1990 to December 31, 2020. Data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E and a result status of “Final” or “Provisional”. The data quality level criteria are outlined in DEQ’s Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results with a data quality level of A, B, or E (DEQ, 2021). Data of unknown quality are used after careful review.
 
 Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.b", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D.
 
 ## Stream flow data
 
-`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}`  the stations where continuous flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2009).
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
@@ -1193,7 +1201,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 ## Effective shade measurements
 
-Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a Solar Pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for August 2002 and August 2004.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for ",t57_date,".")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -1226,7 +1234,7 @@ To the greatest extent possible, the method used to derive the model parameters 
 
 Effective shade curves are plots that present the maximum possible effective shade as a function of different types of natural near-stream vegetation, active channel widths, and stream aspect. Channel width is plotted on the x-axis, effective shade is on the y-axis, and a separate symbol and/or line color is used for each stream aspect. Separate plots are produced for each type of natural vegetation that is expected in the TMDL project area. The plots are called effective shade curves because the pattern on the plot resembles a gentle downward slopping curve. As channel width increases effective shade gets smaller. The plots are produced from the output of Heat Source version 6 shade models that have been parameterized with every combination of the previously mentioned conditions. The effective shade curve approach can be used almost anywhere in the watershed to quantify the amount of background solar radiation loading and the effective shade necessary to eliminate temperature increases from anthropogenic disturbance or removal of near-stream vegetation.
 
-This model approach can also be used to develop a lookup table to determine the effective shade resulting from other combinations vegetation height, vegetation density, vegetation overhang, and vegetation buffer widths that are different from background conditions. The lookup table provides a convenient way for readers of the TMDL to estimate the effective shade for current conditions without using the model or as a reverse lookup to determine what vegetation height, buffer width, or vegetation density would achieve a certain effective shade.
+This model approach can also be used to develop a lookup table to determine the effective shade resulting from other combinations vegetation height, vegetation density, vegetation overhang, and vegetation buffer widths that are different from background conditions. The lookup table provides a convenient way for readers of the TMDL to estimate the effective shade for current conditions without using the model. The lookup table can also be used as a reverse lookup to determine what vegetation height, buffer width, or vegetation density would achieve a certain effective shade.
 
 ### Model domain
 
@@ -1279,9 +1287,9 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 *	Data used for the TMDL must have been collected based on a project plan with quality assurance and quality control protocols for collecting and analyzing samples.    
 
-*	The sampling and laboratory analysis must follow widely accepted scientific methods and protocols. These may include DEQ’s Mode of Operations Manual (DEQ, 2009), USEPA’s methods (EPA, 1983), USGS’s published techniques of water-resources investigations, the USGS National Field Manual, or Standard Methods for the Examination of Water and Wastewater. All acceptable methods include applicable precision and accuracy checks.    
+*	The sampling and laboratory analysis must follow widely accepted scientific methods and protocols. These may include DEQ’s Mode of Operations Manual (DEQ, 2020), USEPA’s methods (EPA, 1983), USGS’s published techniques of water-resources investigations, the USGS National Field Manual, or Standard Methods for the Examination of Water and Wastewater. All acceptable methods include applicable precision and accuracy checks.    
 
-*	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review. For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and pre and post accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
+*	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review (DEQ, 2021). For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and pre and post accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code, and models that have had their methodologies peer reviewed and evaluated.
 
@@ -1540,7 +1548,7 @@ Data: All field data organized or collected in support of the TMDL project. This
 
 Models: All models used for the TMDL project including calibration and scenario models. The models should be organized into subfolders for each model domain and model scenario. Draft models and the final TMDL models will be clearly identified and ideally saved in separate folders. The model folders should include:
 
-*	The model with all inputs and outputs in files and any executable codes used;    
+*	The model with all input and output files and any executable code used;    
 
 *	Copy of all raw and summarized data (including GIS files) used for model input with data source and location metadata included;    
 
@@ -1829,17 +1837,19 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
 }
 
-  save(temp.data.sample.count,
-       flow.data.sample.count,
-       temp_stations,
-       temp_cal_sites,
-       temp_model_bc_tri,
-       flow_model_bc_tri,
-       flow_stations,
-       gage_height_stations_map,
-       met_stations,
-       ind_ps,
-       gen_ps,
-       file = paste0("./data/map_",file.name,"_qapp.RData"))
+save(temp.data.sample.count,
+     flow.data.sample.count,
+     temp_stations,
+     temp_cal_sites,
+     temp_model_bc_tri,
+     flow_model_bc_tri,
+     flow_stations,
+     gage_height_stations_map,
+     met_stations,
+     ind_ps,
+     gen_ps,
+     shade,
+     t57_date,
+     file = paste0("./data/map_",file.name,"_qapp.RData"))
 
 ```
