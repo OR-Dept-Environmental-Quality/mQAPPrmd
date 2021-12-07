@@ -527,6 +527,12 @@ if(NROW(t57)>0){
   
 }
 
+t57_date <- effective.shade.pro.area %>% 
+  dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
+  dplyr::mutate(date = paste0(`Shade Month`, " ", `Shade Year`)) %>% 
+  dplyr::distinct(date) %>% 
+  dplyr::pull()
+
 ```
 
 ```{r, label=`chap6`, include=FALSE}
@@ -1187,7 +1193,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Stream flow data
 
-`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}`  the stations where continuous flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
@@ -1213,7 +1219,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 ## Effective shade measurements
 
-Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for August 2021.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for ",t57_date,".")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -1306,9 +1312,9 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 *	Data used for the TMDL must have been collected based on a project plan with quality assurance and quality control protocols for collecting and analyzing samples.    
 
-*	The sampling and laboratory analysis must follow widely accepted scientific methods and protocols. These may include DEQ’s Mode of Operations Manual (DEQ, 2020), USEPA’s methods (EPA, 1983), USGS’s published techniques of water-resources investigations, the USGS National Field Manual, or Standard Methods for the Examination of Water and Wastewater. All acceptable methods include applicable precision and accuracy checks.  
+*	The sampling and laboratory analysis must follow widely accepted scientific methods and protocols. These may include DEQ’s Mode of Operations Manual (DEQ, 2020), USEPA’s methods (EPA, 1983), USGS’s published techniques of water-resources investigations, the USGS National Field Manual, or Standard Methods for the Examination of Water and Wastewater. All acceptable methods include applicable precision and accuracy checks.    
 
-*	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review (DEQ, 2021). For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and pre and post accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.   
+*	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review (DEQ, 2021). For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and pre and post accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
 Uncertainties in the mathematical formulation are addressed by using open source models that allow free and transparent inspection of model code, and models that have had their methodologies peer reviewed and evaluated.
 
@@ -1575,7 +1581,7 @@ Data: All field data organized or collected in support of the TMDL project. This
 
 Models: All models used for the TMDL project including calibration and scenario models. The models should be organized into subfolders for each model domain and model scenario. Draft models and the final TMDL models will be clearly identified and ideally saved in separate folders. The model folders should include:
 
-*	The model with all input and output files and any executable code used;        
+*	The model with all input and output files and any executable code used;    
 
 *	Copy of all raw and summarized data (including GIS files) used for model input with data source and location metadata included;    
 
@@ -1864,17 +1870,24 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
  
 }
 
-  save(temp.data.sample.count,
-       flow.data.sample.count,
-       temp_stations,
-       temp_cal_sites,
-       temp_model_bc_tri,
-       flow_model_bc_tri,
-       flow_stations,
-       gage_height_stations_map,
-       met_stations,
-       ind_ps,
-       gen_ps,
-       file = paste0("./data/map_",file.name,"_qapp.RData"))
+# Effective shade measurements
+shade <- t57 %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+save(temp.data.sample.count,
+     flow.data.sample.count,
+     temp_stations,
+     temp_cal_sites,
+     temp_model_bc_tri,
+     flow_model_bc_tri,
+     flow_stations,
+     gage_height_stations_map,
+     met_stations,
+     ind_ps,
+     gen_ps,
+     shade,
+     t57_date,
+     file = paste0("./data/map_",file.name,"_qapp.RData"))
 
 ```
