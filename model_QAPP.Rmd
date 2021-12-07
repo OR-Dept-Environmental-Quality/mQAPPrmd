@@ -1827,6 +1827,11 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
 }
 
+# Effective shade measurements
+shade <- t57 %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
 save(temp.data.sample.count,
      flow.data.sample.count,
      temp_stations,
