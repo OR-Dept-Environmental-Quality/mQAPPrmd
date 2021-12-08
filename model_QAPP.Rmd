@@ -528,6 +528,12 @@ if(NROW(t57)>0){
   
 }
 
+t57_date <- effective.shade.pro.area %>% 
+  dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
+  dplyr::mutate(date = paste0(`Shade Month`, " ", `Shade Year`)) %>% 
+  dplyr::distinct(date) %>% 
+  dplyr::pull()
+
 ```
 
 ```{r, label=`chap6`, include=FALSE}
@@ -1192,7 +1198,7 @@ Estimates of water diversion rates and location of points of diversion can be de
 
 ## Effective shade measurements
 
-Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for September 2014.")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for ",t57_date,".")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
 
 `r if(NROW(t57)>0){t57_tbl}`
 
@@ -1822,17 +1828,24 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
   
 }
 
-  save(temp.data.sample.count,
-       flow.data.sample.count,
-       temp_stations,
-       temp_cal_sites,
-       temp_model_bc_tri,
-       flow_model_bc_tri,
-       flow_stations,
-       gage_height_stations_map,
-       met_stations,
-       ind_ps,
-       gen_ps,
-       file = paste0("./data/map_",file.name,"_qapp.RData"))
+# Effective shade measurements
+shade <- t57 %>% 
+  tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
+
+save(temp.data.sample.count,
+     flow.data.sample.count,
+     temp_stations,
+     temp_cal_sites,
+     temp_model_bc_tri,
+     flow_model_bc_tri,
+     flow_stations,
+     gage_height_stations_map,
+     met_stations,
+     ind_ps,
+     gen_ps,
+     shade,
+     t57_date,
+     file = paste0("./data/map_",file.name,"_qapp.RData"))
 
 ```
