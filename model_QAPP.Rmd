@@ -1626,10 +1626,10 @@ mod.ref <- model.info %>%
   dplyr::rename(reference = mod_ref) %>% 
   dplyr::select(reference)
 
-tir.ref <- t52_ref %>% 
-  dplyr::select(`Full Reference`) %>% 
-  dplyr::rename(reference = `Full Reference`) %>% 
-  dplyr::distinct(reference)
+#tir.ref <- t52_ref %>% 
+#  dplyr::select(`Full Reference`) %>% 
+#  dplyr::rename(reference = `Full Reference`) %>% 
+#  dplyr::distinct(reference)
 
 if(NROW(t57)>0){
  
@@ -1642,13 +1642,15 @@ other.ref <- ref %>%
   dplyr::mutate(reference = paste(`Full Reference`, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::select(reference)
 
-qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
+#qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref) %>% 
+qapp.ref <- rbind(tmdl.ref,mod.ref,other.ref) %>% 
   dplyr::arrange(reference) %>% 
   dplyr::distinct(reference)
 
 if(NROW(t57)>0){
-qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref,shade.ref) %>% 
-  dplyr::arrange(reference) %>% 
+#qapp.ref <- rbind(tmdl.ref,mod.ref,tir.ref,other.ref,shade.ref) %>% 
+qapp.ref <- rbind(tmdl.ref,mod.ref,other.ref,shade.ref) %>% 
+    dplyr::arrange(reference) %>% 
   dplyr::distinct(reference)
 }
 
