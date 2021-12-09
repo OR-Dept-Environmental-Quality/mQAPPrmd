@@ -801,7 +801,7 @@ trisks <- knitr::kable(risks, format = "pandoc", padding = 2,
 
 trev <- knitr::kable(rev, format = "pandoc", padding = 2,
                      caption = tbls(name = "rev",
-                                    caption = paste0("Revision history.")))
+                                    caption = paste0("QAPP revision history.")))
 
 ```
 
