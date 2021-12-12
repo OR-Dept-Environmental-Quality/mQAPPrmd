@@ -210,7 +210,7 @@ indPS.markers <- function(map, data) {
                     "<br>", 
                     "<b>Permit Type and Description:</b> ", data$`Permit Type and Description`,
                     "<br>",
-                    "<b>Stream/River Mile:</b> ", data$`Stream/River Mile`),
+                    "<b>Stream River Mile:</b> ", data$`Stream River Mile`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
   
@@ -231,7 +231,7 @@ genPS.markers <- function(map, data) {
                     "<br>", 
                     "<b>Permit Type and Description:</b> ", data$`Permit Type and Description`,
                     "<br>",
-                    "<b>Stream/River Mile:</b> ", data$`Stream/River Mile`),
+                    "<b>Stream River Mile:</b> ", data$`Stream River Mile`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
   
