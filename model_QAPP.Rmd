@@ -117,6 +117,8 @@ if(NROW(tcat4a)>0){
   
 }
 
+tcat45 <- rbind(tcat5,tcat4a)
+
 ```
 
 ```{r, label=`figs`, echo=FALSE}
@@ -1423,7 +1425,7 @@ This scenario evaluates the stream temperature response with streamside vegetati
 
 ## Protected vegetation
 
-This scenario evaluates the stream temperature response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the stream temperature warming or cooling contributed by removal of streamside vegetation in unprotected areas and if existing management strategies are sufficient to achieve allocations and surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The stream temperature warming or cooling is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
+This scenario is specific to the shade models and evaluates the effective shade response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the amount of effective shade contributed by streamside vegetation in unprotected areas and if existing management strategies are sufficient to achieve surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The amount of effective shade contributed by streamside vegetation in unprotected areas is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
 
 *	Identifying streamside vegetation areas along the model extent that are protected and will not be removed. The exact definition of a protected area will be determined during the TMDL process.    
 
@@ -1906,8 +1908,9 @@ save(temp.data.sample.count,
      met_stations,
      ind_ps,
      gen_ps,
-     shade,
-     t57_date,
+     tcat45,
+     #shade,
+     #t57_date, # Section 5 effective shade measurement was not included in the final map
      file = paste0("./data/map_",file.name,"_qapp.RData"))
 
 ```
