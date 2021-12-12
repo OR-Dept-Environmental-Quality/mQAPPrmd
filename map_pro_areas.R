@@ -72,10 +72,10 @@ where_huc10 <- paste0("HUC10 IN ('", paste(subbasin_huc10, collapse = "','"),"')
 where_huc12 <- paste0("HUC12 IN ('", paste(subbasin_huc12, collapse = "','"),"')")
 
 #Use this line to check between the REST map and the QAPP table; if both are matched, use QAPP IR table to pull data to the map
-#where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4','Category 5')) AND (", where_huc12, ")") 
+#where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5')) AND (", where_huc12, ")") 
 
 where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5')) AND ",
-                   "(AU_ID IN ('", paste(pro.cat.45.tbl$AU_ID, collapse = "','"),"'))")
+                   "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
 
 reachcode <- paste(paste0("(ReachCode >= ", subbasin_huc8, "000000", " AND ReachCode <= ", 
                           subbasin_huc8,"999999)"), 
