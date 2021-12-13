@@ -159,7 +159,8 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
                                                ifelse(mod_rmd %in% c("hs7","hs8"), "(Boyd and Kasper, 2003)",
                                                       NA))))
 cal.input <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Calibration Inputs") %>% 
-  dplyr::filter(!`QAPP Project Area` %in% "Upper Klamath and Lost Subbasins")
+  dplyr::filter(!`QAPP Project Area` %in% "Upper Klamath and Lost Subbasins") %>% 
+  dplyr::mutate(`Data Source` = ifelse(`Data Source` == "DEQ File", "DEQ", `Data Source`))
 tir <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "TIR")
 schedule <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "Schedule")
 ref <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet = "References")

@@ -249,8 +249,8 @@ t51.sp <- t51 %>%
   dplyr::filter(tbl=="DEQ File") %>% 
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
-  dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "DEQ FILE")
+  dplyr::rename(Source = Station) #%>% 
+  #dplyr::filter(!Source == "DEQ FILE")
 
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
@@ -380,7 +380,8 @@ row.names(t54_hydromet) <- NULL
 
 t54_sp <- t54 %>% 
   dplyr::filter(!`Data Source` %in% c("USGS","OWRD","Hydromet")) %>% 
-  dplyr::arrange(`Data Source`,`Station ID`,Station)
+  dplyr::arrange(`Data Source`,`Station ID`,Station) %>% 
+  dplyr::filter(!`Data Source` == "DEQ") # LW
 row.names(t54_sp) <- NULL
 
 tables.flow <- data.frame(tbl_name = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
