@@ -382,7 +382,7 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
-# qapp_project_area = "North Umpqua Subbasin"
+qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
@@ -390,7 +390,7 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
   
   print(qapp_project_area)
   
@@ -755,7 +755,9 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
     dplyr::filter(!is.na(`TMDL Document`)) %>% 
     dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>%
+    dplyr::mutate(`Abbreviated Reference` = ifelse(`Abbreviated Reference`=="DEQ, 2006a", 
+                                                   strip_alpha(`Abbreviated Reference`),
+                                                   `Abbreviated Reference`)) %>% # NU
     dplyr::filter(substr(`Abbreviated Reference`,1,3) == "DEQ") %>% 
     dplyr::group_by(`TMDL Document`) %>% 
     dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
@@ -858,7 +860,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
   #dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
   #sf::st_drop_geometry()
   
-  # _ NLCD ----
+ # _ NLCD ----
   nlcd.pro.area <- nlcd.tbl %>% 
     dplyr::ungroup() %>% 
     dplyr::filter(Project_Na == qapp_project_area) %>% 
@@ -871,6 +873,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
     tidyr::drop_na(Stream)
+
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
@@ -975,7 +978,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                            Stations = station.output),
                       path=paste0(data.dir,"appendix_data/",file.name,"_appendix_data.xlsx"))
   
-}
+#}
 
 # Leaflet Map Data ----
 library(tidyverse)
@@ -1055,7 +1058,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
-# qapp_project_area = "North Umpqua Subbasin"
+qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins" ---
@@ -1064,7 +1067,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette River Mainstem and Major Tributaries"),]$areas) {
   
   print(qapp_project_area)
   
@@ -1104,4 +1107,4 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
        file = paste0("./data/map_",file.name,".RData"))
   
   
-}
+#}
