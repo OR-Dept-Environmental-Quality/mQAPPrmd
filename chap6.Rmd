@@ -359,7 +359,7 @@ if(!model.extent == TRUE){
                                                caption = paste0("Boundary condition and tributary inputs to the ", 
                                                                 ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
                                                                 waterbody_name, 
-                                                                " Heat Source Model.")))
+                                                                " Heat Source model.")))
     
     
   }
@@ -468,7 +468,7 @@ if(!model.extent == TRUE){
                                             caption = paste0("Calibration sites and parameters used in the ", 
                                                              ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
                                                              waterbody_name, 
-                                                             " Heat Source Model.")))
+                                                             " Heat Source model.")))
     
     
     

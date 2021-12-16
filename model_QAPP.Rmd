@@ -790,6 +790,14 @@ troles <- flextable::regulartable(roles.pro.area) %>%
 ```{r, label=`risk`, echo=FALSE}
 # Implementation and adaptive management
 
+# branch only
+rev <- rev %>% 
+  dplyr::mutate(Date = ifelse(Revision == "1.0", "12/09/2021","")) %>%  
+  #dplyr::add_row(Revision = "1.1",
+  #               Date = "12/6/2021",
+  #               Changes = "",
+  #               Editor = "R. Michie")   
+
 trisks <- knitr::kable(risks, format = "pandoc", padding = 2,
                        caption = tbls(name = "risks",
                                       caption = paste0("Projects risks and proposed solutions.")))
@@ -1117,7 +1125,7 @@ TMDLs also require identification of seasonal variation and critical conditions.
 
 The TMDL will establish a loading capacity which specifies the amount of a pollutant or pollutants that a waterbody can receive and still meet water quality standards. The pollutant addressed in the temperature TMDL is heat. The TMDL will divide the loading capacity into thermal wasteload allocations for NPDES permittees and load allocations for background and nonpoint sources of heat to ensure that the applicable temperature standards are achieved. Anthropogenic nonpoint and NPDES permitted point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable criteria, cumulatively at the point of maximum impact. The portion of the human use allowance allocated to each source will be determined in the TMDL with the modeling approach supporting assessment of different allocation options. The modeling approach may also be used to support development of TMDL surrogate measures such as effective shade targets. Nonpoint source allocations can be translated into surrogate measures when a pollutant is difficult to measure, highly variable, or difficult to monitor (OAR 340-042-0040(5)(b)). Thermal load allocations for nonpoint sources can be difficult to measure and monitor. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations.
 
-Stream temperatures for the `r pro.area.tmdls` were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.a$'Model Version')`) for the Columbia Slough and Johnson Creek, respectively. `r if(NROW(tmdl.mod.b)>0){paste0("New models are proposed using ", knitr::combine_words(tmdl.mod.b$'Model Version,"."'))}` The models extents include most of the main rivers and their larger tributaries that contain or influence primary fish habitat. Site-specific load allocations will be developed for the streams that are simulated. Other streams are assigned generalized load allocations based on effective shade surrogate measures that target site potential or restored vegetation types. Numeric or narrative wasteload allocations will be developed for all NPDES permittees.
+Stream temperatures for the `r pro.area.tmdls` were simulated using `r if(NROW(tmdl.mod.a)>1){paste0("the computer models")} else {paste0("a computer model")}` (`r knitr::combine_words(tmdl.mod.a$'Model Version')`) for the Columbia Slough and Johnson Creek, respectively. These streams were selected for temperature model development because they contain primary fish habitat, have point source discharges, and are the most impacted by urbanization relative to other streams in the project area. New shade models are proposed using Heat Source version 9. The model extents include most of the main rivers and their larger tributaries that contain or influence primary fish habitat. Site-specific load allocations will be developed for the streams that are simulated. Other streams are assigned generalized load allocations based on effective shade surrogate measures that target site potential or restored vegetation types. Numeric or narrative wasteload allocations will be developed for all NPDES permittees.
 
 ## Model selection
 
@@ -1176,7 +1184,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Stream flow data
 
-`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous or instantaneous flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous `r if(NROW(t54_sp)>0){paste0("and instantaneous")}` flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. `r tbls(name = "flow.data.sample.count", display="cite")` lists the years that continuous stream flow data were collected at each location. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
