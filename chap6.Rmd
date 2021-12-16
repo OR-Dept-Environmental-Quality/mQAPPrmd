@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Pudding River"
+# for test: waterbody_name <- "Little North Santiam River"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -189,10 +189,12 @@ if(!model.extent == TRUE){
     
     t6x6_met <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>%
-      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+      dplyr::mutate(`Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
+                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`)))) %>% 
       dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
       dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
                        Parameter = toString(unique(sort(Parameter))))%>% 
@@ -206,10 +208,12 @@ if(!model.extent == TRUE){
                                                                 `Model Location Name`,
                                                                 paste0(`Model Location Name`, " (", `Station ID`, ")")),
                     `Model Location` = round(`Model Location`,2),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                    `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
+                    `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`)))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
       dplyr::arrange(`Input Type`,Parameter,desc(as.numeric(`Model Location`))) %>% 
@@ -221,8 +225,10 @@ if(!model.extent == TRUE){
     
     t6x6_met <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>%
-      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+      dplyr::mutate(`Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                     `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
       dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
@@ -241,10 +247,12 @@ if(!model.extent == TRUE){
                                                                 `Model Location Name`,
                                                                 paste0(`Model Location Name`, " (", `Station ID`, ")")),
                     #`Model Location` = round(`Model Location`,2),                                                           # Willamette MS
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                    `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",`Data Source`))) %>%  
+                    `Data Source` = ifelse(is.na(`Interpolated Data`),`Data Source`, paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`)))) %>%  
       dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
       dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`)) %>% 
@@ -268,7 +276,7 @@ if(!model.extent == TRUE){
                                                caption = paste0("Boundary condition and tributary inputs to the ", 
                                                                 ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
                                                                 waterbody_name, 
-                                                                " Heat Source Model.")))
+                                                                " Heat Source model.")))
     
   }
   
@@ -314,11 +322,14 @@ if(!model.extent == TRUE){
     
     t6x7 <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-      dplyr::filter(!Parameter %in% "Effective Shade") %>% 
-      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+      dplyr::arrange(desc(Parameter)) %>% 
+      #dplyr::filter(!Parameter %in% "Effective Shade") %>% 
+      dplyr::mutate(`Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`))),
                     Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
                     `Model Location` = round(`Model Location`,2),
                     `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
@@ -327,10 +338,11 @@ if(!model.extent == TRUE){
                     `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                                 `Model Location Name`,
                                                                 paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
-      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
-      dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`) %>% 
+      dplyr::summarize(Parameter = toString(unique(Parameter)),
+                       `Data Source` = toString(unique(`Data Source`))) %>% 
       dplyr::ungroup() %>% 
-      dplyr::arrange(Parameter,desc(as.numeric(`Model Location`))) %>% 
+      dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
       dplyr::rename(`Calibration Parameter` = `Parameter`)
     
   }
@@ -339,11 +351,14 @@ if(!model.extent == TRUE){
     
     t6x7 <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-      dplyr::filter(!Parameter %in% "Effective Shade") %>% 
-      dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                    `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+      dplyr::arrange(desc(Parameter)) %>% 
+      #dplyr::filter(!Parameter %in% "Effective Shade") %>% 
+      dplyr::mutate(`Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           strip_alpha(`Data Source`), `Data Source`),
+                    `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                           paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`)),
+                    `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`))),
                     Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
                     #`Model Location` = round(`Model Location`,2),
                     `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
@@ -352,8 +367,9 @@ if(!model.extent == TRUE){
                     `Model Location Name (Station ID)` = ifelse(`Station ID` == "No Station ID" | is.na(`Station ID`),
                                                                 `Model Location Name`,
                                                                 paste0(`Model Location Name`, " (",`Station ID`,")")))%>% 
-      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`,`Data Source`) %>% 
-      dplyr::summarize(Parameter = toString(unique(sort(Parameter)))) %>% 
+      dplyr::group_by(`Model Location Name (Station ID)`,`Model Location`,`Location Units`) %>% 
+      dplyr::summarize(Parameter = toString(unique(Parameter)),
+                       `Data Source` = toString(unique(`Data Source`))) %>% 
       dplyr::ungroup() %>% 
       dplyr::arrange(Parameter,desc(`Model Location`)) %>% #
       dplyr::rename(`Calibration Parameter` = `Parameter`)
@@ -365,7 +381,7 @@ if(!model.extent == TRUE){
   
   names(t6x7)[names(t6x7) == "Model Location"] <- if(NROW(t6x7_col)>0){paste0("Model Location (",unique(t6x7_col$`Location Units`),")")}else{paste0("Model Location")}
   
-  t6x7 <- t6x7[,c(1,2,5,4)] 
+  t6x7 <- t6x7[,-3] 
   
   if(NROW(t6x7)>0){
     
@@ -374,7 +390,7 @@ if(!model.extent == TRUE){
                                             caption = paste0("Calibration sites and parameters used in the ", 
                                                              ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
                                                              waterbody_name, 
-                                                             " Heat Source Model.")))
+                                                             " Heat Source model.")))
     
   }
   
