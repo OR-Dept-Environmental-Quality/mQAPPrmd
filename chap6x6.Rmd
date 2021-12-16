@@ -30,10 +30,12 @@ options(kableExtra.auto_format = F)
 t6x6j_met <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
   dplyr::filter(`Model Location Type` %in%  c("Meteorological")) %>% 
-  dplyr::mutate(`Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+  dplyr::mutate(`Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                       strip_alpha(`Data Source`), `Data Source`),
+                `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                       paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                 `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",`Data Source`))) %>% 
+                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`)))) %>% 
   dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
   dplyr::summarize(`Model Location` = toString(unique(sort(round(as.numeric(`Model Location`),2)))),
                    Parameter = toString(unique(sort(Parameter))))%>% 
@@ -48,10 +50,12 @@ t6x6j_1 <- section.model.input %>%
                                                             `Model Location Name`,
                                                             paste0(`Model Location Name`, " (", `Station ID`, ")")),
                 `Model Location` = round(as.numeric(`Model Location`),2),
-                `Data Source` = ifelse(`Station ID` %in% "TIR", strip_alpha(`Data Source`), `Data Source`),
-                `Data Source` = ifelse(`Station ID` %in% "TIR", paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
+                `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                       strip_alpha(`Data Source`), `Data Source`),
+                `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
+                                       paste0(gsub(",.*$", "", `Data Source`)," (",stringi::stri_sub(`Data Source`,-4),")"), `Data Source`),
                 `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
-                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",`Data Source`))) %>%   
+                `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`, paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`)))) %>%   
   dplyr::select(`Model Location Name (Station ID)`, `Model Location`, `Location Units`, `Model Location Type`, `Parameter`, `Data Source`, Note) %>%
   dplyr::rename(`Input Type` = `Model Location Type`) %>% 
   dplyr::arrange(`Input Type`,Parameter,desc(as.numeric(`Model Location`))) %>% 
@@ -78,7 +82,7 @@ if(NROW(t6x6j_1)>0){
 
 `r if(NROW(t6x6j_1)>0){t6x6j_tbl}else{paste0("There were no boundary condition and tributary inputs to this model.")}`
 
-```{r, label=`t6x6_2`, echo=FALSE}
+```{r, label=`t6x6j_2`, echo=FALSE}
 
 t6x6j_2 <- section.model.input %>%
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 
@@ -86,6 +90,6 @@ t6x6j_2 <- section.model.input %>%
 
 ```
 
-`r if(NROW(t6x6j_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6j_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
+`r if(NROW(t6x6j_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6j_2$Parameter)))),". Air temperature data were modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds were adjusted to improve the calibration using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}else{paste0("There are no meteorology inputs into the model.")}`
 
 `r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The near-stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
