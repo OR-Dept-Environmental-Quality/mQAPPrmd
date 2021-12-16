@@ -382,9 +382,13 @@ t54_hydromet <- t54 %>%
   dplyr::select(-`Data Source`)
 row.names(t54_hydromet) <- NULL
 
+# SW flow stations remove from the table (see SharePoint version 51)
+rm.flow.stations <- c("Big Dry Creek", "Carolina Creek", "Cartwright Creek", "Cash Creek", "Cedar Creek (Spring 1)", "Kennedy Creek", "Lilly Creek", "McGowan Creek", "Miles Creek", "Mill Creek", "Palmer Creek", "Parsons Creek", "Perkins Creek", "Rock Creek", "Short Creek", "Shotgun Creek", "Smith Creek", "Spencer Creek", "Stell Creek", "Unnamed Creek at model meter 26883.36", "Unnamed Creek at model meter 5821.68")
+  
 t54_sp <- t54 %>% 
   dplyr::filter(!`Data Source` %in% c("USGS","OWRD","Hydromet")) %>% 
-  dplyr::arrange(`Data Source`,`Station ID`,Station)
+  dplyr::arrange(`Data Source`,`Station ID`,Station) %>% 
+  dplyr::filter(!Station %in% rm.flow.stations)
 row.names(t54_sp) <- NULL
 
 tables.flow <- data.frame(tbl_name = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
@@ -551,7 +555,10 @@ tmdl.mod.a<- model.info %>%
   dplyr::mutate(`Model Version` = ifelse(Model_version == "SHADOW", 
                                          Model_version, 
                                          paste0(Model_version, " ", tolower(`Primary Model Parameter`), " model"))) %>% 
-  dplyr::select(`Model Version`,`Model Waterbody`)
+  dplyr::select(`Model Version`,`Model Waterbody`) %>% 
+  dplyr::mutate(`Model Version` = ifelse(`Model Version` == "Heat Source version 9 shade model solar model",
+                                         "Heat Source version 9 shade model",
+                                         `Model Version`)) # SW
   
 
 tmdl.mod.b<- model.info %>% 
@@ -926,7 +933,7 @@ if(NROW(t54_sp)>0){
   
   t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2, row.names = NA,
                              caption = tbls(name = "t54_sp",
-                                            caption = paste0("Instantaneous flow measurements from DEQ and others in the ", qapp_project_area, ".")))
+                                            caption = paste0("Instantaneous flow measurements available from DEQ in the ", qapp_project_area, ".")))
   
 }
 
@@ -966,7 +973,7 @@ if(NROW(flow.data.sample.count)>0){
 \newpage
 # Introduction
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. This QAPP project area excludes the mainstems of the Willamette River, Coast Fork Willamette River, Fall Creek, Long Tom River, McKenzie River, Middle Fork Willamette River, Row River, and the South Fork McKenzie River up to the first major reservoir.
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. This QAPP project area excludes the Willamette River, Coast Fork Willamette River downstream of Cottage Grove Dam, Fall Creek downstream of Fall Creek Dam, Long Tom River downstream of Fern Ridge Dam, McKenzie River downstream of the South Fork McKenzie River, Middle Fork Willamette River downstream of Dexter Dam, Row River downstream of Dorena Dam, and the South Fork McKenzie River downstream of Cougar Dam. These waterbodies are included in the Willamette River and Major Tributaries QAPP.
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -1175,7 +1182,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Stream flow data
 
-`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous or instantaneous flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous and instantaneous flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
@@ -1364,7 +1371,7 @@ DEQ will review and respond to any public comments received on the model and mod
 
 # Management scenarios
 
-Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario has already been developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
+Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario was developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
 
 ## Background
 
@@ -1382,7 +1389,7 @@ This scenario evaluates the stream temperature response with streamside vegetati
 
 ## Protected vegetation
 
-This scenario evaluates the stream temperature response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the stream temperature warming or cooling contributed by removal of streamside vegetation in unprotected areas and if existing management strategies are sufficient to achieve allocations and surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The stream temperature warming or cooling is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
+This scenario is specific to the shade models and evaluates the effective shade response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the amount of effective shade contributed by streamside vegetation in unprotected areas and if existing management strategies are sufficient to achieve allocations and surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The amount of effective shade contributed by streamside vegetation in unprotected areas is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
 
 *	Identifying streamside vegetation areas along the model extent that are protected and will not be removed. The exact definition of a protected area will be determined during the TMDL process.    
 
