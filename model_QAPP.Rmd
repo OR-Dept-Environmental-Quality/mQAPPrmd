@@ -102,12 +102,12 @@ tcat4a <- pro.cat.45.tbl %>%
   dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
   dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
   dplyr::ungroup() %>% 
-  dplyr::rename(Waterbody = AU_Name,
+  dplyr::rename(`Assessment Unit Name` = AU_Name,
                 `Assessment Unit ID` = AU_ID,
                 `Year Listed` = Year_liste,
-                `Criterion Period` = Period) %>% 
-  dplyr::select(Waterbody,`Assessment Unit ID`,`Year Listed`,`Criterion Period`) %>% 
-  dplyr::arrange(Waterbody,`Year Listed`)
+                `Use Period` = Period) %>% 
+  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
+  dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
 
 if(NROW(tcat4a)>0){
   
@@ -799,7 +799,7 @@ trisks <- knitr::kable(risks, format = "pandoc", padding = 2,
 
 # branch only
 rev <- rev %>% 
-  dplyr::mutate(Date = ifelse(Revision == "1.0", "","")) %>%  
+  dplyr::mutate(Date = ifelse(Revision == "1.0", "","")) #%>%  
   #dplyr::add_row(Revision = "1.1",
   #               Date = "12/6/2021",
   #               Changes = "",
