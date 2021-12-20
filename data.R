@@ -376,7 +376,7 @@ snake_reachcodes <- pro.reaches %>%
 # QAPP Project Area Data ----
 
 ## for test:
-# qapp_project_area = "John Day River Basin"
+qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
@@ -390,7 +390,7 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
   
   print(qapp_project_area)
   
@@ -871,6 +871,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
     tidyr::drop_na(Stream)
+
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
@@ -975,7 +976,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
                            Stations = station.output),
                       path=paste0(data.dir,"appendix_data/",file.name,"_appendix_data.xlsx"))
   
-}
+#}
 
 # Leaflet Map Data ----
 library(tidyverse)
@@ -1049,7 +1050,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 
 # _ Project area map data ----
 ## for test:
-# qapp_project_area = "John Day River Basin"
+qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
@@ -1064,7 +1065,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette River Mainstem and Major Tributaries"),]$areas) {
   
   print(qapp_project_area)
   
@@ -1104,4 +1105,4 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
        file = paste0("./data/map_",file.name,".RData"))
   
   
-}
+#}
