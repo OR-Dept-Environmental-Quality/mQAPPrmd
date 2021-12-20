@@ -103,12 +103,12 @@ tcat4a <- pro.cat.45.tbl %>%
   dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
   dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
   dplyr::ungroup() %>% 
-  dplyr::rename(Waterbody = AU_Name,
+  dplyr::rename(`Assessment Unit Name` = AU_Name,
                 `Assessment Unit ID` = AU_ID,
                 `Year Listed` = Year_liste,
-                `Criterion Period` = Period) %>% 
-  dplyr::select(Waterbody,`Assessment Unit ID`,`Year Listed`,`Criterion Period`) %>% 
-  dplyr::arrange(Waterbody,`Year Listed`)
+                `Use Period` = Period) %>% 
+  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
+  dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
 
 if(NROW(tcat4a)>0){
   
@@ -807,6 +807,14 @@ trisks <- knitr::kable(risks, format = "pandoc", padding = 2,
 ```{r, label=`rev`, echo=FALSE}
 # Revision history
 
+# branch only
+rev <- rev %>% 
+  dplyr::mutate(Date = ifelse(Revision == "1.0", "","")) #%>%  
+  #dplyr::add_row(Revision = "1.1",
+  #               Date = "12/6/2021",
+  #               Changes = "",
+  #               Editor = "R. Michie")              
+
 trev <- knitr::kable(rev, format = "pandoc", padding = 2,
                      caption = tbls(name = "rev",
                                     caption = paste0("QAPP revision history.")))
@@ -1374,7 +1382,7 @@ DEQ will review and respond to any public comments received on the model and mod
 
 # Management scenarios
 
-Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario has already been developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
+Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario was developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
 
 ## Background
 
@@ -1392,7 +1400,7 @@ This scenario evaluates the stream temperature response with streamside vegetati
 
 ## Protected vegetation
 
-This scenario evaluates the stream temperature response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the stream temperature warming or cooling contributed by removal of streamside vegetation in unprotected areas and if existing management strategies are sufficient to achieve allocations and surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The stream temperature warming or cooling is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
+This scenario is specific to the shade models and evaluates the effective shade response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the amount of effective shade contributed by streamside vegetation in unprotected areas and if existing management strategies are sufficient to achieve allocations and surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The amount of effective shade contributed by streamside vegetation in unprotected areas is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
 
 *	Identifying streamside vegetation areas along the model extent that are protected and will not be removed. The exact definition of a protected area will be determined during the TMDL process.    
 
