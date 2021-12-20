@@ -49,12 +49,12 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
-# qapp_project_area = "Southern Willamette Subbasins"
+qapp_project_area = "Southern Willamette Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
 
 map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
 load(paste0("./data/",map.file.name,".RData")) # data.R
@@ -197,6 +197,7 @@ leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcg
                                    group = "Oregon Imagery",
                                    options = leaflet::leafletOptions(pane="aerial")) %>%
   leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
+
                                      group = "Oregon Imagery",
                                      options = leaflet::leafletOptions(pane="aerial")) %>%
   # __ Hydro Tiles ----
@@ -790,49 +791,10 @@ leaflet::addControl(position = "bottomleft", className = "logo",
                                         <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">
                                         </a></div></body></html>', logo))
-
-# SAVE DATA ----
-print(paste0(qapp_project_area,"...Save the map"))
-htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
-                        background = "grey", selfcontained = TRUE)
-
-}
-
-# *************** -----
-# DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
-load(paste0("./data/lookup.RData")) #lookup.huc; project.areas
-
-dta.check <- NULL
-for (qapp_project_area in project.areas$areas) {
-  #qapp_project_area = "Southern Willamette Subbasins"
   
-  map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0("./data/",map.file.name,".RData")) # data.R
-  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  # SAVE DATA ----
+  print(paste0(qapp_project_area,"...Save the map"))
+  htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
+                          background = "grey", selfcontained = TRUE)
   
-  dta.check.area <- data.frame("Project Area"=qapp_project_area,
-                               "hs_temp_model_extent" = nrow(hs_temp_model_extent),
-                               "hs_solar_model_extent" = nrow(hs_solar_model_extent),
-                               "hs_solar_model_area" = nrow(hs_solar_model_area),
-                               "ce_model_extent" = nrow(ce_model_extent),
-                               "sh_model_extent" = nrow(sh_model_extent),
-                               "temp_stations" = nrow(temp_stations),
-                               "temp_cal_sites" = nrow(temp_cal_sites),
-                               "temp_model_bc_tri" = nrow(temp_model_bc_tri),
-                               "flow_stations" = nrow (flow_stations),
-                               "flow_model_bc_tri" = nrow(flow_model_bc_tri),
-                               "gage_height_stations_map" = nrow(gage_height_stations_map),
-                               "met_stations" = nrow(met_stations),
-                               "ind_ps" = nrow(ind_ps),
-                               "gen_ps" = nrow(gen_ps))
-  
-  dta.stations.mod <- dta.check.area %>% 
-    tidyr::pivot_longer(!Project.Area, names_to= "data", values_to = "nrow") %>% 
-    dplyr::filter(!nrow == 0)
-  
-  dta.check <- dplyr::bind_rows(dta.check,dta.check.area)
-  
-}
-
-temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
-write.csv(dta.check,paste0(temp.dir,"dta.check.csv"))
+#}
