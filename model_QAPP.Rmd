@@ -567,7 +567,7 @@ if(NROW(tmdl.mod.a)>0){
   
   tmdl.mod.a.tbl <- knitr::kable(tmdl.mod.a, format = "pandoc", padding = 2,
                                  caption = tbls(name = "tmdl.mod.a",
-                                                caption = paste0("Waterbodies where a model has already been developed. The model year is identified if another year is proposed for a new model on the same waterbody.")))
+                                                caption = paste0("Waterbodies where a model has already been developed.")))
   
 }
 
@@ -575,7 +575,7 @@ if(NROW(tmdl.mod.b)>0){
   
   tmdl.mod.b.tbl <- knitr::kable(tmdl.mod.b, format = "pandoc", padding = 2,
                                  caption = tbls(name = "tmdl.mod.b",
-                                                caption = paste0("Waterbodies and year for which new models are expected to be developed.")))
+                                                caption = paste0("Waterbodies for which new models are expected to be developed.")))
   
   tmdl.mod.b.txt <- "**[Update: new model information - See the narratives in the Sandy QAPP]**"
   
@@ -1638,12 +1638,13 @@ tmdl.ref <- model.info %>%
 mod.ref <- model.info %>% 
   dplyr::filter(!is.na(mod_ref)) %>% 
   dplyr::rename(reference = mod_ref) %>% 
-  dplyr::select(reference)
+  dplyr::select(reference) 
 
 tir.ref <- t52_ref %>% 
   dplyr::select(`Full Reference`) %>% 
   dplyr::rename(reference = `Full Reference`) %>% 
-  dplyr::distinct(reference)
+  dplyr::distinct(reference)%>% 
+  dplyr::filter(reference == "") # SU
 
 if(NROW(t57)>0){
  
@@ -1697,7 +1698,7 @@ for(r in unique(sort(qapp.ref$reference))) {
 `r t53_1_tbl`
 `r app_b_tbl`
 
-**[Update: Delete this note if there is no data count > 31.]** \* Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
+\* Some stations have more daily maximum results than the number of days in the month due to multiple probes being deployed at the same location or due to duplicate entries in AWQMS. These data are not proposed to support the modeling so we did not investigate these specific situations further.
 
 \newpage
 # Appendix C Stream flow data summary
