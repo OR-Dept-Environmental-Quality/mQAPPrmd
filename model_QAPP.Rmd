@@ -252,7 +252,7 @@ t51.sp <- t51 %>%
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
   dplyr::rename(Source = Station) %>% 
-  dplyr::filter(!Source == "DEQ") %>% 
+  dplyr::filter(!Source == "DEQ FILE") %>% 
   dplyr::filter(!Source == "10009634 - PORTLAND TROUTDALE AIRPORT, NCDC") # add this station to NCDC table
 
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
@@ -383,7 +383,8 @@ row.names(t54_hydromet) <- NULL
 
 t54_sp <- t54 %>% 
   dplyr::filter(!`Data Source` %in% c("USGS","OWRD","Hydromet")) %>% 
-  dplyr::arrange(`Data Source`,`Station ID`,Station)
+  dplyr::arrange(`Data Source`,`Station ID`,Station) %>% 
+  dplyr::filter(`Data Source` == "") # Sandy; to remove this table in the appendix C
 row.names(t54_sp) <- NULL
 
 tables.flow <- data.frame(tbl_name = c("t54_usgs","t54_owrd","t54_hydromet","t54_sp"),
@@ -1162,8 +1163,6 @@ The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was used to 
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
 
-The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
-
 The CE-QUAL-W2 model (Wells, 2019) also meets the model framework needs and has been used by Portland State University and The City of Portland (Annear, et al., 1999, City of Portland, 2004) to model the Bull Run River and reservoirs.
 
 ## Software Development Quality Assessment
@@ -1673,7 +1672,8 @@ mod.ref <- model.info %>%
 tir.ref <- t52_ref %>% 
   dplyr::select(`Full Reference`) %>% 
   dplyr::rename(reference = `Full Reference`) %>% 
-  dplyr::distinct(reference)
+  dplyr::distinct(reference) %>% 
+  dplyr::filter(reference == "") # Sandy; to remove the duplicated citation
 
 if(NROW(t57)>0){
  
