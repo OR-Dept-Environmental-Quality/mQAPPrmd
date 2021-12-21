@@ -9,7 +9,7 @@ output:
     fig_height: 6
 ---
 
-```{r, label=`setup-chap6`, include=FALSE}
+```{r, label=`setup-appD`, include=FALSE}
 knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
                       error = FALSE,
@@ -26,12 +26,11 @@ options(knitr.kable.NA = '')
 
 if(NROW(gh.data.sample.count)>0){
   
-  app_c_tbl <- knitr::kable(gh.data.sample.count, format = "pandoc", padding = 2,
+  app_d_tbl <- knitr::kable(gh.data.sample.count, format = "pandoc", padding = 2,
                             caption = tbls(name = "gh.data.sample.count",
                                            caption = paste0("Summary of existing gage height data in the ", qapp_project_area,". ")))
   
 }
-
 ```
 
-`r app_c_tbl`
+`r app_d_tbl`
