@@ -1361,7 +1361,7 @@ DEQ will review and respond to any public comments received on the model and mod
 
 # Management scenarios
 
-Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario was developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
+Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario has already been developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
 
 ## Current conditions
 
