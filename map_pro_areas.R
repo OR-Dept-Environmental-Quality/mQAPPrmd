@@ -197,7 +197,7 @@ leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcg
                                    group = "Oregon Imagery",
                                    options = leaflet::leafletOptions(pane="aerial")) %>%
   leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
-
+                                     
                                      group = "Oregon Imagery",
                                      options = leaflet::leafletOptions(pane="aerial")) %>%
   # __ Hydro Tiles ----
@@ -301,7 +301,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                                sendToBack = TRUE),
                                   labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                   labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                       style = list("color" = "red","font-size" = "12px")),
+                                    style = list("color" = "red","font-size" = "12px")),
                                   popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                          '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                          '<br><b>AU ID:</b> \"+props.AU_ID+\"',
@@ -324,7 +324,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.5,
@@ -352,7 +352,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.8,
@@ -791,10 +791,10 @@ leaflet::addControl(position = "bottomleft", className = "logo",
                                         <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">
                                         </a></div></body></html>', logo))
-  
-  # SAVE DATA ----
-  print(paste0(qapp_project_area,"...Save the map"))
-  htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
-                          background = "grey", selfcontained = TRUE)
-  
+
+# SAVE DATA ----
+print(paste0(qapp_project_area,"...Save the map"))
+htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
+                        background = "grey", selfcontained = TRUE)
+
 #}
