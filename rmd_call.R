@@ -22,15 +22,15 @@ qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
 #for (qapp_project_area in project.areas$areas) {
-  
-  print(qapp_project_area)
-  
-  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
-  load(paste0("./data/",file.name,".RData"))
-  
-  rmarkdown::render(input="model_QAPP.Rmd",
-                    output_format = "word_document",
-                    output_dir = output.dir,
-                    output_file=paste0("QAPP_",file.name, ".docx"))
-  
+
+print(qapp_project_area)
+
+file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
+load(paste0("./data/",file.name,".RData"))
+
+rmarkdown::render(input="model_QAPP.Rmd",
+                  output_format = "word_document",
+                  output_dir = output.dir,
+                  output_file=paste0("QAPP_",file.name, ".docx"))
+
 #}
