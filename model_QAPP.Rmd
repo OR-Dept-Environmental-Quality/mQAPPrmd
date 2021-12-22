@@ -790,14 +790,6 @@ troles <- flextable::regulartable(roles.pro.area) %>%
 ```{r, label=`risk`, echo=FALSE}
 # Implementation and adaptive management
 
-# branch only
-rev <- rev %>% 
-  dplyr::mutate(Date = ifelse(Revision == "1.0", "12/09/2021","")) %>%  
-  #dplyr::add_row(Revision = "1.1",
-  #               Date = "12/6/2021",
-  #               Changes = "",
-  #               Editor = "R. Michie")   
-
 trisks <- knitr::kable(risks, format = "pandoc", padding = 2,
                        caption = tbls(name = "risks",
                                       caption = paste0("Projects risks and proposed solutions.")))
@@ -818,6 +810,7 @@ rev <- rev %>%
 trev <- knitr::kable(rev, format = "pandoc", padding = 2,
                      caption = tbls(name = "rev",
                                     caption = paste0("QAPP revision history.")))
+
 
 ```
 

@@ -416,7 +416,7 @@ if(!model.extent == TRUE){
     t6x7 <- section.model.input %>% 
       dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
       dplyr::arrange(desc(Parameter)) %>% 
-      #dplyr::filter(!Parameter %in% "Effective Shade") %>% 
+      dplyr::filter(!Parameter %in% "Effective Shade") %>% # LW; the effective shade data are included in Section 5.7 table
       dplyr::mutate(`Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
                                            strip_alpha(`Data Source`), `Data Source`),
                     `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
