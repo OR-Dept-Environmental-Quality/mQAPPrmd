@@ -1768,6 +1768,7 @@ temp_cal_sites_shade <- t57 %>%
                 Parameter = "Effective Shade") %>% 
   dplyr::select(-`Effective Shade`) %>% 
   tidyr::separate(col="Latitude/Longitude",into=c("Latitude","Longitude"),sep="/") %>% 
+  dplyr::filter(is.na(Longitude)) %>% # Walla Walla; filter out the sites with no lat/long
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
   
 temp_cal_sites <- rbind(temp_cal_sites_temp,temp_cal_sites_shade)  
@@ -1833,6 +1834,7 @@ if(!qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
 # Effective shade measurements
 shade <- t57 %>% 
   tidyr::separate(`Latitude/Longitude`, into = c("lat","lng"), sep = "/") %>% 
+  dplyr::filter(is.na(lng)) %>% # Walla Walla; filter out the sites with no lat/long
   sf::st_as_sf(coords = c("lng","lat"), crs = sf::st_crs("+init=EPSG:4326"))
 
 save(temp.data.sample.count,
