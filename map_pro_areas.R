@@ -44,7 +44,7 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
-# qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
+qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
@@ -54,7 +54,7 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
 
 map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
 load(paste0("./data/",map.file.name,".RData")) # data.R
@@ -300,7 +300,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                                sendToBack = TRUE),
                                   labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                   labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                       style = list("color" = "red","font-size" = "12px")),
+                                    style = list("color" = "red","font-size" = "12px")),
                                   popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                          '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                          '<br><b>AU ID:</b> \"+props.AU_ID+\"',
@@ -323,7 +323,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.5,
@@ -351,7 +351,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.8,
@@ -796,43 +796,4 @@ print(paste0(qapp_project_area,"...Save the map"))
 htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
                         background = "grey", selfcontained = TRUE)
 
-}
-
-# *************** -----
-# DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
-load(paste0("./data/lookup.RData")) #lookup.huc; project.areas
-
-dta.check <- NULL
-for (qapp_project_area in project.areas$areas) {
-  #qapp_project_area = "Southern Willamette Subbasins"
-  
-  map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0("./data/",map.file.name,".RData")) # data.R
-  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
-  
-  dta.check.area <- data.frame("Project Area"=qapp_project_area,
-                               "hs_temp_model_extent" = nrow(hs_temp_model_extent),
-                               "hs_solar_model_extent" = nrow(hs_solar_model_extent),
-                               "hs_solar_model_area" = nrow(hs_solar_model_area),
-                               "ce_model_extent" = nrow(ce_model_extent),
-                               "sh_model_extent" = nrow(sh_model_extent),
-                               "temp_stations" = nrow(temp_stations),
-                               "temp_cal_sites" = nrow(temp_cal_sites),
-                               "temp_model_bc_tri" = nrow(temp_model_bc_tri),
-                               "flow_stations" = nrow (flow_stations),
-                               "flow_model_bc_tri" = nrow(flow_model_bc_tri),
-                               "gage_height_stations_map" = nrow(gage_height_stations_map),
-                               "met_stations" = nrow(met_stations),
-                               "ind_ps" = nrow(ind_ps),
-                               "gen_ps" = nrow(gen_ps))
-  
-  dta.stations.mod <- dta.check.area %>% 
-    tidyr::pivot_longer(!Project.Area, names_to= "data", values_to = "nrow") %>% 
-    dplyr::filter(!nrow == 0)
-  
-  dta.check <- dplyr::bind_rows(dta.check,dta.check.area)
-  
-}
-
-temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
-write.csv(dta.check,paste0(temp.dir,"dta.check.csv"))
+#}
