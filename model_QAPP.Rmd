@@ -1768,7 +1768,8 @@ temp_cal_sites_shade <- t57 %>%
   dplyr::rename(`Model Location Name`= Station) %>% 
   dplyr::mutate(`Model Location`= "",
                 `Location Units`= "",
-                Parameter = "Effective Shade") %>% 
+                Parameter = "Effective Shade",
+                `Station ID` = "No Station ID") %>% # Willow
   dplyr::select(-`Effective Shade`) %>% 
   tidyr::separate(col="Latitude/Longitude",into=c("Latitude","Longitude"),sep="/") %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
