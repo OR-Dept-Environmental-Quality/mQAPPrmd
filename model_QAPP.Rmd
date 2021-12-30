@@ -49,7 +49,9 @@ tbls  <- captioner::captioner(prefix="Table")
 figs <- captioner::captioner(prefix="Figure")
 eqns <- captioner::captioner(prefix="Equation")
 
-if(qapp_project_area == "Willamette River Mainstem and Major Tributaries") {qapp_project_area_wms <- "Willamette River Mainstem and Major Tributaries QAPP project area"}
+if(qapp_project_area == "Willamette River Mainstem and Major Tributaries") {qapp_project_area_wms_1 <- "Willamette River mainstem and major tributaries QAPP project area"}
+
+if(qapp_project_area == "Willamette River Mainstem and Major Tributaries") {qapp_project_area_wms_2 <- "Willamette River mainstem and major tributaries"}
 
 ```
 
@@ -95,7 +97,7 @@ if(NROW(tcat5)>0){
   
   tcat5_tbl <- knitr::kable(tcat5, format = "pandoc", padding = 2,
                             caption = tbls(name = "tcat5",
-                                           caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
+                                           caption = paste0(qapp_project_area_wms_2," assessment units that are classified as water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
   
 }
 
@@ -115,7 +117,7 @@ if(NROW(tcat4a)>0){
   
   tcat4a_tbl <- knitr::kable(tcat4a, format = "pandoc", padding = 2,
                              caption = tbls(name = "tcat4a",
-                                            caption = paste0(qapp_project_area," assessment units that are classified as water quality limited category 4A for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
+                                            caption = paste0(qapp_project_area_wms_2," assessment units that are classified as water quality limited category 4A for temperature based on the Section 303(d) 2018/2020 Integrated Report.")))
 
 }
 
@@ -290,7 +292,7 @@ if(NROW(t52)>0){
   
   t52_tbl <-  knitr::kable(t52, format = "pandoc", padding = 2,
                            caption = tbls(name = "t52",
-                                          caption = paste0("Streams and the TIR collection dates in the ", qapp_project_area_wms,".")))
+                                          caption = paste0("Streams and the TIR collection dates in the ", qapp_project_area_wms_1,".")))
   
 }
 
@@ -425,7 +427,7 @@ if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
     
     tgh_usgs_tbl <- knitr::kable(tgh.usgs, format = "pandoc", padding = 2, row.names = NA,
                                  caption = tbls(name = "tgh.usgs",
-                                                caption = paste0("Gage height data available from the USGS monitoring stations in the ", qapp_project_area_wms, ".")))
+                                                caption = paste0("Gage height data available from the USGS monitoring stations in the ", qapp_project_area_wms_1, ".")))
     
   }
 
@@ -458,7 +460,7 @@ if(NROW(section.npdes.ind)>0){
   
   t55_ind_tbl <- knitr::kable(section.npdes.ind, format = "pandoc", padding = 2,
                               caption = tbls(name = "t55_ind",
-                                             caption = paste0("Summary of individual NPDES permitted discharges in the ", qapp_project_area_wms, ".")))
+                                             caption = paste0("Summary of individual NPDES permitted discharges in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -487,7 +489,7 @@ if(NROW(section.npdes.gen.1)>0){
                                caption = tbls(name = "t55_gen1",
                                               caption = paste0("Summary of current registrants under the general NPDES ",
                                                                knitr::combine_words(unique(sort(gen.txt$PermitType))),
-                                                               " permits in the ", qapp_project_area_wms, ".")))
+                                                               " permits in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -505,11 +507,11 @@ if(NROW(section.npdes.gen.2)>0){
                                caption = tbls(name = "t55_gen2",
                                               caption = ifelse(NROW(section.npdes.gen.1)>0,
                                                                paste0("Summary of the current number of registrants for all the other general NPDES permits in the ",
-                                                                      qapp_project_area_wms,
+                                                                      qapp_project_area_wms_1,
                                                                       " that are not listed in ",
                                                                       tbls(name = "t55_gen1", display="cite"),"."),
                                                                paste0("Summary of the current number of registrants for all the general NPDES permits in the ",
-                                                                      qapp_project_area_wms,"."))))
+                                                                      qapp_project_area_wms_1,"."))))
   
 }
 
@@ -532,7 +534,7 @@ if(NROW(t57)>0){
   
   t57_tbl <- knitr::kable(t57, format = "pandoc", padding = 2,
                           caption = tbls(name = "t57",
-                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area_wms, ".")))
+                                         caption = paste0("Effective shade data collected in the  ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -831,7 +833,7 @@ if(NROW(t51.ncei)>0){
   t51_ncei_tbl <- knitr::kable(t51.ncei, format = "pandoc", padding = 2,
                                caption = tbls(name = "t51_ncei",
                                               caption = paste0("Meteorological stations and data available in the National Climatic Data Center (NCDC) database in the ",
-                                                               qapp_project_area_wms, ".")))
+                                                               qapp_project_area_wms_1, ".")))
   
 }
 
@@ -839,7 +841,7 @@ if(NROW(t51.raws)>0){
   
   t51_raws_tbl <- knitr::kable(t51.raws, format = "pandoc", padding = 2,
                                caption = tbls(name = "t51_raws",
-                                              caption = paste0("Meteorological stations and data, including ", knitr::combine_words(unique(sort(tolower(raws.station.tbl$Parameter)))), ", available in the Remote Automatic Weather Station (RAWS) database in the ", qapp_project_area_wms, ".")))
+                                              caption = paste0("Meteorological stations and data, including ", knitr::combine_words(unique(sort(tolower(raws.station.tbl$Parameter)))), ", available in the Remote Automatic Weather Station (RAWS) database in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -847,7 +849,7 @@ if(NROW(t51.agrimet)>0){
   
   t51_agrimet_tbl <- knitr::kable(t51.agrimet, format = "pandoc", padding = 2,
                                   caption = tbls(name = "t51_agrimet",
-                                                 caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity and wind, available in the USBR AgriMet database in the ", qapp_project_area_wms, ".")))
+                                                 caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity and wind, available in the USBR AgriMet database in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -855,7 +857,7 @@ if(NROW(t51.hydromet)>0){
   
   t51_hydromet_tbl <- knitr::kable(t51.hydromet, format = "pandoc", padding = 2,
                                    caption = tbls(name = "t51_hydromet",
-                                                  caption = paste0("Meteorological stations and data available in the USBR Hydromet database in the ", qapp_project_area_wms, ".")))
+                                                  caption = paste0("Meteorological stations and data available in the USBR Hydromet database in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -863,7 +865,7 @@ if(NROW(t51.mw)>0){
   
   t51_mw_tbl <- knitr::kable(t51.mw, format = "pandoc", padding = 2,
                              caption = tbls(name = "t51_mw",
-                                            caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area_wms, ".")))
+                                            caption = paste0("Meteorological stations and data, including air temperature, precipitation, relative humidity, wind speed and wind direction, available in the MesoWest database in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -871,7 +873,7 @@ if(NROW(t51.sp)>0){
   
   t51_sp_tbl <- knitr::kable(t51.sp, format = "pandoc", padding = 2,
                              caption = tbls(name = "t51_sp",
-                                            caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area_wms, ".")))
+                                            caption = paste0("Meteorological data provided to DEQ from the various sources for the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -884,7 +886,7 @@ if(NROW(t53_1)>0){
   
   t53_1_tbl <-  knitr::kable(t53_1, format = "pandoc", padding = 2,
                              caption = tbls(name = "t53_1",
-                                            caption = paste0("Continuous temperature monitoring stations in the ", qapp_project_area_wms, " currently available in public databases and DEQ files.")))
+                                            caption = paste0("Continuous temperature monitoring stations in the ", qapp_project_area_wms_1, " currently available in public databases and DEQ files.")))
   
 }
 
@@ -903,7 +905,7 @@ if(NROW(temp.data.sample.count)>0){
 
   app_b_tbl <- knitr::kable(app.b, format = "pandoc", padding = 2,
                             caption = tbls(name = "app.b",
-                                           caption = paste0("Summary of existing temperature data in the ", qapp_project_area_wms,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month. Data from the DEQ files that are not in the databases were not summarized in the table.")))
+                                           caption = paste0("Summary of existing temperature data in the ", qapp_project_area_wms_1,". Columns Jan – Dec indicate the number of daily maximum temperature results in each month. Data from the DEQ files that are not in the databases were not summarized in the table.")))
   
 }
 
@@ -917,7 +919,7 @@ if(NROW(t54_usgs)>0){
   
   t54_usgs_tbl <- knitr::kable(t54_usgs, format = "pandoc", padding = 2, row.names = NA,
                                caption = tbls(name = "t54_usgs",
-                                              caption = paste0("Continuous flow measurements available from the USGS flow gaging stations in the ", qapp_project_area_wms, ".")))
+                                              caption = paste0("Continuous flow measurements available from the USGS flow gaging stations in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -925,7 +927,7 @@ if(NROW(t54_owrd)>0){
   
   t54_owrd_tbl <- knitr::kable(t54_owrd, format = "pandoc", padding = 2, row.names = NA,
                                caption = tbls(name = "t54_owrd",
-                                              caption = paste0("Continuous flow measurements available from the OWRD flow gaging stations in the ", qapp_project_area_wms, ".")))
+                                              caption = paste0("Continuous flow measurements available from the OWRD flow gaging stations in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -933,7 +935,7 @@ if(NROW(t54_hydromet)>0){
   
   t54_hydromet_tbl <- knitr::kable(t54_hydromet, format = "pandoc", padding = 2, row.names = NA,
                                    caption = tbls(name = "t54_hydromet",
-                                                  caption = paste0("Continuous flow measurements available from the USBR Hydromet monitoring stations in the ", qapp_project_area_wms, ".")))
+                                                  caption = paste0("Continuous flow measurements available from the USBR Hydromet monitoring stations in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -941,7 +943,7 @@ if(NROW(t54_sp)>0){
   
   t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2, row.names = NA,
                              caption = tbls(name = "t54_sp",
-                                            caption = paste0("Instantaneous flow measurements from DEQ and others in the ", qapp_project_area_wms, ".")))
+                                            caption = paste0("Instantaneous flow measurements from DEQ and others in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -950,7 +952,7 @@ if(NROW(t54_ins_flow)>0){
   
   t54_ins_flow_tbl <- knitr::kable(t54_ins_flow, format = "pandoc", padding = 2, row.names = NA,
                                    caption = tbls(name = "t54_ins_flow",
-                                                  caption = paste0("Instantaneous flow measurements made by DEQ in the ", qapp_project_area_wms, ".")))
+                                                  caption = paste0("Instantaneous flow measurements made by DEQ in the ", qapp_project_area_wms_1, ".")))
   
 }
 
@@ -963,7 +965,7 @@ if(NROW(flow.data.sample.count)>0){
   
   app_c_tbl <- knitr::kable(flow.data.sample.count, format = "pandoc", padding = 2,
                             caption = tbls(name = "flow.data.sample.count",
-                                           caption = paste0("Summary of existing flow data in the ", qapp_project_area_wms,". Columns Jan – Dec indicate the number of daily mean flow results in each month.")))
+                                           caption = paste0("Summary of existing flow data in the ", qapp_project_area_wms_1,". Columns Jan – Dec indicate the number of daily mean flow results in each month.")))
   
 }
 
@@ -981,7 +983,22 @@ if(NROW(flow.data.sample.count)>0){
 \newpage
 # Introduction
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. **[Update: This QAPP project area excludes the (list rivers if applicable).]**
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable in the `r qapp_project_area_wms_1`. The project area is located within the Willamette Basin (HUC 170900) and only includes the following rivers and extents:
+
+* Willamette River including all side channels and sloughs from the confluence of the Columbia River to the confluence of Coast Fork of the Willamette and Middle Fork of the Willamette Rivers (approximately river mile 187);
+* Multnomah Channel;
+* Clackamas River downstream of River Mill Dam/Estacada Lake (approximately river mile 26); 
+* Santiam River (all 12 miles);
+* North Santiam River downstream of Detroit Dam (approximately river mile 49);
+* South Santiam River downstream of Foster Dam (approximately river mile 38);
+* Long Tom River downstream of Fern Ridge Dam (approximately river mile 26);
+* McKenzie River downstream of the South Fork McKenzie River (approximately river mile 56);
+* South Fork McKenzie River downstream of Cougar Dam (approximately river mile 4);
+* Blue River downstream of Blue River Dam (approximately river mile 1.9);
+* Middle Fork Willamette River downstream of Dexter Dam (approximately river 17);
+* Fall Creek downstream of Fall Creek Dam (approximately river mile 7);
+* Coast Fork Willamette River downstream of Cottage Grove Dam (approximately river mile 30);
+* Row River downstream of Dorena Dam (approximately river mile 7.5).
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -991,11 +1008,11 @@ $$TMDL = \sum WLA + \sum LA + \textit {Reserve Capacity} + MOS  \hspace{3em}\tex
 
 Where $\sum {WLA}$ is the sum of wasteload allocations (NPDES permitted sources), $\sum {LA}$ is the sum of load allocations (nonpoint sources and background), Reserve Capacity is allocations reserved for future uses, and MOS is a margin-of-safety to account for uncertainty. For a temperature TMDL, these elements establish the maximum thermal loads that a waterbody may receive without exceeding applicable water quality standards for temperature designed to protect aquatic life and other beneficial uses.
 
-The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list. The `r paste0(qapp_project_area_wms, if(str_sub(qapp_project_area,-1,-1) == "s"){paste0(" include")}else{paste0(" includes")})` several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature (`r tbls(name = "tcat5", display="cite")`). `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL was previously developed for the ", qapp_project_area_wms, " (", knitr::combine_words(strip_alpha(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Abbreviated Reference"))),sep = "; "), ") but it must be replaced due to recent litigation.")}else{paste0("TMDLs were previously developed for the ",qapp_project_area_wms, " (", knitr::combine_words(strip_alpha(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Abbreviated Reference"))),sep = "; "), ") but they must be replaced due to recent litigation.")}`
+The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list. The `r paste0(qapp_project_area_wms_1, if(str_sub(qapp_project_area,-1,-1) == "s"){paste0(" include")}else{paste0(" includes")})` several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature (`r tbls(name = "tcat5", display="cite")`). `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL was previously developed for the ", qapp_project_area_wms_1, " (", knitr::combine_words(strip_alpha(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Abbreviated Reference"))),sep = "; "), ") but it must be replaced due to recent litigation.")}else{paste0("TMDLs were previously developed for the ",qapp_project_area_wms_1, " (", knitr::combine_words(strip_alpha(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Abbreviated Reference"))),sep = "; "), ") but they must be replaced due to recent litigation.")}`
 
 In 2013, the United States Environmental Protection Agency (USEPA) disapproved the Natural Conditions Criterion contained in Oregon’s water quality standard for temperature due to the 2012 U.S. District Court decision for NWEA v. EPA, 855 F. Supp. 2d 1199 (D. Or., 2012). This portion of the temperature water quality standard was used in most temperature TMDLs issued from 2003 through 2012. On October 4, 2019, the U.S. District Court issued a judgment for NWEA v. EPA, No. 3:12-cv-01751-HZ (D. Or., Oct. 4, 2019) and required DEQ and USEPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard.
 
-This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 2017; EPA, 2016) and documents the analysis and numerical modeling approach that will support the updated `r qapp_project_area` TMDL as well as other project details. In particular, this QAPP details the following:
+This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 2017; EPA, 2016) and documents the analysis and numerical modeling approach that will support the updated `r qapp_project_area_wms_2` TMDL as well as other project details. In particular, this QAPP details the following:
 
 *	Definition of the issue and objectives, including the spatial and temporal extents of the water quality impairments (Section 2);
 
@@ -1015,23 +1032,21 @@ This QAPP is consistent with DEQ’s and USEPA’s modeling QAPP guidance (DEQ, 
 
 # Problem definition and management objectives
 
-Multiple waterbodies in the `r qapp_project_area_wms` do not meet the water quality standards for temperature and are listed as `r if(NROW(tcat4a)>0){paste0("Category 5 and Category 4A")}else{paste0("Category 5")}`, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r if(NROW(tcat4a)>0){paste0(tbls(name = "tcat5", display="cite"), " and ", tbls(name = "tcat4a", display="cite"))}else{tbls(name = "tcat5", display="cite")}`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area_wms` include the numeric criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum continuous measurement of temperature.
+Multiple waterbodies in the `r qapp_project_area_wms_1` do not meet the water quality standards for temperature and are listed as `r if(NROW(tcat4a)>0){paste0("Category 5 and Category 4A")}else{paste0("Category 5")}`, water quality limited on Oregon’s 2018/2020 Section 303(d) list (`r if(NROW(tcat4a)>0){paste0(tbls(name = "tcat5", display="cite"), " and ", tbls(name = "tcat4a", display="cite"))}else{tbls(name = "tcat5", display="cite")}`). The temperature water quality standards are set at a level to protect the most sensitive beneficial uses. The beneficial uses most sensitive to water temperature are fish and aquatic life. The temperature water quality standards in the `r qapp_project_area_wms_1` include the numeric and narrative criteria identified below. The numeric temperature criteria are based on a seven-day average daily maximum continuous measurement of temperature.
 
-**[Update with specific temperature criteria based on the project area. Choose the items applicable from the list below.]**
-
-* Bull Trout Spawning and Juvenile Rearing: 12.0 deg-C (OAR 340-041-0028(4)(f))       
 *	Salmon and Steelhead Spawning: 13.0 deg-C (OAR 340-041-0028(4)(a))        
 *	Core Cold Water Habitat: 16.0 deg-C (OAR 340-041-0028(4)(b))        
 *	Salmon and Trout Rearing and Migration: 18.0 deg-C (OAR 340-041-0028(4)(c))       
 *	Salmon and Steelhead Migration Corridors: 20.0 deg-C (OAR 340-041-0028(4)(d))       
+* Cool Water Species narrative: No increase in temperature is allowed that would reasonably be expected to impair cool water species (OAR 340-041-0028(9))
 
 Where and when the applicable criteria apply are based on the designated fish uses maps in OAR `r paste0(project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041.Figure")`. The fish use designations and applicable criteria are shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix E.
 
-The temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
+The numeric portions of the temperature standard authorizes insignificant additions of heat from human sources in waters that exceed the applicable temperature criteria as follows: Following a temperature TMDL or other cumulative effects analysis, the Human Use Allowance (HUA) will restrict all NPDES point sources and nonpoint sources to a cumulative increase of no greater than 0.3 deg-C (OAR 340-041-0028(12)(b)).
 
-As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area_wms`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
+As described in Chapter 1, the U.S. Environmental Protection Agency (USEPA) and State of Oregon (OR) are required to revise the water temperature TMDL for the `r qapp_project_area_wms_1`. In revising the TMDL, all of the allocations will be updated to target the applicable biologically-based numeric criteria (BBNC) and Human Use Allowance (HUA) water quality temperature standards.
 
-Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area_wms`, QAPP project area, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r if(NROW(tcat4a)>0){paste0(tbls(name = "tcat5", display="cite"), " and ", tbls(name = "tcat4a", display="cite"))}else{tbls(name = "tcat5", display="cite")}`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix E.
+Since the issuance of the original TMDL, the extent and number of waterbodies that are identified as water quality limited for temperature has changed. As part of the TMDL update, DEQ will address all current temperature listings based on the most recent integrated report list. The current listings, as they pertain to the `r qapp_project_area_wms_1`, were obtained from Oregon’s 2018/2020 Integrated Report and are summarized in `r if(NROW(tcat4a)>0){paste0(tbls(name = "tcat5", display="cite"), " and ", tbls(name = "tcat4a", display="cite"))}else{tbls(name = "tcat5", display="cite")}`. The listings are also shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix E.
 
 To the extent existing data and information allow, the primary analysis and modeling objectives for this TMDL include:
 
@@ -1129,35 +1144,36 @@ Stream temperature is influenced by both human and natural factors. `r temp.fig`
 
 ## Overview
 
-Stream temperature TMDLs are generally scaled to a subbasin or basin scale since stream temperatures are affected by cumulative interactions between upstream and local sources. For this reason the TMDL considers all surface waters that affect the temperatures of 303(d) listed waterbodies. For example, the **[Update waterbody]** is water quality limited for temperature. To address this listing in the TMDL, all upstream waterbodies are considered in the TMDL analysis and TMDL allocations are applied throughout the entire stream network and include all waters of the state.
-
 An important step in the TMDL is to perform a source assessment which quantifies the background and anthropogenic contributions to stream heating. Models provide a way to evaluate potential sources of stream warming and, to the extent existing data allow, the amount of pollutant loading from these sources. The model that is selected for the TMDL analysis should support the needs of the project. Section 4.2 describes the model framework needs for this project and the models that will be used to support the TMDL.
 
 TMDLs also require identification of seasonal variation and critical conditions. The TMDL analysis will determine seasonal variation by including a statistical summary and visual plots summarizing the instream temperatures and flow rates observed at various monitoring locations. The time period when the applicable temperature criteria are exceeded will be described in relation to the critical conditions.
 
-The TMDL will establish a loading capacity which specifies the amount of a pollutant or pollutants that a waterbody can receive and still meet water quality standards. The pollutant addressed in the temperature TMDL is heat. The TMDL will divide the loading capacity into thermal wasteload allocations for NPDES permittees and load allocations for background and nonpoint sources of heat to ensure that the applicable temperature standards are achieved. Anthropogenic nonpoint and NPDES permitted point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable criteria, cumulatively at the point of maximum impact. The portion of the human use allowance allocated to each source will be determined in the TMDL with the modeling approach supporting assessment of different allocation options. The modeling approach may also be used to support development of TMDL surrogate measures such as effective shade targets. Nonpoint source allocations can be translated into surrogate measures when a pollutant is difficult to measure, highly variable, or difficult to monitor (OAR 340-042-0040(5)(b)). Thermal load allocations for nonpoint sources can be difficult to measure and monitor. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations.
+The TMDL will establish a loading capacity which specifies the amount of a pollutant or pollutants that a waterbody can receive and still meet water quality standards. The pollutant addressed in the temperature TMDL is heat. The TMDL will divide the loading capacity into thermal wasteload allocations for NPDES permittees and load allocations for background and nonpoint sources of heat to ensure that the applicable temperature standards are achieved. Anthropogenic nonpoint and NPDES permitted point sources are not permitted to heat a waterbody more than 0.3 deg-C above the applicable numeric criteria, cumulatively at the point of maximum impact. The portion of the human use allowance allocated to each source will be determined in the TMDL with the modeling approach supporting assessment of different allocation options. The modeling approach may also be used to support development of TMDL surrogate measures such as effective shade targets. Nonpoint source allocations can be translated into surrogate measures when a pollutant is difficult to measure, highly variable, or difficult to monitor (OAR 340-042-0040(5)(b)). Thermal load allocations for nonpoint sources can be difficult to measure and monitor. Attainment of the surrogate measures ensures compliance with the nonpoint source allocations.
 
-Stream temperatures for the Willamette Basin TMDL and WQMP will be simulated using CE-QUAL-W2 version 4 temperature model. The models extents include most of the main rivers and their larger tributaries that contain or influence primary fish habitat. Site-specific load allocations will be developed for the streams that are simulated. Other streams are assigned generalized load allocations based on effective shade surrogate measures that target site potential or restored vegetation types. Numeric or narrative wasteload allocations will be developed for all NPDES permittees.
+In the Long Tom River where the narrative cool water species criterion applies, all sources cannot result in a temperature that would reasonably be expected to impair cool water species. As part of the TMDL analysis, DEQ may review available studies and consult with fishery experts to determine the most sensitive cool water species and the temperature tolerances of that species.
+
+Stream temperatures for all rivers in the project area will be simulated using CE-QUAL-W2 version 4 temperature model. Site-specific load allocations will be developed for the streams that are simulated. Numeric or narrative wasteload allocations will be developed for all NPDES permittees.
 
 ## Model selection
 
 The modeling framework needs for this project include:
 
-1)	Prediction of hourly stream temperatures over a period of months and at a no greater than 500 meter longitudinal resolution.  
+1)	Prediction of hourly stream temperatures over the summer and spawning use transition period in the fall (approximately May 1 - October 30) in order to evaluate the critical period when stream temperatures most often exceed the applicable temperature criteria.  
 
-2)	Prediction of hourly solar radiation flux and daily effective shade at a no greater than 100 meter longitudinal resolution.  
+2)	Prediction of hourly stream temperatures during low flow periods.  
 
-3)	Ability to evaluate hourly stream temperature response from changes in streamside vegetation.  
+3)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and effluent flow discharge from NPDES permitted facilities.  
 
-4)	Ability to evaluate hourly stream temperature response from changes in water withdrawals and tributary stream flow within the upstream catchment.  
+4)  Ability to evaluate hourly stream temperature response from changes in flow and stream temperature at boundary condition tributaries and Dams/Reservoir operations.  
 
-5)	Ability to evaluate hourly stream temperature response from changes in channel morphology within the upstream catchment.  
+5)	Ability to model stream temperature and hydrodynamics in stratified, tidal, and well mixed riverine waterbodies.  
 
-6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
+CE-QUAL-W2 model version 3.12 was used to model all the project area rivers (except Blue River) for the development of the 2006 Willamette Basin TMDL. The models were calibrated using data collected during model years 2001 and 2002. These set of CE-QUAL-W2 models were developed for the temperature TMDL by Portland State University (Annear et al 2004; Berger et al 2004), the USGS (Sullivan and Rounds 2004), and DEQ (DEQ 2006). In 2007, USGS made several improvements to the temperature models (Rounds 2007) and used them to estimate the thermal effects of dams in the Willamette River Basin (Rounds 2010). 
 
-7)	**[Update as needed]**
+Since then, the USGS and U.S. Army Corps of Engineers have collaborated to update some of the CE-QUAL-W2 models for the U.S. Army Corps of Engineers’ Willamette Valley Project environmental impact statement. The models for the Coast Fork Willamette River, Middle Fork Willamette River, McKenzie River, South Santiam River, North Santiam River, Santiam River, and the Willamette River upstream of Willamette Falls were updated from version 3.12 to CE-QUAL-W2 version 4.2. The updated models are being used to simulate water temperatures from approximately April to November of 2011, 2015, and 2016. Because these series of CE-QUAL-W2 models already exist and meet all the model framework needs, CE-QUAL-W2 was selected for stream temperature simulation in the project area. 
 
-CE-QUAL-W2 version 4.2 (Wells, 2019) is a laterally averaged U.S. Army Corps of Engineers model that consists of directly coupled hydrodynamic and water quality transport algorithms. Developed for reservoirs and narrow, stratified estuaries, CE-QUAL-W2 can handle a branched and/or looped system with flow and/or head boundary conditions. CE-QUAL-W2 simulates temperature, phytoplankton, dissolved oxygen, pH, organic matter, nutrients and residence time.
+CE-QUAL-W2 version 4.2 is a two-dimensional, longitudinal/vertical, hydrodynamic and water quality model (Wells, 2019). The model was originally developed by the U.S. Army Corps of Engineers and is currently maintained by Portland State University. The model consists of directly coupled hydrodynamic and water quality transport algorithms. Developed for reservoirs and narrow, stratified estuaries, CE-QUAL-W2 can handle a branched and/or looped system with flow and/or head boundary conditions. CE-QUAL-W2 simulates water surface elevations, velocities (longitudinal and vertical), temperature, and multiple other water quality constituents including phytoplankton, dissolved oxygen, pH, organic matter, and nutrients.
+
 
 ## Software Development Quality Assessment
 We do not anticipate any new software development or model code changes as part of this project.
@@ -1168,13 +1184,13 @@ This chapter describes the data that is available to support the TMDL project an
 
 ## Meteorology
 
-Meteorological data includes air temperature, sky conditions, cloudiness, relative humidity, and wind speed. `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` in Appendix A list the stations where meteorological data available in the `r qapp_project_area_wms`, including `r t51_txt`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix E. The station IDs in `r tbls(name = tables.met$tbl_name[1], display="cite")` are the NCDC ID, which may differ from the station identifiers used by other sources.
+Meteorological data includes air temperature, sky conditions, cloudiness, relative humidity, and wind speed. `r paste0(tbls(name = tables.met$tbl_name[1], display="cite"), " through ", tbls(name = tables.met$tbl_name[length(tables.met$tbl_name)], display="cite"))` in Appendix A list the stations where meteorological data available in the `r qapp_project_area_wms_1`, including `r t51_txt`. The meteorological monitoring stations are also shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix E. The station IDs in `r tbls(name = tables.met$tbl_name[1], display="cite")` are the NCDC ID, which may differ from the station identifiers used by other sources.
 
 The meteorological data obtained from the NCDC includes the Local Climatological Dataset (NOAA, 2005) and the Global Integrated Surface Dataset (NOAA, 2001). The Local Climatological Dataset includes quality controlled meteorological data from airports and other prominent weather stations managed by the National Weather Service, Federal Aviation Administration, and the U.S. Department of Defense. The Global Integrated Surface Dataset provides a long-term record of hourly, sub-hourly and synoptic weather observations from a variety of meteorological networks around the world. The dataset includes observations from the World Meteorological Organization, Automated Surface Observing System, Automated Weather Observing Stations, U.S. Climate Reference Network, and others. 
 
 ## Thermal Infrared Radiometry (TIR) data
 
-DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area_wms` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area_wms_1` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1184,17 +1200,17 @@ All available continuous stream temperature data were retrieved from DEQ’s Amb
 
 The data retrieval period for continuous stream temperature data is from January 1, 1990 to December 31, 2020. Data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E and a result status of “Final” or “Provisional”. The data quality level criteria are outlined in DEQ’s Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results with a data quality level of A, B, or E (DEQ, 2021). Data of unknown quality are used after careful review.
 
-Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area_wms` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.b", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix E.
+Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperature data were collected in the `r qapp_project_area_wms_1` and the organizations that collected that data in `r tbls(name = "t53_1", display="cite")`, and when data were collected at each location in `r tbls(name = "app.b", display="cite")`. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix E.
 
 ## Stream flow data
 
-`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous `r if(NROW(t54_sp)>0){paste0("and instantaneous")}` flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. `r tbls(name = "flow.data.sample.count", display="cite")` lists the years that continuous stream flow data were collected at each location. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix E. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous `r if(NROW(t54_sp)>0){paste0("and instantaneous")}` flow volume data were available in the `r qapp_project_area_wms_2`, including `r t54_txt`. `r tbls(name = "flow.data.sample.count", display="cite")` lists the years that continuous stream flow data were collected at each location. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix E. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
 ## Point source discharges
 
-`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area_wms,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area_wms,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}` The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix E. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area_wms," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area_wms)}`.
+`r if(NROW(section.npdes.ind)>0){paste0(tbls(name = "t55_ind", display="cite")," identifies all the active individual NPDES permittees in the ",qapp_project_area_wms_1,if(nrow(ms4)>0){paste0(" (including individual MS4 permittees)")},". ")}else{paste0("[Update: No individual NPDES permits.]")}` `r if(NROW(section.npdes.gen.1)>0){paste0(tbls(name = "t55_gen1", display="cite")," lists the registrants covered under the general NPDES ",knitr::combine_words(unique(sort(gen.txt$PermitType)))," permits in the ",qapp_project_area_wms_1,". This group of general permits are highlighted because the permits require temperature monitoring at a frequency of at least one grab sample per month. ")}else{paste0("There are no registrants covered under the general NPDES GEN01, GEN03, GEN04, GEN05, GEN19, and GEN40 (MS4) permits that require temperature monitoring.")}` The location of these NPDES permittees is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix E. Many of these permittees submit Discharge Monitoring Reports (DMRs) as a condition of their permit. Depending on the monitoring requirements in the permit, some permittees are required to report effluent temperature and effluent flow rates in the DMR. The frequency and type of reporting varies by permit and permit type. Some permits only require monthly, weekly, or daily grab samples while others require summary statistics such as daily maximum, daily mean, or seven-day average daily maximum. Where possible, DEQ will utilize any continuous effluent data that has been provided to DEQ. When continuous data is not available, DMR data will be utilized to characterize point source discharges. `r if(NROW(section.npdes.gen.2)>0){tbls(name = "t55_gen2", display="cite")}` lists the current number of registrants for `r if(NROW(section.npdes.gen.1)>0){paste0("all the other general NPDES permits in the ",qapp_project_area_wms_1," that are not listed in ",tbls(name = "t55_gen1", display="cite"))}else{paste0("all the general NPDES permits in the ", qapp_project_area_wms_1)}`.
 
 `r if(NROW(section.npdes.ind)>0){t55_ind_tbl}`
 `r if(NROW(section.npdes.gen.1)>0){t55_gen1_tbl}`
@@ -1236,7 +1252,7 @@ To the greatest extent possible, the method used to derive the model parameters 
 
 ## Effective shade curves and lookup tables
 
-Effective shade curves are plots that present the maximum possible effective shade as a function of different types of natural near-stream vegetation, active channel widths, and stream aspect. Channel width is plotted on the x-axis, effective shade is on the y-axis, and a separate symbol and/or line color is used for each stream aspect. Separate plots are produced for each type of natural vegetation that is expected in the TMDL project area. The plots are called effective shade curves because the pattern on the plot resembles a gentle downward slopping curve. As channel width increases effective shade gets smaller. The plots are produced from the output of Heat Source version 6 shade models that have been parameterized with every combination of the previously mentioned conditions. The effective shade curve approach can be used almost anywhere in the watershed to quantify the amount of background solar radiation loading and the effective shade necessary to eliminate temperature increases from anthropogenic disturbance or removal of near-stream vegetation.
+Effective shade curves are plots that present the maximum possible effective shade as a function of different types of natural near-stream vegetation, active channel widths, and stream aspect. Channel width is plotted on the x-axis, effective shade is on the y-axis, and a separate symbol and/or line color is used for each stream aspect. Separate plots are produced for each type of natural vegetation that is expected in the TMDL project area. The plots are called effective shade curves because the pattern on the plot resembles a gentle downward slopping curve. As channel width increases effective shade gets smaller. The plots are produced from the output of Heat Source version 6 shade models that have been parameterized with every combination of the previously mentioned conditions. The effective shade curve approach can be used almost anywhere to quantify the amount of background solar radiation loading and the effective shade necessary to eliminate temperature increases from anthropogenic disturbance or removal of near-stream vegetation.
 
 This model approach can also be used to develop a lookup table to determine the effective shade resulting from other combinations vegetation height, vegetation density, vegetation overhang, and vegetation buffer widths that are different from background conditions. The lookup table provides a convenient way for readers of the TMDL to estimate the effective shade for current conditions without using the model. The lookup table can also be used as a reverse lookup to determine what vegetation height, buffer width, or vegetation density would achieve a certain effective shade.
 
@@ -1486,7 +1502,7 @@ The DEQ Project Manager (or designee) will provide progress reports to DEQ Manag
 
 ## Project schedule
 
-The project schedule for the `r qapp_project_area_wms` TMDL is scheduled to occur in two phases. The pre TMDL project phase, and the TMDL and WQMP development phase.
+The project schedule for the `r qapp_project_area_wms_1` TMDL is scheduled to occur in two phases. The pre TMDL project phase, and the TMDL and WQMP development phase.
 
 **Pre TMDL project phase**
 

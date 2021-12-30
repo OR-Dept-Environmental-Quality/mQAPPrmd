@@ -36,7 +36,7 @@ model.extent <- na.omit(model.extent)
 
 ## `r waterbody_name`
 
-`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")`
+`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")` `r if(waterbody_name == "Clackamas River"){paste0("This model is an update of an older CE-QUAL-W2 model originally calibrated to the period of approximately April through October of 2001 and 2002. The model was developed by Portland State University (Annear et al., 2004 and Berger et al., 2004).")}`
 
 ### Model domain
 
@@ -50,7 +50,7 @@ The extent of the model domain is `r model.domain` The model extent is shown in 
 
 ### Spatial and temporal resolution
 
-`r if(waterbody_name == "Clackamas River"){paste0("The existing 2001/2002 model input bathymetry uses one water body and two branches. The branches were selected based on changes in the channel bottom slope. The model grid has 149 segments; 145 of which are active (Branch 1 Segments 2 to 94 and Branch 2 Segments 97 to 148); and each segment has a length of 251.06 meters. The upstream boundary is configured using the flow and temperature from the USGS gage station at Estacada. The downstream boundary condition is configured as an artificial spillway which discharges to the Lower Willamette River.")}`
+`r if(waterbody_name == "Clackamas River"){paste0("The existing 2001/2002 model input bathymetry uses one water body and two branches. The branches were selected based on changes in the channel bottom slope. The model grid has 149 segments; 145 of which are active (Branch 1 Segments 2 to 94 and Branch 2 Segments 97 to 148); and each segment has a length of 251.06 meters. The upstream boundary is configured using the flow and temperature from the USGS gage station at Estacada. The downstream boundary condition is configured as an artificial spillway which discharges to the Willamette River.")}`
 
 `r if(waterbody_name == "Long Tom River"){paste0("The existing current conditions model input bathymetry uses one water body and 13 branches along the main river and one branch representing a side channel. The branches were incorporated into the model to accurately predict the flow peak timings due to the several weirs/dams that lie along the model domain. The model grid has 187 segments, with each segment lengths ranging from 83.88 meters to 251.06 meters. The side channel is comprised of 3 segments of 1897, 2590, and 1427 meters. The upstream boundary is configured using the flow and temperature from the USGS gage station near Alvadore (USGS 1416999) at RM 23.5. There are ten spillway structures defined along the systems, and three gates.  The downstream boundary condition is configured as an artificial gate which discharges to the Willamette River. The model also includes one withdrawal from segment 91 (RM 12.9) of 4 cfs.  It should be noted that the PSU documentation (Annear et. al, 2004) notes that there were no withdrawals, however the 2001 and 2002 model do have this withdrawal. In addition, the PSU model documentation also does not discuss the gates in the model.")}`
 
@@ -61,6 +61,12 @@ The extent of the model domain is `r model.domain` The model extent is shown in 
 ### Source characteristics
 
 ```{r, label=`sc`, include=FALSE}
+
+## 1st paragraph
+source.char <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_sourceChar.xlsx",
+                                 sheet = "wms_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar)
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
