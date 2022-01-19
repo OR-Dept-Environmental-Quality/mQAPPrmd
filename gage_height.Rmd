@@ -22,6 +22,6 @@ options(knitr.kable.NA = '')
 
 ## Gage Height
 
-`r if(NROW(tgh.usgs)>0){paste0(tbls(name="tgh.usgs", display="cite")," lists the stations for gage height data that were available in USGS databases.")}`
+`r if(NROW(tgh.usgs)>0){paste0(tbls(name="tgh.usgs", display="cite")," lists the stations for gage height data that were available in USGS databases. Table 50 in Appendix D lists the years that gage height data were collected at each location. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix E.")}`
 
 `r if(NROW(tgh.usgs)>0){tgh_usgs_tbl}`

@@ -150,10 +150,10 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
   dplyr::mutate(mod_score = ifelse(mod_rmd == "hs6", "1",
                                    ifelse(mod_rmd == "hs7", "10",
                                           ifelse(mod_rmd == "hs8", "20", "0")))) %>% 
-  dplyr::mutate(mod_ref = ifelse(mod_rmd == "ce", 'Cole, T.M., and S. A. Wells. 2000. "CE-QUAL-W2: A Two-Dimensional, Laterally Averaged, Hydrodynamic and Water Quality Model, Version 3.0." Instruction Report EL-2000. US Army Engineering and Research Development Center, Vicksburg, MS.',
-                                 ifelse(mod_rmd == "sh", 'USFS (U.S. Forest Service). 1993. “SHADOW v. 2.3 - Stream Temperature Management Program. Prepared by Chris Park USFS, Pacific Northwest Region.”',
-                                        NA))) %>% 
-  dplyr::mutate(mod_ref_intext = ifelse(mod_rmd == "ce", "(Cole and Wells, 2000)",
+  #dplyr::mutate(mod_ref = ifelse(mod_rmd == "ce", 'Cole, T.M., and S. A. Wells. 2000. "CE-QUAL-W2: A Two-Dimensional, Laterally Averaged, Hydrodynamic and Water Quality Model, Version 3.0." Instruction Report EL-2000. US Army Engineering and Research Development Center, Vicksburg, MS.',
+  #                               ifelse(mod_rmd == "sh", 'USFS (U.S. Forest Service). 1993. “SHADOW v. 2.3 - Stream Temperature Management Program. Prepared by Chris Park USFS, Pacific Northwest Region.”',
+  #                                      NA))) %>% # WMS: Citations are summarized in the Worksheet Reference
+  dplyr::mutate(mod_ref_intext = ifelse(mod_rmd == "ce", "(Wells, 2019)", # WMS
                                         ifelse(mod_rmd == "sh", "(USFS, 1993)",
                                                ifelse(mod_rmd %in% c("hs7","hs8"), "(Boyd and Kasper, 2003)",
                                                       NA))))
@@ -212,22 +212,45 @@ save(lookup.huc,
      file = paste0("./data/lookup.RData"))
 
 # _ IR2018/20 Cat 4 & 5 ----
+# Willamette MS:
 cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
-                             layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL")
+                             layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL") %>% 
+  sf::st_drop_geometry()
+
 cat.45.waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL.shp",
-                                  layer = "2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL")
-cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
-                                layer = "2018_2020_IR_Cat4_5_Temp_Watershed_FINAL") %>% 
-  dplyr::mutate(AU_Name = gsub(pattern = "HUC12 Name: ","",AU_Name)) %>% 
-  dplyr::mutate(AU_Name = paste0(AU_Name, " Watershed"))
+                                  layer = "2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL") %>% 
+  sf::st_drop_geometry()
 
-cat.45 <- rbind(cat.45.rivers[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
-                cat.45.waterbodies[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
-                cat.45.watershed[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")]) %>% 
-  sf::st_zm() %>% 
-  dplyr::left_join(lookup.huc, by = "HUC12")
+cat.45.rivers_wms <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS",
+                             layer = "Study_Areas_v4_AU_IDs_Rivers") %>% 
+  sf::st_drop_geometry() %>% 
+  dplyr::left_join(cat.45.rivers[,c("IR_categor","AU_ID","Year_liste","Period")],"AU_ID") %>% 
+  dplyr::filter(Project_Na == "Willamette River Mainstem and Major Tributaries", # Use the field of project area in Study_Areas_v4_AU_IDs_Rivers
+                IR_categor == "Category 5") # Use IR_categor in 2018_2020_IR_Cat4_5_Temp_Rivers_FINA to include temp AUs.
 
-cat.45.tbl <- sf::st_drop_geometry(cat.45) %>% 
+cat.45.rivers.wms.diff <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/WMS_waterbodies/WMS_Waterbodies.gdb",
+                                      layer = "WMS_AUs_diff") %>% 
+  sf::st_drop_geometry()
+
+cat.45.waterbodies_wms <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/WMS_waterbodies/WMS_Waterbodies.gdb",
+                                  layer = "Study_Areas_v4_AU_IDs_Waterbodies_copy") %>% 
+  sf::st_drop_geometry() %>% 
+  dplyr::left_join(cat.45.waterbodies[,c("IR_categor","AU_ID","Year_liste","Period")],"AU_ID") %>% 
+  dplyr::filter(Connection == TRUE,
+                IR_categor == "Category 5") %>% 
+  dplyr::filter(AU_ID == "OR_LK_1709000703_02_100792")
+
+#cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
+#                                layer = "2018_2020_IR_Cat4_5_Temp_Watershed_FINAL") %>% 
+#  dplyr::mutate(AU_Name = gsub(pattern = "HUC12 Name: ","",AU_Name)) %>% 
+#  dplyr::mutate(AU_Name = paste0(AU_Name, " Watershed")) # Watershed AUs are included in the Willamette subbasins
+
+cat.45 <- rbind(cat.45.rivers_wms[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
+                cat.45.waterbodies_wms[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
+                cat.45.rivers.wms.diff[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")]) 
+
+cat.45.tbl <- cat.45 %>% 
+  #sf::st_drop_geometry(cat.45) %>% 
   #dplyr::filter(!AU_ID %in% c(colum_auid)) %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "Cre\\*", "Creek") %>%
   dplyr::mutate_at("AU_Name", str_replace_all, "For\\*", "Fork Willamette River") %>%
@@ -357,8 +380,8 @@ pro_area_huc12_union <- sf::st_union(pro_area_huc12)
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
 # _ IR2018/20 Cat 4 & 5 ----
-pro.cat.45.tbl <- cat.45.tbl %>% 
-  dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
+pro.cat.45.tbl <- cat.45.tbl #%>% 
+  #dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
 
 # _ Temp data ----
 # AWQMS, OWRD, BES, and DOE Temp Data
