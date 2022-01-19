@@ -155,7 +155,6 @@ irs <- tcat45 %>%
                                                ifelse(substr(`Assessment Unit ID`,4,5) == "LK" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Waterbodies (Spawning Criteria)",
                                                       ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Watershed (Year Round Criteria)",
                                                              ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Watershed (Spawning Criteria)",NA)))))))
-               
 ir.grps <- sort(unique(irs$ir.grps))
 
 group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
@@ -319,7 +318,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                                sendToBack = TRUE),
                                   labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                   labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                       style = list("color" = "red","font-size" = "12px")),
+                                    style = list("color" = "red","font-size" = "12px")),
                                   popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                          '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                          '<br><b>AU ID:</b> \"+props.AU_ID+\"',
@@ -368,7 +367,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.5,
@@ -424,7 +423,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.8,
