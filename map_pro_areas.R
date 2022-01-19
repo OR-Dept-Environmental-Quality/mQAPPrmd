@@ -51,10 +51,10 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
 # qapp_project_area = "Southern Willamette Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
-# qapp_project_area = "Willamette River Mainstem and Major Tributaries"
+qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
 
 map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
 load(paste0("./data/",map.file.name,".RData")) # data.R
@@ -74,14 +74,17 @@ where_huc12 <- paste0("HUC12 IN ('", paste(subbasin_huc12, collapse = "','"),"')
 #Use this line to check between the REST map and the QAPP table; if both are matched, use QAPP IR table to pull data to the map
 #where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4','Category 5')) AND (", where_huc12, ")") 
 
-where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5')) AND ",
-                   "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
+where_au_yearRound <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5') AND Period = 'Year Round') AND ",
+                             "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
+
+where_au_spawning <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5') AND Period = 'Spawning') AND ",
+                            "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
 
 reachcode <- paste(paste0("(ReachCode >= ", subbasin_huc8, "000000", " AND ReachCode <= ", 
                           subbasin_huc8,"999999)"), 
                    collapse =  " OR ") 
 
-# group names ----
+# Data group names ----
 dta.mod <- data.frame(project_area = qapp_project_area,
                       data = c("hs_temp_model_extent",
                                "hs_solar_model_extent",
@@ -135,11 +138,29 @@ dta.stations <- data.frame(project_area = qapp_project_area,
 
 dta.stations.mod <- rbind(dta.mod,dta.stations)
 
+# IR group names ----
+
+sub.tcat45 <- tcat45 %>% 
+  dplyr::filter(`Use Period` == "Spawning, Year Round") %>% 
+  tidyr::separate(col = `Use Period`, into = c("up1","up2"), sep = ", ") %>% 
+  tidyr::gather(`up`,`Use Period`, `up1`,`up2`) %>% 
+  dplyr::select(-`up`)
+
+irs <- tcat45 %>%
+  dplyr::filter(!`Use Period` == "Spawning, Year Round") %>% 
+  rbind(sub.tcat45) %>% 
+  dplyr::mutate(ir.grps = ifelse(substr(`Assessment Unit ID`,4,5) == "SR" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Streams (Year Round Criteria)",
+                                 ifelse(substr(`Assessment Unit ID`,4,5) == "SR" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Streams (Spawning Criteria)",
+                                        ifelse(substr(`Assessment Unit ID`,4,5) == "LK" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Waterbodies (Year Round Criteria)",
+                                               ifelse(substr(`Assessment Unit ID`,4,5) == "LK" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Waterbodies (Spawning Criteria)",
+                                                      ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Watershed (Year Round Criteria)",
+                                                             ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Watershed (Spawning Criteria)",NA)))))))
+
+ir.grps <- sort(unique(irs$ir.grps))
+
 group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
                  "HUC8","HUC10","HUC12",
-                 "2018/2020 303(d) Temperature Listed - Streams",
-                 "2018/2020 303(d) Temperature Listed - Waterbodies",
-                 "2018/2020 303(d) Temperature Listed - Watershed",
+                 ir.grps,
                  "Fish Use Designations",
                  "Salmon and Steelhead Spawning Use Designations",
                  "Stream Names (USGS NHD)",
@@ -147,9 +168,7 @@ group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
 
 group.names.hide <- c(dta.stations.mod[-1,] %>% dplyr::pull(group_name),
                       "HUC8","HUC10","HUC12",
-                      "2018/2020 303(d) Temperature Listed - Streams",
-                      "2018/2020 303(d) Temperature Listed - Waterbodies",
-                      "2018/2020 303(d) Temperature Listed - Watershed",
+                      ir.grps,
                       "Fish Use Designations",
                       "Salmon and Steelhead Spawning Use Designations",
                       "Stream Names (USGS NHD)",
@@ -285,9 +304,9 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                            ' \"}'))) %>%
   # __ IR ----
 leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/0",
-                                  options = leaflet.esri::featureLayerOptions(where = where_au),
+                                  options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                   useServiceSymbology = TRUE,
-                                  group = "2018/2020 303(d) Temperature Listed - Streams",
+                                  group = "2018/2020 303(d) Temperature Listed - Streams (Year Round Criteria)",
                                   pathOptions = leaflet::pathOptions(pane="ir3"),
                                   color = "red",
                                   weight = 3,
@@ -300,7 +319,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                                sendToBack = TRUE),
                                   labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                   labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                       style = list("color" = "red","font-size" = "12px")),
+                                    style = list("color" = "red","font-size" = "12px")),
                                   popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                          '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                          '<br><b>AU ID:</b> \"+props.AU_ID+\"',
@@ -310,10 +329,36 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                          '<br><b>Use Period:</b> \"+props.Period+\"',
                                                                          '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                          ' \"}'))) %>% 
-  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/1",
-                                    options = leaflet.esri::featureLayerOptions(where = where_au),
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/0",
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
                                     useServiceSymbology = TRUE,
-                                    group = "2018/2020 303(d) Temperature Listed - Waterbodies",
+                                    group = "2018/2020 303(d) Temperature Listed - Streams (Spawning Criteria)",
+                                    pathOptions = leaflet::pathOptions(pane="ir3"),
+                                    color = "red",
+                                    weight = 3,
+                                    opacity = 0.8,
+                                    fill=FALSE,
+                                    highlightOptions = leaflet::highlightOptions(color="red",
+                                                                                 weight = 5,
+                                                                                 fillOpacity = 0.5,
+                                                                                 bringToFront = TRUE,
+                                                                                 sendToBack = TRUE),
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(#noHide = T,
+                                      style = list("color" = "red","font-size" = "12px")),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                           '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                           '<br><b>Impaired Parameter:</b> \"+props.Char_Name+\"',
+                                                                           '<br><b>IR Category:</b> \"+props.IR_category+\"',
+                                                                           '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                                                           '<br><b>Use Period:</b> \"+props.Period+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                           ' \"}'))) %>% 
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/1",
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
+                                    useServiceSymbology = TRUE,
+                                    group = "2018/2020 303(d) Temperature Listed - Waterbodies (Year Round Criteria)",
                                     pathOptions = leaflet::pathOptions(pane="ir2"),
                                     color = "red",
                                     weight = 2,
@@ -323,7 +368,35 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
+                                    highlightOptions = leaflet::highlightOptions(color="red",
+                                                                                 weight = 3,
+                                                                                 fillOpacity = 0.5,
+                                                                                 bringToFront = TRUE,
+                                                                                 sendToBack = TRUE),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                           '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                           '<br><b>Impaired Parameter:</b> \"+props.Char_Name+\"',
+                                                                           '<br><b>IR Category:</b> \"+props.IR_category+\"',
+                                                                           '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                                                           '<br><b>Use Period:</b> \"+props.Period+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                           ' \"}'))) %>% 
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/1",
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
+                                    useServiceSymbology = TRUE,
+                                    group = "2018/2020 303(d) Temperature Listed - Waterbodies (Spawning Criteria)",
+                                    pathOptions = leaflet::pathOptions(pane="ir2"),
+                                    color = "red",
+                                    weight = 2,
+                                    opacity = 0.8,
+                                    fill=TRUE,
+                                    fillColor = "red",
+                                    fillOpacity = 0.25,
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(#noHide = T,
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.5,
@@ -339,9 +412,9 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                            '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                            ' \"}'))) %>% 
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/2",
-                                    options = leaflet.esri::featureLayerOptions(where = where_au),
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                     useServiceSymbology = TRUE,
-                                    group = "2018/2020 303(d) Temperature Listed - Watershed",
+                                    group = "2018/2020 303(d) Temperature Listed - Watershed (Year Round Criteria)",
                                     pathOptions = leaflet::pathOptions(pane="ir1"),
                                     color = "red",
                                     weight = 1,
@@ -351,7 +424,35 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     fillOpacity = 0.25,
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                                                         style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "red","font-size" = "12px")),
+                                    highlightOptions = leaflet::highlightOptions(color="red",
+                                                                                 weight = 3,
+                                                                                 fillOpacity = 0.8,
+                                                                                 bringToFront = TRUE,
+                                                                                 sendToBack = TRUE),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                           '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                           '<br><b>Impaired Parameter:</b> \"+props.Char_Name+\"',
+                                                                           '<br><b>IR Category:</b> \"+props.IR_category+\"',
+                                                                           '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                                                           '<br><b>Use Period:</b> \"+props.Period+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                           ' \"}'))) %>%
+  leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/IR_201820_byParameter/MapServer/2",
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
+                                    useServiceSymbology = TRUE,
+                                    group = "2018/2020 303(d) Temperature Listed - Watershed (Spawning Criteria)",
+                                    pathOptions = leaflet::pathOptions(pane="ir1"),
+                                    color = "red",
+                                    weight = 1,
+                                    opacity = 0.8,
+                                    fill = TRUE,
+                                    fillColor = "red",
+                                    fillOpacity = 0.25,
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(#noHide = T,
+                                      style = list("color" = "red","font-size" = "12px")),
                                     highlightOptions = leaflet::highlightOptions(color="red",
                                                                                  weight = 3,
                                                                                  fillOpacity = 0.8,
@@ -796,43 +897,4 @@ print(paste0(qapp_project_area,"...Save the map"))
 htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
                         background = "grey", selfcontained = TRUE)
 
-}
-
-# *************** -----
-# DO NOT RUN ONLY WHEN CHECKING DATASETS FOR ALL PROJECT AREAS ----
-load(paste0("./data/lookup.RData")) #lookup.huc; project.areas
-
-dta.check <- NULL
-for (qapp_project_area in project.areas$areas) {
-  #qapp_project_area = "Southern Willamette Subbasins"
-  
-  map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-  load(paste0("./data/",map.file.name,".RData")) # data.R
-  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
-  
-  dta.check.area <- data.frame("Project Area"=qapp_project_area,
-                               "hs_temp_model_extent" = nrow(hs_temp_model_extent),
-                               "hs_solar_model_extent" = nrow(hs_solar_model_extent),
-                               "hs_solar_model_area" = nrow(hs_solar_model_area),
-                               "ce_model_extent" = nrow(ce_model_extent),
-                               "sh_model_extent" = nrow(sh_model_extent),
-                               "temp_stations" = nrow(temp_stations),
-                               "temp_cal_sites" = nrow(temp_cal_sites),
-                               "temp_model_bc_tri" = nrow(temp_model_bc_tri),
-                               "flow_stations" = nrow (flow_stations),
-                               "flow_model_bc_tri" = nrow(flow_model_bc_tri),
-                               "gage_height_stations_map" = nrow(gage_height_stations_map),
-                               "met_stations" = nrow(met_stations),
-                               "ind_ps" = nrow(ind_ps),
-                               "gen_ps" = nrow(gen_ps))
-  
-  dta.stations.mod <- dta.check.area %>% 
-    tidyr::pivot_longer(!Project.Area, names_to= "data", values_to = "nrow") %>% 
-    dplyr::filter(!nrow == 0)
-  
-  dta.check <- dplyr::bind_rows(dta.check,dta.check.area)
-  
-}
-
-temp.dir <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/temp/"
-write.csv(dta.check,paste0(temp.dir,"dta.check.csv"))
+#}
