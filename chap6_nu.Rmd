@@ -163,7 +163,8 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
-  dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name_nu), x=`Stream Name`, ignore.case = TRUE)) %>% 
+  #dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name), x=`Stream Name`, ignore.case = TRUE)) %>% 
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
