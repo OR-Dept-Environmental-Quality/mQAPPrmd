@@ -177,8 +177,10 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Ati ", "ATI ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Bdc/", "BDC/") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "cmss", "CMSS") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Llc", "LLC") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ms4", "MS4") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Mwmc", "MWMC") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Nw ", "NW ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odc", "ODC") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odfw", "ODFW") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
@@ -221,33 +223,38 @@ cat.45.waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temper
                                   layer = "2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL") %>% 
   sf::st_drop_geometry()
 
-cat.45.rivers_wms <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS",
-                             layer = "Study_Areas_v4_AU_IDs_Rivers") %>% 
-  sf::st_drop_geometry() %>% 
-  dplyr::left_join(cat.45.rivers[,c("IR_categor","AU_ID","Year_liste","Period")],"AU_ID") %>% 
-  dplyr::filter(Project_Na == "Willamette River Mainstem and Major Tributaries", # Use the field of project area in Study_Areas_v4_AU_IDs_Rivers
-                IR_categor == "Category 5") # Use IR_categor in 2018_2020_IR_Cat4_5_Temp_Rivers_FINA to include temp AUs.
+#cat.45.rivers_wms <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS",
+#                             layer = "Study_Areas_v4_AU_IDs_Rivers") %>% 
+#  sf::st_drop_geometry() %>% 
+#  dplyr::left_join(cat.45.rivers[,c("IR_categor","AU_ID","Year_liste","Period")],"AU_ID") %>% 
+#  dplyr::filter(Project_Na == "Willamette River Mainstem and Major Tributaries", # Use the field of project area in Study_Areas_v4_AU_IDs_Rivers
+#                IR_categor == "Category 5") # Use IR_categor in 2018_2020_IR_Cat4_5_Temp_Rivers_FINA to include temp AUs.
 
-cat.45.rivers.wms.diff <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/WMS_waterbodies/WMS_Waterbodies.gdb",
-                                      layer = "WMS_AUs_diff") %>% 
-  sf::st_drop_geometry()
+#cat.45.rivers.wms.diff <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/WMS_waterbodies/WMS_Waterbodies.gdb",
+#                                      layer = "xx_WMS_AUs_diff") %>% 
+#  sf::st_drop_geometry()
 
-cat.45.waterbodies_wms <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/WMS_waterbodies/WMS_Waterbodies.gdb",
-                                  layer = "Study_Areas_v4_AU_IDs_Waterbodies_copy") %>% 
-  sf::st_drop_geometry() %>% 
-  dplyr::left_join(cat.45.waterbodies[,c("IR_categor","AU_ID","Year_liste","Period")],"AU_ID") %>% 
-  dplyr::filter(Connection == TRUE,
-                IR_categor == "Category 5") %>% 
-  dplyr::filter(AU_ID == "OR_LK_1709000703_02_100792")
+#cat.45.waterbodies_wms <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/WMS_waterbodies/WMS_Waterbodies.gdb",
+#                                  layer = "xx_Study_Areas_v4_AU_IDs_Waterbodies_copy") %>% 
+#  sf::st_drop_geometry() %>% 
+#  dplyr::left_join(cat.45.waterbodies[,c("IR_categor","AU_ID","Year_liste","Period")],"AU_ID") %>% 
+#  dplyr::filter(Connection == TRUE,
+#                IR_categor == "Category 5") %>% 
+#  dplyr::filter(AU_ID == "OR_LK_1709000703_02_100792")
 
 #cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
 #                                layer = "2018_2020_IR_Cat4_5_Temp_Watershed_FINAL") %>% 
 #  dplyr::mutate(AU_Name = gsub(pattern = "HUC12 Name: ","",AU_Name)) %>% 
 #  dplyr::mutate(AU_Name = paste0(AU_Name, " Watershed")) # Watershed AUs are included in the Willamette subbasins
 
-cat.45 <- rbind(cat.45.rivers_wms[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
-                cat.45.waterbodies_wms[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
-                cat.45.rivers.wms.diff[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")]) 
+wms.aus <- readxl::read_xlsx(paste0(data.dir,"Willamette_Mainstem_AUs_2022.01.21.xlsx"),sheet = "AU_IDs")
+
+cat.45 <- rbind(cat.45.rivers[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
+                cat.45.waterbodies[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")]) %>% 
+  dplyr::filter(AU_ID %in% wms.aus$AU_ID) %>% 
+  dplyr::distinct(AU_ID)
+
+write.csv(cat.45,"cat45.csv")
 
 cat.45.tbl <- cat.45 %>% 
   #sf::st_drop_geometry(cat.45) %>% 
