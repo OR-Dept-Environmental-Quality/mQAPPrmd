@@ -114,8 +114,6 @@ if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
 
 `r if(waterbody_name %in% "Cavitt Creek (Summer period)"){paste0("Cavitt Creek is a major tributary to the Little River and was modeled in both the Little River TMDL as well as the Umpqua River Basin TMDL. As described in the Umpqua River Basin TMDL (DEQ, 2006), the Cavitt Creek watershed has experienced timber harvest activities resulting in current temperatures that are warmer than the natural thermal potential of the stream.")}`
 
-`r if(waterbody_name %in% "Clearwater River (Summer period)"){paste0("[Update: From the older version. Please review.] Clearwater River is a tributary to the North Umpqua River at Toketee Reservoir. Clearwater River is part of Pacific Power hydroelectric project area and flow below Stump Lake has been reduced by hydroelectric water diversion. As described in the Umpqua River Basin TMDL (DEQ, 2006), the Clearwater River simulation begins at Stump Lake (near river mile 8.1). Since the natural thermal potential scenario has more instream flow than the current condition, there is less variability in the temperature profile. Powerhouse #1 is located near river mile 5, where the current temperature drops approximately 5°C. This temperature decrease is a result of previously diverted water coming back to the Clearwater River through Powerhouse #1.")}`
-
 `r if(waterbody_name %in% "Fish Creek (2001) (Summer Period)"){paste0("[Update: From the older version. Please review.] Fish Creek is part of Pacific Power hydroelectric project area and enters the North Umpqua River below Slide Creek Dam and above Soda Springs Dam. The Umpqua River Basin TMDL (DEQ, 2006) found Fish Creek to be slightly below the numeric criterion (18°C). The assimilative capacity was allocated to PacifiCorp, in the form of their 401 certification.")}`
 
 `r if(!waterbody_name == "Fish Creek (2009)"){paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")}else{paste0("The existing PacifiCorp 2009 model will be adapted for the spawning period and adjusted as needed.")}`
@@ -140,9 +138,7 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 4: Slide Powerhouse to Soda Springs Reservoir.")}`
 
-`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 5: Soda Springs Reservoir to Steamboat Creek.")}`
-
-`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 6: Steamboat Creek to Mouth.")}`
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 5: Soda Springs Reservoir to Mouth.")}`
 
 `r if(waterbody_name %in% c("Canton Creek (Spawning period)","Rock Creek (Spawning period)")){paste0("The extent of the model domain is ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"),"). The extent differs from the summer model due to data availability.")}`
 
