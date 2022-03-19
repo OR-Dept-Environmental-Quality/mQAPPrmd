@@ -391,7 +391,13 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+done <- c("Lower Willamette and Clackamas Subbasins",
+          "Middle Willamette Subbasins",
+          "Sandy Subbasin",
+          "Southern Willamette Subbasins",
+          "Willamette River Mainstem and Major Tributaries")
+
+for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
   print(qapp_project_area)
   
@@ -918,7 +924,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamett
        s,
        is.are,
        numbers.to.words,
-       file = paste0("./data/",file.name,".RData"))
+       #file = paste0("./data/",file.name,".RData"))
+       file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/",file.name,"/mQAPPrmd/data/",file.name,".RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -1065,7 +1072,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette River Mainstem and Major Tributaries"),]$areas) {
+for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
   print(qapp_project_area)
   
@@ -1094,6 +1101,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
   
   #tir_extent
   
+  # _ Save Data ----
   save(pro_area,
        hs_temp_model_extent,
        hs_solar_model_extent,
@@ -1102,7 +1110,8 @@ for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette 
        sh_model_extent,
        #tir_extent,
        pro.cat.45.tbl,
-       file = paste0("./data/map_",file.name,".RData"))
+       #file = paste0("./data/map_",file.name,".RData"))
+       file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/",file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
   
   
 }
