@@ -110,7 +110,7 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)")){paste0("The North Umpqua River simulation consists of six separate Heat Source models, each separated by a reservoir, diversion dam, or Steamboat Creek. Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")}`
 
-`r if(waterbody_name %in% c("North Umpqua River (Spawning period)")){paste0("The North Umpqua River simulation consists of five separate Heat Source models, each separated by the reservoir or diversion dam  (Figure 6 & 7). Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams were not simulated.")}`
+`r if(waterbody_name %in% c("North Umpqua River (Spawning period)")){paste0("The North Umpqua River simulation consists of five separate Heat Source models, each separated by the reservoir or diversion dam  (Figure 6 & 7). Since Heat Source is a one-dimensional model, the reservoirs or backwaters behind the dams will not be simulated.")}`
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("Model 1: Lemolo Reservoir to Lemolo Powerhouse #1.")}`
 
