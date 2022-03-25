@@ -349,7 +349,7 @@ t54_hydromet <- flow.stations %>%
 
 t54_sp <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
-  dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
+  dplyr::filter(!`Model Location Type` %in% c("Point of Diversion","Point Source")) %>% 
   dplyr::filter(!`Data Source` == "USGS") %>% 
   dplyr::filter(!is.na(`Data Source`)) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
@@ -770,16 +770,8 @@ chap6 <- NULL
 
 for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHADOW",]$`Model Waterbody`))){
   
-  #if(!qapp_project_area == "North Umpqua Subbasin"){
-    
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
-    
-  #} else {
-    
-    #chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
-
-  #}
-  
+  chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
+ 
 }
 
 ```
@@ -1357,7 +1349,7 @@ $$RMSE = \sqrt{\frac{1}{n}\sum(X_{mod} - X_{obs})^2} \hspace{3em}\text{Equation 
 
 **Nash-Sutcliffe efficiency coefficient (NS)**: Nash-Sutcliffe efficiencies can range from -$\infty$ to 1. An efficiency of 1 corresponds to a perfect match of modeled predicted value to the observed data. An efficiency of 0 indicates that the model predictions are as accurate as the mean of the observed data, whereas an efficiency less than zero occurs when the observed mean is a better predictor than the model.
 
-$$NS = 1 - \frac {\sum (X_{mod} - X_{obs})^2}{\sum (X_{mod} - \overline{X_{obs}})^2}  \hspace{3em}\text{Equation 8}$$
+$$NS = 1 - \frac {\sum (X_{obs} - X_{mod})^2}{\sum (X_{obs} - \overline{X_{obs}})^2}  \hspace{3em}\text{Equation 8}$$
 
 where,  
 $X_{mod}$ = The model predicted results;  
