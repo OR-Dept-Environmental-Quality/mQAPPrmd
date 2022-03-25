@@ -95,12 +95,9 @@ if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
   knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_5.png")
 }
 ```
+`r if(waterbody_name %in% "Cavitt Creek"){paste0("Cavitt Creek is a major tributary to the Little River. The Cavitt Creek model is a temperature model developed using Heat Source 7.0. The model was developed by DEQ for both the Little River TMDL (DEQ, 2002a) as well as the Umpqua River Basin TMDL (DEQ, 2006).")}`
 
-`r if(waterbody_name %in% "Cavitt Creek"){paste0("Cavitt Creek is a major tributary to the Little River and was modeled in both the Little River TMDL as well as the Umpqua River Basin TMDL. As described in the Umpqua River Basin TMDL (DEQ, 2006), the Cavitt Creek watershed has experienced timber harvest activities resulting in current temperatures that are warmer than the natural thermal potential of the stream.")}`
-
-`r if(waterbody_name %in% "Fish Creek (2001)"){paste0("[Update: From the older version. Please review.] Fish Creek is part of Pacific Power hydroelectric project area and enters the North Umpqua River below Slide Creek Dam and above Soda Springs Dam. The Umpqua River Basin TMDL (DEQ, 2006) found Fish Creek to be slightly below the numeric criterion (18°C). The assimilative capacity was allocated to PacifiCorp, in the form of their 401 certification.")}`
-
-`r if(!waterbody_name == "Fish Creek (2009)"){paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")}else{paste0("The existing PacifiCorp 2009 model will be adapted for the spawning period and adjusted as needed.")}`
+`r if(!waterbody_name == "Fish Creek (2009)"){paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")}else{paste0("The existing Fish Creek temperature model developed for PacifiCorp (WSI and MBG, 2012) will be utilized for the spawning period Fish Creek temperature calibration and adjusted as needed.")}`
 
 ### Model domain
 
@@ -126,13 +123,13 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 `r if(waterbody_name %in% c("North Umpqua River (Summer period)")){paste0("Model 6: Steamboat Creek to Mouth.")}`
 
-`r if(waterbody_name %in% c("North Umpqua River (Summer period)")){paste0("The specific model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
-
 `r if(waterbody_name %in% c("North Umpqua River (Spawning period)")){paste0("Model 5: Soda Springs Reservoir to Mouth.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)")){paste0("The specific model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
 
 `r if(waterbody_name %in% c("Canton Creek (Spawning period)","Rock Creek (Spawning period)")){paste0("The extent of the model domain is ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"),"). The extent differs from the summer model due to data availability.")}`
 
-`r if(waterbody_name %in% c("Fish Creek (2009)","Lake Creek (Spawning period)","Steamboat Creek (Spawning period)")){paste0("The extent of the model domain is ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"), ").")}`
+`r if(waterbody_name %in% c("Fish Creek (2009)","Lake Creek (Spawning period)","Steamboat Creek (Spawning period)")){paste0("The extent of the model domain is ", model.domain, " (", figs(name=paste0("tt.fig",waterbody_name),display="cite"), ").", " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
 
 `r if(waterbody_name %in% c("Canton Creek (Summer period)","Cavitt Creek","Clearwater River (Summer period)","Clearwater River (Spawning period)","Fish Creek (2001)","Lake Creek (Summer period)","Little River","Rock Creek (Summer period)","Steamboat Creek (Summer period)")){paste0("The extent of the model domain is ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
 
@@ -277,7 +274,21 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-`r if(waterbody_name %in% waterbody_spawning_nu){paste0("Due to the limited availability of temperature data for the spawning period, surrogate relationships will be determined to establish model inputs. The method will rely on relationships established for stations with data available during both the summer and spawning model periods, and estimations will be based on the assumption that the established relationships will also be true for tributaries without data.")}else{paste0("[Update this section if any changes are proposed to the current condition calibration model.] The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2002a and DEQ, 2006), the model user guide ", knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))), " or in Section 6 and Section 7 of this document.")}`
+`r if(waterbody_name %in% c("Canton Creek (Summer period)","Clearwater River (Summer period)","Fish Creek (2001)","North Umpqua River (Summer period)","Rock Creek (Summer period)","Steamboat Creek (Summer period)")){paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (DEQ, 2006) and the model user guide (Boyd and Kasper, 2003).")}`
+
+`r if(waterbody_name %in% c("Cavitt Creek","Lake Creek (Summer period)","Little River")){paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDLs (DEQ, 2002a and DEQ, 2006) and the model user guide (Boyd and Kasper, 2003).")}`
+
+`r if(waterbody_name %in% c("Fish Creek (2009)")){paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the PacifiCorp model report (WSI and MBG, 2012) and the model user guide (Boyd and Kasper, 2003).")}`
+
+`r if(waterbody_name %in% c("Canton Creek (Spawning period)")){paste0("There is limited availability of temperature or flow data for some of the tributaries to Canton Creek. These model inputs will be derived using the methods described in Section 6.3. It is assumed that these approaches will do a reasonably good job of estimating the tributary temperatures or flow rates. DEQ will assess the goodness of fit for these approaches where measured temperature or flow data are available.")}`
+
+`r if(waterbody_name == "Clearwater River (Spawning period)"){paste0("Model development for the Clearwater River relies upon deriving flow rates for Powerhouse #1 and Mowich Creek. A flow mass balance, drainage area ratio, or the flow-probability-probability-flow approach will be used to estimate these flow rates. Temperature data for Powerhouse #1 is also not available. These data will be derived using the methods described in Section 6.3. DEQ will assess the goodness of fit for these approaches where measured temperature or flow data are available.")}`
+
+`r if(waterbody_name %in% c("Lake Creek (Spawning period)")){paste0("Thielsen Creek and Sheep Creek were excluded on Lake Creek summer model due to lack of flow. Thielsen Creek and Sheep Creek may have flow during the spawning period. This will be investigated using the measured flow rates and a flow mass balance. If it deemed necessary to include these small tributaries the flow rates and temperatures will be derived using the methods described in Section 6.3. It is assumed that these approaches will do a reasonably good job of estimating the tributary temperatures or flow rates. DEQ will assess the goodness of fit for these approaches where measured temperature or flow data are available.")}`
+
+`r if(waterbody_name %in% c("North Umpqua River (Spawning period)")){paste0("Model development for the North Umpqua River relies on deriving temperature or flow inputs for a few small tributaries that lack flow and temperature measurements. DEQ plans to use the direct surrogate or linear regression approaches described in Section 6.3 to derive stream temperature, and a combination of a flow mass balance, drainage area ratio, and the flow-probability-probability-flow approaches to estimate stream flow. It is assumed that these approaches do a reasonably good job of estimating the tributary temperatures or flow rates. DEQ will assess the goodness of fit for these approaches where measured temperature or flow data are available. Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003).")}`
+
+`r if(waterbody_name %in% c("Rock Creek (Spawning period)","Steamboat Creek (Spawning period)")){paste0("Due to the limited availability of temperature data for the spawning period, surrogate relationships will be determined to establish model inputs. The method will rely on relationships established for stations with data available during both the summer and spawning model periods, and estimations will be based on the assumption that the established relationships will also be true for tributaries without data.")}`
 
 ### Model inputs
 
