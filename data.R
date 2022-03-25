@@ -78,6 +78,8 @@ awqms.stations.temp <- df.stations.state %>%
 
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+
 # _ USGS flow data ----
 load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations & usgs.fl.data
 usgs.flow.stations <- usgs.fl.stations %>% 
@@ -209,11 +211,6 @@ lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"),
 
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
-
-# _ * general data for leaflet map ----
-save(lookup.huc,
-     project.areas,
-     file = paste0("./data/lookup.RData"))
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
@@ -878,6 +875,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
     tidyr::drop_na(Stream)
+
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
@@ -925,7 +923,13 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
        is.are,
        numbers.to.words,
        #file = paste0("./data/",file.name,".RData"))
-       file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/",file.name,"/mQAPPrmd/data/",file.name,".RData"))
+       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,".RData"))
+  
+  # _ * general data for leaflet map ----
+  save(lookup.huc,
+       project.areas,
+       #file = paste0("./data/lookup.RData"))
+       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -991,8 +995,10 @@ library(httr)
 library(geojsonsf)
 library(sf)
 
+# _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0("./data/lookup.RData"))
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                          layer = "project_areas") %>% 
@@ -1076,10 +1082,13 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
   
   print(qapp_project_area)
   
+  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
+  #load(paste0("./data/lookup.RData"))
+  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+  
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
   subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
-  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
@@ -1111,7 +1120,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
        #tir_extent,
        pro.cat.45.tbl,
        #file = paste0("./data/map_",file.name,".RData"))
-       file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/",file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
+       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
   
   
 }
