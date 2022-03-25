@@ -549,16 +549,11 @@ t57_date <- effective.shade.pro.area %>%
 tmdl.mod.a<- model.info %>% 
   dplyr::filter(is.na(`New Model`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Canton Creek (Summer period)","Canton Creek (Spawning period)"),"Canton Creek",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Cavitt Creek (Summer period)","Cavitt Creek (Spawning period)"),"Cavitt Creek",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Clearwater River (Summer period)"),"Clearwater River",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2001) (Summer period)"),"Fish Creek (2001)",`Model Waterbody`)) %>% 
-  #dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2009) (Summer period)","Fish Creek (2009) (Spawning period)"),"Fish Creek (2009)",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Clearwater River (Summer period)","Clearwater River (Spawning period)"),"Clearwater River",`Model Waterbody`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Lake Creek (Summer period)","Lake Creek (Spawning period)"),"Lake Creek",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Little River (Summer period)","Little River (Spawning period)"),"Little River",`Model Waterbody`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)"),"North Umpqua River",`Model Waterbody`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Rock Creek (Summer period)","Rock Creek (Spawning period)"),"Rock Creek",`Model Waterbody`)) %>%
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`)) %>% 
-  dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`)) %>%   dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
@@ -571,16 +566,11 @@ tmdl.mod.a<- model.info %>%
 tmdl.mod.b<- model.info %>% 
   dplyr::filter(!is.na(`New Model`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Canton Creek (Summer period)","Canton Creek (Spawning period)"),"Canton Creek",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Cavitt Creek (Summer period)","Cavitt Creek (Spawning period)"),"Cavitt Creek",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Clearwater River (Summer period)"),"Clearwater River",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2001) (Summer period)"),"Fish Creek (2001)",`Model Waterbody`)) %>% 
-  #dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Fish Creek (2009) (Summer period)","Fish Creek (2009) (Spawning period)"),"Fish Creek (2009)",`Model Waterbody`)) %>%
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Clearwater River (Summer period)","Clearwater River (Spawning period)"),"Clearwater River",`Model Waterbody`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Lake Creek (Summer period)","Lake Creek (Spawning period)"),"Lake Creek",`Model Waterbody`)) %>% 
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Little River (Summer period)","Little River (Spawning period)"),"Little River",`Model Waterbody`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("North Umpqua River (Summer period)","North Umpqua River (Spawning period)"),"North Umpqua River",`Model Waterbody`)) %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Rock Creek (Summer period)","Rock Creek (Spawning period)"),"Rock Creek",`Model Waterbody`)) %>%
-  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`)) %>% 
-  dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
+  dplyr::mutate(`Model Waterbody` = ifelse(`Model Waterbody` %in% c("Steamboat Creek (Summer period)","Steamboat Creek (Spawning period)"),"Steamboat Creek",`Model Waterbody`)) %>%   dplyr::group_by(Model_version, `Primary Model Parameter`) %>% 
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", "Multiple streams (see Section 6.4)", `Model Waterbody`)) %>% 
@@ -780,15 +770,15 @@ chap6 <- NULL
 
 for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHADOW",]$`Model Waterbody`))){
   
-  if(!qapp_project_area == "North Umpqua Subbasin"){
+  #if(!qapp_project_area == "North Umpqua Subbasin"){
     
     chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
     
-  } else {
+  #} else {
     
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
+    #chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
 
-  }
+  #}
   
 }
 
@@ -994,7 +984,7 @@ if(NROW(flow.data.sample.count)>0){
 \newpage
 # Introduction
 
-This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`.
+This Quality Assurance Project Plan (QAPP) summarizes the modeling approach to be used for the temperature TMDL replacement project applicable within `r knitr::combine_words(unique(sort(huc8.txt$huc8txt)))`. The modeling approach to be used in the South Umpqua Subbasin (17100302) and the Umpqua Subbasin (17100303) is described in the modeling QAPP DEQ22-HQ-0007-QAPP (DEQ, 2022).
 
 A TMDL is a water quality restoration plan and the calculation of the maximum amount of a pollutant that a waterbody can receive while still meeting water quality standards for that particular pollutant. The maximum amount of loading a waterbody can receive is called the loading capacity. Loading from all pollutant sources must not exceed the loading capacity (TMDL) of a waterbody, including an appropriate margin of safety.
 
@@ -1252,11 +1242,11 @@ DEQ will develop effective shade curves for all other waterbodies that were not 
 
 Updating the Heat Source models will mainly involve the determination of inflows, water temperatures, and weather conditions. It appears that flow data are limited on the tributaries based on the preliminary review of the data that Tetra Tech received. In the case of limited availability of flow data, flow scaling with the gaged drainage area or other approaches such as the stream flow estimation tool that Tetra Tech is developing for DEQ may be used. Observed temperature probe data collected downstream of reservoirs will be used to configure the Heat Source models for North Umpqua River below the impoundments - Lemolo Lake, Toketee Lake, and Soda Springs Dam. 
 
-Weather stations are also limited. It is anticipated that air temperature measurement probes from 2009 can be used. In addition to NCDC, additional sources of weather data such as the USFS and AgriMet will also be explored if appropriate. It is expected that solar radiation will not vary too much within the watershed. Air temperature will decrease from the river mouth to headwater areas based on the elevation. Air temperature data will need to be adjusted based on elevation for each heat source model. Shading is a critical controlling factor for the water temperature change along the river. Shading information has been incorporated in the Heat Source models. We assume that the shading is not changing dramatically from July to the Fall spawning season and will not be changed in the model. The existing vegetation setup from the summer model period can also be used for the updated spawning models because the majority of trees in the North Umpqua are conifers and the leaves on the deciduous trees will still be on, since deciduous trees in Oregon do not reach peak fall color change until mid-October.
+Weather stations are also limited. It is anticipated that air temperature measurement probes from 2009 can be used. In addition to NCDC, additional sources of weather data such as the USFS and AgriMet will also be explored if appropriate. It is expected that solar radiation will not vary too much within the watershed. Air temperature will decrease from the river mouth to headwater areas based on the elevation. Air temperature data will need to be adjusted based on elevation for each Heat Source model. Shading is a critical controlling factor for the water temperature change along the river. Shading information has been incorporated in the Heat Source models. We assume that the shading is not changing dramatically from July to the Fall spawning season and will not be changed in the model. The existing vegetation setup from the summer model period can also be used for the updated spawning models because the majority of trees in the North Umpqua are conifers and the leaves on the deciduous trees will still be on, since deciduous trees in Oregon do not reach peak fall color change until mid-October.
 
 Due to the change of inflows, the Heat Source model may require slight adjustment of stability related parameters such as the Manning’s *n* and time step. It is expected that limited model validation will be conducted unless under the TOCORs written technical directive. All the existing Heat Source models have been built using version 7 and will updated using the same version. PacifiCorp has recently developed a Heat Source Model for Fish Creek for the spawning period during 2009 that uses version 8 of Heat Source. This model will be made available for use by Tetra Tech. If this model is unstable or incompatible with the other Heat Source models, Tetra Tech will convert it to version 7.
 
-Modeling the water temperature for the entire North Umpqua River during the spawning season will involve running ten heat source models (twelve heat source model segments because the heat source model for the upper portion of the North Umpqua River includes three segments). For the current conditions, measured flows and temperatures at the upstream boundary for each Heat Source model will be used as the upstream boundary condition. Any tributary to the main-stem model that is configured as a Heat Source model will be calibrated using observed flow and temperature. The downstream output from tributary model will be input to the main-stem model using observed data.
+Modeling the water temperature for the entire North Umpqua River during the spawning season will involve running ten Heat Source models (twelve Heat Source model segments because the Heat Source model for the upper portion of the North Umpqua River includes three segments). For the current conditions, measured flows and temperatures at the upstream boundary for each Heat Source model will be used as the upstream boundary condition. Any tributary to the main-stem model that is configured as a Heat Source model will be calibrated using observed flow and temperature. The downstream output from tributary model will be input to the main-stem model using observed data.
 
 ## Data gaps
 
@@ -1405,9 +1395,11 @@ This scenario evaluates the stream temperature response under current existing c
 
 * Updating the Little River model to include current discharges from the USFS-Wolf Creek Civilian Conservation Center.       
 
-*	Updating the North Umpqua River Model to include current discharges from the Glide-Idleyld Sanitary District.       
+*	Updating the North Umpqua River summer period model to include current discharges from the Glide-Idleyld Sanitary District.       
 
-*	Updating the North Umpqua Model to include Douglas County’s permitted water withdrawal of 7 cfs from the North Umpqua River below Steamboat Creek.        
+*	Updating the North Umpqua model to include Douglas County’s permitted water withdrawal of 7 cfs from the North Umpqua River below Steamboat Creek.        
+
+* Updating the Rock Creek summer period model to include current discharges from the ODFW Rock Creek Fish Hatchery.
 
 ## Background
 
@@ -1435,15 +1427,9 @@ This scenario is specific to the shade models and evaluates the effective shade 
 
 *	All other model inputs will be the same as the current condition model.    
 
-## Restored stream flow
+## Stream flow
 
-This scenario evaluates stream temperature response by changing permitted water withdrawals to instream flow. The stream temperature warming or cooling from keeping permitted water withdrawals as instream flow is evaluated by comparing this scenario to the current conditions model scenario. Assumptions and methods used to estimate restored stream flow will be documented in the TMDL. Elements of this scenario or scenarios may include:
-
-*	Maintaining all currently permitted water withdrawals as instream flow in order to increase the thermal loading capacity and reduce stream warming.    
-
-*	Model boundary and tributary flows will be set to reflect the additional instream flows.    
-
-*	All other model inputs will be the same as the current condition model.    
+This scenario evaluates the stream temperature response from water withdrawals. The stream temperature warming or cooling is evaluated by comparing the water withdrawal scenario to a model scenario with the stream flow rates set to a natural flow. Assumptions and methods used to estimate natural stream flow will be documented in the TMDL.  
 
 ## Tributary temperatures
 

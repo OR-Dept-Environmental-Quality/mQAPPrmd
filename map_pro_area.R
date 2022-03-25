@@ -1,3 +1,10 @@
+############################################################
+# Master version is different from the branch versions.    #
+# Eg, see Line 26 where is flagged for Yuan's location.    #
+# Master version produces area maps in a batch,            #
+# while branch versions produce branch maps only.          #
+############################################################
+
 library(tidyverse)
 library(stringr)
 library(leaflet)
@@ -16,9 +23,11 @@ library(geojsonsf)
 library(base64enc)
 
 map.dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
 
 source("map_functions.R")
-load(paste0("./data/lookup.RData"))
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 #lgnd <- base64enc::base64encode("./fig/legend.png")
 logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
@@ -38,6 +47,7 @@ tag.map.title <- tags$style(HTML("
 "))
 
 # PROJECT AREA MAPS ----
+
 ## for test:
 # qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
@@ -54,11 +64,16 @@ qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for(qapp_project_area in sort(qapp_project_areas$areas)) {
+  
+file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
-map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
-load(paste0("./data/",map.file.name,".RData")) # data.R
-load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+#load(paste0(data.dir.yg,c,"/mQAPPrmd/data/lookup.RData"))
+load(paste0("./data/lookup.RData"))
+
+map.file.name <- paste0("map_", file.name)
+load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
+load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
 pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
@@ -630,22 +645,15 @@ if(qapp_project_area == "Middle Columbia-Hood, Miles Creeks") {
 # __ North Umpqua Subbasin ----
 if(qapp_project_area == "North Umpqua Subbasin") {
   
-  # ____ * New models: Fish Creek 2009 ----
-  fish_creek_2009 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/fish_creek_2009.shp",
-                                 layer = "fish_creek_2009") %>% 
+  # ____ * New models: Fish Creek 2009 and Tetra Tech models ----
+  new.models <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/n_umpqua_river_new_models.shp",
+                            layer = "n_umpqua_river_new_models") %>% 
     sf::st_transform(4326) %>% 
     sf::st_zm()
   
-  # North Umpqua River model nodes
-  n_umpqua_model_nodes <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/n_umpqua_river_model_nodes.shp",
-                                      layer = "n_umpqua_river_model_nodes") %>% 
-    
-    sf::st_transform(4326) %>%
-    sf::st_zm()
-  
   map_area <- map_basic %>% 
-    # __ Fish Creek (2009)
-    leaflet::addPolylines(data = fish_creek_2009,
+    # __ new models
+    leaflet::addPolylines(data = new.models,
                           group = "Heat Source Temperature Model Extent (New Models)",
                           options = leaflet::leafletOptions(pane="mod2009"),
                           label = ~Stream,
@@ -654,14 +662,6 @@ if(qapp_project_area == "North Umpqua Subbasin") {
                           color = "#993404",
                           opacity = 0.5,
                           weight = 10) %>% 
-    leaflet::addCircleMarkers(data = n_umpqua_model_nodes,
-                              group = "North Umpqua River Model Nodes",
-                              options = leaflet::leafletOptions(pane="node"),
-                              color = "#e34a33", #red orange
-                              stroke = FALSE, 
-                              fillOpacity = 0.5,
-                              label = ~Location,
-                              labelOptions = labelOptions(textsize = "15px")) %>% 
     hsTempModel(hs_temp_model_extent) %>% 
     tempStation.markers(temp_stations) %>% 
     tempCalibration.markers(temp_cal_sites) %>% 
@@ -672,11 +672,9 @@ if(qapp_project_area == "North Umpqua Subbasin") {
     genPS.markers(gen_ps) %>% 
     #effectiveShade.markers(shade) %>% 
     leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
-                                                "North Umpqua River Model Nodes",
                                                 group.names),
                               options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
     leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
-                         "North Umpqua River Model Nodes",
                          group.names.hide))
 }
 
@@ -794,7 +792,7 @@ if(qapp_project_area == "Willamette River Mainstem and Major Tributaries") {
     ceModel(ce_model_extent) %>% 
     tempStation.markers(temp_stations) %>% 
     tempCalibration.markers(temp_cal_sites) %>% 
-    tempBoundaryTributary.markers(temp_model_bc_tri) %>% 
+    #tempBoundaryTributary.markers(temp_model_bc_tri) %>% 
     flowStation.markers(flow_stations) %>% 
     gageHeight.markers(gage_height_stations_map) %>% 
     metStation.markders(met_stations) %>% 
@@ -895,6 +893,7 @@ leaflet::addControl(position = "bottomleft", className = "logo",
 # SAVE DATA ----
 print(paste0(qapp_project_area,"...Save the map"))
 htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
-                        background = "grey", selfcontained = TRUE)
+                        #background = "grey", 
+                        selfcontained = TRUE)
 
 #}
