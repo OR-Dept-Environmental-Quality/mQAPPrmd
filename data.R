@@ -1000,7 +1000,7 @@ library(sf)
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
-project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
+project.areas
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                          layer = "project_areas") %>% 
