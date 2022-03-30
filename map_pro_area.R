@@ -197,7 +197,8 @@ print(qapp_project_area)
 map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
 map_basic <- leaflet::leaflet() %>%
   leaflet::addControl(map.title, position = "topleft", className="map-title") %>% 
-  leaflet::addMiniMap(position = "bottomright",
+  leaflet::addMiniMap(tiles = providers$Esri.NatGeoWorldMap,
+                      position = "bottomright",
                       width = 200,
                       height = 150,
                       zoomLevelFixed = 5,
@@ -206,7 +207,7 @@ map_basic <- leaflet::leaflet() %>%
   leaflet.extras::addResetMapButton() %>% 
   leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                      lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
-  leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>% 
+  leaflet::addMapPane("Esri.NatGeoWorldMap", zIndex = -1200) %>% 
   leaflet::addMapPane("aerial", zIndex = -1100) %>% 
   leaflet::addMapPane("hydrotiles", zIndex = -1050) %>%
   leaflet::addMapPane("area", zIndex = -1000) %>%
@@ -224,8 +225,12 @@ map_basic <- leaflet::leaflet() %>%
   leaflet::addMapPane("mod2009", zIndex = -200) %>%
   leaflet::addMapPane("node", zIndex = -100) %>%
   leaflet::addMapPane("marker", zIndex = 100) %>%
-  leaflet::addProviderTiles("OpenStreetMap",group = "OpenStreetMap",
-                            options = pathOptions(pane = "OpenStreetMap")) %>% 
+  #leaflet::addProviderTiles("OpenStreetMap",group = "OpenStreetMap",
+  #leaflet::addTiles(urlTemplate = "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  leaflet::addProviderTiles(providers$Esri.NatGeoWorldMap, #name(providers) to see a list of the layers
+                    #group = "OpenStreetMap",
+                    options = pathOptions(pane = "Esri.NatGeoWorldMap")
+                    ) %>% 
   # __ Oregon Imagery ----
 leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
                                    group = "Oregon Imagery",
@@ -893,7 +898,7 @@ leaflet::addControl(position = "bottomleft", className = "logo",
 # SAVE DATA ----
 print(paste0(qapp_project_area,"...Save the map"))
 htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
-                        #background = "grey", 
+                        #background = "transparent", 
                         selfcontained = TRUE)
 
 #}

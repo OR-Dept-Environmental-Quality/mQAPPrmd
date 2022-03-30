@@ -28,13 +28,13 @@ print(qapp_project_area)
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 load(paste0("./data/",file.name,".RData"))
 
-# Just for North Umpqua
+# NU only ---
 library(captioner)
 figs <- captioner::captioner(prefix="Figure")
-
+waterbody_name <- "Fish Creek (2001)"
+tt_fig.cap <- figs(name=paste0("tt.fig",waterbody_name), caption = paste0("Map of ",waterbody_name," Model Inputs."))
 tt_nua.cap <- figs(name="tt_fig_nu1", caption = "Map of North Umpqua River Spawning Period Models 1-4 Inputs.")
 tt_nub.cap <- figs(name="tt_fig_nu2", caption = "Map of North Umpqua River Spawning Period Model 5 Inputs.")
-
 # ---
 
 rmarkdown::render(input=paste0("model_QAPP.Rmd"),
