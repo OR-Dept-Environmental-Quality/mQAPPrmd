@@ -78,6 +78,8 @@ awqms.stations.temp <- df.stations.state %>%
 
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+
 # _ USGS flow data ----
 load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations & usgs.fl.data
 usgs.flow.stations <- usgs.fl.stations %>% 
@@ -209,11 +211,6 @@ lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"),
 
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
-
-# _ * general data for leaflet map ----
-save(lookup.huc,
-     project.areas,
-     file = paste0("./data/lookup.RData"))
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
@@ -391,7 +388,13 @@ qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#done <- c("Lower Willamette and Clackamas Subbasins",
+#          "Middle Willamette Subbasins",
+#          "Sandy Subbasin",
+#          "Southern Willamette Subbasins",
+#          "Willamette River Mainstem and Major Tributaries")
+
+# for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
 
 print(qapp_project_area)
 
@@ -618,7 +621,7 @@ if(qapp_project_area %in% c("Lower Willamette and Clackamas Subbasins",
   station.usgs.flow <- station.usgs.flow %>% 
     dplyr::left_join(df.stations[,c("MLocID","Reachcode")], by = c("site_no" = "MLocID")) %>% 
     dplyr::filter(!Reachcode %in% will_reachcodes) 
-  
+
 } 
 
 ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
@@ -919,7 +922,14 @@ save(df.stations,
      s,
      is.are,
      numbers.to.words,
-     file = paste0("./data/",file.name,".RData"))
+       #file = paste0("./data/",file.name,".RData"))
+       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,".RData"))
+  
+  # _ * general data for leaflet map ----
+  save(lookup.huc,
+       project.areas,
+       #file = paste0("./data/lookup.RData"))
+       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
 
 # _ Data output to Excel ----
 station.output.temp <- temp.stations %>% 
@@ -985,8 +995,10 @@ library(httr)
 library(geojsonsf)
 library(sf)
 
+# _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0("./data/lookup.RData"))
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                          layer = "project_areas") %>% 
@@ -1066,43 +1078,49 @@ qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette River Mainstem and Major Tributaries"),]$areas) {
-
-print(qapp_project_area)
-
-subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
-subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
-subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
-file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
-
-pro_area <- pro_areas %>% 
-  dplyr::filter(Project_Na == qapp_project_area)
-
-hs_temp_model_extent <- map_hs_temp_model_extent %>% 
-  dplyr::filter(Project_Na == qapp_project_area)
-
-hs_solar_model_extent <- map_hs_solar_model_extent %>% 
-  dplyr::filter(Project_Na == qapp_project_area)
-
-hs_solar_model_area <-  map_hs_solar_model_area %>% 
-  dplyr::filter(Project_Na == qapp_project_area)
-
-ce_model_extent <- map_ce_model_extent %>% 
-  dplyr::filter(Project_Na == qapp_project_area)
-
-sh_model_extent <- map_sh_model_extent %>% 
-  dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
-
-#tir_extent
-
-save(pro_area,
-     hs_temp_model_extent,
-     hs_solar_model_extent,
-     hs_solar_model_area,
-     ce_model_extent,
-     sh_model_extent,
-     #tir_extent,
-     pro.cat.45.tbl,
-     file = paste0("./data/map_",file.name,".RData"))
-
+#for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
+  
+  print(qapp_project_area)
+  
+  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
+  #load(paste0("./data/lookup.RData"))
+  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+  
+  subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
+  subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
+  subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
+  
+  pro_area <- pro_areas %>% 
+    dplyr::filter(Project_Na == qapp_project_area)
+  
+  hs_temp_model_extent <- map_hs_temp_model_extent %>% 
+    dplyr::filter(Project_Na == qapp_project_area)
+  
+  hs_solar_model_extent <- map_hs_solar_model_extent %>% 
+    dplyr::filter(Project_Na == qapp_project_area)
+  
+  hs_solar_model_area <-  map_hs_solar_model_area %>% 
+    dplyr::filter(Project_Na == qapp_project_area)
+  
+  ce_model_extent <- map_ce_model_extent %>% 
+    dplyr::filter(Project_Na == qapp_project_area)
+  
+  sh_model_extent <- map_sh_model_extent %>% 
+    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
+  
+  #tir_extent
+  
+  # _ Save Data ----
+  save(pro_area,
+       hs_temp_model_extent,
+       hs_solar_model_extent,
+       hs_solar_model_area,
+       ce_model_extent,
+       sh_model_extent,
+       #tir_extent,
+       pro.cat.45.tbl,
+       file = paste0("./data/map_",file.name,".RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
+  
+  
 #}
