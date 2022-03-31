@@ -74,6 +74,8 @@ load(paste0(data.dir.yg,c,"/mQAPPrmd/data/lookup.RData"))
 map.file.name <- paste0("map_", file.name)
 load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
 load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+# load(paste0("./data/",map.file.name,".RData")) # data.R
+# load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
 pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
