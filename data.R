@@ -390,13 +390,14 @@ snake_reachcodes <- pro.reaches %>%
 
 done <- c("Lower Willamette and Clackamas Subbasins",
           "Middle Willamette Subbasins",
+          "North Umpqua Subbasin",
           "Sandy Subbasin",
           "Southern Willamette Subbasins",
           "Willamette River Mainstem and Major Tributaries")
 
 for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
-  print(qapp_project_area)
+  print(paste0(qapp_project_area," QAPP data..."))
   
   # _ Project area and HUCs ----
   subbasin_num <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
@@ -1019,7 +1020,7 @@ pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
   dplyr::left_join(project.areas, by = c("Project_Na" = "areas")) %>% 
   #dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
   #dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>")) %>% 
-  dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) %>% 
+  dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) #%>% 
   #dplyr::arrange(EPA.Approval)
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
@@ -1080,7 +1081,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 
 for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
-  print(qapp_project_area)
+  print(paste0(qapp_project_area, " map data..."))
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   #load(paste0("./data/lookup.RData"))
@@ -1120,7 +1121,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
        #tir_extent,
        pro.cat.45.tbl,
        #file = paste0("./data/map_",file.name,".RData"))
-       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
+       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
   
   
 }
