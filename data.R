@@ -78,6 +78,8 @@ awqms.stations.temp <- df.stations.state %>%
 
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+
 # _ USGS flow data ----
 load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations & usgs.fl.data
 usgs.flow.stations <- usgs.fl.stations %>% 
@@ -179,8 +181,10 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Ati ", "ATI ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Bdc/", "BDC/") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "cmss", "CMSS") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Llc", "LLC") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ms4", "MS4") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Mwmc", "MWMC") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Nw ", "NW ") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odc", "ODC") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odfw", "ODFW") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
@@ -196,7 +200,6 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP")
 
-
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
 
 # _ Lookup table & Project areas ----
@@ -208,11 +211,6 @@ lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"),
 
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
-
-# _ * general data for leaflet map ----
-save(lookup.huc,
-     project.areas,
-     file = paste0("./data/lookup.RData"))
 
 # _ IR2018/20 Cat 4 & 5 ----
 cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
@@ -390,9 +388,16 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for (qapp_project_area in project.areas[which(!project.areas$areas == "Willamette River Mainstem and Major Tributaries"),]$areas) {
+#done <- c("Lower Willamette and Clackamas Subbasins",
+#          "Middle Willamette Subbasins",
+#          "North Umpqua Subbasin",
+#          "Sandy Subbasin",
+#          "Southern Willamette Subbasins",
+#          "Willamette River Mainstem and Major Tributaries")
+
+#for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
-  print(qapp_project_area)
+  print(paste0(qapp_project_area," QAPP data..."))
   
   # _ Project area and HUCs ----
   subbasin_num <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
@@ -919,6 +924,13 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
        is.are,
        numbers.to.words,
        file = paste0("./data/",file.name,".RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,".RData"))
+  
+  # _ * general data for leaflet map ----
+  save(lookup.huc,
+       project.areas,
+       #file = paste0("./data/lookup.RData"))
+       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -984,8 +996,10 @@ library(httr)
 library(geojsonsf)
 library(sf)
 
+# _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-load(paste0("./data/lookup.RData"))
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                          layer = "project_areas") %>% 
@@ -1004,10 +1018,10 @@ pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                                          Project_Na == "Walla Walla Subbasin" ~ "#78c679", #green
                                          Project_Na == "Willow Creek Subbasin" ~ "#78c679")) %>%  #green
   dplyr::left_join(project.areas, by = c("Project_Na" = "areas")) %>% 
-  dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
+  #dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
   #dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>")) %>% 
-  dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) %>% 
-  dplyr::arrange(EPA.Approval)
+  dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) #%>% 
+  #dplyr::arrange(EPA.Approval)
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
                            layer = "TempTMDL_QAPP_Reaches") %>% 
@@ -1065,14 +1079,17 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for (qapp_project_area in project.areas[which(!project.areas$areas=="Willamette River Mainstem and Major Tributaries"),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
-  print(qapp_project_area)
+  print(paste0(qapp_project_area, " map data..."))
+  
+  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
+  #load(paste0("./data/lookup.RData"))
+  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
   subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC12)
-  file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
@@ -1094,6 +1111,7 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
   
   #tir_extent
   
+  # _ Save Data ----
   save(pro_area,
        hs_temp_model_extent,
        hs_solar_model_extent,
@@ -1103,5 +1121,6 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
        #tir_extent,
        pro.cat.45.tbl,
        file = paste0("./data/map_",file.name,".RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
   
 #}

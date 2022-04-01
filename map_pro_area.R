@@ -23,9 +23,11 @@ library(geojsonsf)
 library(base64enc)
 
 map.dir <-  "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/map/area_maps/"
-#data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
 
 source("map_functions.R")
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 #lgnd <- base64enc::base64encode("./fig/legend.png")
 logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
@@ -62,13 +64,18 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Willow Creek Subbasin"
 
 #for(qapp_project_area in sort(qapp_project_areas$areas)) {
+  
+file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
-#load(paste0(data.dir.yg,qapp_project_areas[which(qapp_project_areas$areas==qapp_project_area),]$folder,"/mQAPPrmd/data/lookup.RData"))
+#load(paste0(data.dir.yg,c,"/mQAPPrmd/data/lookup.RData"))
 load(paste0("./data/lookup.RData"))
 
-map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
+map.file.name <- paste0("map_", file.name)
+#load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
+#load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
 load(paste0("./data/",map.file.name,".RData")) # data.R
 load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+
 pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
@@ -192,7 +199,8 @@ print(qapp_project_area)
 map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
 map_basic <- leaflet::leaflet() %>%
   leaflet::addControl(map.title, position = "topleft", className="map-title") %>% 
-  leaflet::addMiniMap(position = "bottomright",
+  leaflet::addMiniMap(tiles = providers$Esri.NatGeoWorldMap,
+                      position = "bottomright",
                       width = 200,
                       height = 150,
                       zoomLevelFixed = 5,
@@ -201,7 +209,7 @@ map_basic <- leaflet::leaflet() %>%
   leaflet.extras::addResetMapButton() %>% 
   leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                      lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
-  leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>% 
+  leaflet::addMapPane("Esri.NatGeoWorldMap", zIndex = -2000) %>% 
   leaflet::addMapPane("aerial", zIndex = -1100) %>% 
   leaflet::addMapPane("hydrotiles", zIndex = -1050) %>%
   leaflet::addMapPane("area", zIndex = -1000) %>%
@@ -219,8 +227,9 @@ map_basic <- leaflet::leaflet() %>%
   leaflet::addMapPane("mod2009", zIndex = -200) %>%
   leaflet::addMapPane("node", zIndex = -100) %>%
   leaflet::addMapPane("marker", zIndex = 100) %>%
-  leaflet::addProviderTiles("OpenStreetMap",group = "OpenStreetMap",
-                            options = pathOptions(pane = "OpenStreetMap")) %>% 
+  #leaflet::addProviderTiles("OpenStreetMap",group = "OpenStreetMap",
+  leaflet::addProviderTiles(providers$Esri.NatGeoWorldMap, #name(providers) to see a list of the layers
+                            options = pathOptions(pane = "Esri.NatGeoWorldMap")) %>% 
   # __ Oregon Imagery ----
 leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
                                    group = "Oregon Imagery",
