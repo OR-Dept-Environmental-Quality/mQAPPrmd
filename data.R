@@ -390,6 +390,7 @@ qapp_project_area = "John Day River Basin"
 
 #done <- c("Lower Willamette and Clackamas Subbasins",
 #          "Middle Willamette Subbasins",
+#          "North Umpqua Subbasin",
 #          "Sandy Subbasin",
 #          "Southern Willamette Subbasins",
 #          "Willamette River Mainstem and Major Tributaries")
@@ -1080,7 +1081,7 @@ qapp_project_area = "John Day River Basin"
 
 #for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
-  print(qapp_project_area)
+  print(paste0(qapp_project_area, " map data..."))
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   #load(paste0("./data/lookup.RData"))
@@ -1120,7 +1121,6 @@ qapp_project_area = "John Day River Basin"
        #tir_extent,
        pro.cat.45.tbl,
        file = paste0("./data/map_",file.name,".RData"))
-       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
-  
-  
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
+
 #}
