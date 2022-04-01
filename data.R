@@ -924,13 +924,13 @@ qapp_project_area = "South Umpqua and Umpqua Subbasins"
        is.are,
        numbers.to.words,
        file = paste0("./data/",file.name,".RData"))
-  #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,".RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,".RData"))
   
   # _ * general data for leaflet map ----
   save(lookup.huc,
        project.areas,
-       #file = paste0("./data/lookup.RData"))
-       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+       file = paste0("./data/lookup.RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -1021,7 +1021,7 @@ pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
   #dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
   #dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>")) %>% 
   dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) #%>% 
-#dplyr::arrange(EPA.Approval)
+  #dplyr::arrange(EPA.Approval)
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
                            layer = "TempTMDL_QAPP_Reaches") %>% 
