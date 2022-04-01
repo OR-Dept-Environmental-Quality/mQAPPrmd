@@ -876,7 +876,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
     tidyr::drop_na(Stream)
-
+  
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
@@ -1021,7 +1021,7 @@ pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
   #dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
   #dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>")) %>% 
   dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) #%>% 
-  #dplyr::arrange(EPA.Approval)
+#dplyr::arrange(EPA.Approval)
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
                            layer = "TempTMDL_QAPP_Reaches") %>% 
