@@ -929,8 +929,8 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
   # _ * general data for leaflet map ----
   save(lookup.huc,
        project.areas,
-       #file = paste0("./data/lookup.RData"))
-       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+       file = paste0("./data/lookup.RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -1084,8 +1084,8 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
   print(paste0(qapp_project_area, " map data..."))
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
-  #load(paste0("./data/lookup.RData"))
-  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+  load(paste0("./data/lookup.RData"))
+  #load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
