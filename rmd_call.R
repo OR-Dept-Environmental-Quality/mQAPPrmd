@@ -1,7 +1,7 @@
 library(rmarkdown)
 
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/202201"
+output.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/test_doc/202203"
 
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
