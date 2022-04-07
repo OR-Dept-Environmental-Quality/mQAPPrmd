@@ -341,7 +341,7 @@ t54_hydromet <- flow.stations %>%
 
 t54_sp <- model.input %>% 
   dplyr::filter(`Parameter` %in% c("Flow")) %>%
-  dplyr::filter(!`Model Location Type` == "Point of Diversion") %>% 
+  dplyr::filter(!`Model Location Type` %in% c("Point of Diversion","Point Source")) %>% 
   dplyr::filter(!`Data Source` == "USGS") %>% 
   dplyr::filter(!is.na(`Data Source`)) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
@@ -751,19 +751,7 @@ chap6 <- NULL
 
 for(waterbody_name in unique(sort(model.info[!model.info$`Model version` == "SHADOW",]$`Model Waterbody`))){
   
-  if(!qapp_project_area == "North Umpqua Subbasin"){
-    
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
-    
-    
-  } else {
-    
-    #if(!waterbody_name == "Fish Creek (2009)"){
-    
-    chap6 <- c(chap6, knitr::knit_child(input = "chap6_nu.Rmd", envir = globalenv()))
-    
-    #}
-  }
+  chap6 <- c(chap6, knitr::knit_child(input = "chap6.Rmd", envir = globalenv()))
   
 }
 
@@ -1140,7 +1128,7 @@ The modeling framework needs for this project include:
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) meets all these model framework needs and was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was used to model several streams for the development of TMDLs in the `r paste0(qapp_project_area," (",knitr::combine_words(unique(sort(model.info$'Abbreviated Reference'))),")")``. Because these models already exist and meet all the model framework needs, Heat Source was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
 
@@ -1159,7 +1147,7 @@ The meteorological data obtained from the NCDC includes the Local Climatological
 
 ## Thermal Infrared Radiometry (TIR) data
 
-DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r sort(unique(t52_ref$'Abbreviated Reference'))`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
+DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrared Radiometry (TIR) imagery of spatial temperature patterns within the `r qapp_project_area` (`r paste0(sort(unique(t52_ref$'Abbreviated Reference')),collapse="; ")`). TIR data is used to characterize the thermal regime of the streams and habitat quality. All streams and the TIR collection dates are summarized in `r tbls(name = "t52", display="cite")`.
 
 `r if(NROW(t52)>0){t52_tbl}`
 
@@ -1332,7 +1320,7 @@ $$RMSE = \sqrt{\frac{1}{n}\sum(X_{mod} - X_{obs})^2} \hspace{3em}\text{Equation 
 
 **Nash-Sutcliffe efficiency coefficient (NS)**: Nash-Sutcliffe efficiencies can range from -$\infty$ to 1. An efficiency of 1 corresponds to a perfect match of modeled predicted value to the observed data. An efficiency of 0 indicates that the model predictions are as accurate as the mean of the observed data, whereas an efficiency less than zero occurs when the observed mean is a better predictor than the model.
 
-$$NS = 1 - \frac {\sum (X_{mod} - X_{obs})^2}{\sum (X_{mod} - \overline{X_{obs}})^2}  \hspace{3em}\text{Equation 8}$$
+$$NS = 1 - \frac {\sum (X_{obs} - X_{mod})^2}{\sum (X_{obs} - \overline{X_{obs}})^2}  \hspace{3em}\text{Equation 8}$$
 
 where,  
 $X_{mod}$ = The model predicted results;  
@@ -1390,15 +1378,9 @@ This scenario is specific to the shade models and evaluates the effective shade 
 
 *	All other model inputs will be the same as the current condition model.    
 
-## Restored stream flow
+## Stream flow
 
-This scenario evaluates stream temperature response by changing permitted water withdrawals to instream flow. The stream temperature warming or cooling from keeping permitted water withdrawals as instream flow is evaluated by comparing this scenario to the current conditions model scenario. Assumptions and methods used to estimate restored stream flow will be documented in the TMDL. Elements of this scenario or scenarios may include:
-
-*	Maintaining all currently permitted water withdrawals as instream flow in order to increase the thermal loading capacity and reduce stream warming.    
-
-*	Model boundary and tributary flows will be set to reflect the additional instream flows.    
-
-*	All other model inputs will be the same as the current condition model.    
+This scenario evaluates the stream temperature response from water withdrawals. The stream temperature warming or cooling is evaluated by comparing the water withdrawal scenario to a model scenario with the stream flow rates set to a natural flow. Assumptions and methods used to estimate natural stream flow will be documented in the TMDL.   
 
 ## Tributary temperatures
 
