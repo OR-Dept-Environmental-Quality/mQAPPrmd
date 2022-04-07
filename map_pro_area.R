@@ -897,8 +897,7 @@ leaflet::addControl(position = "bottomleft", className = "logo",
 
 # SAVE DATA ----
 print(paste0(qapp_project_area,"...Save the map"))
-htmlwidgets::saveWidget(map_final, paste0(map.dir,map.file.name,".html"), 
-                        #background = "transparent", 
-                        selfcontained = TRUE)
+htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
+file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
 
 #}

@@ -390,13 +390,14 @@ qapp_project_area = "North Umpqua Subbasin"
 
 #done <- c("Lower Willamette and Clackamas Subbasins",
 #          "Middle Willamette Subbasins",
+#          "North Umpqua Subbasin",
 #          "Sandy Subbasin",
 #          "Southern Willamette Subbasins",
 #          "Willamette River Mainstem and Major Tributaries")
 
 #for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
-  print(qapp_project_area)
+  print(paste0(qapp_project_area," QAPP data..."))
   
   # _ Project area and HUCs ----
   subbasin_num <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
@@ -877,7 +878,7 @@ qapp_project_area = "North Umpqua Subbasin"
     dplyr::filter(Project_Na == qapp_project_area) %>% 
     dplyr::mutate(text = ifelse(text=="NA", "Open Water",text)) %>% 
     tidyr::drop_na(Stream)
-
+  
   # _ DMA ----
   dma.pro.area <- dma.tbl %>% 
     dplyr::ungroup() %>% 
@@ -1000,7 +1001,7 @@ library(sf)
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
 data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
-project.areas
+project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                          layer = "project_areas") %>% 
@@ -1019,10 +1020,10 @@ pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
                                          Project_Na == "Walla Walla Subbasin" ~ "#78c679", #green
                                          Project_Na == "Willow Creek Subbasin" ~ "#78c679")) %>%  #green
   dplyr::left_join(project.areas, by = c("Project_Na" = "areas")) %>% 
-  dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
+  #dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
   #dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>")) %>% 
-  dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) %>% 
-  dplyr::arrange(EPA.Approval)
+  dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) #%>% 
+  #dplyr::arrange(EPA.Approval)
 
 pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
                            layer = "TempTMDL_QAPP_Reaches") %>% 
@@ -1082,7 +1083,7 @@ qapp_project_area = "North Umpqua Subbasin"
 
 #for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
-  print(qapp_project_area)
+  print(paste0(qapp_project_area, " map data..."))
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   load(paste0("./data/lookup.RData"))
@@ -1122,6 +1123,6 @@ qapp_project_area = "North Umpqua Subbasin"
        #tir_extent,
        pro.cat.45.tbl,
        file = paste0("./data/map_",file.name,".RData"))
-       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
   
 #}
