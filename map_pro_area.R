@@ -200,7 +200,7 @@ print(qapp_project_area)
 map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
 map_basic <- leaflet::leaflet() %>%
   leaflet::addControl(map.title, position = "topleft", className="map-title") %>% 
-  leaflet::addMiniMap(tiles = providers$Esri.NatGeoWorldMap,
+  leaflet::addMiniMap(tiles = providers$OpenStreetMap,
                       position = "bottomright",
                       width = 200,
                       height = 150,
@@ -210,7 +210,7 @@ map_basic <- leaflet::leaflet() %>%
   leaflet.extras::addResetMapButton() %>% 
   leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                      lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
-  leaflet::addMapPane("Esri.NatGeoWorldMap", zIndex = -2000) %>% 
+  leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>% 
   leaflet::addMapPane("aerial", zIndex = -1100) %>% 
   leaflet::addMapPane("hydrotiles", zIndex = -1050) %>%
   leaflet::addMapPane("area", zIndex = -1000) %>%
@@ -228,9 +228,8 @@ map_basic <- leaflet::leaflet() %>%
   leaflet::addMapPane("mod2009", zIndex = -200) %>%
   leaflet::addMapPane("node", zIndex = -100) %>%
   leaflet::addMapPane("marker", zIndex = 100) %>%
-  #leaflet::addProviderTiles("OpenStreetMap",group = "OpenStreetMap",
-  leaflet::addProviderTiles(providers$Esri.NatGeoWorldMap, #name(providers) to see a list of the layers
-                            options = pathOptions(pane = "Esri.NatGeoWorldMap")) %>% 
+  leaflet::addProviderTiles(providers$OpenStreetMap, #names(providers) to see a list of the layers
+                            options = pathOptions(pane = "OpenStreetMap")) %>% 
   # __ Oregon Imagery ----
 leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
                                    group = "Oregon Imagery",
