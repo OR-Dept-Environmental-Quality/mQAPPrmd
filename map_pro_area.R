@@ -63,11 +63,11 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-#for(qapp_project_area in sort(qapp_project_areas$areas)) {
+#for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy Subbasin"),]$areas)) {
   
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
-#load(paste0(data.dir.yg,c,"/mQAPPrmd/data/lookup.RData"))
+#load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
 load(paste0("./data/lookup.RData"))
 
 map.file.name <- paste0("map_", file.name)
@@ -156,7 +156,6 @@ dta.stations <- data.frame(project_area = qapp_project_area,
 dta.stations.mod <- rbind(dta.mod,dta.stations)
 
 # IR group names ----
-
 sub.tcat45 <- tcat45 %>% 
   dplyr::filter(`Use Period` == "Spawning, Year Round") %>% 
   tidyr::separate(col = `Use Period`, into = c("up1","up2"), sep = ", ") %>% 
@@ -168,8 +167,8 @@ irs <- tcat45 %>%
   rbind(sub.tcat45) %>% 
   dplyr::mutate(ir.grps = ifelse(substr(`Assessment Unit ID`,4,5) == "SR" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Streams (Year Round Criteria)",
                                  ifelse(substr(`Assessment Unit ID`,4,5) == "SR" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Streams (Spawning Criteria)",
-                                        ifelse(substr(`Assessment Unit ID`,4,5) == "LK" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Waterbodies (Year Round Criteria)",
-                                               ifelse(substr(`Assessment Unit ID`,4,5) == "LK" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Waterbodies (Spawning Criteria)",
+                                        ifelse(substr(`Assessment Unit ID`,4,5) %in% c("LK","EB") & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Waterbodies (Year Round Criteria)",
+                                               ifelse(substr(`Assessment Unit ID`,4,5) %in% c("LK","EB") & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Waterbodies (Spawning Criteria)",
                                                       ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Watershed (Year Round Criteria)",
                                                              ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Watershed (Spawning Criteria)",NA)))))))
 
@@ -218,14 +217,11 @@ map_basic <- leaflet::leaflet() %>%
   leaflet::addMapPane("huc12", zIndex = -700) %>%
   leaflet::addMapPane("wqs1", zIndex = -60) %>%
   leaflet::addMapPane("wqs2", zIndex = -50) %>%
-  leaflet::addMapPane("ir1", zIndex = -40) %>%
-  leaflet::addMapPane("ir2", zIndex = -40) %>%
-  leaflet::addMapPane("ir3", zIndex = -40) %>%
+  leaflet::addMapPane("ir", zIndex = -40) %>%
   leaflet::addMapPane("mod", zIndex = -300) %>%
   leaflet::addMapPane("modbes", zIndex = -350) %>%
   leaflet::addMapPane("mod2016", zIndex = -200) %>%
   leaflet::addMapPane("mod2009", zIndex = -200) %>%
-  leaflet::addMapPane("node", zIndex = -100) %>%
   leaflet::addMapPane("marker", zIndex = 100) %>%
   leaflet::addProviderTiles(providers$OpenStreetMap, #names(providers) to see a list of the layers
                             options = pathOptions(pane = "OpenStreetMap")) %>% 
@@ -325,7 +321,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                   options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                   useServiceSymbology = TRUE,
                                   group = "2018/2020 303(d) Temperature Listed - Streams (Year Round Criteria)",
-                                  pathOptions = leaflet::pathOptions(pane="ir3"),
+                                  pathOptions = leaflet::pathOptions(pane="ir"),
                                   color = "red",
                                   weight = 3,
                                   opacity = 0.8,
@@ -351,7 +347,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 303(d) Temperature Listed - Streams (Spawning Criteria)",
-                                    pathOptions = leaflet::pathOptions(pane="ir3"),
+                                    pathOptions = leaflet::pathOptions(pane="ir"),
                                     color = "red",
                                     weight = 3,
                                     opacity = 0.8,
@@ -377,7 +373,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 303(d) Temperature Listed - Waterbodies (Year Round Criteria)",
-                                    pathOptions = leaflet::pathOptions(pane="ir2"),
+                                    pathOptions = leaflet::pathOptions(pane="ir"),
                                     color = "red",
                                     weight = 2,
                                     opacity = 0.8,
@@ -405,7 +401,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 303(d) Temperature Listed - Waterbodies (Spawning Criteria)",
-                                    pathOptions = leaflet::pathOptions(pane="ir2"),
+                                    pathOptions = leaflet::pathOptions(pane="ir"),
                                     color = "red",
                                     weight = 2,
                                     opacity = 0.8,
@@ -433,7 +429,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 303(d) Temperature Listed - Watershed (Year Round Criteria)",
-                                    pathOptions = leaflet::pathOptions(pane="ir1"),
+                                    pathOptions = leaflet::pathOptions(pane="ir"),
                                     color = "red",
                                     weight = 1,
                                     opacity = 0.8,
@@ -461,7 +457,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                     options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
                                     useServiceSymbology = TRUE,
                                     group = "2018/2020 303(d) Temperature Listed - Watershed (Spawning Criteria)",
-                                    pathOptions = leaflet::pathOptions(pane="ir1"),
+                                    pathOptions = leaflet::pathOptions(pane="ir"),
                                     color = "red",
                                     weight = 1,
                                     opacity = 0.8,
