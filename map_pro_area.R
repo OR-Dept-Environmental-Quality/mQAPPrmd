@@ -47,12 +47,11 @@ tag.map.title <- tags$style(HTML("
 "))
 
 # PROJECT AREA MAPS ----
-
 ## for test:
 # qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
-# qapp_project_area = "Malheur River Subbasins"
+qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
@@ -64,18 +63,19 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy Subbasin"),]$areas)) {
+#for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy Subbasin"),]$areas)) {
   
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 
-load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
-#load(paste0("./data/lookup.RData"))
+#load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+load(paste0("./data/lookup.RData"))
 
 map.file.name <- paste0("map_", file.name)
 load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
 load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
 # load(paste0("./data/",map.file.name,".RData")) # data.R
 # load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+
 pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
@@ -894,4 +894,4 @@ print(paste0(qapp_project_area,"...Save the map"))
 htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
 file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
 
-}
+#}
