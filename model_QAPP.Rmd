@@ -969,7 +969,7 @@ Load allocations are portions of the loading capacity that are allocated to back
 
 $$TMDL = \sum WLA + \sum LA + \textit {Reserve Capacity} + MOS  \hspace{3em}\text{Equation 1}$$
 
-Where $\sum {WLA}$ is the sum of wasteload allocations (NPDES permitted sources), $\sum {LA}$ is the sum of load allocations (nonpoint sources and background), Reserve Capacity is allocations reserved for future uses, and MOS is a margin-of-safety to account for uncertainty. For a temperature TMDL, these elements establish the maximum thermal loads that a waterbody may receive without exceeding applicable water quality standards for temperature designed to protect aquatic life and other beneficial uses.
+Where $\sum {WLA}$ is the sum of wasteload allocations (NPDES permitted sources), $\sum {LA}$ is the sum of load allocations (nonpoint sources and background), *Reserve Capacity* is allocations reserved for future uses, and *MOS* is a margin-of-safety to account for uncertainty. For a temperature TMDL, these elements establish the maximum thermal loads that a waterbody may receive without exceeding applicable water quality standards for temperature designed to protect aquatic life and other beneficial uses.
 
 The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list. The `r paste0(qapp_project_area, if(str_sub(qapp_project_area,-1,-1) == "s"){paste0(" include")}else{paste0(" includes")})` several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature (`r tbls(name = "tcat5", display="cite")`). `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL was previously developed for the ", qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Abbreviated Reference"))),sep = "; "), ") but it must be replaced due to recent litigation.")}else{paste0("TMDLs were previously developed for the ",qapp_project_area, " (", knitr::combine_words(strip_alpha(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Abbreviated Reference"))),sep = "; "), ") but they must be replaced due to recent litigation.")}`
 
@@ -1137,7 +1137,7 @@ DEQ has developed Heat Source models (version 8) for the mainstem, North Fork an
 
 6)	Ability to evaluate hourly stream temperature response from changes in effluent temperature and flow discharge from NPDES permitted facilities.  
 
-The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was used to model several streams for the development of TMDLs in the `r paste0(qapp_project_area," (",knitr::combine_words(unique(sort(model.info$'Abbreviated Reference'))),")")``. Because these models already exist and meet all the model framework needs, Heat Source was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
+The Heat Source stream thermodynamics model (Boyd and Kasper, 2003) was used to model several streams for the development of TMDLs in the `r paste0(qapp_project_area," (",knitr::combine_words(unique(sort(model.info$'Abbreviated Reference'))),")")`. Because these models already exist and meet all the model framework needs, Heat Source was selected for stream temperature simulation in the project area. The Heat Source model was originally developed at Oregon State University as a master’s thesis where it was evaluated and approved by an academic committee (Boyd, 1996). Development of the model continued and in 1999 DEQ submitted the model equations and methodology for peer review (DEQ, 1999) and again in 2004 to the Independent Multidisciplinary Science Team (IMST, 2004) where the model was found to be scientifically sound.
 
 The Heat Source model has been used in numerous stream temperature related studies including Loheide and Gorelick (2006), Diabat et al. (2013), Holzapfel et al. (2013), Lawrence et al.  (2014), Bond et al. (2015), Woltemade and Hawkins (2016), Justice et al. (2017), and Wondzell et al. (2019). Heat Source has also been used in numerous Oregon TMDLs (DEQ, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2010, 2018, 2019).
 
@@ -1162,7 +1162,7 @@ DEQ contracted with Watershed Sciences, Inc. to provide airborne Thermal Infrare
 
 ## Continuous stream temperature data
 
-All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS), USGS’s National Water Information System (NWIS), or were obtained during the data solicitation for DEQ’s Temperature TMDL Replacement Project. Some temperature data presented in this QAPP were retrieved from DEQ’s files and were not available in AWQMS or USGS’s database.
+All available continuous stream temperature data were retrieved from DEQ’s Ambient Water Quality Monitoring System (AWQMS), USGS’s National Water Information System (NWIS), or were obtained during the data solicitation for DEQ’s temperature TMDL replacement project. Some temperature data presented in this QAPP were retrieved from DEQ’s files and were not available in AWQMS or USGS’s database.
 
 The data retrieval period for continuous stream temperature data is from January 1, 1990 to December 31, 2020. Data retrieved from the AWQMS database has a Data Quality Level (DQL) of A, B or E and a result status of “Final” or “Provisional”. The data quality level criteria are outlined in DEQ’s Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results with a data quality level of A, B, or E (DEQ, 2021). Data of unknown quality are used after careful review.
 
@@ -1361,7 +1361,7 @@ DEQ will review and respond to any public comments received on the model and mod
 
 # Management scenarios
 
-Management scenarios described in this section summarize the means by which the current conditions and other alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario has already been developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
+Management scenarios described in this section summarize the means by which sources of stream warming and different management alternatives will be evaluated. Some of these model scenarios may not be developed due to lack of sufficient data and information, because the management scenario is not applicable to the specific waterbody, or because it is determined the scenario will require an effort and timeline that does not align with the project schedule or available resources. In some cases, the management scenario has already been developed as part of the previous TMDL and does not need further adjustment. DEQ will review all available data and information during model development and document final model scenario decisions, setup, and results in the TMDL technical appendix.
 
 ## Current conditions
 
@@ -1385,13 +1385,13 @@ This scenario evaluates the stream temperature response with streamside vegetati
 
 ## Protected vegetation
 
-This scenario is specific to the shade models and evaluates the effective shade response from only streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). The purpose of this scenario is to determine the amount of effective shade contributed by streamside vegetation in unprotected areas and if existing management strategies are sufficient to achieve allocations and surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. The amount of effective shade contributed by streamside vegetation in unprotected areas is evaluated by comparing this scenario to the current condition model. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
+This set of scenarios evaluate the amount of effective shade contributed by streamside vegetation along the stream that is currently protected by statue, rule, ordinance, or some other approved management plan (voluntary or regulatory). Multiple scenarios may be developed to evaluate different aspects of management plans and protection policies. The purpose of this scenario is to determine the amount of effective shade contributed by streamside vegetation in protected areas and if existing management strategies are sufficient to achieve TMDL allocations and surrogate measure effective shade targets. This scenario may be a subset of the TMDL implementation scenario. Attainment of the effective shade targets and allocations assigned to riparian management nonpoint sources are evaluated by comparing this scenario to the background model scenario. Elements of this scenario or scenarios may include:
 
 *	Identifying streamside vegetation areas along the model extent that are protected and will not be removed. The exact definition of a protected area will be determined during the TMDL process.    
 
 *	Model inputs for land cover height, density, and overhang outside protected areas will be set to zero.     
 
-*	Model inputs for land cover height, density, and overhang inside protected areas will be set to current conditions.  
+*	Model inputs for land cover height, density, and overhang inside protected areas will be set to current conditions or restored conditions depending on the scenario.  
 
 *	All other model inputs will be the same as the current condition model.    
 
@@ -1437,7 +1437,7 @@ This scenario evaluates the stream temperature response from removing point sour
 
 ## TMDL wasteload allocations
 
-This scenario evaluates stream temperature warming or cooling from the TMDL wasteload allocations. These scenarios will be compared to the background model scenario to evaluate attainment of the human use allowance allocations. Numeric or narrative wasteload allocations will be developed for all NPDES permittees but some of the permittees may not be included in this model scenario due to availability of effluent data, lack of discharge, or because the discharge is not a significant source or thermal loading. Elements of this scenario or scenarios may include:    
+This scenario evaluates stream temperature warming or cooling from the TMDL wasteload allocations. These scenarios will be compared to the no point source model scenario to evaluate attainment of the human use allowance allocations. Numeric or narrative wasteload allocations will be developed for all NPDES permittees but some of the permittees may not be included in this model scenario due to availability of effluent data, lack of discharge, or because the discharge is not a significant source or thermal loading. Elements of this scenario or scenarios may include:    
 
 *	Modifying point source discharges to reflect proposed or existing TMDL wasteload allocations.    
 
@@ -1532,11 +1532,13 @@ Routine maintenance of DEQ’s computers and servers is performed by in-house co
 
 All data and documents generated during the course of the TMDL project will be archived according to the current Oregon State Archives Records Retention Schedules. Generally TMDL documents will be retained until 15 years after the TMDL is no longer operational. 
 
-Records that are stored in electronic format will be located in either the TMDL project folder or Master TMDL folder located on DEQ’s TMDL server. The TMDL project folder will contain at minimum the following subfolders: “Project Plans”, “Data”, “Models”, and “Meetings”. Alternative names and additional subfolders can be used as appropriate. The Master TMDL folder will contain the written TMDL documents (Word, PDF) along with supporting written documents that support the public comment period and TMDL issuance. The contents and organization of these subfolders is described below.
+Records that are stored in electronic format will be located in either the TMDL project folder or Master TMDL folder located on DEQ’s TMDL server. The TMDL project folder will contain at minimum the following subfolders: “Project Plans”, “Data”, “NPDES”, “Models”, and “Meetings”. Alternative names and additional subfolders can be used as appropriate. The Master TMDL folder will contain the written TMDL documents (Word, PDF) along with supporting written documents that support the public comment period and TMDL issuance. The contents and organization of these subfolders is described below.
 
 Project Plans: All documents related to project planning, project proposals, project schedules, and the modeling QAPPs. Each will reside in their relevant subfolders. The final versions of documents will be clearly identified from drafts and ideally located in separate folders.
 
-Data: All field data organized or collected in support of the TMDL project. This may include water quality samples, NPDES effluent data, field sheets, photos, monitoring metadata, sampling project plans, or other documentation. The data should be organized by parameter and data source if possible.
+Data: All field data organized or collected in support of the TMDL project. This may include water quality samples, field sheets, photos, monitoring metadata, third party sampling project plans, or other documentation. The data should be organized by parameter and data source if possible.
+
+NPDES: All available NPDES effluent data, discharge monitoring reports, copies of NPDES permits, and related information. Data and permit information will be organized for each permittee and located in separate subfolders.
 
 Models: All models used for the TMDL project including calibration and scenario models. The models should be organized into subfolders for each model domain and model scenario. Draft models and the final TMDL models will be clearly identified and ideally saved in separate folders. The model folders should include:
 

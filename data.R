@@ -189,6 +189,7 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Odfw", "ODFW") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Odot", "ODOT") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ohsu", "OHSU") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "R.u.s.a.", "R.U.S.A.") %>% #South Umpqua
   dplyr::mutate_at("Common Name", str_replace_all, "Slli", "SLLI") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Stp", "STP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Usa", "USA") %>% 
@@ -198,6 +199,7 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Wpcp", "WPCP") %>% 
   dplyr::mutate_at("Common Name", str_replace_all, "Wrf", "WRF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "wrf", "WRF") %>%
+  dplyr::mutate_at("Common Name", str_replace_all, "Wwtf", "WWTF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP")
 
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
@@ -565,7 +567,8 @@ qapp_project_area = "John Day River Basin"
     dplyr::mutate(Organization = ifelse(Organization == "WALLAWALLA_WC(NOSTORETID)", "Walla Walla Basin Watershed Council", Organization)) %>%
     dplyr::mutate(Organization = ifelse(Organization == "WEYERHAUSER(NOSTORETID)", "Weyerhaeuser", Organization)) %>% 
     dplyr::mutate(Station = ifelse(Station == "Zig Zag River", "Zigzag River", Station)) %>% # Sandy
-    dplyr::mutate(Station = ifelse(Station == "ZigZag R at Forest Boundary_LTWT", "Zigzag River at Forest Boundary_LTWT", Station)) # Sandy
+    dplyr::mutate(Station = ifelse(Station == "ZigZag R at Forest Boundary_LTWT", "Zigzag River at Forest Boundary_LTWT", Station)) %>%  # Sandy
+    dplyr::mutate(Station = ifelse(Station == "Iron Moutain Creek", "Iron Mountain Creek", Station)) # South Umpqua
   
   temp.data <- awqms.data.temp %>% 
     dplyr::filter(MLocID %in% station.awqms.temp$`Station ID`) %>%
