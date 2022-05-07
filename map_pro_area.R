@@ -679,7 +679,24 @@ if(qapp_project_area == "North Umpqua Subbasin") {
 
 # __ Rogue River Basin ----
 if(qapp_project_area == "Rogue River Basin") {
+  
+  # ____ * New models: Applegate and Little Applegate ----
+  map_hs_applegate_and_little_applegate <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/applegate_and_little applegate.shp",
+                                                       layer = "applegate_and_little applegate") %>% 
+    sf::st_transform(4326) %>% 
+    sf::st_zm() 
+  
   map_area <- map_basic %>% 
+    # __ Applegate and Little Applegate
+    leaflet::addPolylines(data = map_hs_applegate_and_little_applegate,
+                          group = "Heat Source Temperature Model Extent (New Models)",
+                          options = leaflet::leafletOptions(pane="mod2009"),
+                          label = ~Stream,
+                          labelOptions = labelOptions(style = list("color" = "black",
+                                                                   "font-size" = "20px")),
+                          color = "#993404",
+                          opacity = 0.5,
+                          weight = 10) %>% 
     hsTempModel(hs_temp_model_extent) %>% 
     shModel(sh_model_extent) %>% 
     tempStation.markers(temp_stations) %>% 
@@ -691,9 +708,11 @@ if(qapp_project_area == "Rogue River Basin") {
     indPS.markers(ind_ps) %>% 
     genPS.markers(gen_ps) %>% 
     #effectiveShade.markers(shade) %>% 
-    leaflet::addLayersControl(overlayGroups = group.names,
+    leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+                                                group.names),
                               options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
-    leaflet::hideGroup(group.names.hide)
+    leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
+                         group.names.hide))
 }
 
 # __ Sandy Subbasin ----

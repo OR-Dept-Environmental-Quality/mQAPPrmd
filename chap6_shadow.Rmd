@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "North Umpqua River"
+# only for Rogue River Basin
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name) %>% 
@@ -37,7 +37,9 @@ model.extent <- na.omit(model.extent)
 
 ## `r waterbody_name`
 
-`r paste0("The ",gsub("SHADOW ","",waterbody_name)," SHADOW models are shade models developed by the ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),". DEQ does not intend to update these models. If the need arises to revisit some of the modeling, this QAPP will be updated as needed. The model setup is described in the original ", section.model.info$'TMDL Document'," (", section.model.info$Cite_inText, ").")`
+`r if(!waterbody_name == "SHADOW Bear Creek Watershed"){paste0("The ",gsub("SHADOW ","",waterbody_name)," SHADOW models are shade models developed by the ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),". DEQ does not intend to update these models. If the need arises to revisit some of the modeling, this QAPP will be updated as needed. The model setup is described in the original ", section.model.info$'TMDL Document'," (", section.model.info$Cite_inText, ").")}else{paste0("The Bear Creek Watershed SHADOW models are shade models developed by the USFS. The model setup for the USFS SHADOW models are described in the original Bear Creek Watershed TMDL (DEQ, 2007). DEQ does not intend to update these models but will include the model results in the updated TMDL. If the need arises to revisit some of these models, this QAPP will be updated as needed.")}`
+
+`r if(waterbody_name == "SHADOW Bear Creek Watershed"){paste0("The BLM has also developed SHADOW shade models on BLM administered lands for 14 different streams in the Bear Creek watershed (BLM, 2006 and BLM, 2008). DEQ is exploring the possibility of including the BLM models in the updated TMDL. Additional discussion with BLM is needed. DEQ also needs to review the model and determine the model setup and calibration results achieve the quality acceptance criteria identified in Section 7. If the models are used for the TMDL, documentation of the models will follow the same procedures outlined in Section 8.")}`
 
 ### Model domain
 
@@ -48,4 +50,3 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 ```
 
 The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix C.
-
