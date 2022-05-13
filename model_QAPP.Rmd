@@ -71,12 +71,20 @@ huc8.txt <- lookup.huc %>%
 ref.pro.area <- ref %>% 
   dplyr::filter(`Project Area` %in% c("ALL",qapp_project_area)) %>% 
   # Review for project area citation
-  dplyr::mutate(Reference_Year = #ifelse(Reference == '"Heat Source methodology review and comments."', "1999a",
-                                    ifelse(Reference == '"Water Quality Management Plan, Rogue River Basin,  Illinois River Sub Basin."', "1999b",
-                                           ifelse(Reference == '"Lobster Creek, Lower Rogue Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002a",
-                                                  ifelse(Reference == '"Lower Sucker Creek, Illinois River Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002b",
-                                                         #ifelse(Reference == '"Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP)."', "2002c",
-                                                         Year)))) %>% 
+  dplyr::mutate(Reference_Year =     
+                  # DEQ ---
+                  #ifelse(Reference == '"Heat Source methodology review and comments."', "1999a",
+                  #       ifelse(Reference == '"Water Quality Management Plan, Rogue River Basin,  Illinois River Sub Basin."', "1999b",
+                  #              ifelse(Reference == '"Lobster Creek, Lower Rogue Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002a",
+                  #                     ifelse(Reference == '"Lower Sucker Creek, Illinois River Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002b",
+                  #                            ifelse(Reference == '"Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP)."', "2002c",
+                                                     # Watershed Sciences ---
+                                                     ifelse(Reference == '"Aerial Surveys in the John Day River Basin, Thermal Infrared and Color Videography. Prepared for Oregon Department of Environmental Quality. April 15, 2003."',"2003a",
+                                                            ifelse(Reference == '"Description of Aerial Surveys in the Upper John Day River Basin, Thermal Infrared and Color Videography, Survey Dates: August 4-5, 1998."',"2003b",
+                                                                   ifelse(Reference == '"Aerial Survey of John Day River, OR, Thermal Infrared and Color Videography. Prepared for Oregon Department of Environmental Quality. June 9, 2005."',"2005a",
+                                                                          ifelse(Reference == '"Aerial Survey of South Fork John Day River, OR, Thermal Infrared and Color Videography. April 11, 2005."',"2005b",
+                                                                                 Year))))#)))))
+                         ) %>% 
   dplyr::mutate(Full_Reference = paste0(Author, " ", Reference_Year, ". ", Reference, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::mutate(Cite_inText = paste0(`Author_inText`,", ",Reference_Year))
 
@@ -1244,7 +1252,7 @@ DEQ will develop effective shade curves for all other waterbodies that were not 
 
 Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parameterize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parameterize the model.
 
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in Section 6. The tables are located in sections 6.x.6 where x is the specific sub-section for each model (e.g. Section 6.7.6 for **[Update: e.g. Antelope Creek]**).
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in Section 6. The tables are located in sections 6.x.6 where x is the specific sub-section for each model (e.g. Section 6.4.6 for the John Day River).
 
 `r tgap`
 
