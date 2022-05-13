@@ -79,7 +79,8 @@ npdes.ind.waterbody <- npdes.ind.pro.area %>%
                 `River Mile` = round(`River Mile`,1),
                 `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
   dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
-  dplyr::arrange(`Facility Name (Facility Number)`)
+  dplyr::arrange(`Facility Name (Facility Number)`) %>% 
+  dplyr::mutate(`Stream/River Mile` = ifelse(`Facility Name (Facility Number)` == "Ashland STP (3780)", "Ashland Creek RM 0.2 (current); Bear Creek RM 22.8 (future)",`Stream/River Mile`)) # Rogue
 
 npdes.ind.n <- nrow(npdes.ind.waterbody)
 
@@ -100,7 +101,7 @@ if(npdes.ind.n == 1) {
 }
 
 if(npdes.ind.n > 1) {
-  npdes.txt <- ifelse(!waterbody_name == "Bear Creek", paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),"."), paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"), ". The City of Ashland (#3780) owns and operates a secondary wastewater treatment facility that discharges treated effluent into Ashland Creek about 1600 feet upstream of its confluence with Bear Creek. Currently there are plans to move the outfall to Bear Creek. DEQ may consider this new outfall in the Bear Creek model scenarios."))
+  npdes.txt <- ifelse(!waterbody_name == "Bear Creek", paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),"."), paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"), ". The City of Ashland (#3780) owns and operates a wastewater treatment facility that discharges treated effluent into Ashland Creek upstream of its confluence with Bear Creek at river mile 0.2. Currently there are plans to move the outfall to Bear Creek approximately 100 feet downstream from the confluence of Ashland Creek at about river mile 22.8. DEQ may consider this new outfall in the Bear Creek model scenarios."))
 } 
 
 # NLCD

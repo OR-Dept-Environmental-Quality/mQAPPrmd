@@ -100,7 +100,7 @@ tempCalibration.markers <- function(map, data) {
   leaflet::addMarkers(
     map,
     data = data,
-    group = "Stream Temperature Calibration Sites",
+    group = "Model Calibration Sites",
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 

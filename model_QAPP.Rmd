@@ -1742,7 +1742,7 @@ DEQ prepared an interactive HTML map to display relevant information described i
 
 11. The extent of newly proposed calibrated models described in this QAPP.       
 
-12. The location of temperature calibration sites.        
+12. The location of model calibration sites, including temperature, flow, and effective shade monitoring sites.        
 
 13. The location of temperature monitoring used for model boundary conditions and tributary inputs.       
 
@@ -1769,7 +1769,7 @@ temp_stations <- temp.stations %>%
 # Stream Temperature Calibration Sites
 temp_cal_sites_temp <- model.input %>% 
   dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-  dplyr::filter(Parameter == "Water Temperature") %>% 
+  dplyr::filter(Parameter %in% c("Water Temperature","Flow")) %>% 
   dplyr::filter(!is.na(Latitude)) %>% 
   dplyr::filter(!`Station ID` %in% c("TIR")) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
