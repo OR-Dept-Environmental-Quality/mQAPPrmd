@@ -759,19 +759,10 @@ qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
     dplyr::mutate(Station = ifelse(Station == "Zig Zag River", "Zigzag River", Station)) %>% # Sandy
     dplyr::mutate(Station = ifelse(Station == "ZigZag R at Forest Boundary_LTWT", "Zigzag River at Forest Boundary_LTWT", Station)) # Sandy
   
-  pro.area.tmdls <- model.info %>% 
+  pro.area.tmdls.total <- model.info %>% 
     dplyr::select(`TMDL Document`,`Abbreviated Reference`) %>% 
     dplyr::filter(!is.na(`TMDL Document`)) %>% 
-    dplyr::filter(!is.na(`Abbreviated Reference`)) %>% 
-    dplyr::mutate(`Abbreviated Reference` = strip_alpha(`Abbreviated Reference`)) %>%
-    dplyr::filter(substr(`Abbreviated Reference`,1,3) == "DEQ") %>% 
-    dplyr::group_by(`TMDL Document`) %>% 
-    dplyr::summarize(Reference = toString(unique(sort(`Abbreviated Reference`)))) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",Reference,")")) %>% 
-    dplyr::distinct(tmdls.ref)
-  
-  pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
+    dplyr::filter(!is.na(`Abbreviated Reference`))
   
   # _ NCDC met data ----
   ncei.stations.pro.area <- ncei.stations %>% 
@@ -905,7 +896,7 @@ qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
        temp.data.sample.count,
        model.info,
        model.input,
-       pro.area.tmdls,
+       pro.area.tmdls.total,
        pro.cat.45.tbl,
        flow.stations,
        flow.data.sample.count,
