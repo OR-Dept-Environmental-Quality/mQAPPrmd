@@ -379,7 +379,7 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
-# qapp_project_area = "Malheur River Subbasins"
+qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
@@ -390,14 +390,14 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-done <- c("Lower Willamette and Clackamas Subbasins",
-          "Middle Willamette Subbasins",
-          "North Umpqua Subbasin",
-          "Sandy Subbasin",
-          "Southern Willamette Subbasins",
-          "Willamette River Mainstem and Major Tributaries")
+#done <- c("Lower Willamette and Clackamas Subbasins",
+#          "Middle Willamette Subbasins",
+#          "North Umpqua Subbasin",
+#          "Sandy Subbasin",
+#          "Southern Willamette Subbasins",
+#          "Willamette River Mainstem and Major Tributaries")
 
-for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
   print(paste0(qapp_project_area," QAPP data..."))
   
@@ -917,14 +917,14 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
        s,
        is.are,
        numbers.to.words,
-       #file = paste0("./data/",file.name,".RData"))
-       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,".RData"))
+       file = paste0("./data/",file.name,".RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",file.name,".RData"))
   
   # _ * general data for leaflet map ----
   save(lookup.huc,
        project.areas,
-       #file = paste0("./data/lookup.RData"))
-       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+       file = paste0("./data/lookup.RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   # _ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -982,7 +982,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
                            Stations = station.output),
                       path=paste0(data.dir,"appendix_data/",file.name,"_appendix_data.xlsx"))
   
-}
+#}
 
 # Leaflet Map Data ----
 library(tidyverse)
@@ -1061,7 +1061,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 # qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
-# qapp_project_area = "Malheur River Subbasins"
+qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
@@ -1073,13 +1073,13 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
+#for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
   print(paste0(qapp_project_area, " map data..."))
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
-  #load(paste0("./data/lookup.RData"))
-  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+  load(paste0("./data/lookup.RData"))
+  #load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
   
   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8)
   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10)
@@ -1114,8 +1114,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
        sh_model_extent,
        #tir_extent,
        pro.cat.45.tbl,
-       #file = paste0("./data/map_",file.name,".RData"))
-       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
+       file = paste0("./data/map_",file.name,".RData"))
+       #file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
   
-  
-}
+#}
