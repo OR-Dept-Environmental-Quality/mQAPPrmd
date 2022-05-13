@@ -771,8 +771,6 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
     dplyr::mutate(tmdls.ref = paste0(`TMDL Document`," (",Reference,")")) %>% 
     dplyr::distinct(tmdls.ref)
   
-  pro.area.tmdls <- knitr::combine_words(pro.area.tmdls$tmdls.ref)
-  
   # _ NCDC met data ----
   ncei.stations.pro.area <- ncei.stations %>% 
     dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
