@@ -75,8 +75,8 @@ ref.pro.area <- ref %>%
                                     ifelse(Reference == '"Water Quality Management Plan, Rogue River Basin,  Illinois River Sub Basin."', "1999b",
                                            ifelse(Reference == '"Lobster Creek, Lower Rogue Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002a",
                                                   ifelse(Reference == '"Lower Sucker Creek, Illinois River Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002b",
-                                                         #ifelse(Reference == '"Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP)."', "2002c",Year))
-                                                  )))) %>% 
+                                                         #ifelse(Reference == '"Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP)."', "2002c",
+                                                         Year)))) %>% 
   dplyr::mutate(Full_Reference = paste0(Author, " ", Reference_Year, ". ", Reference, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::mutate(Cite_inText = paste0(`Author_inText`,", ",Reference_Year))
 
@@ -937,7 +937,7 @@ if(NROW(t54_sp)>0){
   
   t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2, row.names = NA,
                              caption = tbls(name = "t54_sp",
-                                            caption = paste0("Instantaneous flow measurements from DEQ and others in the ", qapp_project_area, ".")))
+                                            caption = paste0("Instantaneous flow measurements by DEQ and others in the ", qapp_project_area, ".")))
   
 }
 
@@ -987,7 +987,7 @@ $$TMDL = \sum WLA + \sum LA + \textit {Reserve Capacity} + MOS  \hspace{3em}\tex
 
 Where $\sum {WLA}$ is the sum of wasteload allocations (NPDES permitted sources), $\sum {LA}$ is the sum of load allocations (nonpoint sources and background), *Reserve Capacity* is allocations reserved for future uses, and *MOS* is a margin-of-safety to account for uncertainty. For a temperature TMDL, these elements establish the maximum thermal loads that a waterbody may receive without exceeding applicable water quality standards for temperature designed to protect aquatic life and other beneficial uses.
 
-The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list. The `r paste0(qapp_project_area, if(str_sub(qapp_project_area,-1,-1) == "s"){paste0(" contain")}else{paste0(" contains")})` several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature (`r tbls(name = "tcat5", display="cite")`). `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL that was previously developed for the ", qapp_project_area, " (", knitr::combine_words(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Cite_inText")),sep = "; "), ") must be replaced due to recent litigation.")}else{paste0("Multiple TMDLs that were previously developed for  ",qapp_project_area, " (", knitr::combine_words(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Cite_inText"))),sep = "; "), ") must be replaced due to recent litigation.")}`
+The Clean Water Act requires TMDLs be developed for waterbodies that do not meet water quality standards and are listed as water quality impaired on the State’s 303(d) list. The `r paste0(qapp_project_area, if(str_sub(qapp_project_area,-1,-1) == "s"){paste0(" contain")}else{paste0(" contains")})` several waterbodies listed on the Oregon 2018/2020 Section 303(d) Category 5 list as water quality limited for temperature (`r tbls(name = "tcat5", display="cite")`). `r if(length(unique(model.info$'TMDL Document'))==1){paste0("A TMDL that was previously developed for the ", qapp_project_area, " (", knitr::combine_words(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Cite_inText")),sep = "; "), ") must be replaced due to recent litigation.")}else{paste0("Multiple TMDLs that were previously developed for  ",qapp_project_area, " (", knitr::combine_words(unique(sort(ref.intr[which(ref.intr$'Project Area' == qapp_project_area),]$"Cite_inText")),sep = "; "), ") must be replaced due to recent litigation.")}`
 
 In 2013, the United States Environmental Protection Agency (USEPA) disapproved the Natural Conditions Criterion contained in Oregon’s water quality standard for temperature due to the 2012 U.S. District Court decision for NWEA v. EPA, 855 F. Supp. 2d 1199 (D. Or., 2012). This portion of the temperature water quality standard was used in most temperature TMDLs issued from 2003 through 2012. On October 4, 2019, the U.S. District Court issued a judgment for NWEA v. EPA, No. 3:12-cv-01751-HZ (D. Or., Oct. 4, 2019) and required DEQ and USEPA to replace 15 Oregon temperature TMDLs that were based on the Natural Conditions Criterion and to reissue the temperature TMDLs based on the remaining elements of the temperature water quality standard.
 
@@ -1206,6 +1206,12 @@ Estimates of water diversion rates and location of points of diversion can be de
 [WRIS]: https://www.oregon.gov/owrd/programs/WaterRights/WRIS/Pages/default.aspx
 [Water Use Reports]: https://apps.wrd.state.or.us/apps/wr/wateruse_query/
 
+## Effective shade measurements
+
+Effective shade is the percent of potential daily solar radiation flux that is blocked by vegetation and topography. DEQ and/or partner agency staff used an instrument called a solar pathfinder to collect effective shade measurements in the field. The effective shade measurement methods and quality control procedures used are outlined in the Water Quality Monitoring Technical Guide Book (OWEB, 1999) and the solar pathfinder manual (Solar Pathfinder, 2016). `r if(NROW(t57)>0){paste0(tbls(name = "t57", display="cite")," lists the locations where effective shade measurements were collected and the effective shade value for ",t57_date,".")} else {paste0("There are no effective shade data available to DEQ or within publically accessible databases in the ", qapp_project_area, ".")}`
+
+`r if(NROW(t57)>0){t57_tbl}`
+
 # Model development and calibration
 
 Waterbodies where model development was initiated for the `r pro.area.tmdls` are listed in `r tbls(name = "tmdl.mod.a", display="cite")`. `r if(NROW(tmdl.mod.b)>0){paste0("The waterbodies listed in ", tbls(name = "tmdl.mod.b", display="cite")," will have new models developed.")}` The extent and location of these models is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
@@ -1371,7 +1377,7 @@ Management scenarios described in this section summarize the means by which sour
 
 This scenario evaluates the stream temperature response under current existing conditions. This scenario is similar to the calibrated model except that some sources conditions will be modified, may be removed, or new ones added to reflect the current conditions or discharge loads if they are significantly different from the calibrated model. Elements of this scenario or scenarios may include:
 
-* Updating the Wallowa River model to characterize current discharges from Enterprise STP and Wallowa STP.
+* Updating the Wallowa River model to characterize current discharges from Enterprise STP, Wallowa STP, and the ODFW Wallowa River Fish Hatchery.
 
 ## Background
 
