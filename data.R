@@ -393,7 +393,9 @@ snake_reachcodes <- pro.reaches %>%
 done <- c("Lower Willamette and Clackamas Subbasins",
           "Middle Willamette Subbasins",
           "North Umpqua Subbasin",
+          "Rogue River Basin",
           "Sandy Subbasin",
+          "South Umpqua and Umpqua Subbasins",
           "Southern Willamette Subbasins",
           "Willamette River Mainstem and Major Tributaries")
 
