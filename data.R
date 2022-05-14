@@ -390,14 +390,14 @@ qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-done <- c("Lower Willamette and Clackamas Subbasins",
-          "Middle Willamette Subbasins",
-          "North Umpqua Subbasin",
-          "Rogue River Basin",
-          "Sandy Subbasin",
-          "South Umpqua and Umpqua Subbasins",
-          "Southern Willamette Subbasins",
-          "Willamette River Mainstem and Major Tributaries")
+# done <- c("Lower Willamette and Clackamas Subbasins",
+#           "Middle Willamette Subbasins",
+#           "North Umpqua Subbasin",
+#           "Rogue River Basin",
+#           "Sandy Subbasin",
+#           "South Umpqua and Umpqua Subbasins",
+#           "Southern Willamette Subbasins",
+#           "Willamette River Mainstem and Major Tributaries")
 
 #for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   

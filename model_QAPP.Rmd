@@ -1235,7 +1235,7 @@ DEQ will develop effective shade curves for all other waterbodies that were not 
 
 Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parameterize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parameterize the model.
 
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in Section 6. The tables are located in sections 6.x.6 where x is the specific sub-section for each model (e.g. Section 6.7.6 for **[Update: e.g. Antelope Creek]**).
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in Section 6. The tables are located in sections 6.x.6 where x is the specific sub-section for each model (e.g. Section 6.4.6 for Malheur River).
 
 `r tgap`
 
