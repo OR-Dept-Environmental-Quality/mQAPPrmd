@@ -73,8 +73,8 @@ ref.pro.area <- ref %>%
   # Review for project area citation
   dplyr::mutate(Reference_Year =     
                   # DEQ ---
-                  #ifelse(Reference == '"Heat Source methodology review and comments."', "1999a",
-                         ifelse(Reference == '"Water Quality Management Plan, Rogue River Basin,  Illinois River Sub Basin."', "1999b",
+                  ifelse(Reference == '"DRAFT: Walla Walla Subbasin Temperature TMDL Effective Shade and Channel Width Assessment."', "2020a",
+                         ifelse(Reference == '"Water monitoring mode of operations manual (MOMs). DEQ03-LAB-0036-SOP Volume 4: Field Analysis Methods."', "2020b",
                   #              ifelse(Reference == '"Lobster Creek, Lower Rogue Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002a",
                   #                     ifelse(Reference == '"Lower Sucker Creek, Illinois River Subbasin Total Maximum Daily Load and Water Quality Management Plan."', "2002b",
                   #                            ifelse(Reference == '"Upper Klamath Lake Drainage Total Maximum Daily Load (TMDL) and Water Quality Management Plan (WQMP)."', "2002c",
@@ -83,7 +83,7 @@ ref.pro.area <- ref %>%
                   #                                          ifelse(Reference == '"Description of Aerial Surveys in the Upper John Day River Basin, Thermal Infrared and Color Videography, Survey Dates: August 4-5, 1998."',"2003b",
                   #                                                 ifelse(Reference == '"Aerial Survey of John Day River, OR, Thermal Infrared and Color Videography. Prepared for Oregon Department of Environmental Quality. June 9, 2005."',"2005a",
                   #                                                        ifelse(Reference == '"Aerial Survey of South Fork John Day River, OR, Thermal Infrared and Color Videography. April 11, 2005."',"2005b",
-                                                                                 Year)#))))))))
+                                                                                 Year))#)))))))
                          ) %>% 
   dplyr::mutate(Full_Reference = paste0(Author, " ", Reference_Year, ". ", Reference, ifelse(is.na(`Reference Link`),"",`Reference Link`))) %>% 
   dplyr::mutate(Cite_inText = paste0(`Author_inText`,", ",Reference_Year))
@@ -276,8 +276,8 @@ t51.sp <- t51 %>%
   dplyr::filter(tbl=="DEQ File") %>% 
   dplyr::select(-c(`Station ID`,Agency,tbl)) %>% 
   dplyr::arrange(Station) %>% 
-  dplyr::rename(Source = Station) #%>% 
-  #dplyr::filter(!Source == "DEQ FILE")
+  dplyr::rename(Source = Station) %>% 
+  dplyr::filter(!Source == "DEQ")
 
 tables.met <- data.frame(tbl_name = c("t51_ncei","t51_raws","t51_agrimet","t51_hydromet","t51_mw","t51_sp"),
                          tbl_rows = c(NROW(t51.ncei),NROW(t51.raws),NROW(t51.agrimet),NROW(t51.hydromet),NROW(t51.mw),NROW(t51.sp)),
@@ -604,7 +604,7 @@ if(NROW(tmdl.mod.b)>0){
                                  caption = tbls(name = "tmdl.mod.b",
                                                 caption = paste0("Waterbodies and year for which new models are expected to be developed.")))
   
-  tmdl.mod.b.txt <- "**[Update: new model information - See the narratives in the Sandy QAPP]**"
+  tmdl.mod.b.txt <- "**[Update: new model information]**"
   
 }
 
@@ -1189,7 +1189,7 @@ Appendix B summarizes `r nrow(t53_1)` locations where continuous stream temperat
 
 ## Stream flow data
 
-`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous `r if(NROW(t54_sp)>0){paste0("and instantaneous")}` flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. `r tbls(name = "flow.data.sample.count", display="cite")` lists the years that continuous stream flow data were collected at each location. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020).
+`r if(NROW(tables.flow) == 1){paste0(tbls(name = tables.flow$tbl_name, display="cite"), " in Appendix C lists")} else {paste0(tbls(name = tables.flow$tbl_name[1], display="cite"), " through ", tbls(name = tables.flow$tbl_name[nrow(tables.flow)], display="cite"), " in Appendix C list")}` the stations where continuous `r if(NROW(t54_sp)>0){paste0("and instantaneous")}` flow volume data were available in the `r qapp_project_area`, including `r t54_txt`. `r tbls(name = "flow.data.sample.count", display="cite")` lists the years that continuous stream flow data were collected at each location. The location of these stations is shown in the HTML interactive map that accompanies this QAPP and referenced in Appendix D. `r if(NROW(t54_ins_flow)>0){paste0(tbls(name = "t54_ins_flow", display="cite"), " lists the locations where instantaneous flow volume measurements made by DEQ were available.")}` DEQ relies upon the quality control checks implemented by USGS and OWRD. DEQ-collected stream flow measurements utilize field and quality control methods outlined in DEQ’s Mode of Operations Manual (DEQ, 2020b).
 
 `r if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){knitr::knit_child(input = "gage_height.Rmd", envir = globalenv())}`
 
@@ -1241,7 +1241,7 @@ DEQ will develop effective shade curves for all other waterbodies that were not 
 
 Non-steady state stream models typically require a significant amount of data because of the large spatial and temporal extents the models typically encompass. As the model size or modeling period increase, the amount of information needed to parameterize it also increases. Often it is not possible to parameterize a model entirely from field data because it can be resource intensive or impractical to collect everything that is needed. In general, these data gaps may be considered and addressed in a number of ways. `r tbls(name = "data.gap", display="cite")` summarizes methods that are used to derive the data needed to parameterize the model.
 
-To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in Section 6. The tables are located in sections 6.x.6 where x is the specific sub-section for each model (e.g. Section 6.7.6 for **[Update: e.g. Antelope Creek]**).
+To the greatest extent possible, the method used to derive the model parameters for the existing TMDL models have been summarized in the boundary conditions and tributary inputs tables in Section 6. The tables are located in sections 6.x.6 where x is the specific sub-section for each model (e.g. Section 6.4.6 for the Walla Walla and South Fork Walla Walla Rivers).
 
 `r tgap`
 
@@ -1302,7 +1302,7 @@ Reducing uncertainty in measured field parameters used for model input and calib
 
 *	Data used for the TMDL must have been collected based on a project plan with quality assurance and quality control protocols for collecting and analyzing samples.    
 
-*	The sampling and laboratory analysis must follow widely accepted scientific methods and protocols. These may include DEQ’s Mode of Operations Manual (DEQ, 2020), USEPA’s methods (EPA, 1983), USGS’s published techniques of water-resources investigations, the USGS National Field Manual, or Standard Methods for the Examination of Water and Wastewater. All acceptable methods include applicable precision and accuracy checks.    
+*	The sampling and laboratory analysis must follow widely accepted scientific methods and protocols. These may include DEQ’s Mode of Operations Manual (DEQ, 2020b), USEPA’s methods (EPA, 1983), USGS’s published techniques of water-resources investigations, the USGS National Field Manual, or Standard Methods for the Examination of Water and Wastewater. All acceptable methods include applicable precision and accuracy checks.    
 
 *	When possible, accuracy and precision should be evaluated using DEQ’s data validation criteria as outlined in DEQ Data Quality Matrix for Field Parameters (DEQ, 2013). The TMDL program uses waterbody results that demonstrate a data quality level of A, B, or E with careful review (DEQ, 2021). For continuous temperature data a data quality of A or B corresponds to an absolute accuracy 1.0 deg-C and absolute precision 2.0 deg-C. Data of unknown quality lacking audit and pre and post accuracy checks may also be used following a careful review where it is determined the results appear reasonable and free of issues based on professional judgment.    
 
