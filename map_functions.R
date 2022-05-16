@@ -121,7 +121,7 @@ tempBoundaryTributary.markers <- function(map, data) {
   leaflet::addMarkers(
     map,
     data = data,
-    group = "Stream Temperature Model Boundary Conditions and Tributary Inputs",
+    group = "Model Temperature Boundary Conditions and Tributary Inputs",
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
@@ -165,7 +165,7 @@ flowBoundaryTributary.markers <- function(map, data) {
   leaflet::addMarkers(
     map,
     data = data,
-    group = "Stream Flow Model Boundary Conditions and Tributary Inputs",
+    group = "Model Flow Boundary Conditions and Tributary Inputs",
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
