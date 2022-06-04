@@ -574,7 +574,7 @@ tmdl.mod.a<- model.info %>%
   dplyr::summarize(`Model Waterbody` = toString(unique(sort(`Model Waterbody`)))) %>% 
   dplyr::ungroup() %>% 
   dplyr::mutate(`Model Waterbody` = ifelse(Model_version == "SHADOW", # Only for Rogue River Basin
-                                           "Multiple streams in the Applegate Subbasin, Bear Creek Watershed, and Lobster Creek Watershed (see sections 6.4 – 6.6)", 
+                                           "Multiple streams in the Applegate Subbasin, Bear Creek Watershed, and Lobster Creek Watershed (see Sections 6.4 – 6.6)", 
                                            `Model Waterbody`)) %>% 
   dplyr::mutate(`Model Version` = ifelse(Model_version == "SHADOW", 
                                          "SHADOW shade model", 
@@ -950,7 +950,7 @@ if(NROW(t54_sp)>0){
   
   t54_sp_tbl <- knitr::kable(t54_sp, format = "pandoc", padding = 2, row.names = NA,
                              caption = tbls(name = "t54_sp",
-                                            caption = paste0("Instantaneous flow measurements from DEQ and others in the ", qapp_project_area, ".")))
+                                            caption = paste0("Instantaneous flow measurements by DEQ and others in the ", qapp_project_area, ".")))
   
 }
 
@@ -1232,7 +1232,7 @@ Waterbodies where model development was initiated for the `r pro.area.tmdls` are
 
 `r if(NROW(tmdl.mod.a)>0){tmdl.mod.a.tbl}`
 
-The setup and calibration for the Heat Source models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. The SHADOW models are shade only models and were setup and calibrated by the BLM, USFS, and Lower Rogue Watershed Council. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Section 7.2. 
+The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.a", display="cite")` was completed by DEQ and documented in the `r pro.area.tmdls`. The SHADOW models are shade only models and were setup and calibrated by the BLM, USFS, and Lower Rogue Watershed Council. Adjustments to the existing calibrated models are unlikely to occur as part of this project. However, if it is determined that the model calibration needs to be updated, the model inputs that are expected to be modified are described in Section 6.1. DEQ will follow the model acceptance criteria and model fit statistics described in Section 7.2. 
 
 Not listed in `r tbls(name = "tmdl.mod.a", display="cite")` are existing SHADOW models for various streams in the Sucker Creek Watershed (DEQ, 1999b; DEQ, 2002b), a Heat Source temperature model for Sucker Creek (DEQ, 2002b), and Heat Source shade models for Cheney Creek, Thompson Creek, Slate Creek, and Waters Creek in the Applegate Subbasin (DEQ, 2004). These models were documented in their respective TMDLs but unfortunately have gone missing from DEQ’s files. DEQ does not plan to replace these models with new ones. Instead DEQ will utilize a “Shade Curve” approach as described in Section 6.3.
 
