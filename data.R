@@ -390,14 +390,15 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willow Creek Subbasin"
 
-done <- c("Lower Willamette and Clackamas Subbasins",
-          "Middle Willamette Subbasins",
-          "North Umpqua Subbasin",
-          "Rogue River Basin",
-          "Sandy Subbasin",
-          "South Umpqua and Umpqua Subbasins",
-          "Southern Willamette Subbasins",
-          "Willamette River Mainstem and Major Tributaries")
+done <- c(
+  # "Lower Willamette and Clackamas Subbasins",
+  # "Middle Willamette Subbasins",
+  # "North Umpqua Subbasin",
+  # "Rogue River Basin",
+  "Sandy Subbasin",
+  # "South Umpqua and Umpqua Subbasins",
+  # "Southern Willamette Subbasins",
+  "Willamette River Mainstem and Major Tributaries")
 
 #for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
@@ -417,6 +418,9 @@ done <- c("Lower Willamette and Clackamas Subbasins",
                                 layer = "project_huc12") %>% 
     dplyr::filter(HUC_8 %in% subbasin_num) %>% 
     sf::st_transform(4269) #4326
+  
+  sf_use_s2(FALSE)
+  # sf_use_s2(TRUE)
   
   pro_area_huc12_union <- sf::st_union(pro_area_huc12)
   
@@ -458,9 +462,12 @@ done <- c("Lower Willamette and Clackamas Subbasins",
                   Organization = ifelse(Organization == "USGS-OR", "USGS", Organization)) %>% 
     dplyr::mutate(lat = Latitude,
                   long = Longitude) %>%
-    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry()
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) #%>% 
+  #   dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>%
+  #   sf::st_drop_geometry()
+  
+  station.awqms <- sf::st_intersection(station.awqms,pro_area_huc12_union, sparse = FALSE)
+  station.awqms <- sf::st_drop_geometry(station.awqms)
   
   station.awqms.usgs.or <- station.awqms %>% 
     dplyr::filter(Organization == "USGS") %>% 
@@ -508,9 +515,10 @@ done <- c("Lower Willamette and Clackamas Subbasins",
     dplyr::mutate(`Station ID` = as.character(station_nbr),
                   lat = Lat,
                   long = Long) %>%
-    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry() %>% 
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) #%>% 
+
+  station.owrd <- sf::st_intersection(station.owrd,pro_area_huc12_union, sparse = FALSE)
+  station.owrd <- station.owrd %>% sf::st_drop_geometry() %>% 
     dplyr::select(Organization = Operator,
                   `Station ID` = station_nbr,
                   `Station` = station_name,
@@ -531,9 +539,10 @@ done <- c("Lower Willamette and Clackamas Subbasins",
     dplyr::mutate(Organization = "Portland Environmental Services",
                   lat = Latitude,
                   long = Longitude) %>% 
-    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry() %>% 
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) #%>% 
+  
+  station.bes <- sf::st_intersection(station.bes,pro_area_huc12_union, sparse = FALSE)
+  station.bes <- station.bes %>% sf::st_drop_geometry() %>% 
     dplyr::select(Organization,
                   `Station ID` = LocationIdentifier,
                   `Station` = LocationName,
@@ -612,9 +621,10 @@ done <- c("Lower Willamette and Clackamas Subbasins",
     dplyr::filter(data_type_cd %in% c("dv", "id", "iv")) %>% # dv=daily values; id=historical instantaneous values; iv=instantaneous values
     dplyr::mutate(lat = dec_lat_va,
                   long = dec_long_va) %>%
-    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry() %>% 
+    sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) #%>%
+  
+  station.usgs.flow <- sf::st_intersection(station.usgs.flow,pro_area_huc12_union, sparse = FALSE)
+  station.usgs.flow <- station.usgs.flow %>% sf::st_drop_geometry() %>% 
     dplyr::filter(!is.na(dec_lat_va)) %>% 
     dplyr::filter(!site_no %in% station.owrd$`Station ID`) %>% 
     dplyr::distinct(site_no,.keep_all=TRUE)
@@ -670,9 +680,8 @@ done <- c("Lower Willamette and Clackamas Subbasins",
                   Long = Longitude)
   
   ## _ (3) Hydromet ----
-  station.hydromet.flow <- hydromet.stations %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry() %>% 
+  station.hydromet.flow <- sf::st_intersection(hydromet.stations,pro_area_huc12_union, sparse = FALSE)
+  station.hydromet.flow <- station.hydromet.flow %>% sf::st_drop_geometry() %>% 
     dplyr::mutate(`Data Source`= "Hydromet") %>% 
     dplyr::rename(`Station ID` = Station.ID,
                   Station = Station.Name,
@@ -767,18 +776,16 @@ done <- c("Lower Willamette and Clackamas Subbasins",
     dplyr::filter(!is.na(`Abbreviated Reference`))
   
   # _ NCDC met data ----
-  ncei.stations.pro.area <- ncei.stations %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry()
+  ncei.stations.pro.area <- sf::st_intersection(ncei.stations,pro_area_huc12_union, sparse = FALSE)
+  ncei.stations.pro.area <- ncei.stations.pro.area %>% sf::st_drop_geometry()
   
   ncei.station.tbl <- ncei.stations.pro.area %>%
     dplyr::mutate(STATION_NAME = ifelse(NCDC == "10009634","PORTLAND TROUTDALE AIRPORT",STATION_NAME))
   
   # _ RAWS met data ----
-  raws.stations.pro.area <- raws.stations %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry()
-  
+  raws.stations.pro.area <- sf::st_intersection(raws.stations,pro_area_huc12_union, sparse = FALSE)
+  raws.stations.pro.area <- raws.stations.pro.area %>% sf::st_drop_geometry()
+
   raws.station.data.type <- raws.data.type %>% 
     dplyr::rename(Parameter = "unlist.type.list.columnNames.") %>% 
     dplyr::filter(Parameter %in% c("humidity","precipitation","temperature","windDirection","windSpeed")) %>% 
@@ -794,10 +801,9 @@ done <- c("Lower Willamette and Clackamas Subbasins",
     dplyr::left_join(raws.station.data.type, by = "wrccID")
   
   # _ USBR AgriMet ----
-  agrimet.stations.pro.area <- agrimet.stations.or %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry()
-  
+  agrimet.stations.pro.area <- sf::st_intersection(agrimet.stations.or,pro_area_huc12_union, sparse = FALSE)
+  agrimet.stations.pro.area <- agrimet.stations.pro.area %>% sf::st_drop_geometry()
+
   agrimet.station.data.type <- agrimet.parameters %>% 
     dplyr::filter(Type %in% c("Air Temperature","Precipitation", "Relative Humidity", "Wind"))
   #dplyr::group_by(siteid) %>% 
@@ -807,16 +813,14 @@ done <- c("Lower Willamette and Clackamas Subbasins",
     dplyr::left_join(agrimet.station.data.type, by = "siteid")
   
   # _ USBR Hydromet ----
-  hydromet.stations.pro.area <- hydromet.stations %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry()
+  hydromet.stations.pro.area <- sf::st_intersection(hydromet.stations,pro_area_huc12_union, sparse = FALSE)
+  hydromet.stations.pro.area <- hydromet.stations.pro.area %>% sf::st_drop_geometry()
   
   hydromet.station.tbl <- hydromet.stations.pro.area
   
   # _ MesoWest climate data ----
-  mw.stations.pro.area <- mw.stations %>% 
-    dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-    sf::st_drop_geometry()
+  mw.stations.pro.area <- sf::st_intersection(mw.stations,pro_area_huc12_union, sparse = FALSE)
+  mw.stations.pro.area <- mw.stations.pro.area %>% sf::st_drop_geometry()
   
   mw.station.tbl <- mw.stations.pro.area #%>% 
   #dplyr::mutate(NAME = stringr::str_to_title(NAME)) %>% 
@@ -1103,7 +1107,7 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
     dplyr::filter(Project_Na == qapp_project_area)
   
   sh_model_extent <- map_sh_model_extent %>% 
-    dplyr::filter(sf::st_contains(pro_area, ., sparse = FALSE))
+    dplyr::filter(Project_Na == qapp_project_area)
   
   #tir_extent
   
