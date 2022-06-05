@@ -12,7 +12,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
-# qapp_project_area = "North Umpqua Subbasin"
+qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
@@ -21,16 +21,25 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for (qapp_project_area in project.areas$areas) {
+#for (qapp_project_area in project.areas$areas) {
 
 print(qapp_project_area)
 
 file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
 load(paste0("./data/",file.name,".RData"))
 
+# NU only ---
+library(captioner)
+figs <- captioner::captioner(prefix="Figure")
+waterbody_name <- "Fish Creek (2001)"
+tt_fig.cap <- figs(name=paste0("tt.fig",waterbody_name), caption = paste0("Map of ",waterbody_name," Model Inputs."))
+tt_nua.cap <- figs(name="tt_fig_nu1", caption = "Map of North Umpqua River Spawning Period Models 1-4 Inputs.")
+tt_nub.cap <- figs(name="tt_fig_nu2", caption = "Map of North Umpqua River Spawning Period Model 5 Inputs.")
+# ---
+
 rmarkdown::render(input=paste0("model_QAPP.Rmd"),
                   output_format = "word_document",
                   output_dir = output.dir,
                   output_file=paste0("QAPP_",file.name, ".docx"))
 
-}
+#}
