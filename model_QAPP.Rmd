@@ -537,7 +537,8 @@ t57 <- effective.shade.pro.area %>%
   dplyr::filter(!`Result Status` %in% c("REJECT","SUSPECT")) %>% 
   dplyr::mutate(`Latitude/Longitude` = paste0(round(Latitude,4),"/",round(Longitude,3)),
                 `Effective Shade` = paste0(Result,"%")) %>% 
-  dplyr::select(`Station ID` = `Site ID`,
+  dplyr::select(`Model Waterbody`,
+                `Station ID` = `Site ID`,
                 Station = `Site Name`,
                 `Latitude/Longitude`,
                 `Effective Shade`,
@@ -545,7 +546,7 @@ t57 <- effective.shade.pro.area %>%
 
 if(NROW(t57)>0){
   
-  t57_tbl <- knitr::kable(t57, format = "pandoc", padding = 2,
+  t57_tbl <- knitr::kable(t57[-1,], format = "pandoc", padding = 2,
                           caption = tbls(name = "t57",
                                          caption = paste0("Effective shade data collected in the  ", qapp_project_area, ".")))
   
@@ -1761,7 +1762,7 @@ temp_cal_sites_temp <- model.input %>%
   dplyr::filter(!is.na(Latitude)) %>% 
   dplyr::filter(!`Station ID` %in% c("TIR")) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
-  dplyr::select(`Station ID`,`Model Location Name`,`Model Location`,`Location Units`,Parameter,`Data Source`,Longitude,Latitude) %>% 
+  dplyr::select(`Model Waterbody`,`Station ID`,`Model Location Name`,`Model Location`,`Location Units`,Parameter,`Data Source`,Longitude,Latitude) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
 temp_cal_sites_shade <- t57 %>% 
