@@ -554,7 +554,8 @@ t57 <- effective.shade.pro.area %>%
                 Station = `Site Name`,
                 `Latitude/Longitude`,
                 `Effective Shade`,
-                `Data Source`)
+                `Data Source`) %>% 
+  dplyr::filter(is.na(`Effective Shade`)) # Mid-Willamette: effective shade has no data
 
 if(NROW(t57)>0){
   
