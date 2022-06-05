@@ -35,6 +35,10 @@ model.extent <- ifelse(NROW(section.model.input)>0,
 
 model.extent <- na.omit(model.extent)
 
+the <- section.model.info %>% 
+  dplyr::mutate(is_the = ifelse(grepl("River",section.model.info$`Model Waterbody`, fixed = TRUE),"the ","")) %>% 
+  dplyr::pull(is_the)
+
 section.model.info.nu <- section.model.info %>% 
   dplyr::mutate(figName = ifelse(`Model Waterbody` %in% c("Canton Creek (Spawning period)"),"North_Umpqua_Canton_Creek.jpg",
                                  #ifelse(`Model Waterbody` %in% c("Cavitt Creek (Spawning period)"),"North_Umpqua_Cavitt_Creek.jpg",
@@ -185,8 +189,8 @@ if(waterbody_name %in% source.char.waterbody){
   if(npdes.ind.n>0){
     
     npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
-                                  caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
-                                                 caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name_nu, ".")))
+                                caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
+                                               caption = paste0("Summary of individual NPDES permitted discharges in ", the, waterbody_name, ".")))
     
   }
 }
@@ -224,8 +228,8 @@ if(waterbody_name %in% source.char.waterbody){
   if(NROW(nlcd.waterbody)>0){
     
     nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
-                                caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name_nu, " centerline based on the 2016 National Land Cover Database (Yang et al., 2018).")))
+                              caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
+                                             caption = paste0("Summary of land uses along the model extent within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al., 2018).")))
     
   }
 }
@@ -247,8 +251,8 @@ if(waterbody_name %in% source.char.waterbody){
   if(NROW(dma.waterbody)>0){
     
     dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
-                               caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                              caption = paste0("Summary of designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name_nu, " centerline.")))
+                             caption = tbls(name = paste0("dma.waterbody",waterbody_name),
+                                            caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons along the model extent within 100 meters of the digitized ", waterbody_name, " centerline.")))
     
   }
 }
