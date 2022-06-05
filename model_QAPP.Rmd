@@ -460,7 +460,8 @@ section.npdes.ind <- npdes.ind.pro.area %>%
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
                 `River Mile` = round(as.numeric(`River Mile`),1),
                 `Stream River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
-  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream River Mile`) %>% 
+  dplyr::rename(`Permit Number` = `Permit Nbr`) %>% 
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Number`,`EPA Number`,`Permit Type and Description`, `Stream River Mile`) %>% 
   dplyr::arrange(`Facility Name (Facility Number)`) %>% 
   dplyr::mutate(`Stream River Mile` = ifelse(`Permit Type and Description` %in% c("NPDES-DOM-MS4-1: Municipal Separate Storm Sewer System - Phase I",
                                                                                   "NPDES-DOM-MS4-2: Municipal Separate Storm Sewer System - Phase II"),
@@ -472,7 +473,7 @@ ms4 <- section.npdes.ind %>%
 
 if(NROW(section.npdes.ind)>0){
   
-  t55_ind_tbl <- knitr::kable(section.npdes.ind, format = "pandoc", padding = 2,
+  t55_ind_tbl <- knitr::kable(section.npdes.ind[,-c(3,4)], format = "pandoc", padding = 2,
                               caption = tbls(name = "t55_ind",
                                              caption = paste0("Summary of individual NPDES permitted discharges in the ", qapp_project_area, ".")))
   
@@ -486,7 +487,8 @@ section.npdes.gen.1 <- npdes.gen.pro.area %>%
                 `Permit Type and Description` = paste0(`PermitType`, ": ", `PermitDescription`),
                 `River Mile` = round(as.numeric(RiverMile),1),
                 `Stream River Mile` = ifelse(is.na(`StreamName`), NA, paste0(`StreamName`, " ", " RM ",`River Mile`))) %>% 
-  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream River Mile`) %>% 
+  dplyr::rename(`Permit Number` = PermitNbr) %>% 
+  dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Number`,`Permit Type and Description`, `Stream River Mile`) %>% 
   dplyr::arrange(`Facility Name (Facility Number)`) %>% 
   dplyr::mutate(`Stream River Mile` = ifelse(`Permit Type and Description` == "GEN40: 4000 MS4-Phase 2 General Permit – Water Quality NPDES General Permit",
                                              "Multiple discharge locations",
@@ -499,7 +501,7 @@ gen.txt <- npdes.gen.pro.area %>%
 
 if(NROW(section.npdes.gen.1)>0){
   
-  t55_gen1_tbl <- knitr::kable(section.npdes.gen.1, format = "pandoc", padding = 2,
+  t55_gen1_tbl <- knitr::kable(section.npdes.gen.1[,-3], format = "pandoc", padding = 2,
                                caption = tbls(name = "t55_gen1",
                                               caption = paste0("Summary of current registrants under the general NPDES ",
                                                                knitr::combine_words(unique(sort(gen.txt$PermitType))),
@@ -1755,25 +1757,14 @@ temp_stations <- temp.stations %>%
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
 
 # Stream Temperature Calibration Sites
-temp_cal_sites_temp <- model.input %>% 
+temp_cal_sites <- model.input %>% 
   dplyr::filter(`Model Location Type` %in% "Calibration Site") %>%
-  dplyr::filter(Parameter %in% c("Water Temperature","Flow")) %>% 
+  dplyr::filter(Parameter %in% c("Water Temperature","Flow","Effective Shade")) %>% 
   dplyr::filter(!is.na(Latitude)) %>% 
   dplyr::filter(!`Station ID` %in% c("TIR")) %>% 
   dplyr::filter(is.na(`Interpolated Data`)) %>% 
-  dplyr::select(`Station ID`,`Model Location Name`,`Model Location`,`Location Units`,Parameter,`Data Source`,Longitude,Latitude) %>% 
+  dplyr::select(`Model Waterbody`,`Station ID`,`Model Location Name`,`Model Location`,`Location Units`,Parameter,`Data Source`,Longitude,Latitude) %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
-
-temp_cal_sites_shade <- t57 %>% 
-  dplyr::rename(`Model Location Name`= Station) %>% 
-  dplyr::mutate(`Model Location`= "",
-                `Location Units`= "",
-                Parameter = "Effective Shade") %>% 
-  dplyr::select(-`Effective Shade`) %>% 
-  tidyr::separate(col="Latitude/Longitude",into=c("Latitude","Longitude"),sep="/") %>% 
-  sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
-  
-temp_cal_sites <- rbind(temp_cal_sites_temp,temp_cal_sites_shade)  
 
 # Stream Temperature Model Boundary Conditions and Tributary inputs
 temp_model_bc_tri <- model.input %>% 
