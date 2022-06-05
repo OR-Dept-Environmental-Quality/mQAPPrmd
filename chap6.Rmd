@@ -129,9 +129,19 @@ if(NROW(dma.waterbody)>0){
   
 }
 
+if(!waterbody_name %in% c("Calapooya Creek","Cow Creek","Olalla-Lookingglass Creek")){
+  
+  sc_txt <- paste0("and background sources (",strip_alpha(section.model.info$"Abbreviated Reference"),"). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. ")
+  
+} else {
+  
+  sc_txt <- paste0("reductions to stream flow rate or volume, and background sources (",strip_alpha(section.model.info$"Abbreviated Reference"),"). Other potential sources include channel modification and widening, and warming caused by climate change. ")
+  
+}
+
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances in `r paste0(the,waterbody_name)` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+The primary sources of thermal loading contributing to temperatures exceedances in `r paste0(the,waterbody_name)` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}` `r sc_txt` The contribution of these latter potential sources may be investigated as part of the model scenarios. 
 
 `r npdes.txt`
 
@@ -160,7 +170,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. `r paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")`
+`r paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")`
 
 ### Model inputs
 
