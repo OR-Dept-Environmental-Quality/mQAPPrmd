@@ -121,6 +121,7 @@ dta.mod <- data.frame(project_area = qapp_project_area,
                                      "SHADOW Model Extent")) %>% 
   dplyr::filter(!NROW == 0)
 
+dta.stations <- data.frame(project_area = qapp_project_area,
                            data = c("temp_cal_sites",
                                     "temp_model_bc_tri",
                                     "flow_model_bc_tri",
