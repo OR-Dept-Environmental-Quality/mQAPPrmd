@@ -71,10 +71,10 @@ file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$fil
 load(paste0("./data/lookup.RData"))
 
 map.file.name <- paste0("map_", file.name)
-load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
-load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
-# load(paste0("./data/",map.file.name,".RData")) # data.R
-# load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+#load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
+#load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+load(paste0("./data/",map.file.name,".RData")) # data.R
+load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
 pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
@@ -207,7 +207,7 @@ map_basic <- leaflet::leaflet() %>%
   leaflet.extras::addResetMapButton() %>% 
   leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                      lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
-  leaflet::addMapPane("Esri.NatGeoWorldMap", zIndex = -1200) %>% 
+  leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>%
   leaflet::addMapPane("aerial", zIndex = -1100) %>% 
   leaflet::addMapPane("hydrotiles", zIndex = -1050) %>%
   leaflet::addMapPane("area", zIndex = -1000) %>%
