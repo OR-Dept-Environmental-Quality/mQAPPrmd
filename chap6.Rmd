@@ -32,11 +32,15 @@ model.extent <- ifelse(NROW(section.model.input)>0,
 
 model.extent <- na.omit(model.extent)
 
+the <- section.model.info %>% 
+  dplyr::mutate(is_the = ifelse(grepl("River",section.model.info$`Model Waterbody`, fixed = TRUE),"the ","")) %>% 
+  dplyr::pull(is_the)
+
 ```
 
 ## `r waterbody_name`
 
-`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")` `r if(waterbody_name == "Bull Run River (2016)"){paste0(" The City of Portland Water Bureau is also developing a temperature model of the Bull Run River using CE-QUAL-W2 version 4.2 for the full 2016 calendar year. DEQ may consider using this model instead of the Heat Source model for TMDL development after DEQ has reviewed the model and determined the model setup and assumptions are consistent with this QAPP; and the calibration results achieve the quality acceptance criteria identified in Chapter 7. Documentation of the model will follow the same procedures outlined in Chapter 8. Except where noted, the model setup and calibration described in this section are applicable to both models.")}`
+`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if("T" %in% section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")` `r if(waterbody_name == "Bull Run River (2016)"){paste0(" The City of Portland Water Bureau is also developing a temperature model of the Bull Run River using CE-QUAL-W2 version 4.2 for the full 2016 calendar year. DEQ may consider using this model instead of the Heat Source model for TMDL development after DEQ has reviewed the model and determined the model setup and assumptions are consistent with this QAPP; and the calibration results achieve the quality acceptance criteria identified in Chapter 7. Documentation of the model will follow the same procedures outlined in Chapter 8. Except where noted, the model setup and calibration described in this section are applicable to both models.")}`
 
 ### Model domain
 
@@ -85,7 +89,8 @@ source.char <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_T
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
-  dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name), x=`Stream Name`, ignore.case = TRUE)) %>% 
+  #dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name), x=`Stream Name`, ignore.case = TRUE)) %>% 
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
   dplyr::mutate(`Facility Name (Facility Number)` = paste0(`Common Name`," (", `WQ File Nbr`,")"),
                 `Latitude/Longitude` = paste0(round(Latitude,4), "/",round(Longitude,3)),
                 `Permit Type and Description` = paste0(`Permit Type`, ": ", `Permit Description`),
@@ -100,7 +105,7 @@ if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salm
   
   npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of individual NPDES permitted discharges in the ", waterbody_name, ".")))
+                                               caption = paste0("Summary of individual NPDES permitted discharges in ", the, waterbody_name, ".")))
   
 }
 
@@ -128,7 +133,7 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
   
   nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                             caption = paste0("Summary of land uses within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al., 2018).")))
+                                             caption = paste0("Summary of land uses along the model extent within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al., 2018).")))
   
 }
 
@@ -146,13 +151,13 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                            caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                                            caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons along the model extent within 100 meters of the digitized ", waterbody_name, " centerline.")))
   
 }
 
 ```
 
-`r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The primary sources of thermal loading contributing to temperatures exceedances along the ", waterbody_name, " include increases in solar radiation loading from ",source.char)}`
+`r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The primary sources of thermal loading contributing to temperatures exceedances in `r paste0(the,waterbody_name)` include increases in solar radiation loading from ",source.char)}`
 
 `r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){npdes.txt}`
 
@@ -168,7 +173,7 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
 
 `r if(waterbody_name == "Bull Run River (2016)"){paste0("Dam 2 is an earthfill dam four miles downstream of Dam 1. Dam 2 was completed in 1962 and the reservoir has a maximum capacity of 6.8 billion gallons. In 2014 a selective withdrawal structure was completed on the intake towers at Dam 2. The city tries to keep the reservoir at Dam 2 as full as possible throughout the year, including the summer months. The surface elevation varies between 840 and 860 feet above mean sea level.")}`
 
-`r if(waterbody_name == "Bull Run River (2016)"){paste0("The project has a license to produce electricity (FERC License No. 2821). Most of the time water is routed through the powerhouses, located immediately downstream of the dams before being returned to the Bull Run River.  Less frequently, water is routed over the spillways during large winter storms that produce flows that exceed the powerhouse capacities. In 2029 the FERC license is scheduled to expire.")}`
+`r if(waterbody_name == "Bull Run River (2016)"){paste0("The project has a license to produce electricity (FERC License No. 2821). Most of the time water is routed through the powerhouses, located immediately downstream of the dams before being returned to the Bull Run River. Less frequently, water is routed over the spillways during large winter storms that produce flows that exceed the powerhouse capacities. In 2029 the FERC license is scheduled to expire.")}`
 
 `r if(waterbody_name == "Bull Run River (2016)"){paste0("Bull Run Lake is a natural lake above the headwaters of Bull Run River, though a dam structure has been added to increase the elevation by 10 feet and the subsequent storage capacity of the lake. The lake does not have a surface water connection to Bull Run River and was formed from a landslide sometime before European settlement. Seepage through porous geologic features surrounding the lake contributes significant stream flow into the Bull Run River.  The U.S. Forest Service issues a special use permit to the City of Portland to withdrawal water from the lake for municipal water supplies. Water from the lake is used for drinking water supply only during dry years. The permit restricts the withdrawal to ensure adequate water is available to support the ecosystem.")}`
 
@@ -233,7 +238,7 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                     `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`)))) %>% 
       dplyr::group_by(`Station ID`,`Model Location Type`, `Location Units`, `Data Source`,Note) %>% 
-      dplyr::summarize(`Model Location` = toString(unique(sort(round(`Model Location`,2)))),
+      dplyr::summarize(`Model Location` = toString(unique(sort(round(as.numeric(`Model Location`),2)))),
                        Parameter = toString(unique(sort(Parameter))))%>% 
       dplyr::ungroup() %>%
       dplyr::rename(`Model Location Name (Station ID)` = `Station ID`,
@@ -244,7 +249,7 @@ if(!model.extent == TRUE){
       dplyr::mutate(`Model Location Name (Station ID)` = ifelse(`Station ID` %in% "No Station ID" | is.na(`Station ID`),
                                                                 `Model Location Name`,
                                                                 paste0(`Model Location Name`, " (", `Station ID`, ")")),
-                    `Model Location` = round(`Model Location`,2),
+                    `Model Location` = round(as.numeric(`Model Location`),2),
                     `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
                                            strip_alpha(`Data Source`), `Data Source`),
                     `Data Source` = ifelse(substr(`Data Source`,1,18) == "Watershed Sciences", 
@@ -367,7 +372,7 @@ if(!model.extent == TRUE){
                     `Data Source` = ifelse(is.na(`Data Source`),"",`Data Source`),
                     `Data Source` = ifelse(is.na(`Interpolated Data`), `Data Source`,paste0("Derived data. ",ifelse(`Data Source`=="DEQ","",`Data Source`))),
                     Parameter = ifelse(`Station ID` %in% "TIR", paste0(Parameter," (TIR)"), Parameter),
-                    `Model Location` = round(`Model Location`,2),
+                    `Model Location` = round(as.numeric(`Model Location`),2),
                     `Model Location` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location`),
                     `Model Location Name` = ifelse(`Station ID` %in% "TIR","Model extent",`Model Location Name`),
                     `Station ID` = ifelse(`Station ID` %in% "TIR",NA,`Station ID`),
