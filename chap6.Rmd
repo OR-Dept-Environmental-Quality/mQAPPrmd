@@ -157,7 +157,7 @@ if(!waterbody_name %in% c("Bull Run River (2001)", "Salmon River (2001)", "Sandy
 
 ```
 
-`r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The primary sources of thermal loading contributing to temperatures exceedances in `r paste0(the,waterbody_name)` include increases in solar radiation loading from ",source.char)}`
+`r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){paste0("The primary sources of thermal loading contributing to temperatures exceedances in ", the, waterbody_name," include increases in solar radiation loading from ",source.char)}`
 
 `r if(!waterbody_name %in% c("Bull Run River (2001)","Bull Run River (2016)", "Salmon River (2001)", "Sandy River (2001)")){npdes.txt}`
 
