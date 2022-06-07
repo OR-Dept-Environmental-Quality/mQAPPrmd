@@ -9,7 +9,7 @@ output:
     fig_height: 6
 ---
 
-```{r setup_hs6, include=FALSE}
+```{r, label=`setup_ce`, include=FALSE}
 
 knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
@@ -21,6 +21,6 @@ options(kableExtra.auto_format = F)
 
 ```
 
-### CE-QUAL-W2 version 3
+### CE-QUAL-W2 version 4
 
-The CE-QUAL-W2 version 3 model is a 2-dimensional hydrodynamic and water quality model that incorporates temperature (heat) into its hydrodynamic and water quality subroutines. The heat budget model theory for CE-QUAL-W2 is similar to Heat Source, though its implementation in the model and the level of detail are different. CE-QUAL-W2 is two dimensional in the longitudinal and vertical directions, and the vertical dimension allows for modeling temperature profiles as a function of depth in the water column. This feature is critical for deeper water bodies, such as reservoirs, larger rivers and estuaries where light penetration and density profiles are not easily estimated uniformly throughout the water column. Documentation for CE-QUAL-W2, and the inputs used to set up and calibrate the model, are provided in the CE-QUAL-W2 user's manual (Cole and Wells, 2000).
+The CE-QUAL-W2 version 4 model is a 2-dimensional hydrodynamic and water quality model that incorporates temperature (heat) into its hydrodynamic and water quality subroutines. CE-QUAL-W2 is two dimensional in the longitudinal and vertical directions, and the vertical dimension allows for modeling temperature profiles as a function of depth in the water column. This feature is critical for deeper water bodies, such as reservoirs, larger rivers and estuaries where light penetration and density profiles are not easily estimated uniformly throughout the water column. Documentation for CE-QUAL-W2, and the inputs used to set up and calibrate the model, are provided in the CE-QUAL-W2 user’s manual (Wells, 2019). Parameters adjusted to improve calibration of the Willamette CE-QUAL-W2 models are documented in Annear et al., 2004; Berger et al., 2004; Sullivan and Rounds, 2004; and DEQ, 2006.

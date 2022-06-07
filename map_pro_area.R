@@ -27,7 +27,6 @@ data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_Q
 data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
 
 source("map_functions.R")
-project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 #lgnd <- base64enc::base64encode("./fig/legend.png")
 logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
@@ -61,21 +60,18 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
 # qapp_project_area = "Southern Willamette Subbasins"
 # qapp_project_area = "Walla Walla Subbasin"
-# qapp_project_area = "Willamette River Mainstem and Major Tributaries"
+qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy Subbasin"),]$areas)) {
-  
-file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
+#for(qapp_project_area in sort(qapp_project_areas$areas)) {
 
-load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
-#load(paste0("./data/lookup.RData"))
+#load(paste0(data.dir.yg,qapp_project_areas[which(qapp_project_areas$areas==qapp_project_area),]$folder,"/mQAPPrmd/data/lookup.RData"))
+load(paste0("./data/lookup.RData"))
 
-map.file.name <- paste0("map_", file.name)
-load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
-load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
-# load(paste0("./data/",map.file.name,".RData")) # data.R
-# load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
+load(paste0("./data/",map.file.name,".RData")) # data.R
+load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+
 pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
@@ -913,4 +909,5 @@ print(paste0(qapp_project_area,"...Save the map"))
 htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
 file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
 
-}
+#}
+

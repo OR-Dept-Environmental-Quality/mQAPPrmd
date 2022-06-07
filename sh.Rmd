@@ -9,7 +9,7 @@ output:
     fig_height: 6
 ---
 
-```{r setup_hs6, include=FALSE}
+```{r setup_sh, include=FALSE}
 
 knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,

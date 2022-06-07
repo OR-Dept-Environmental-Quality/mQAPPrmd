@@ -9,7 +9,7 @@ output:
     fig_height: 6
 ---
 
-```{r setup_chap6x6, include=FALSE}
+```{r, label=`setup_chap6x6`, include=FALSE}
 
 knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
@@ -25,7 +25,7 @@ options(kableExtra.auto_format = F)
 
 #### `r model_extent`
 
-```{r, label=t6x6j, include=FALSE}
+```{r, label=`t6x6j`, include=FALSE}
 
 t6x6j_met <- section.model.input %>% 
   dplyr::filter(`Model Extent` %in%  model_extent) %>% 

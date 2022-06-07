@@ -703,8 +703,8 @@ station.usgs.gh <- usgs.gh.stations %>%
   dplyr::mutate(lat = dec_lat_va,
                 long = dec_long_va) %>%
   sf::st_as_sf(coords = c("long", "lat"), crs = sf::st_crs("+init=EPSG:4269")) #%>% 
-  # dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
-  # sf::st_drop_geometry() %>% 
+# dplyr::filter(sf::st_intersects(pro_area_huc12_union, ., sparse = FALSE)) %>% 
+# sf::st_drop_geometry() %>% 
 
 station.usgs.gh <- sf::st_intersection(station.usgs.gh,pro_area_huc12_union, sparse = FALSE)
 station.usgs.gh <- sf::st_drop_geometry(station.usgs.gh) %>% 
