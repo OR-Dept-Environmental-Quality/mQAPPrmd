@@ -71,6 +71,7 @@ load(paste0("./data/lookup.RData"))
 map.file.name <- paste0("map_", project.areas[which(project.areas$areas == qapp_project_area),]$file.name)
 load(paste0("./data/",map.file.name,".RData")) # data.R
 load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+
 pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
@@ -909,3 +910,4 @@ htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = 
 file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
 
 #}
+
