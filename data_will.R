@@ -256,7 +256,7 @@ cat.45 <- rbind(cat.45.rivers[,c("IR_categor","AU_Name","AU_ID","Year_liste","Pe
   dplyr::filter(AU_ID %in% wms.aus$AU_ID) %>% 
   dplyr::distinct(AU_ID, .keep_all = TRUE)
 
-write.csv(cat.45,"cat45.csv")
+#write.csv(cat.45,"cat45.csv")
 
 cat.45.tbl <- cat.45 %>% 
   #sf::st_drop_geometry(cat.45) %>% 
