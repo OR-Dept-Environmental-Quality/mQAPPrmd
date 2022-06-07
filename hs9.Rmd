@@ -21,7 +21,7 @@ options(kableExtra.auto_format = F)
 
 ```
 
-```{r, hs9_tbl, echo=FALSE}
+```{r hs9_tbl, echo=FALSE}
 
 hs9.v <- tmdl.mod.2 %>% 
   dplyr::filter(mod_rmd == "hs9") %>% 

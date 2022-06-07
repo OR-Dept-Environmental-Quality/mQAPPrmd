@@ -22,7 +22,7 @@ options(knitr.kable.NA = '')
 
 # Appendix D Gage height data summary
 
-```{r, echo=FALSE}
+```{r, label=`gh`, echo=FALSE}
 
 if(NROW(gh.data.sample.count)>0){
   

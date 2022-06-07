@@ -71,7 +71,7 @@ waterbody_spawning_nu <- c("Canton Creek (Spawning period)",
 
 ## `r waterbody_name`
 
-```{r tt-fig, eval.after="fig.cap", fig.cap=tt_fig.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+```{r, label=`tt-fig`, eval.after="fig.cap", fig.cap=tt_fig.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 
 if(waterbody_name %in% waterbody_spawning_nu){
   
@@ -82,7 +82,7 @@ if(waterbody_name %in% waterbody_spawning_nu){
 
 ```
 
-```{r echo=FALSE}
+```{r, label=`tt`, echo=FALSE}
 # Run captions in advance
 
 if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
@@ -94,19 +94,19 @@ if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
 }
 ```
 
-```{r tt-nua, eval.after="fig.cap", fig.cap=tt_nua.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+```{r, label=`tt-nua`, eval.after="fig.cap", fig.cap=tt_nua.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
   knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_1-4.jpg")
 }
 ```
 
-```{r tt-nub, eval.after="fig.cap", fig.cap=tt_nub.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+```{r, label=`tt-nub`, eval.after="fig.cap", fig.cap=tt_nub.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
   knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_5.jpg")
 }
 ```
 
-```{r tt-nuc, eval.after="fig.cap", fig.cap=tt_nuc.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+```{r, label=`tt-nuc`, eval.after="fig.cap", fig.cap=tt_nuc.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 if(waterbody_name %in% c("North Umpqua River (Spawning period)")){
   knitr::include_graphics(path = "./fig/North_Umpqua_North_Umpqua_River_6.jpg")
 }

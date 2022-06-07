@@ -9,7 +9,7 @@ output:
     fig_height: 6
 ---
 
-```{r setup_hs6, include=FALSE}
+```{r, label=`setup_hs6`, include=FALSE}
 
 knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
@@ -21,7 +21,7 @@ options(kableExtra.auto_format = F)
 
 ```
 
-```{r, hs6_tbl, echo=FALSE}
+```{r, label=`hs6_tbl`, echo=FALSE}
 
 hs6 <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = "hs6")
 

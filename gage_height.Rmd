@@ -9,7 +9,7 @@ output:
     fig_height: 6
 ---
 
-```{r, label=`setup-chap6`, include=FALSE}
+```{r setup_chap6_gh, include=FALSE}
 knitr::opts_chunk$set(results = "asis",
                       warning = FALSE,
                       error = FALSE,

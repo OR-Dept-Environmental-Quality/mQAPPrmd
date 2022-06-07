@@ -745,7 +745,7 @@ t63_tbl <- knitr::kable(effective.shade.lookup, format = "pandoc", padding = 2,
 
 ```
 
-```{r,label=`shadow`, include=FALSE}
+```{r, label=`shadow`, include=FALSE}
 # SHADOW model
 
 if(qapp_project_area == "Rogue River Basin"){
@@ -1097,7 +1097,7 @@ $$\textit {Water Temperature Change as a Function of Heat Exchange and Volume,}$
 $$\Delta Tw = \frac{\Delta Heat}{Density\times \textit {Specific Heat}\times \Delta Volume}  \hspace{3em}\text{Equation 2}$$
 <br>
 
-```{r heat-transfer, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
+```{r, label=`heat-transfer`, eval.after="fig.cap", fig.cap=heat.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=4, echo=FALSE}
 
 knitr::include_graphics(path = "./fig/Heat_Transfer_Diagram.jpg")
 
@@ -1129,7 +1129,7 @@ $\Phi_{evaporation}$ = Evaporation (+/-)
 
 <br>
 
-```{r temp-cd, eval.after="fig.cap", fig.cap=temp.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
+```{r, label=`temp-cd`, eval.after="fig.cap", fig.cap=temp.cap, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
 
 knitr::include_graphics(path = "./fig/Temp_cd_detailed.jpg")
 
@@ -1238,7 +1238,7 @@ The setup and calibration for the models listed in `r tbls(name = "tmdl.mod.b", 
 
 `r if(NROW(tmdl.mod.b)>0){tmdl.mod.b.tbl}`
 
-DEQ will develop effective shade curves for all other waterbodies that were not specifically listed in `r if(NROW(tmdl.mod.b)>0){paste0(tbls(name = "tmdl.mod.b", display="cite"))}else{tbls(name = "tmdl.mod.a", display="cite")}`. Effective shade curves represent the maximum possible effective shade for different vegetation types, stream widths, and stream aspect. Every combination of these conditions are modeled in Heat Source to develop the estimated effective shade. The results are summarized in a shade curve plot. The results can also be summarized in a lookup table with additional combinations of vegetation height, density, and buffer width included. Effective shade curves were developed for the original `r pro.area.tmdls`. Adjustments to the existing shade curve models are unlikely to occur as part of this project. However, if it is determined that the models need to be updated DEQ will follow the procedures outlined in this QAPP.
+DEQ will develop effective shade curves for all other waterbodies that were not specifically listed in `r if(NROW(tmdl.mod.b)>0){paste0(tbls(name = "tmdl.mod.b", display="cite"))}else{tbls(name = "tmdl.mod.a", display="cite")}`. Effective shade curves represent the maximum possible effective shade for different vegetation types, stream widths, and stream aspect. Every combination of these conditions are modeled in Heat Source to develop the estimated effective shade. The results are summarized in a shade curve plot. The results can also be summarized in a lookup table with additional combinations of vegetation height, density, and buffer width included. Effective shade curves were developed for the original `r pro.area.tmdls.total`. Adjustments to the existing shade curve models are unlikely to occur as part of this project. However, if it is determined that the models need to be updated DEQ will follow the procedures outlined in this QAPP.
 
 ## General model inputs and parameters
 
@@ -1280,13 +1280,13 @@ The model period is a single day in late July or early August. This time frame w
 
 Models used to develop effective shade curves assume no cloud cover and no topographic shade. The modeled terrain is flat so there is no difference in ground elevation between the stream and the adjacent vegetation buffer area. The vegetation density, vegetation height, vegetation overhang, and vegetation buffer width are assumed to be equal on both sides of the stream. The width of the active channel is assumed to be equal to the distance between near-stream vegetation on either side of the stream.
 
-Effective shade curves were developed for the original `r pro.area.tmdls`. Adjustments to the existing shade curve models are unlikely to occur as part of this project. However, if it is determined that the models need to be updated DEQ will follow the procedures outlined in this QAPP.
+Effective shade curves were developed for the original `r pro.area.tmdls.total`. Adjustments to the existing shade curve models are unlikely to occur as part of this project. However, if it is determined that the models need to be updated DEQ will follow the procedures outlined in this QAPP.
 
 ### Model inputs
 
 There are two categories of models each with different sets of inputs:
 
-* Effective shade curves: Model input values for vegetation height, vegetation density, vegetation overhang, and vegetation buffer width correspond to the restored streamside vegetation types expected in areas that are currently lacking streamside vegetation because of anthropogenic disturbance. The specific values will be determined during the TMDL process and will likely be the same or similar to the values presented in the `r pro.area.tmdls`. The other model inputs are the same as what is described in `r tbls(name = "t63", display="cite")`.        
+* Effective shade curves: Model input values for vegetation height, vegetation density, vegetation overhang, and vegetation buffer width correspond to the restored streamside vegetation types expected in areas that are currently lacking streamside vegetation because of anthropogenic disturbance. The specific values will be determined during the TMDL process and will likely be the same or similar to the values presented in the `r pro.area.tmdls.total`. The other model inputs are the same as what is described in `r tbls(name = "t63", display="cite")`.        
 
 * Effective shade lookup tables: Model input values to be used for the lookup tables are described in `r tbls(name = "t63", display="cite")`.       
 
@@ -1397,7 +1397,7 @@ This scenario evaluates the stream temperature response from background sources 
 
 This scenario evaluates the stream temperature response with streamside vegetation at restored conditions. The stream temperature warming or cooling contributed by removal of streamside vegetation is evaluated by comparing this scenario to the current condition model. Elements of this scenario or scenarios may include:
 
-* Restoring streamside vegetation in areas along the model extent that are currently characterized as lacking streamside vegetation because of anthropogenic disturbance. The restored vegetation type, height, density, and overhang values will be determined during the TMDL process and will likely be the same or similar to the values presented in the `r pro.area.tmdls`.
+* Restoring streamside vegetation in areas along the model extent that are currently characterized as lacking streamside vegetation because of anthropogenic disturbance. The restored vegetation type, height, density, and overhang values will be determined during the TMDL process and will likely be the same or similar to the values presented in the `r pro.area.tmdls.total`.
 
 *	Shade inputs will reflect the restored vegetation conditions and will likely be based on the shade files used for the model developed for the 2006 TMDL (DEQ, 2006).
 
@@ -1753,7 +1753,7 @@ DEQ prepared an interactive HTML map to display relevant information described i
 `r if(!is.na(project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B)){paste0("20. Salmon and Steelhead spawning use extent and period depicted in OAR ", project.areas[which(project.areas$areas == qapp_project_area),]$"OAR.340.041", " ", project.areas[which(project.areas$areas == qapp_project_area),]$OAR.340.041.Figure.B, ".")}`    
 
 
-```{r, label=`area-map-data`,echo=FALSE}
+```{r, label=`area-map-data`, echo=FALSE}
 # Stream Temperature Stations
 temp_stations <- temp.stations %>% 
   sf::st_as_sf(coords = c("Longitude","Latitude"), crs = sf::st_crs("+init=EPSG:4326"))
