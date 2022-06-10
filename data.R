@@ -501,7 +501,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
     
   }
   
-  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
+  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Snake River QAPP
   if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
                               "Malheur River Subbasins")) {
     
@@ -640,13 +640,13 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
     
   } 
   
-  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
+  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Snake River QAPP
   if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
                               "Malheur River Subbasins")) {
     
     station.usgs.flow <- station.usgs.flow %>% 
       dplyr::left_join(df.stations[,c("MLocID","Reachcode")], by = c("site_no" = "MLocID")) %>% 
-      dplyr::filter(!Reachcode %in% will_reachcodes)
+      dplyr::filter(!Reachcode %in% snake_reachcodes)
     
   }
   
