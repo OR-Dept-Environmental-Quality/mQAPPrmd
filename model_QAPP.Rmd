@@ -109,17 +109,27 @@ pro.area.tmdls <- knitr::combine_words(sort(pro.tmdls$tmdls.ref))
 # 2. Problem definition and management objectives
 ## Table 1. Water quality limited category 5 for temperature based on the Section 303(d) 2018/2020 Integrated Report
 
-tcat5 <- pro.cat.45.tbl %>% 
-  dplyr::filter(IR_categor == "Category 5") %>% 
-  dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
-  dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
-  dplyr::ungroup() %>% 
+# tcat5 <- pro.cat.45.tbl %>% 
+#   dplyr::filter(IR_categor == "Category 5") %>% 
+#   dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
+#   dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
+#   dplyr::ungroup() %>% 
+#   dplyr::rename(`Assessment Unit Name` = AU_Name,
+#                 `Assessment Unit ID` = AU_ID,
+#                 `Year Listed` = Year_liste,
+#                 `Use Period` = Period) %>% 
+#   dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
+#   dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
+
+# Updated for IR2022 on 11/15/2022
+tcat5 <- pro.cat.45.tbl %>%
+  dplyr::filter(AU_parameter_category == "5") %>% 
+  dplyr::filter(AU_parameter_category == "5") %>%
   dplyr::rename(`Assessment Unit Name` = AU_Name,
                 `Assessment Unit ID` = AU_ID,
-                `Year Listed` = Year_liste,
-                `Use Period` = Period) %>% 
-  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
-  dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
+                `Use Period (Year Listed)` = `Period_(Year_Listed)`) %>% 
+  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Use Period (Year Listed)`) %>% 
+  dplyr::arrange(`Assessment Unit Name`)
 
 if(NROW(tcat5)>0){
   
@@ -129,17 +139,26 @@ if(NROW(tcat5)>0){
   
 }
 
-tcat4a <- pro.cat.45.tbl %>% 
-  dplyr::filter(IR_categor == "Category 4A") %>% 
-  dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
-  dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
-  dplyr::ungroup() %>% 
+# tcat4a <- pro.cat.45.tbl %>% 
+#   dplyr::filter(IR_categor == "Category 4A") %>% 
+#   dplyr::group_by(AU_Name,AU_ID,Year_liste) %>% 
+#   dplyr::summarize(Period = toString(unique(sort(Period)))) %>% 
+#   dplyr::ungroup() %>% 
+#   dplyr::rename(`Assessment Unit Name` = AU_Name,
+#                 `Assessment Unit ID` = AU_ID,
+#                 `Year Listed` = Year_liste,
+#                 `Use Period` = Period) %>% 
+#   dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
+#   dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
+
+# Updated for IR2022 on 11/15/2022
+tcat4a <- pro.cat.45.tbl %>%
+  dplyr::filter(AU_parameter_category == "4A") %>%
   dplyr::rename(`Assessment Unit Name` = AU_Name,
                 `Assessment Unit ID` = AU_ID,
-                `Year Listed` = Year_liste,
-                `Use Period` = Period) %>% 
-  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Year Listed`,`Use Period`) %>% 
-  dplyr::arrange(`Assessment Unit Name`,`Year Listed`)
+                `Use Period (Year Listed)` = `Period_(Year_Listed)`) %>% 
+  dplyr::select(`Assessment Unit Name`,`Assessment Unit ID`,`Use Period (Year Listed)`) %>% 
+  dplyr::arrange(`Assessment Unit Name`)
 
 if(NROW(tcat4a)>0){
   
