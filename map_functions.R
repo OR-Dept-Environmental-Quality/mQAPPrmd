@@ -1,3 +1,19 @@
+# TMDL project scope ----
+projectScope <- function(map, data) {
+
+  leaflet::addPolygons(
+    map,
+    data = data,
+    group = "TMDL Project Scope",
+    options = leaflet::leafletOptions(pane="area"),
+    fillColor = "transparent",
+    fillOpacity = 0,
+    weight = 3,
+    color = "black",
+    opacity = 1)
+  
+}
+
 # Pop-up tables ----
 popupTable.temp <- function(station_name = NULL){
   
