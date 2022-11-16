@@ -214,44 +214,74 @@ lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"),
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
 
-# _ IR2018/20 Cat 4 & 5 ----
-cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
-                             layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL")
-cat.45.waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL.shp",
-                                  layer = "2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL")
-cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
-                                layer = "2018_2020_IR_Cat4_5_Temp_Watershed_FINAL") %>% 
-  dplyr::mutate(AU_Name = gsub(pattern = "HUC12 Name: ","",AU_Name)) %>% 
-  dplyr::mutate(AU_Name = paste0(AU_Name, " Watershed"))
+# # _ IR2018/20 Cat 4 & 5 ----
+# cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Rivers_FINAL.shp",
+#                              layer = "2018_2020_IR_Cat4_5_Temp_Rivers_FINAL")
+# cat.45.waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL.shp",
+#                                   layer = "2018_2020_IR_Cat4_5_Temp_Waterbodies_FINAL")
+# cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/2018_2020_IR_Cat4_5_Temp_Watershed_FINAL.shp",
+#                                 layer = "2018_2020_IR_Cat4_5_Temp_Watershed_FINAL") %>% 
+#   dplyr::mutate(AU_Name = gsub(pattern = "HUC12 Name: ","",AU_Name)) %>% 
+#   dplyr::mutate(AU_Name = paste0(AU_Name, " Watershed"))
 
-cat.45 <- rbind(cat.45.rivers[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
-                cat.45.waterbodies[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")],
-                cat.45.watershed[,c("IR_categor","AU_Name","AU_ID","Year_liste","Period","HUC12")]) %>% 
-  sf::st_zm() %>% 
-  dplyr::left_join(lookup.huc, by = "HUC12")
+# _ IR2022 Cat 4 & 5 ----
+# Updated on 11/14/2022
+columbia_aus <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
+                            layer="Columbia_River_AU_IDs",
+                            stringsAsFactors=FALSE) %>%
+  sf::st_drop_geometry()
 
-colum_auid <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
-                          layer="Columbia_River_AU_IDs",
-                          stringsAsFactors=FALSE) %>% 
-  sf::st_drop_geometry() %>%
-  dplyr::pull(AU_ID) 
+cat.45.rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/IR2022_4A5_Temperature_Rivers_project_areas.shp",
+                             layer = "IR2022_4A5_Temperature_Rivers_project_areas") %>% sf::st_zm() %>% sf::st_transform(4326) %>%
+  dplyr::select(-c(AU_WBType, AU_UseCode, AU_LenMile, AU_AreaAcr, AQWMS_NUM, AQWMS_TXT, wqstd_code, action_ID, action_TMD, TMDL_Prior)) %>%
+  dplyr::rename(AU_Description = AU_Descrip,
+                AU_parameter_category = AU_paramet,
+                TMDL_Project = TMDL_Proje,
+                QAPP_Project_Area = QAPP_Proje,
+                `Period_(Year_Listed)` = Period__Ye) %>%
+  dplyr::filter(!AU_ID %in% columbia_aus$AU_ID)
 
-cat.45.tbl <- sf::st_drop_geometry(cat.45) %>% 
-  dplyr::filter(!AU_ID %in% c(colum_auid)) %>%  
-  dplyr::mutate_at("AU_Name", str_replace_all, "Cre\\*", "Creek") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "For\\*", "Fork Willamette River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Joh\\*", "John Day River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "John\\*", "John Day River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "McKenzie \\*", "McKenzie River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Mill\\*", "Mill Creek") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "R\\*", "River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Ri\\*", "River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Riv\\*", "River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")  %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "W\\*", "Willamette River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Willamet\\*", "Willamette River") %>%
-  dplyr::mutate_at("AU_Name", str_replace_all, "Willamett\\*", "Willamette River") %>% 
-  dplyr::mutate_at("AU_Name", str_replace_all, "Willamette \\*", "Willamette River")
+cat.45.waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/IR2022_4A5_Temperature_Waterbodies_project_areas.shp",
+                                  layer = "IR2022_4A5_Temperature_Waterbodies_project_areas") %>% sf::st_zm() %>% sf::st_transform(4326) %>%
+  dplyr::select(-c(AU_WBType, AU_UseCode, AU_LenMile, AU_AreaAcr, AQWMS_NUM, AQWMS_TXT, wqstd_code, action_ID, action_TMD, TMDL_Prior)) %>%
+  dplyr::rename(AU_Description = AU_Descrip,
+                AU_parameter_category = AU_paramet,
+                TMDL_Project = TMDL_Proje,
+                QAPP_Project_Area = QAPP_Proje,
+                `Period_(Year_Listed)` = Period__Ye) %>%
+  dplyr::filter(!AU_ID %in% columbia_aus$AU_ID)
+
+cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/IR2022_4A5_Temperature_Watershed_project_areas.shp",
+                                layer = "IR2022_4A5_Temperature_Watershed_project_areas") %>% sf::st_zm() %>% sf::st_transform(4326) %>%
+  dplyr::select(-c(AU_WBType, AU_UseCode, AU_LenMile, AU_AreaAcr, AQWMS_NUM, AQWMS_TXT, wqstd_code, action_ID, action_TMD, TMDL_Prior)) %>%
+  dplyr::rename(AU_Description = AU_Descrip,
+                AU_parameter_category = AU_paramet,
+                TMDL_Project = TMDL_Proje,
+                QAPP_Project_Area = QAPP_Proje,
+                `Period_(Year_Listed)` = Period__Ye) %>%
+  dplyr::filter(!AU_ID %in% columbia_aus$AU_ID)
+
+cat.45 <- rbind(cat.45.rivers[,c("AU_parameter_category","AU_Name","AU_ID","Period_(Year_Listed)","HUC_12","QAPP_Project_Area")],
+                cat.45.waterbodies[,c("AU_parameter_category","AU_Name","AU_ID","Period_(Year_Listed)","HUC_12","QAPP_Project_Area")],
+                cat.45.watershed[,c("AU_parameter_category","AU_Name","AU_ID","Period_(Year_Listed)","HUC_12","QAPP_Project_Area")]) 
+
+cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Cre\\*", "Creek") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "For\\*", "Fork Willamette River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Joh\\*", "John Day River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "John\\*", "John Day River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "McKenzie \\*", "McKenzie River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Mill\\*", "Mill Creek") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "R\\*", "River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Ri\\*", "River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Riv\\*", "River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Thunder Creek-North Unpqua River", "Thunder Creek-North Umpqua River")  %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "W\\*", "Willamette River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Willamet\\*", "Willamette River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Willamett\\*", "Willamette River") %>%
+  dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Willamette \\*", "Willamette River") %>% 
+  dplyr::mutate_at("Period_(Year_Listed)", stringr::str_replace_all, "spawn", "Spawn") %>% # Updated for IR2022 on 11/15/2022
+  dplyr::mutate_at("Period_(Year_Listed)", stringr::str_replace_all, "year_round", "Year-round")
 
 # _ NCDC met data ----
 load(paste0(data.dir,"/download/ncei.RData")) # ncei & ncei.datacats.or
@@ -501,7 +531,7 @@ qapp_project_area = "Middle Willamette Subbasins"
     
   }
   
-  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
+  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Snake River QAPP
   if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
                               "Malheur River Subbasins")) {
     
@@ -640,13 +670,13 @@ qapp_project_area = "Middle Willamette Subbasins"
     
   } 
   
-  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Willamette mainstem QAPP
+  ## In the Malheur and Grande Ronde QAPPs, filter out the reachcodes covered in the Snake River QAPP
   if(qapp_project_area %in% c("Lower Grande Ronde, Imnaha, and Wallowa Subbasins",
                               "Malheur River Subbasins")) {
     
     station.usgs.flow <- station.usgs.flow %>% 
       dplyr::left_join(df.stations[,c("MLocID","Reachcode")], by = c("site_no" = "MLocID")) %>% 
-      dplyr::filter(!Reachcode %in% will_reachcodes)
+      dplyr::filter(!Reachcode %in% snake_reachcodes)
     
   }
   
