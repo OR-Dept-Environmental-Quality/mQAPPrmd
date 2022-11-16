@@ -59,24 +59,25 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Rogue River Basin"
 # qapp_project_area = "Sandy Subbasin"
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
-# qapp_project_area = "Southern Willamette Subbasins"                     ---X
+qapp_project_area = "Southern Willamette Subbasins"                        ---X
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 # qapp_project_area = "Willamette Subbasins"
 
-for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy Subbasin"),]$areas)) {
-  
+#for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy Subbasin"),]$areas)) { 
+
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   
-  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
-  #load(paste0("./data/lookup.RData"))
+  #load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+  load(paste0("./data/lookup.RData"))
   
   map.file.name <- paste0("map_", file.name)
-  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
-  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
-  # load(paste0("./data/",map.file.name,".RData")) # data.R
-  # load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  #load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,".RData")) # data.R
+  #load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+  load(paste0("./data/",map.file.name,".RData")) # data.R
+  load(paste0("./data/",map.file.name,"_qapp.RData")) # model_QAPP.Rmd
+
   pro.area.extent <- unlist(strsplit(project.areas[which(project.areas$areas == qapp_project_area),]$huc8.extent, split = ","))
   subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC_8))
   subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area == qapp_project_area),]$HUC10))
@@ -90,7 +91,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy S
   where_huc12 <- paste0("HUC12 IN ('", paste(subbasin_huc12, collapse = "','"),"')")
   
   #Use this line to check between the REST map and the QAPP table; if both are matched, use QAPP IR table to pull data to the map
-  #where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4','Category 5')) AND (", where_huc12, ")") 
+  # where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4','Category 5')) AND (", where_huc12, ")") 
   
   # where_au_yearRound <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5') AND Period = 'Year Round') AND ",
   #                              "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
@@ -187,7 +188,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy S
   #                                                       ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Year Round","2018/2020 303(d) Temperature Listed - Watershed (Year Round Criteria)",
   #                                                              ifelse(substr(`Assessment Unit ID`,4,5) == "WS" & `Use Period` == "Spawning","2018/2020 303(d) Temperature Listed - Watershed (Spawning Criteria)",NA)))))))
   
-  # Update for IR2022IR
+  # Update for IR2022
   sub.tcat45 <- tcat45 %>% tidyr::separate(col = `Use Period (Year Listed)`, into = c("up1","up2"), sep = ", ")
   sub.tcat45.1 <- sub.tcat45[c(1:3)] %>% dplyr::rename(`Use Period (Year Listed)` = up1)
   sub.tcat45.2 <- sub.tcat45[c(1,2,4)] %>% dplyr::rename(`Use Period (Year Listed)` = up2)
@@ -1175,10 +1176,10 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy S
                                         <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">
                                         </a></div></body></html>', logo))
-  
-  # SAVE DATA ----
-  print(paste0(qapp_project_area,"...Save the map"))
-  htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
-  file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
-  
-}
+
+# SAVE DATA ----
+print(paste0(qapp_project_area,"...Save the map"))
+htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
+file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
+
+#}
