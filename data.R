@@ -421,13 +421,13 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Willow Creek Subbasin"
 
 done <- c(
-  # "Lower Willamette and Clackamas Subbasins",
-  # "Middle Willamette Subbasins",
+  "Lower Willamette and Clackamas Subbasins",
+  "Middle Willamette Subbasins",
   # "North Umpqua Subbasin",
   # "Rogue River Basin",
-  "Sandy Subbasin",
+  # "Sandy Subbasin",
   # "South Umpqua and Umpqua Subbasins",
-  # "Southern Willamette Subbasins",
+  "Southern Willamette Subbasins",
   "Willamette River Mainstem and Major Tributaries")
 
 for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
@@ -449,8 +449,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
     dplyr::filter(HUC_8 %in% subbasin_num) %>% 
     sf::st_transform(4269) #4326
   
-  sf_use_s2(FALSE)
-  # sf_use_s2(TRUE)
+  sf::sf_use_s2(FALSE)
   
   pro_area_huc12_union <- sf::st_union(pro_area_huc12)
   
@@ -1060,6 +1059,14 @@ pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_T
                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
 #pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
 
+# _ Basin AUs ----
+au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
+                           layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326)
+au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
+                              layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
+au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
+                           layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
+
 # _ Model Extents ----
 map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_model_extent.shp"),
                                         layer = "hs_temp_model_extent")%>% 
@@ -1123,6 +1130,10 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
   
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
+  sf::sf_use_s2(FALSE)
+  pro_scope_rivers <- sf::st_intersection(au_rivers,pro_area, sparse = FALSE) %>% pull(AU_ID)
+  pro_scope_waterbodies <- sf::st_intersection(au_waterbodies,pro_area, sparse = FALSE) %>% pull(AU_ID)
+  pro_scope_watershed <- sf::st_intersection(au_watershed,pro_area, sparse = FALSE) %>% pull(AU_ID)
   
   hs_temp_model_extent <- map_hs_temp_model_extent %>% 
     dplyr::filter(Project_Na == qapp_project_area)
@@ -1143,6 +1154,9 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
   
   # _ Save Data ----
   save(pro_area,
+       pro_scope_rivers,
+       pro_scope_waterbodies,
+       pro_scope_watershed,
        hs_temp_model_extent,
        hs_solar_model_extent,
        hs_solar_model_area,

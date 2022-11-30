@@ -10,8 +10,8 @@ projectScope <- function(map, data) {
     fillOpacity = 0,
     weight = 3,
     color = "black",
-    opacity = 1)
-  
+    opacity = 0.8)
+
 }
 
 # Pop-up tables ----
@@ -25,7 +25,7 @@ popupTable.temp <- function(station_name = NULL){
     
     table <- knitr::kable(mapTempTbl,
                           format = "html", row.names = FALSE,
-                          caption = tags$h5("Count of days per month/year with available data:")) %>% 
+                          caption = htmltools::tags$h5("Count of days per month/year with available data:")) %>% 
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
                                 full_width = TRUE, font_size = 12,
                                 position = "left")
@@ -49,7 +49,7 @@ popupTable.flow <- function(station_name = NULL){
     
     table <- knitr::kable(mapFlowTbl,
                           format = "html", row.names = FALSE,
-                          caption = tags$h5("Count of days per month/year with available data:")) %>% 
+                          caption = htmltools::tags$h5("Count of days per month/year with available data:")) %>% 
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
                                 full_width = TRUE, font_size = 12,
                                 position = "left")
@@ -73,7 +73,7 @@ popupTable.gageHeight <- function(station_name = NULL){
     
     table <- knitr::kable(mapGageHeightTbl,
                           format = "html", row.names = FALSE,
-                          caption = tags$h5("Count of days per month/year with available data:")) %>% 
+                          caption = htmltools::tags$h5("Count of days per month/year with available data:")) %>% 
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
                                 full_width = TRUE, font_size = 12,
                                 position = "left")
