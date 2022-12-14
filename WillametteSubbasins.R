@@ -105,8 +105,8 @@ au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMD
                          layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
 au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
                               layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
-# au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
-#                             layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
+au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
+                            layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
 sf::sf_use_s2(FALSE)
 # pro_scope_rivers <- sf::st_intersection(au_rivers,pro_area, sparse = FALSE) %>% pull(AU_ID)
 # pro_scope_waterbodies <- sf::st_intersection(au_waterbodies,pro_area, sparse = FALSE) %>% pull(AU_ID)
@@ -117,6 +117,11 @@ pro_scope_rivers <- au_rivers %>% sf::st_drop_geometry() %>%
   dplyr::filter(!AU_ID %in% wms.au.id) %>% 
   dplyr::pull(AU_ID)
 pro_scope_waterbodies <- au_waterbodies %>% sf::st_drop_geometry() %>% 
+  dplyr::left_join(lookup.huc,by="HUC12") %>% 
+  dplyr::filter(QAPP_Project_Area %in% Willamette_Subbasins) %>% 
+  dplyr::filter(!AU_ID %in% wms.au.id)%>% 
+  dplyr::pull(AU_ID)
+pro_scope_watershed <- au_watershed %>% sf::st_drop_geometry() %>% 
   dplyr::left_join(lookup.huc,by="HUC12") %>% 
   dplyr::filter(QAPP_Project_Area %in% Willamette_Subbasins) %>% 
   dplyr::filter(!AU_ID %in% wms.au.id)%>% 
@@ -145,30 +150,36 @@ pro.area.extent <- "43.356,-123.6642,45.94129,-121.6514"
 subbasin_huc8 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% Willamette_Subbasins),]$HUC_8))
 subbasin_huc10 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% Willamette_Subbasins),]$HUC10))
 subbasin_huc12 <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% Willamette_Subbasins),]$HUC12))
+subbasin_huc8_lower <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% "Lower Willamette and Clackamas Subbasins"),]$HUC_8))
+subbasin_huc8_middle <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% "Middle Willamette Subbasins"),]$HUC_8))
+subbasin_huc8_southern <- sort(unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% "Southern Willamette Subbasins"),]$HUC_8))
 
 # where clause ----
 ## used in querying the feature layers from the REST Server
 where_huc8 <- paste0("HUC8 IN ('", paste(subbasin_huc8, collapse = "','"),"')")
 where_huc10 <- paste0("HUC10 IN ('", paste(subbasin_huc10, collapse = "','"),"')")
 where_huc12 <- paste0("HUC12 IN ('", paste(subbasin_huc12, collapse = "','"),"')")
+where_huc8_lower <- paste0("HUC8 IN ('", paste(subbasin_huc8_lower, collapse = "','"),"')")
+where_huc8_middle <- paste0("HUC8 IN ('", paste(subbasin_huc8_middle, collapse = "','"),"')")
+where_huc8_southern <- paste0("HUC8 IN ('", paste(subbasin_huc8_southern, collapse = "','"),"')")
+#Test:
+where_huc12_1 <- paste0("HUC12 IN ('", paste(subbasin_huc12[1:50], collapse = "','"),"')")
+where_huc12_2 <- paste0("HUC12 IN ('", paste(subbasin_huc12[51:100], collapse = "','"),"')")
+where_huc12_3 <- paste0("HUC12 IN ('", paste(subbasin_huc12[101:150], collapse = "','"),"')")
+where_huc12_4 <- paste0("HUC12 IN ('", paste(subbasin_huc12[151:200], collapse = "','"),"')")
+where_huc12_5 <- paste0("HUC12 IN ('", paste(subbasin_huc12[201:250], collapse = "','"),"')")
+where_huc12_6 <- paste0("HUC12 IN ('", paste(subbasin_huc12[251:300], collapse = "','"),"')")
+where_huc12_7 <- paste0("HUC12 IN ('", paste(subbasin_huc12[301:350], collapse = "','"),"')")
 
 where_au_rivers <- paste0("(AU_ID IN ('", paste(pro_scope_rivers, collapse = "','"),"'))")
 where_au_waterbodies <- paste0("(AU_ID IN ('", paste(pro_scope_waterbodies, collapse = "','"),"'))")
-# where_au_watershed <- paste0("(AU_ID IN ('", paste(pro_scope_watershed, collapse = "','"),"'))")
+where_au_watershed <- paste0("(AU_ID IN ('", paste(pro_scope_watershed, collapse = "','"),"'))")
 
 where_au_yearRound <- paste0("(Pollutant = 'Temperature' AND AU_parameter_category IN ('4A','5') AND period = 'year_round') AND ",
                              "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
 
 where_au_spawning <- paste0("(Pollutant = 'Temperature' AND AU_parameter_category IN ('4A','5') AND period = 'spawn') AND ",
                             "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
-
-# where_au_gnis_yearRound <- paste0("(Pollutant = 'Temperature' AND AU_final_status IN ('4A','5') AND period = 'year_round') AND ",
-#                                   "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
-# 
-# where_au_gnis_spawning <- paste0("(Pollutant = 'Temperature' AND AU_final_status IN ('4A','5') AND period = 'spawn') AND ",
-#                                  "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
-# 
-# where_au <- paste0("(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
 
 reachcode <- paste(paste0("(ReachCode >= ", subbasin_huc8, "000000", " AND ReachCode <= ", 
                           subbasin_huc8,"999999)"), 
@@ -250,6 +261,9 @@ group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
                  ir.grps,
                  "Fish Use Designations",
                  "Salmon and Steelhead Spawning Use Designations",
+                 "Land Ownership or Jurisdiction (Lower Willamette and Clackamas Subbasins)",
+                 "Land Ownership or Jurisdiction (Middle Willamette Subbasins)",
+                 "Land Ownership or Jurisdiction (Southern Willamette Subbasins)",
                  "Stream Names (USGS NHD)",
                  "Oregon Imagery")
 
@@ -259,6 +273,9 @@ group.names.hide <- c(dta.stations.mod %>% dplyr::pull(group_name),
                       ir.grps,
                       "Fish Use Designations",
                       "Salmon and Steelhead Spawning Use Designations",
+                      "Land Ownership or Jurisdiction (Lower Willamette and Clackamas Subbasins)",
+                      "Land Ownership or Jurisdiction (Middle Willamette Subbasins)",
+                      "Land Ownership or Jurisdiction (Southern Willamette Subbasins)",
                       "Stream Names (USGS NHD)",
                       "Oregon Imagery")
 
@@ -280,8 +297,10 @@ map_basic <- leaflet::leaflet() %>%
                      lng2 = -121.6514, lat2 = 45.94129) %>%
   leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>%
   leaflet::addMapPane("aerial", zIndex = -1500) %>%
+  leaflet::addMapPane("dma", zIndex = -1500) %>%
   leaflet::addMapPane("hydrotiles", zIndex = -1400) %>%
   leaflet::addMapPane("area", zIndex = -1300) %>%
+  leaflet::addMapPane("areaOutline", zIndex = -1350) %>%
   leaflet::addMapPane("area_wms", zIndex = -1200) %>%
   leaflet::addMapPane("huc8", zIndex = -900) %>%
   leaflet::addMapPane("huc10", zIndex = -800) %>%
@@ -294,7 +313,7 @@ map_basic <- leaflet::leaflet() %>%
   leaflet::addMapPane("modbes", zIndex = -100) %>%
   # leaflet::addMapPane("mod2016", zIndex = -200) %>%
   # leaflet::addMapPane("mod2009", zIndex = -200) %>%
-  leaflet::addMapPane("marker", zIndex = 1000) %>%
+  leaflet::addMapPane("marker", zIndex = 100) %>%
   leaflet::addProviderTiles(providers$OpenStreetMap, #names(providers) to see a list of the layers
                             options = pathOptions(pane = "OpenStreetMap")) %>% 
   # __ Oregon Imagery ----
@@ -360,32 +379,29 @@ leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC
                                                                            '<br><b>AU ID:</b> \"+props.AU_ID+\"',
                                                                            '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                            ' \"}'))) %>%
-  # leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/44",
-  #                                   options = leaflet.esri::featureLayerOptions(where = where_huc12),
-  #                                   useServiceSymbology = TRUE,
-  #                                   group = "Willamette Subbasins TMDL Project Scope",
-  #                                   pathOptions = leaflet::pathOptions(pane="area2"),
-  #                                   weight = 2,
-  #                                   color = "black",
-  #                                   opacity = 1,
-  #                                   fillColor = "transparent",
-  #                                   fillOpacity = 0,
-  #                                   dashArray = c(6,12),
-  #                                   highlightOptions = leaflet::highlightOptions(color="black",
-  #                                                                                weight = 3,
-  #                                                                                fill=TRUE,
-  #                                                                                fillColor = "black",
-  #                                                                                fillOpacity = 0.5,
-  #                                                                                bringToFront = TRUE,
-  #                                                                                sendToBack = TRUE),
-  #                                   labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
-  #                                   labelOptions = leaflet::labelOptions(#noHide = T,
-  #                                     style = list("color" = "black","font-size" = "20px")),
-  #                                   popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
-  #                                                                          '<b>AU Name:</b> \"+props.AU_Name+\"',
-  #                                                                          '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-  #                                                                          '<br><b>HUC12:</b> \"+props.HUC_12+\"',
-  #                                                                          ' \"}'))) %>%
+  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/arcgis/rest/services/OR_AUs_Line_work/FeatureServer/1",
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_watershed),
+                                    useServiceSymbology = TRUE,
+                                    group = "Willamette Subbasins TMDL Project Scope",
+                                    pathOptions = leaflet::pathOptions(pane="area"),
+                                    color = "#0868ac",
+                                    weight = 3,
+                                    opacity = 1,
+                                    fill = FALSE,
+                                    highlightOptions = leaflet::highlightOptions(color="gray",
+                                                                                 weight = 4,
+                                                                                 fillOpacity = 1,
+                                                                                 bringToFront = TRUE,
+                                                                                 sendToBack = TRUE),
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_GNIS+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(#noHide = T,
+                                      style = list("color" = "black","font-size" = "16px")),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>AU GNIS:</b> \"+props.AU_GNIS+\"',
+                                                                           '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                           '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                           ' \"}'))) %>%
 # __ Project scope: WMS ----
 leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/34",
                                   options = leaflet.esri::featureLayerOptions(where = where_au_rivers_wms),
@@ -698,6 +714,73 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                            '<b>Waterbody Name:</b> \"+props.GNIS_Name+\"',
                                                                            '<br><b>Temperature Spawn Dates:</b> \"+props.Temperature_Spawn_dates+\"',
                                                                            '<br><b> Spawning Criterion 7DADM deg-C:</b> 13',
+                                                                           ' \"}'))) %>% 
+  # __ DMA ----
+leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                  options = leaflet.esri::featureLayerOptions(where = where_huc8_lower,
+                                                                              style = DMAcolor),
+                                  group = "Land Ownership or Jurisdiction (Lower Willamette and Clackamas Subbasins)",
+                                  pathOptions = leaflet::pathOptions(pane="dma"),
+                                  fill = TRUE,
+                                  fillOpacity = 0.75,
+                                  weight = 0.1,
+                                  opacity = 0,
+                                  color = "white",
+                                  highlightOptions = leaflet::highlightOptions(weight = 3,
+                                                                               color = "white",
+                                                                               opacity = 1,
+                                                                               bringToFront = TRUE),
+                                  labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+                                  labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                  popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                         '<b>Land Ownership or Jurisdiction:</b> \"+props.DMA_RP+\"',
+                                                                         '<br>\"+props.DMA_RP_Cl+\"',
+                                                                         '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                         '<br><b>Version:</b> \"+props.Version+\"',
+                                                                         ' \"}'))) %>% 
+  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                    options = leaflet.esri::featureLayerOptions(where = where_huc8_middle,
+                                                                                style = DMAcolor),
+                                    group = "Land Ownership or Jurisdiction (Middle Willamette Subbasins)",
+                                    pathOptions = leaflet::pathOptions(pane="dma"),
+                                    fill = TRUE,
+                                    fillOpacity = 0.75,
+                                    weight = 0.1,
+                                    opacity = 0,
+                                    color = "white",
+                                    highlightOptions = leaflet::highlightOptions(weight = 3,
+                                                                                 color = "white",
+                                                                                 opacity = 1,
+                                                                                 bringToFront = TRUE),
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>Land Ownership or Jurisdiction:</b> \"+props.DMA_RP+\"',
+                                                                           '<br>\"+props.DMA_RP_Cl+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                           '<br><b>Version:</b> \"+props.Version+\"',
+                                                                           ' \"}'))) %>% 
+  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                    options = leaflet.esri::featureLayerOptions(where = where_huc8_southern,
+                                                                                style = DMAcolor),
+                                    group = "Land Ownership or Jurisdiction (Southern Willamette Subbasins)",
+                                    pathOptions = leaflet::pathOptions(pane="dma"),
+                                    fill = TRUE,
+                                    fillOpacity = 0.75,
+                                    weight = 0.1,
+                                    opacity = 0,
+                                    color = "white",
+                                    highlightOptions = leaflet::highlightOptions(weight = 3,
+                                                                                 color = "white",
+                                                                                 opacity = 1,
+                                                                                 bringToFront = TRUE),
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>Land Ownership or Jurisdiction:</b> \"+props.DMA_RP+\"',
+                                                                           '<br>\"+props.DMA_RP_Cl+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                           '<br><b>Version:</b> \"+props.Version+\"',
                                                                            ' \"}')))
 # Project area layer ----
 # ____ * New models: BES 2019 ----

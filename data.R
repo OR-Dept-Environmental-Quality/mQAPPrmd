@@ -1130,10 +1130,28 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
   
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
+  au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
+                           layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
+  au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
+                                layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
+  au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
+                              layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
   sf::sf_use_s2(FALSE)
-  pro_scope_rivers <- sf::st_intersection(au_rivers,pro_area, sparse = FALSE) %>% pull(AU_ID)
-  pro_scope_waterbodies <- sf::st_intersection(au_waterbodies,pro_area, sparse = FALSE) %>% pull(AU_ID)
-  pro_scope_watershed <- sf::st_intersection(au_watershed,pro_area, sparse = FALSE) %>% pull(AU_ID)
+  pro_scope_rivers <- au_rivers %>% sf::st_drop_geometry() %>% 
+    dplyr::left_join(lookup.huc,by="HUC12") %>% 
+    dplyr::filter(QAPP_Project_Area %in% Willamette_Subbasins) %>% 
+    dplyr::filter(!AU_ID %in% wms.au.id) %>% 
+    dplyr::pull(AU_ID)
+  pro_scope_waterbodies <- au_waterbodies %>% sf::st_drop_geometry() %>% 
+    dplyr::left_join(lookup.huc,by="HUC12") %>% 
+    dplyr::filter(QAPP_Project_Area %in% Willamette_Subbasins) %>% 
+    dplyr::filter(!AU_ID %in% wms.au.id)%>% 
+    dplyr::pull(AU_ID)
+  pro_scope_watershed <- au_watershed %>% sf::st_drop_geometry() %>% 
+    dplyr::left_join(lookup.huc,by="HUC12") %>% 
+    dplyr::filter(QAPP_Project_Area %in% Willamette_Subbasins) %>% 
+    dplyr::filter(!AU_ID %in% wms.au.id)%>% 
+    dplyr::pull(AU_ID)
   
   hs_temp_model_extent <- map_hs_temp_model_extent %>% 
     dplyr::filter(Project_Na == qapp_project_area)

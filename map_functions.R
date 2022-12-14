@@ -5,7 +5,7 @@ projectScope <- function(map, data) {
     map,
     data = data,
     group = "TMDL Project Scope",
-    options = leaflet::leafletOptions(pane="area"),
+    options = leaflet::leafletOptions(pane="areaOutline"),
     fillColor = "transparent",
     fillOpacity = 0,
     weight = 3,
@@ -452,4 +452,48 @@ tempSpawncolor <- htmlwidgets::JS("function tempSpawncolor(feature) {
                       else colorToUse = \"darkgrey\";
                       
     return {color: colorToUse};
+    }")
+
+# Hex colors same as DMA style file
+DMAcolor <- htmlwidgets::JS("function DMAcolor(feature) {
+    var colorToUse;
+    var code = feature.properties.Symbol;
+    
+                      if (code === \"City\") colorToUse = \"#C31400\";
+                      else if (code === \"County\") colorToUse = \"#FFD37F\";
+                      else if (code === \"Oregon Department of Agriculture\") colorToUse = \"#FFFF64\";
+                      else if (code === \"Oregon Department of Aviation\") colorToUse = \"#686868\";
+                      else if (code === \"Oregon Department of Fish and Wildlife\") colorToUse = \"#00C5FF\";
+                      else if (code === \"Oregon Department of Forestry - Private\") colorToUse = \"#89CD66\";
+                      else if (code === \"Oregon Department of Forestry - Public\") colorToUse = \"#00A000\";
+                      else if (code === \"Oregon Department of Geology and Mineral Industries\") colorToUse = \"#DCDCDC\";
+                      else if (code === \"Oregon Department of Land Conservation and Development\") colorToUse = \"#FFEBAF\";
+                      else if (code === \"Oregon Department of State Lands\") colorToUse = \"#DCF064\";
+                      else if (code === \"Oregon Department of Transportation\") colorToUse = \"#002673\";
+                      else if (code === \"Oregon Military Department\") colorToUse = \"#CCCCCC\";
+                      else if (code === \"Oregon Parks and Recreation Department\") colorToUse = \"#00DC82\";
+                      else if (code === \"State of Oregon\") colorToUse = \"#CD6666\";
+                      else if (code === \"Port\") colorToUse = \"#FFBEBE\";
+                      else if (code === \"Private Utility\") colorToUse = \"#E69800\";
+                      else if (code === \"Railroad\") colorToUse = \"#FFFFFF\";
+                      else if (code === \"Road\") colorToUse = \"#000000\";
+                      else if (code === \"TBD - Water\") colorToUse = \"#0046C8\";
+                      else if (code === \"NA - Tribal\") colorToUse = \"#784B00\";
+                      else if (code === \"Special District\") colorToUse = \"#BEFFE8\";
+                      else if (code === \"Bonneville Power Administration\") colorToUse = \"#FFDCD2\";
+                      else if (code === \"Federal Aviation Administration\") colorToUse = \"#686868\";
+                      else if (code === \"U.S. Army Corps of Engineers\") colorToUse = \"#BED2FF\";
+                      else if (code === \"U.S. Bureau of Land Management\") colorToUse = \"#FFB432\";
+                      else if (code === \"U.S. Bureau of Reclamation\") colorToUse = \"#966400\";
+                      else if (code === \"U.S. Coast Guard\") colorToUse = \"#F57AB6\";
+                      else if (code === \"U.S. Department of Agriculture\") colorToUse = \"#788200\";
+                      else if (code === \"U.S. Department of Defense\") colorToUse = \"#704489\";
+                      else if (code === \"U.S. Department of Energy\") colorToUse = \"#F57AB6\";
+                      else if (code === \"U.S. Fish and Wildlife Service\") colorToUse = \"#00E6A9\";
+                      else if (code === \"U.S. Forest Service\") colorToUse = \"#009678\";
+                      else if (code === \"U.S. Government\") colorToUse = \"#894465\";
+                      else if (code === \"U.S. National Park Service\") colorToUse = \"#285000\";
+                      else colorToUse = \"#NNNNNN00\";
+                      
+    return {fillColor: colorToUse};
     }")

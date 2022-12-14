@@ -63,7 +63,6 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
-# qapp_project_area = "Willamette Subbasins"
 
 for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("Sandy Subbasin",
                                                                               "Lower Willamette and Clackamas Subbasins",
@@ -91,7 +90,10 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
   where_huc8 <- paste0("HUC8 IN ('", paste(subbasin_huc8, collapse = "','"),"')")
   where_huc10 <- paste0("HUC10 IN ('", paste(subbasin_huc10, collapse = "','"),"')")
   where_huc12 <- paste0("HUC12 IN ('", paste(subbasin_huc12, collapse = "','"),"')")
-
+  where_huc12_1 <- paste0("HUC12 IN ('", paste(subbasin_huc12[1:50], collapse = "','"),"')")
+  where_huc12_2 <- paste0("HUC12 IN ('", paste(subbasin_huc12[51:100], collapse = "','"),"')")
+  where_huc12_3 <- paste0("HUC12 IN ('", paste(subbasin_huc12[101:150], collapse = "','"),"')")
+  
   # IR2018/20
   # where_au_yearRound <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5') AND Period = 'Year Round') AND ",
   #                              "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
@@ -107,6 +109,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
   
   if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
     
+    wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
     wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)
     where_au_rivers <- paste0("(AU_ID IN ('", paste(wms.au.id, collapse = "','"),"'))")
     where_au_waterbodies <- paste0("(AU_ID IN ('", paste(wms.au.id, collapse = "','"),"'))")
@@ -114,7 +117,9 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
     
   }else{
     
-    where_au 
+    where_au_rivers <- paste0("(AU_ID IN ('", paste(pro_scope_rivers, collapse = "','"),"'))")
+    where_au_waterbodies <- paste0("(AU_ID IN ('", paste(pro_scope_waterbodies, collapse = "','"),"'))")
+    where_au_watershed <- paste0("(AU_ID IN ('", paste(pro_scope_watershed, collapse = "','"),"'))") 
     
   }
   
@@ -216,6 +221,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
                    ir.grps,
                    "Fish Use Designations",
                    "Salmon and Steelhead Spawning Use Designations",
+                   "Land Ownership or Jurisdiction",
                    "Stream Names (USGS NHD)",
                    "Oregon Imagery")
   
@@ -224,6 +230,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
                         ir.grps,
                         "Fish Use Designations",
                         "Salmon and Steelhead Spawning Use Designations",
+                        "Land Ownership or Jurisdiction",
                         "Stream Names (USGS NHD)",
                         "Oregon Imagery")
   
@@ -247,8 +254,10 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
                        lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
     leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>% 
     leaflet::addMapPane("aerial", zIndex = -1500) %>% 
+    leaflet::addMapPane("dma", zIndex = -1500) %>% 
     leaflet::addMapPane("hydrotiles", zIndex = -1400) %>%
     leaflet::addMapPane("area", zIndex = -1300) %>%
+    leaflet::addMapPane("areaOutline", zIndex = -1350) %>%
     leaflet::addMapPane("huc8", zIndex = -900) %>%
     leaflet::addMapPane("huc10", zIndex = -800) %>%
     leaflet::addMapPane("huc12", zIndex = -700) %>%
@@ -260,7 +269,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
     leaflet::addMapPane("modbes", zIndex = -100) %>%
     leaflet::addMapPane("mod2016", zIndex = -200) %>%
     leaflet::addMapPane("mod2009", zIndex = -200) %>%
-    leaflet::addMapPane("marker", zIndex = 1000) %>%
+    leaflet::addMapPane("marker", zIndex = 100) %>%
     leaflet::addProviderTiles(providers$OpenStreetMap, #names(providers) to see a list of the layers
                               options = pathOptions(pane = "OpenStreetMap")) %>% 
     # __ Oregon Imagery ----
@@ -326,31 +335,29 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
                                                                              '<br><b>AU ID:</b> \"+props.AU_ID+\"',
                                                                              '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                              ' \"}'))) %>%
-    # leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/44",
-    #                                   options = leaflet.esri::featureLayerOptions(where = where_au_watershed),
-    #                                   useServiceSymbology = TRUE,
-    #                                   group = "TMDL Project Scope",
-    #                                   pathOptions = leaflet::pathOptions(pane="area"),
-    #                                   color = "black",
-    #                                   weight = 8,
-    #                                   opacity = 1,
-    #                                   fillColor = "black",
-    #                                   fillOpacity = 0.8,
-    #                                   highlightOptions = leaflet::highlightOptions(color="gray",
-    #                                                                                weight = 5,
-    #                                                                                fill=TRUE,
-    #                                                                                fillColor = "gray",
-    #                                                                                fillOpacity = 1,
-    #                                                                                bringToFront = TRUE,
-    #                                                                                sendToBack = TRUE),
-    #                                   labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
-    #                                   labelOptions = leaflet::labelOptions(#noHide = T,
-    #                                     style = list("color" = "black","font-size" = "20px")),
-    #                                   popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
-    #                                                                          '<b>AU Name:</b> \"+props.AU_Name+\"',
-    #                                                                          '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-    #                                                                          '<br><b>HUC12:</b> \"+props.HUC_12+\"',
-    #                                                                          ' \"}'))) %>%
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/arcgis/rest/services/OR_AUs_Line_work/FeatureServer/1",
+                                      options = leaflet.esri::featureLayerOptions(where = where_au_watershed),
+                                      useServiceSymbology = TRUE,
+                                      group = "TMDL Project Scope",
+                                      pathOptions = leaflet::pathOptions(pane="area"),
+                                      color = "#0868ac",
+                                      weight = 3,
+                                      opacity = 1,
+                                      fill = FALSE,
+                                      highlightOptions = leaflet::highlightOptions(color="gray",
+                                                                                   weight = 4,
+                                                                                   fillOpacity = 1,
+                                                                                   bringToFront = TRUE,
+                                                                                   sendToBack = TRUE),
+                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_GNIS+\" \"}"),
+                                      labelOptions = leaflet::labelOptions(#noHide = T,
+                                        style = list("color" = "black","font-size" = "16px")),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>AU GNIS:</b> \"+props.AU_GNIS+\"',
+                                                                             '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                             '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                             ' \"}'))) %>%
     # __ HUCs ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc8),
@@ -781,6 +788,73 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
                                                                              '<b>Waterbody Name:</b> \"+props.GNIS_Name+\"',
                                                                              '<br><b>Temperature Spawn Dates:</b> \"+props.Temperature_Spawn_dates+\"',
                                                                              '<br><b> Spawning Criterion 7DADM deg-C:</b> 13',
+                                                                             ' \"}'))) %>% 
+    # __ DMA ----
+  leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                    options = leaflet.esri::featureLayerOptions(where = where_huc12_1,
+                                                                                style = DMAcolor),
+                                    group = "Land Ownership or Jurisdiction",
+                                    pathOptions = leaflet::pathOptions(pane="dma"),
+                                    fill = TRUE,
+                                    fillOpacity = 0.75,
+                                    weight = 0.1,
+                                    opacity = 0,
+                                    color = "white",
+                                    highlightOptions = leaflet::highlightOptions(weight = 3,
+                                                                                 color = "white",
+                                                                                 opacity = 1,
+                                                                                 bringToFront = TRUE),
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>Land Ownership or Jurisdiction:</b> \"+props.DMA_RP+\"',
+                                                                           '<br>\"+props.DMA_RP_Cl+\"',
+                                                                           '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                           '<br><b>Version:</b> \"+props.Version+\"',
+                                                                           ' \"}'))) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc12_2,
+                                                                                  style = DMAcolor),
+                                      group = "Land Ownership or Jurisdiction",
+                                      pathOptions = leaflet::pathOptions(pane="dma"),
+                                      fill = TRUE,
+                                      fillOpacity = 0.75,
+                                      weight = 0.1,
+                                      opacity = 0,
+                                      color = "white",
+                                      highlightOptions = leaflet::highlightOptions(weight = 3,
+                                                                                   color = "white",
+                                                                                   opacity = 1,
+                                                                                   bringToFront = TRUE),
+                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>Land Ownership or Jurisdiction:</b> \"+props.DMA_RP+\"',
+                                                                             '<br>\"+props.DMA_RP_Cl+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                             '<br><b>Version:</b> \"+props.Version+\"',
+                                                                             ' \"}'))) %>% 
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc12_3,
+                                                                                  style = DMAcolor),
+                                      group = "Land Ownership or Jurisdiction",
+                                      pathOptions = leaflet::pathOptions(pane="dma"),
+                                      fill = TRUE,
+                                      fillOpacity = 0.75,
+                                      weight = 0.1,
+                                      opacity = 0,
+                                      color = "white",
+                                      highlightOptions = leaflet::highlightOptions(weight = 3,
+                                                                                   color = "white",
+                                                                                   opacity = 1,
+                                                                                   bringToFront = TRUE),
+                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>Land Ownership or Jurisdiction:</b> \"+props.DMA_RP+\"',
+                                                                             '<br>\"+props.DMA_RP_Cl+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                             '<br><b>Version:</b> \"+props.Version+\"',
                                                                              ' \"}')))
   
   # Project area layer ----
