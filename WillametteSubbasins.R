@@ -16,6 +16,10 @@ tag.map.title <- htmltools::tags$style(htmltools::HTML("
     font-size: 28px;
   }
 "))
+
+# text-align: center;
+# line-height: 1;
+
 qapp_project_area <- "Willamette Subbasins"
 file.name <- "Willamette Subbasins"
 map.file.name <-  "map_Willamette_Subbasins"
@@ -274,6 +278,7 @@ group.names.search <- dta.stations %>% dplyr::pull(group_name)
 
 # Basic layers ----
 map.title <- htmltools::tags$div(tag.map.title, htmltools::HTML(paste0(qapp_project_area)))
+#map.title <- htmltools::tags$div(tag.map.title, htmltools::HTML(paste0(htmltools::tags$h1("Willamette Subbasins"),htmltools::tags$h3("(Lower Willamette, Middle Willamette and Southern Willamette)"))))
 map_basic <- leaflet::leaflet() %>%
   leaflet::addControl(map.title, position = "topleft", className="map-title") %>%
   leaflet::addMiniMap(tiles = providers$OpenStreetMap,
