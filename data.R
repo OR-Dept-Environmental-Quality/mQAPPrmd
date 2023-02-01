@@ -226,7 +226,7 @@ project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>%
 
 # _ IR2022 Cat 4 & 5 ----
 # Updated on 11/14/2022
-columbia_aus <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/2020_2024",
+columbia_aus <- sf::st_read(dsn = "//deqhq1/tmdl/Planning statewide/TMDL_Priorities/2018_2020_IR/working_2020_2024",
                             layer="Columbia_River_AU_IDs",
                             stringsAsFactors=FALSE) %>%
   sf::st_drop_geometry()
@@ -1066,6 +1066,10 @@ au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperatur
                               layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
 au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
                            layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
+sf::sf_use_s2(FALSE)
+
+wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
+wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)
 
 # _ Model Extents ----
 map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_model_extent.shp"),
@@ -1130,14 +1134,7 @@ qapp_project_area = "Sandy Subbasin"
   
   pro_area <- pro_areas %>% 
     dplyr::filter(Project_Na == qapp_project_area)
-  
-  au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
-                           layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
-  au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
-                                layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
-  au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
-                              layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326) %>% sf::st_zm()
-  sf::sf_use_s2(FALSE)
+
   pro_scope_rivers <- au_rivers %>% sf::st_drop_geometry() %>% 
     dplyr::left_join(lookup.huc,by="HUC12") %>% 
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
