@@ -1,3 +1,19 @@
+# TMDL project scope ----
+projectScope <- function(map, data) {
+
+  leaflet::addPolygons(
+    map,
+    data = data,
+    group = "TMDL Project Scope",
+    options = leaflet::leafletOptions(pane="areaOutline"),
+    fillColor = "transparent",
+    fillOpacity = 0,
+    weight = 3,
+    color = "black",
+    opacity = 0.8)
+
+}
+
 # Pop-up tables ----
 popupTable.temp <- function(station_name = NULL){
   
@@ -9,7 +25,7 @@ popupTable.temp <- function(station_name = NULL){
     
     table <- knitr::kable(mapTempTbl,
                           format = "html", row.names = FALSE,
-                          caption = tags$h5("Count of days per month/year with available data:")) %>% 
+                          caption = htmltools::tags$h5("Count of days per month/year with available data:")) %>% 
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
                                 full_width = TRUE, font_size = 12,
                                 position = "left")
@@ -33,7 +49,7 @@ popupTable.flow <- function(station_name = NULL){
     
     table <- knitr::kable(mapFlowTbl,
                           format = "html", row.names = FALSE,
-                          caption = tags$h5("Count of days per month/year with available data:")) %>% 
+                          caption = htmltools::tags$h5("Count of days per month/year with available data:")) %>% 
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
                                 full_width = TRUE, font_size = 12,
                                 position = "left")
@@ -57,7 +73,7 @@ popupTable.gageHeight <- function(station_name = NULL){
     
     table <- knitr::kable(mapGageHeightTbl,
                           format = "html", row.names = FALSE,
-                          caption = tags$h5("Count of days per month/year with available data:")) %>% 
+                          caption = htmltools::tags$h5("Count of days per month/year with available data:")) %>% 
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
                                 full_width = TRUE, font_size = 12,
                                 position = "left")
@@ -82,7 +98,7 @@ tempStation.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$Organization, ": ", data$Station, " (", data$`Station ID`,")"),
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>", 
                     data$Organization," Station Name: ",
                     data$Station,"<br>",
@@ -104,7 +120,7 @@ tempCalibration.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Model Waterbody:</b> ", `Model Waterbody`,
                     '<br>', "<b>Station:</b> ", `Model Location Name`,
                     '<br>', "<b>Station ID:</b> ", `Station ID`,
@@ -126,7 +142,7 @@ tempBoundaryTributary.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Model Waterbody:</b> ", `Model Waterbody`,
                     '<br>', "<b>Station:</b> ", `Model Location Name`,
                     '<br>', "<b>Station ID:</b> ", `Station ID`,
@@ -149,7 +165,7 @@ flowStation.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$`Data Source`, ": ", data$Station, " (", data$`Station ID`,")"),
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>", 
                     data$`Data Source`," Station Name: ",
                     data$Station,"<br>",
@@ -171,7 +187,7 @@ flowBoundaryTributary.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = ifelse(is.na(data$`Station ID`),data$`Model Location Name`,paste0(data$`Model Location Name`," (", data$`Station ID`,")")), 
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Model Waterbody:</b> ", `Model Waterbody`,
                     '<br>', "<b>Station:</b> ", `Model Location Name`,
                     '<br>', "<b>Station ID:</b> ", `Station ID`,
@@ -194,7 +210,7 @@ metStation.markders <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$tbl, ": ", data$Station, " (", data$`Station ID`, ")"),
-    labelOptions = labelOptions(textsize = "15px")) 
+    labelOptions = labelOptions(textsize = "12px")) 
   
 }
 
@@ -208,7 +224,7 @@ indPS.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$`Facility Name (Facility Number)`),
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Facility Name (Facility Number):</b> ", data$`Facility Name (Facility Number)`,
                     "<br>", 
                     "<b>Permit Number:</b> ", data$`Permit Number`,
@@ -233,7 +249,7 @@ genPS.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$`Facility Name (Facility Number)`),
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Facility Name (Facility Number):</b> ", data$`Facility Name (Facility Number)`,
                     "<br>", 
                     "<b>Permit Number:</b> ", data$`Permit Number`,
@@ -256,7 +272,7 @@ gageHeight.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = paste0("USGS: ", data$Station, " (", data$`Station ID`,")"),
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>", 
                     "USGS Station Name: ",
                     data$Station,"<br>",
@@ -278,7 +294,7 @@ effectiveShade.markers <- function(map, data) {
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
     label = paste0(data$Station),
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Station:</b> ", data$Station,
                     "<br>", 
                     "<b>Effective shade measurement time:</b> ", t57_date,
@@ -300,7 +316,7 @@ hsTempModel <- function(map, data) {
     options = leaflet::leafletOptions(pane="mod"),
     label = ~Stream,
     labelOptions = labelOptions(style = list("color" = "black",
-                                             "font-size" = "20px")),
+                                             "font-size" = "12px")),
     color = "#045a8d",
     opacity = 1,
     weight = 4,
@@ -319,7 +335,7 @@ hsSolarModel <- function(map, data) {
     options = leaflet::leafletOptions(pane="mod"),
     label = ~Stream,
     labelOptions = labelOptions(style = list("color" = "black",
-                                             "font-size" = "20px")),
+                                             "font-size" = "12px")),
     color = "#3690c0",
     opacity = 1,
     weight = 4,
@@ -338,7 +354,7 @@ hsSolarArea <- function(map, data) {
     options = leaflet::leafletOptions(pane="mod"),
     label = ~Name,
     labelOptions = labelOptions(style = list("color" = "black",
-                                             "font-size" = "20px")),
+                                             "font-size" = "12px")),
     fillColor = "#3690c0",
     fillOpacity = 0.8,
     weight = 3,
@@ -357,7 +373,7 @@ ceModel <- function(map, data) {
     options = leaflet::leafletOptions(pane="mod"),
     label = ~Stream,
     labelOptions = labelOptions(style = list("color" = "black",
-                                             "font-size" = "20px")),
+                                             "font-size" = "12px")),
     color = "#8c510a",
     opacity = 1,
     weight = 4,
@@ -376,7 +392,7 @@ shModel <- function(map, data) {
     options = leaflet::leafletOptions(pane="mod"),
     label = ~Stname,
     labelOptions = labelOptions(style = list("color" = "black",
-                                             "font-size" = "20px")),
+                                             "font-size" = "12px")),
     color = "#8c510a",
     opacity = 1,
     weight = 4,
@@ -436,4 +452,48 @@ tempSpawncolor <- htmlwidgets::JS("function tempSpawncolor(feature) {
                       else colorToUse = \"darkgrey\";
                       
     return {color: colorToUse};
+    }")
+
+# Hex colors same as DMA style file
+DMAcolor <- htmlwidgets::JS("function DMAcolor(feature) {
+    var colorToUse;
+    var code = feature.properties.Symbol;
+    
+                      if (code === \"City\") colorToUse = \"#C31400\";
+                      else if (code === \"County\") colorToUse = \"#FFD37F\";
+                      else if (code === \"Oregon Department of Agriculture\") colorToUse = \"#FFFF64\";
+                      else if (code === \"Oregon Department of Aviation\") colorToUse = \"#686868\";
+                      else if (code === \"Oregon Department of Fish and Wildlife\") colorToUse = \"#00C5FF\";
+                      else if (code === \"Oregon Department of Forestry - Private\") colorToUse = \"#89CD66\";
+                      else if (code === \"Oregon Department of Forestry - Public\") colorToUse = \"#00A000\";
+                      else if (code === \"Oregon Department of Geology and Mineral Industries\") colorToUse = \"#DCDCDC\";
+                      else if (code === \"Oregon Department of Land Conservation and Development\") colorToUse = \"#FFEBAF\";
+                      else if (code === \"Oregon Department of State Lands\") colorToUse = \"#DCF064\";
+                      else if (code === \"Oregon Department of Transportation\") colorToUse = \"#002673\";
+                      else if (code === \"Oregon Military Department\") colorToUse = \"#CCCCCC\";
+                      else if (code === \"Oregon Parks and Recreation Department\") colorToUse = \"#00DC82\";
+                      else if (code === \"State of Oregon\") colorToUse = \"#CD6666\";
+                      else if (code === \"Port\") colorToUse = \"#FFBEBE\";
+                      else if (code === \"Private Utility\") colorToUse = \"#E69800\";
+                      else if (code === \"Railroad\") colorToUse = \"#FFFFFF\";
+                      else if (code === \"Road\") colorToUse = \"#000000\";
+                      else if (code === \"TBD - Water\") colorToUse = \"#0046C8\";
+                      else if (code === \"NA - Tribal\") colorToUse = \"#784B00\";
+                      else if (code === \"Special District\") colorToUse = \"#BEFFE8\";
+                      else if (code === \"Bonneville Power Administration\") colorToUse = \"#FFDCD2\";
+                      else if (code === \"Federal Aviation Administration\") colorToUse = \"#686868\";
+                      else if (code === \"U.S. Army Corps of Engineers\") colorToUse = \"#BED2FF\";
+                      else if (code === \"U.S. Bureau of Land Management\") colorToUse = \"#FFB432\";
+                      else if (code === \"U.S. Bureau of Reclamation\") colorToUse = \"#966400\";
+                      else if (code === \"U.S. Coast Guard\") colorToUse = \"#F57AB6\";
+                      else if (code === \"U.S. Department of Agriculture\") colorToUse = \"#788200\";
+                      else if (code === \"U.S. Department of Defense\") colorToUse = \"#704489\";
+                      else if (code === \"U.S. Department of Energy\") colorToUse = \"#F57AB6\";
+                      else if (code === \"U.S. Fish and Wildlife Service\") colorToUse = \"#00E6A9\";
+                      else if (code === \"U.S. Forest Service\") colorToUse = \"#009678\";
+                      else if (code === \"U.S. Government\") colorToUse = \"#894465\";
+                      else if (code === \"U.S. National Park Service\") colorToUse = \"#285000\";
+                      else colorToUse = \"#NNNNNN00\";
+                      
+    return {fillColor: colorToUse};
     }")
