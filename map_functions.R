@@ -4,7 +4,7 @@ projectScope <- function(map, data) {
   leaflet::addPolygons(
     map,
     data = data,
-    group = "TMDL Project Scope",
+    group = "TMDL Project Scope Outline",
     options = leaflet::leafletOptions(pane="areaOutline"),
     fillColor = "transparent",
     fillOpacity = 0,

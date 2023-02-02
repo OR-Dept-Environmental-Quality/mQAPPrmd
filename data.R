@@ -1070,6 +1070,10 @@ sf::sf_use_s2(FALSE)
 
 wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
 wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)
+columbia_aus <- sf::st_read(dsn = "//deqhq1/tmdl/Planning statewide/TMDL_Priorities/2018_2020_IR/working_2020_2024",
+                            layer="Columbia_River_AU_IDs",
+                            stringsAsFactors=FALSE) %>%
+  sf::st_drop_geometry()
 
 # _ Model Extents ----
 map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_model_extent.shp"),
@@ -1139,16 +1143,19 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
     dplyr::left_join(lookup.huc,by="HUC12") %>% 
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
     dplyr::filter(!AU_ID %in% wms.au.id) %>% 
+    dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
     dplyr::pull(AU_ID)
   pro_scope_waterbodies <- au_waterbodies %>% sf::st_drop_geometry() %>% 
     dplyr::left_join(lookup.huc,by="HUC12") %>% 
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
-    dplyr::filter(!AU_ID %in% wms.au.id)%>% 
+    dplyr::filter(!AU_ID %in% wms.au.id) %>% 
+    dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
     dplyr::pull(AU_ID)
   pro_scope_watershed <- au_watershed %>% sf::st_drop_geometry() %>% 
     dplyr::left_join(lookup.huc,by="HUC12") %>% 
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
-    dplyr::filter(!AU_ID %in% wms.au.id)%>% 
+    dplyr::filter(!AU_ID %in% wms.au.id) %>% 
+    dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
     dplyr::pull(AU_ID)
   
   hs_temp_model_extent <- map_hs_temp_model_extent %>% 

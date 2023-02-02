@@ -215,8 +215,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
   
   ir.grps <- sort(unique(irs$ir.grps))
   
-  group.names <- c("TMDL Project Scope",
-                   dta.stations.mod %>% dplyr::pull(group_name),
+  group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
                    "HUC8","HUC10","HUC12",
                    ir.grps,
                    "Fish Use Designations",
@@ -884,7 +883,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -902,7 +901,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -941,7 +940,8 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Shade Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Shade Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Shade Model Extent (New Models)",
@@ -960,7 +960,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -978,7 +978,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -996,7 +996,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1031,7 +1031,8 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -1070,7 +1071,8 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -1108,7 +1110,8 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -1129,7 +1132,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1149,7 +1152,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1165,7 +1168,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       flowStation.markers(flow_stations) %>% 
       metStation.markders(met_stations) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1182,7 +1185,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1199,7 +1202,7 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
