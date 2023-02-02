@@ -216,8 +216,7 @@ qapp_project_area = "Sandy Subbasin"
   
   ir.grps <- sort(unique(irs$ir.grps))
   
-  group.names <- c("TMDL Project Scope",
-                   dta.stations.mod %>% dplyr::pull(group_name),
+  group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
                    "HUC8","HUC10","HUC12",
                    ir.grps,
                    "Fish Use Designations",
@@ -885,7 +884,7 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -903,7 +902,7 @@ qapp_project_area = "Sandy Subbasin"
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -942,7 +941,8 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Shade Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Shade Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Shade Model Extent (New Models)",
@@ -961,7 +961,7 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -979,7 +979,7 @@ qapp_project_area = "Sandy Subbasin"
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -997,7 +997,7 @@ qapp_project_area = "Sandy Subbasin"
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1032,7 +1032,8 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -1071,7 +1072,8 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -1088,7 +1090,7 @@ qapp_project_area = "Sandy Subbasin"
       sf::st_zm()
     
     map_area <- map_basic %>% 
-      #projectScope(pro_area) %>% 
+      projectScope(pro_area) %>% 
       # __ Bull Run River, Salmon River and Sandy Rivers (2016)
       leaflet::addPolylines(data = sandy_2016,
                             group = "Heat Source Temperature Model Extent (New Models)",
@@ -1109,7 +1111,8 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -1130,7 +1133,7 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1150,7 +1153,7 @@ qapp_project_area = "Sandy Subbasin"
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1166,7 +1169,7 @@ qapp_project_area = "Sandy Subbasin"
       flowStation.markers(flow_stations) %>% 
       metStation.markders(met_stations) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1183,7 +1186,7 @@ qapp_project_area = "Sandy Subbasin"
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1200,7 +1203,7 @@ qapp_project_area = "Sandy Subbasin"
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
