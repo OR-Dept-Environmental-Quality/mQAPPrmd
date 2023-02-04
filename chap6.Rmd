@@ -24,7 +24,8 @@ section.model.info <- model.info %>%
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
 
 section.model.input <- model.input %>% 
-  dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+  dplyr::filter(`Model Waterbody` %in%  waterbody_name) %>% 
+  dplyr::filter(!`Model Location Name` == "Node 1") # branch edit
 
 model.extent <- ifelse(NROW(section.model.input)>0,
                        ifelse(section.model.input$`Model Waterbody` == section.model.input$`Model Extent`, TRUE, FALSE),
@@ -131,17 +132,18 @@ if(NROW(dma.waterbody)>0){
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances in `r paste0(the,waterbody_name)` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+`r if(waterbody_name %in% c("Ramsey Creek","Eightmile Creek")){paste0("The primary purpose of the ", waterbody_name, " solar model was to characterize the status of effective shade. Effective shade is a surrogate for solar radiation loading caused by the disturbance or removal of near-stream vegetation. Other potential sources of thermal loading were not evaluated by this model.")}`
+`r if(waterbody_name %in% c("Fifteenmile Creek")){paste0("The primary sources of thermal loading contributing to temperatures exceedances in ",paste0(the,waterbody_name)," include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, ",if(npdes.ind.n>0){paste0("point source discharges, ")} ,"reductions to the stream flow rate or volume, and background sources (DEQ, 2008). Other potential sources include channel modification and widening, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios.")}`
 
-`r npdes.txt`
+`r if(waterbody_name %in% c("Fifteenmile Creek")){npdes.txt}`
 
-`r if(npdes.ind.n > 0){npdes.ind.tbl}`
+`r if(waterbody_name %in% c("Fifteenmile Creek")){if(npdes.ind.n > 0){npdes.ind.tbl}}`
 
 The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along `r paste0(the,waterbody_name)` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near-stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al., 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
 
 `r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
 
-Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, the activities, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies (`r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}`).
+Anthropogenic related stream warming caused by `r if(waterbody_name %in% c("Fifteenmile Creek")){paste0("nonpoint sources")}else{paste0("the removal of effective shade")}` is closely associated with the uses, the activities, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies (`r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}`).
 
 A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along `r paste0(the,waterbody_name)` model extent. 
 
@@ -160,7 +162,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. `r paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")`
+`r paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")`
 
 ### Model inputs
 
@@ -263,15 +265,18 @@ if(!model.extent == TRUE){
   t6x6_1 <- t6x6_1[,-c(3)] %>% 
     dplyr::rename(`Model Input` = Parameter)
   
-  if(NROW(t6x6_1)>0){
+  if(waterbody_name %in% c("Fifteenmile Creek")){
     
-    t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
+    if(NROW(t6x6_1)>0){
+      
+          t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
                                                caption = paste0("Boundary condition and tributary inputs to the ", 
                                                                 ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
                                                                 waterbody_name, 
                                                                 " Heat Source model.")))
-    
+      
+    }
   }
   
   t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
@@ -280,9 +285,11 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(waterbody_name %in% c("Fifteenmile Creek")){if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}}`
 
-`r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
+`r if(waterbody_name %in% c("Ramsey Creek","Eightmile Creek")){paste0("The inputs to the model include aerial imagery derived vegetation heights and stream position.")}`
+
+`r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(waterbody_name %in% c("Fifteenmile Creek")){if(NROW(t6x6_1)>0){t6x6_1_tbl}}}`
 
 ```{r, label=`t6x6_2`, echo=FALSE}
 
@@ -291,9 +298,9 @@ t6x6_2 <- section.model.input %>%
 
 ```
 
-`r if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data ", if(is.na(model.info[which(model.info$"Model Waterbody" == waterbody_name),]$"New Model")){paste0("were")}else{paste0("may be")}, " modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds ", if(is.na(model.info[which(model.info$"Model Waterbody" == waterbody_name),]$"New Model")){paste0("were")}else{paste0("may be")}, " adjusted to improve the calibration using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}`
+`r if(waterbody_name %in% c("Fifteenmile Creek")){if(NROW(t6x6_2)>1){paste0("Hourly meteorology inputs into the model include ", tolower(knitr::combine_words(unique(sort(t6x6_2$Parameter)))),". Air temperature data ", if(is.na(model.info[which(model.info$"Model Waterbody" == waterbody_name),]$"New Model")){paste0("were")}else{paste0("may be")}, " modified using the dry adiabatic lapse rate to adjust for differences in elevation between the measurement location and the model input location. Wind speeds ", if(is.na(model.info[which(model.info$"Model Waterbody" == waterbody_name),]$"New Model")){paste0("were")}else{paste0("may be")}, " adjusted to improve the calibration using a wind-sheltering coefficient to represent difference in wind speed between the measurement location and above the stream within the riparian area.")}}`
 
-`r if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The near-stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}`
+`r if(waterbody_name %in% c("Fifteenmile Creek")){if(!is.na(unique(section.model.info$"Veg Notes"))){paste0("The near-stream vegetation inputs to the model include vegetation height and canopy cover. ", unique(section.model.info$"Veg Notes"))}}`
 
 ### Model calibration
 
@@ -338,6 +345,7 @@ if(!model.extent == TRUE){
       dplyr::ungroup() %>% 
       dplyr::arrange(desc(as.numeric(`Model Location`))) %>% 
       dplyr::rename(`Calibration Parameter` = `Parameter`)
+      
     
   }
   
@@ -400,6 +408,8 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(waterbody_name %in% c("Fifteenmile Creek")){if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}}}`
+
+`r if(waterbody_name %in% c("Ramsey Creek","Eightmile Creek")){paste0("The model was calibrated by comparing the model effective shade predictions to the field measured effective shade values summarized in ", tbls(name = paste0("t6x7", waterbody_name),display="cite"), ". ", mod.loc[1], " Two or three measurements were taken at each location and averaged for a reach measurement. The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
