@@ -21,7 +21,8 @@ options(knitr.kable.NA = '')
 # for test: waterbody_name <- "Clackamas River"
 
 section.model.info <- model.info %>% 
-  dplyr::filter(`Model Waterbody` %in%  waterbody_name)
+  dplyr::filter(`Model Waterbody` %in%  waterbody_name) %>% 
+  dplyr::left_join(ref.pro.area, by = "Abbreviated Reference")
 
 section.model.input <- model.input %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -40,7 +41,7 @@ the <- section.model.info %>%
 
 ## `r waterbody_name`
 
-`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if("T" %in% section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")`
+`r paste0("The ",waterbody_name," model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("is")}," a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model" %in% "T"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")`
 
 ### Model domain
 
@@ -62,6 +63,12 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 
 ```{r, label=`sc`, include=FALSE}
 
+## 1st paragraph
+source.char <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_sourceChar.xlsx",
+                                 sheet = "Rogue_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar)
+
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
   #dplyr::filter(grepl(pattern=gsub("\\s*\\([^\\)]+\\)","",x=waterbody_name), x=`Stream Name`, ignore.case = TRUE)) %>% 
@@ -72,7 +79,8 @@ npdes.ind.waterbody <- npdes.ind.pro.area %>%
                 `River Mile` = round(`River Mile`,1),
                 `Stream/River Mile` = ifelse(is.na(`Stream Name`), NA, paste0(`Stream Name`, " ", " RM ",`River Mile`))) %>% 
   dplyr::select(`Facility Name (Facility Number)`, `Latitude/Longitude`,`Permit Type and Description`, `Stream/River Mile`) %>% 
-  dplyr::arrange(`Facility Name (Facility Number)`)
+  dplyr::arrange(`Facility Name (Facility Number)`) %>% 
+  dplyr::mutate(`Stream/River Mile` = ifelse(`Facility Name (Facility Number)` == "Ashland STP (3780)", "Ashland Creek RM 0.2 (current); Bear Creek RM 22.8 (future)",`Stream/River Mile`)) # Rogue
 
 npdes.ind.n <- nrow(npdes.ind.waterbody)
 
@@ -93,7 +101,7 @@ if(npdes.ind.n == 1) {
 }
 
 if(npdes.ind.n > 1) {
-  npdes.txt <- paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),".")
+  npdes.txt <- ifelse(!waterbody_name == "Bear Creek", paste0("There are ", numbers.to.words(npdes.ind.n)," permitted individual NPDES point sources along the model extent. Detail about each point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"),"."), paste0("There is one permitted individual NPDES point source along the model extent. Detail about the point source is summarized in ",tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),display="cite"), ". The City of Ashland (#3780) owns and operates a wastewater treatment facility that discharges treated effluent into Ashland Creek upstream of its confluence with Bear Creek at river mile 0.2. Currently there are plans to move the outfall to Bear Creek approximately 100 feet downstream from the confluence of Ashland Creek at about river mile 22.8. DEQ may consider this new outfall in the Bear Creek model scenarios."))
 } 
 
 # NLCD
@@ -129,11 +137,25 @@ if(NROW(dma.waterbody)>0){
   
 }
 
+if(waterbody_name %in% c("Antelope Creek","Bear Creek","Little Applegate River",
+                         "Little Butte Creek and North Fork Little Butte Creek")){
+  
+  sc_txt <- paste0("reductions to stream flow rate or volume,",ifelse(waterbody_name == "Bear Creek"," water impoundments behind irrigation structures, "," "),"and background sources (",section.model.info$Cite_inText,"). Other potential sources include channel modification and widening and warming caused by climate change. ")
+  
+  
+} else {
+  
+  sc_txt <- paste0("and background sources (",section.model.info$Cite_inText,"). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. ")
+  
+}
+
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances in `r paste0(the,waterbody_name)` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+`r source.char`
 
-`r npdes.txt`
+`r if(waterbody_name %in% c("Applegate River")){paste0("There is one permitted individual NPDES point source along the model extent (Hidden Valley High School STP). Detail about this permittee is summarized in Table 18. The current NPDES permit for Hidden Valley High School STP does not authorize discharge May 1st – October 31st so they are not a source of warming during the summer period.")}`
+
+`r if(!waterbody_name %in% c("Applegate River")){npdes.txt}`
 
 `r if(npdes.ind.n > 0){npdes.ind.tbl}`
 
@@ -160,7 +182,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. `r paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")`
+`r if(waterbody_name %in% c("Applegate River","Little Applegate River")){paste0("Model development for ",paste0(the,waterbody_name)," will be completed by DEQ and assumptions will be documented in the TMDL. Other key assumptions about model constants are described in the Heat Source model user guide (Boyd and Kasper, 2003).")}else{paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original ",section.model.info$'TMDL Document'," (",section.model.info$Cite_inText,") and the model user guide (Boyd and Kasper, 2003).")}`
 
 ### Model inputs
 
