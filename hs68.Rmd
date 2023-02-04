@@ -21,7 +21,7 @@ options(kableExtra.auto_format = F)
 
 ```
 
-```{r, hs68_tbl, echo=FALSE}
+```{r hs68_tbl, echo=FALSE}
 
 hs68 <- readxl::read_xlsx(paste0(data.dir, "hs_tbl.xlsx"), sheet = "hs68")
 

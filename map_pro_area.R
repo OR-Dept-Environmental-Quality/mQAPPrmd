@@ -27,7 +27,6 @@ data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_Q
 data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
 
 source("map_functions.R")
-project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 #lgnd <- base64enc::base64encode("./fig/legend.png")
 logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
@@ -61,13 +60,13 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "South Umpqua and Umpqua Subbasins"
 # qapp_project_area = "Southern Willamette Subbasins"                     ---X
 # qapp_project_area = "Walla Walla Subbasin"
-# qapp_project_area = "Willamette River Mainstem and Major Tributaries"
+qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("Sandy Subbasin",
-                                                                              "Lower Willamette and Clackamas Subbasins",
-                                                                              "Middle Willamette Subbasins",
-                                                                              "Southern Willamette Subbasins")),]$areas)) {
+#for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("Sandy Subbasin",
+#                                                                              "Lower Willamette and Clackamas Subbasins",
+#                                                                              "Middle Willamette Subbasins",
+#                                                                              "Southern Willamette Subbasins")),]$areas)) {
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   
@@ -1277,10 +1276,10 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
                                         <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">
                                         </a></div></body></html>', logo))
-  
-  # SAVE DATA ----
-  print(paste0(qapp_project_area,"...Save the map"))
-  htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
-  file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
-  
-}
+
+# SAVE DATA ----
+print(paste0(qapp_project_area,"...Save the map"))
+htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
+file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
+
+#}
