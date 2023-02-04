@@ -1047,6 +1047,7 @@ sh_model_extent <- data.frame()
 
 save(pro_area,
      pro_reaches,
+     wms.aus,
      hs_temp_model_extent,
      hs_solar_model_extent,
      hs_solar_model_area,
