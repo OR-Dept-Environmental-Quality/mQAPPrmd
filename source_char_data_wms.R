@@ -105,7 +105,7 @@ model_extents <- rbind(#map_hs_temp_model_extent,
   dplyr::summarise()
 
 # check
-sf::st_write(model_extents, paste0(output_gis_dir,"model_extents_wms.shp"), delete_layer=TRUE)
+sf::st_write(model_extents, paste0(output_gis_dir,"model_extents_wms.shp"), delete_layer=TRUE) # kept in gis/archive
 
 # Read in county outline feature
 county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
@@ -117,7 +117,7 @@ county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnt
 model_buff <- sf::st_buffer(model_extents, dist = units::set_units(300, m))
 
 # check
-sf::st_write(model_buff, paste0(output_gis_dir,"model_buff_wms.shp"), delete_layer=TRUE)
+sf::st_write(model_buff, paste0(output_gis_dir,"model_buff_wms.shp"), delete_layer=TRUE) # kept in gis/archive
 
 # intersect stream buffer with counties. The purpose is the get a list of 
 # all the counties that need to be loaded for each stream
@@ -133,7 +133,7 @@ sort(unique(model_buff_county$County))
 model_buff_nlcd <- sf::st_transform(model_buff, crs = sf::st_crs(nlcd))
 
 # check
-sf::st_write(model_buff_nlcd, paste0(output_gis_dir,"model_buff_nlcd_wms.shp"), delete_layer=TRUE)
+sf::st_write(model_buff_nlcd, paste0(output_gis_dir,"model_buff_nlcd_wms.shp"), delete_layer=TRUE) # kept in gis/archive
 
 # intersect stream buffer with NCLD, only return a data frame
 extract_fun <- function(y, x=nlcd) {
@@ -284,7 +284,7 @@ model_buff_dma <- model_buff_dma_rp %>%
   dplyr::left_join(dmaLU)
 
 # Output to shapefile
-sf::st_write(model_buff_dma , paste0(output_gis_dir,"model_buff_dma_wms.shp"), delete_layer=TRUE)
+sf::st_write(model_buff_dma , paste0(output_gis_dir,"model_buff_dma_wms.shp"), delete_layer=TRUE) # kept in gis/archive
 
 # Summarize by DMA/RP. Total Acres in buffer and percentage
 dma.tbl <- model_buff_dma %>%

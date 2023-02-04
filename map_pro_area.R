@@ -63,7 +63,6 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
 # qapp_project_area = "Walla Walla Subbasin"
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
-# qapp_project_area = "Willamette Subbasins"
 
 #for(qapp_project_area in sort(project.areas[which(!project.areas$areas=="Sandy Subbasin"),]$areas)) { 
 
@@ -89,10 +88,13 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   where_huc8 <- paste0("HUC8 IN ('", paste(subbasin_huc8, collapse = "','"),"')")
   where_huc10 <- paste0("HUC10 IN ('", paste(subbasin_huc10, collapse = "','"),"')")
   where_huc12 <- paste0("HUC12 IN ('", paste(subbasin_huc12, collapse = "','"),"')")
+  where_huc12_1 <- paste0("HUC12 IN ('", paste(subbasin_huc12[1:50], collapse = "','"),"')")
+  where_huc12_2 <- paste0("HUC12 IN ('", paste(subbasin_huc12[51:100], collapse = "','"),"')")
+  where_huc12_3 <- paste0("HUC12 IN ('", paste(subbasin_huc12[101:150], collapse = "','"),"')")
   
+  # IR2018/20
   #Use this line to check between the REST map and the QAPP table; if both are matched, use QAPP IR table to pull data to the map
-  # where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4','Category 5')) AND (", where_huc12, ")") 
-  
+  # where_au <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4','Category 5')) AND (", where_huc12, ")")   
   # where_au_yearRound <- paste0("(Char_Name = 'Temperature' AND IR_category IN ('Category 4A','Category 5') AND Period = 'Year Round') AND ",
   #                              "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
   # 
@@ -105,13 +107,21 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   where_au_spawning <- paste0("(Pollutant = 'Temperature' AND AU_parameter_category IN ('4A','5') AND period = 'spawn') AND ",
                               "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
   
-  where_au_gnis_yearRound <- paste0("(Pollutant = 'Temperature' AND AU_final_status IN ('4A','5') AND period = 'year_round') AND ",
-                                    "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
-  
-  where_au_gnis_spawning <- paste0("(Pollutant = 'Temperature' AND AU_final_status IN ('4A','5') AND period = 'spawn') AND ",
-                                   "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
-  
-  where_au <- paste0("(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
+  if(qapp_project_area == "Willamette River Mainstem and Major Tributaries"){
+    
+    wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
+    wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)
+    where_au_rivers <- paste0("(AU_ID IN ('", paste(wms.au.id, collapse = "','"),"'))")
+    where_au_waterbodies <- paste0("(AU_ID IN ('", paste(wms.au.id, collapse = "','"),"'))")
+    where_au_watershed <- paste0("(AU_ID IN ('", paste(wms.au.id, collapse = "','"),"'))")
+    
+  }else{
+    
+    where_au_rivers <- paste0("(AU_ID IN ('", paste(pro_scope_rivers, collapse = "','"),"'))")
+    where_au_waterbodies <- paste0("(AU_ID IN ('", paste(pro_scope_waterbodies, collapse = "','"),"'))")
+    where_au_watershed <- paste0("(AU_ID IN ('", paste(pro_scope_watershed, collapse = "','"),"'))") 
+    
+  }
   
   reachcode <- paste(paste0("(ReachCode >= ", subbasin_huc8, "000000", " AND ReachCode <= ", 
                             subbasin_huc8,"999999)"), 
@@ -206,20 +216,20 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   ir.grps <- sort(unique(irs$ir.grps))
   
   group.names <- c(dta.stations.mod %>% dplyr::pull(group_name),
-                   "TMDL Project Scope",
                    "HUC8","HUC10","HUC12",
                    ir.grps,
                    "Fish Use Designations",
                    "Salmon and Steelhead Spawning Use Designations",
+                   "Land Ownership or Jurisdiction",
                    "Stream Names (USGS NHD)",
                    "Oregon Imagery")
   
-  group.names.hide <- c(dta.stations.mod[-1,] %>% dplyr::pull(group_name),
-                        "TMDL Project Scope",
+  group.names.hide <- c(dta.stations.mod %>% dplyr::pull(group_name),
                         "HUC8","HUC10","HUC12",
                         ir.grps,
                         "Fish Use Designations",
                         "Salmon and Steelhead Spawning Use Designations",
+                        "Land Ownership or Jurisdiction",
                         "Stream Names (USGS NHD)",
                         "Oregon Imagery")
   
@@ -241,21 +251,24 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
     leaflet.extras::addResetMapButton() %>% 
     leaflet::fitBounds(lng1 = pro.area.extent[2], lat1 = pro.area.extent[1],
                        lng2 = pro.area.extent[4], lat2 = pro.area.extent[3]) %>%
-    leaflet::addMapPane("OpenStreetMap", zIndex = -2000) %>% 
-    leaflet::addMapPane("aerial", zIndex = -1100) %>% 
-    leaflet::addMapPane("hydrotiles", zIndex = -1050) %>%
-    leaflet::addMapPane("area", zIndex = 50) %>%
-    leaflet::addMapPane("huc8", zIndex = -900) %>%
-    leaflet::addMapPane("huc10", zIndex = -800) %>%
-    leaflet::addMapPane("huc12", zIndex = -700) %>%
-    leaflet::addMapPane("wqs1", zIndex = -60) %>%
-    leaflet::addMapPane("wqs2", zIndex = -50) %>%
-    leaflet::addMapPane("ir", zIndex = -40) %>%
-    leaflet::addMapPane("mod", zIndex = -300) %>%
-    leaflet::addMapPane("modbes", zIndex = -350) %>%
-    leaflet::addMapPane("mod2016", zIndex = -200) %>%
-    leaflet::addMapPane("mod2009", zIndex = -200) %>%
-    leaflet::addMapPane("marker", zIndex = 100) %>%
+    leaflet::addMapPane("OpenStreetMap", zIndex = -20) %>%
+    leaflet::addMapPane("aerial", zIndex = -10) %>%
+    leaflet::addMapPane("areaOutline", zIndex = 10) %>%
+    leaflet::addMapPane("dma", zIndex = 20) %>%
+    leaflet::addMapPane("area", zIndex = 30) %>%
+    leaflet::addMapPane("hydrotiles", zIndex = 40) %>%
+    leaflet::addMapPane("huc8", zIndex = 50) %>%
+    leaflet::addMapPane("huc10", zIndex = 60) %>%
+    leaflet::addMapPane("huc12", zIndex = 70) %>%
+    leaflet::addMapPane("wqs1", zIndex = 80) %>%
+    leaflet::addMapPane("wqs2", zIndex = 90) %>%
+    leaflet::addMapPane("ir", zIndex = 100) %>%
+    leaflet::addMapPane("ir_gnis", zIndex = 110) %>%
+    leaflet::addMapPane("mod", zIndex = 120) %>%
+    leaflet::addMapPane("modbes", zIndex = 130) %>%
+    leaflet::addMapPane("mod2016", zIndex = 140) %>%
+    leaflet::addMapPane("mod2009", zIndex = 140) %>%
+    leaflet::addMapPane("marker", zIndex = 150) %>%
     leaflet::addProviderTiles(providers$OpenStreetMap, #names(providers) to see a list of the layers
                               options = pathOptions(pane = "OpenStreetMap")) %>% 
     # __ Oregon Imagery ----
@@ -273,6 +286,83 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                                          pane= "hydrotiles"),
                        attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer">USGS The National Map: National Hydrography Dataset.</a>',
                        layers = "0") %>%
+    # __ Project scope ----
+  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/34",
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_rivers,
+                                                                                simplifyFactor = 0.35),
+                                    useServiceSymbology = TRUE,
+                                    group = "TMDL Project Scope",
+                                    pathOptions = leaflet::pathOptions(pane="area"),
+                                    color = "#0868ac",
+                                    weight = 3,
+                                    opacity = 1,
+                                    fill = FALSE,
+                                    highlightOptions = leaflet::highlightOptions(color="gray",
+                                                                                 weight = 4,
+                                                                                 fillOpacity = 1,
+                                                                                 bringToFront = TRUE,
+                                                                                 sendToBack = TRUE),
+                                    #labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+                                    labelProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '\"+props.AU_ID+\"',
+                                                                           '<br>\"+props.AU_Name+\"',
+                                                                           ' \"}')),
+                                    labelOptions = leaflet::labelOptions(#noHide = T,
+                                      style = list("color" = "black","font-size" = "12px")),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                           '<br><b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                           ' \"}'))) %>%
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/43",
+                                      options = leaflet.esri::featureLayerOptions(where = where_au_waterbodies),
+                                      useServiceSymbology = TRUE,
+                                      group = "TMDL Project Scope",
+                                      pathOptions = leaflet::pathOptions(pane="area"),
+                                      color = "#0868ac",
+                                      weight = 0.8,
+                                      opacity = 1,
+                                      fillColor = "#0868ac",
+                                      fillOpacity = 0.8,
+                                      highlightOptions = leaflet::highlightOptions(color="gray",
+                                                                                   weight = 4,
+                                                                                   fill=TRUE,
+                                                                                   fillColor = "gray",
+                                                                                   fillOpacity = 1,
+                                                                                   bringToFront = TRUE,
+                                                                                   sendToBack = TRUE),
+                                      #labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+                                      labelProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '\"+props.AU_ID+\"',
+                                                                             '<br>\"+props.AU_Name+\"',
+                                                                             ' \"}')),
+                                      labelOptions = leaflet::labelOptions(#noHide = T,
+                                        style = list("color" = "black","font-size" = "12px")),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                             '<br><b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                             ' \"}'))) %>%
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/arcgis/rest/services/OR_AUs_Line_work/FeatureServer/1",
+                                      options = leaflet.esri::featureLayerOptions(where = where_au_watershed,
+                                                                                  simplifyFactor = 0.35),
+                                      useServiceSymbology = TRUE,
+                                      group = "TMDL Project Scope",
+                                      pathOptions = leaflet::pathOptions(pane="area"),
+                                      color = "#0868ac",
+                                      weight = 1,
+                                      opacity = 1,
+                                      fill = FALSE,
+                                      highlightOptions = leaflet::highlightOptions(color="gray",
+                                                                                   weight = 2,
+                                                                                   fillOpacity = 1,
+                                                                                   bringToFront = TRUE,
+                                                                                   sendToBack = TRUE),
+                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_GNIS+\" \"}"),
+                                      labelOptions = leaflet::labelOptions(#noHide = T,
+                                        style = list("color" = "black","font-size" = "12px")),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>AU ID; GNIS Name:</b> \"+props.AU_GNIS+\"',
+                                                                             '<br><b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                             ' \"}'))) %>%
     # __ HUCs ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc8),
@@ -280,7 +370,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                     pathOptions = leaflet::pathOptions(pane="huc8"),
                                     weight = 4,
                                     color = "black",
-                                    opacity = 3,
+                                    opacity = 1,
                                     fillColor = "transparent",
                                     fillOpacity = 0,
                                     highlightOptions = leaflet::highlightOptions(color="black",
@@ -291,7 +381,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                                                                  bringToFront = TRUE,
                                                                                  sendToBack = TRUE),
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.Name+\" \"}"),
-                                    labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                    labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "12px")),
                                     popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                            '<b>Name:</b> \"+props.Name+\"',
                                                                            '<br><b>HUC8:</b> \"+props.HUC8+\"',
@@ -313,7 +403,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                                                                    bringToFront = TRUE,
                                                                                    sendToBack = TRUE),
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.Name+\" \"}"),
-                                      labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "12px")),
                                       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                              '<b>Name:</b> \"+props.Name+\"',
                                                                              '<br><b>HUC10:</b> \"+props.HUC10+\"',
@@ -336,7 +426,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                                                                    bringToFront = TRUE,
                                                                                    sendToBack = TRUE),
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.Name+\" \"}"),
-                                      labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "20px")),
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "12px")),
                                       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                              '<b>Name:</b> \"+props.Name+\"',
                                                                              '<br><b>HUC12:</b> \"+props.HUC12+\"',
@@ -513,18 +603,18 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                     useServiceSymbology = TRUE,
                                     group = "2022 303(d) Temperature Listed - Streams (Year Round Criteria)",
                                     pathOptions = leaflet::pathOptions(pane="ir"),
-                                    color = "red",
+                                    color = "#9A00C4",
                                     weight = 3,
                                     opacity = 0.8,
                                     fill=FALSE,
-                                    highlightOptions = leaflet::highlightOptions(color="red",
+                                    highlightOptions = leaflet::highlightOptions(color="#9A00C4",
                                                                                  weight = 5,
                                                                                  fillOpacity = 0.5,
                                                                                  bringToFront = TRUE,
                                                                                  sendToBack = TRUE),
                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                     labelOptions = leaflet::labelOptions(#noHide = T,
-                                      style = list("color" = "red","font-size" = "12px")),
+                                      style = list("color" = "#9A00C4","font-size" = "12px")),
                                     popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                            '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                            '<br><b>AU ID:</b> \"+props.AU_ID+\"',
@@ -539,18 +629,18 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                       useServiceSymbology = TRUE,
                                       group = "2022 303(d) Temperature Listed - Streams (Spawning Criteria)",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
-                                      color = "red",
+                                      color = "#9A00C4",
                                       weight = 3,
                                       opacity = 0.8,
                                       fill=FALSE,
-                                      highlightOptions = leaflet::highlightOptions(color="red",
+                                      highlightOptions = leaflet::highlightOptions(color="#9A00C4",
                                                                                    weight = 5,
                                                                                    fillOpacity = 0.5,
                                                                                    bringToFront = TRUE,
                                                                                    sendToBack = TRUE),
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                       labelOptions = leaflet::labelOptions(#noHide = T,
-                                        style = list("color" = "red","font-size" = "12px")),
+                                        style = list("color" = "#9A00C4","font-size" = "12px")),
                                       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                              '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                              '<br><b>AU ID:</b> \"+props.AU_ID+\"',
@@ -565,16 +655,16 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                       useServiceSymbology = TRUE,
                                       group = "2022 303(d) Temperature Listed - Waterbodies (Year Round Criteria)",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
-                                      color = "red",
+                                      color = "#9A00C4",
                                       weight = 2,
                                       opacity = 0.8,
                                       fill=TRUE,
-                                      fillColor = "red",
+                                      fillColor = "#9A00C4",
                                       fillOpacity = 0.25,
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                       labelOptions = leaflet::labelOptions(#noHide = T,
-                                        style = list("color" = "red","font-size" = "12px")),
-                                      highlightOptions = leaflet::highlightOptions(color="red",
+                                        style = list("color" = "#9A00C4","font-size" = "12px")),
+                                      highlightOptions = leaflet::highlightOptions(color="#9A00C4",
                                                                                    weight = 3,
                                                                                    fillOpacity = 0.5,
                                                                                    bringToFront = TRUE,
@@ -593,16 +683,16 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                       useServiceSymbology = TRUE,
                                       group = "2022 303(d) Temperature Listed - Waterbodies (Spawning Criteria)",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
-                                      color = "red",
+                                      color = "#9A00C4",
                                       weight = 2,
                                       opacity = 0.8,
                                       fill=TRUE,
-                                      fillColor = "red",
+                                      fillColor = "#9A00C4",
                                       fillOpacity = 0.25,
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                       labelOptions = leaflet::labelOptions(#noHide = T,
-                                        style = list("color" = "red","font-size" = "12px")),
-                                      highlightOptions = leaflet::highlightOptions(color="red",
+                                        style = list("color" = "#9A00C4","font-size" = "12px")),
+                                      highlightOptions = leaflet::highlightOptions(color="#9A00C4",
                                                                                    weight = 3,
                                                                                    fillOpacity = 0.5,
                                                                                    bringToFront = TRUE,
@@ -616,108 +706,62 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                                                              '<br><b>Use Period:</b> \"+props.period+\"',
                                                                              '<br><b>HUC12:</b> \"+props.HUC_12+\"',
                                                                              ' \"}'))) %>%
-    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/52",
-                                      options = leaflet.esri::featureLayerOptions(where = where_au_gnis_yearRound),
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/63",
+                                      options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                       useServiceSymbology = TRUE,
                                       group = "2022 303(d) Temperature Listed - Watershed (Year Round Criteria)",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
-                                      color = "red",
-                                      weight = 1,
+                                      color = "#9A00C4",
+                                      weight = 2,
                                       opacity = 0.8,
-                                      fill = TRUE,
-                                      fillColor = "red",
-                                      fillOpacity = 0.25,
-                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_GNIS+\" \"}"),
-                                      labelOptions = leaflet::labelOptions(#noHide = T,
-                                        style = list("color" = "red","font-size" = "12px")),
-                                      highlightOptions = leaflet::highlightOptions(color="red",
-                                                                                   weight = 3,
-                                                                                   fillOpacity = 0.8,
-                                                                                   bringToFront = TRUE,
-                                                                                   sendToBack = TRUE),
-                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
-                                                                             '<b>AU Name:</b> \"+props.AU_Name+\"',
-                                                                             '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-                                                                             '<br><b>AU GNIS Name:</b> \"+props.AU_GNIS_Name+\"',
-                                                                             '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
-                                                                             '<br><b>IR AU Category:</b> \"+props.AU_final_status+\"',
-                                                                             '<br><b>IR GNIS Category:</b> \"+props.GNIS_final_category+\"',
-                                                                             '<br><b>Use Period:</b> \"+props.period+\"',
-                                                                             ' \"}'))) %>% 
-    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/52",
-                                      options = leaflet.esri::featureLayerOptions(where = where_au_gnis_spawning),
-                                      useServiceSymbology = TRUE,
-                                      group = "2022 303(d) Temperature Listed - Watershed (Spawning Criteria))",
-                                      pathOptions = leaflet::pathOptions(pane="ir"),
-                                      color = "red",
-                                      weight = 1,
-                                      opacity = 0.8,
-                                      fill = TRUE,
-                                      fillColor = "red",
-                                      fillOpacity = 0.25,
-                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_GNIS+\" \"}"),
-                                      labelOptions = leaflet::labelOptions(#noHide = T,
-                                        style = list("color" = "red","font-size" = "12px")),
-                                      highlightOptions = leaflet::highlightOptions(color="red",
-                                                                                   weight = 3,
-                                                                                   fillOpacity = 0.8,
-                                                                                   bringToFront = TRUE,
-                                                                                   sendToBack = TRUE),
-                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
-                                                                             '<b>AU Name:</b> \"+props.AU_Name+\"',
-                                                                             '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-                                                                             '<br><b>AU GNIS Name:</b> \"+props.AU_GNIS_Name+\"',
-                                                                             '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
-                                                                             '<br><b>IR AU Category:</b> \"+props.AU_final_status+\"',
-                                                                             '<br><b>IR GNIS Category:</b> \"+props.GNIS_final_category+\"',
-                                                                             '<br><b>Use Period:</b> \"+props.period+\"',
-                                                                             ' \"}'))) %>% 
-    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/44",
-                                      options = leaflet.esri::featureLayerOptions(where = where_au),
-                                      useServiceSymbology = TRUE,
-                                      group = "2022 303(d) Temperature Listed - Watershed (Year Round Criteria))",
-                                      pathOptions = leaflet::pathOptions(pane="ir"),
-                                      color = "red",
-                                      weight = 1,
-                                      opacity = 0.8,
-                                      fill = TRUE,
-                                      fillColor = "red",
+                                      fill=TRUE,
+                                      fillColor = "#9A00C4",
                                       fillOpacity = 0.25,
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                       labelOptions = leaflet::labelOptions(#noHide = T,
-                                        style = list("color" = "red","font-size" = "12px")),
-                                      highlightOptions = leaflet::highlightOptions(color="red",
+                                        style = list("color" = "#9A00C4","font-size" = "12px")),
+                                      highlightOptions = leaflet::highlightOptions(color="#9A00C4",
                                                                                    weight = 3,
-                                                                                   fillOpacity = 0.8,
+                                                                                   fillOpacity = 0.5,
                                                                                    bringToFront = TRUE,
                                                                                    sendToBack = TRUE),
                                       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                              '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                              '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-                                                                             ' \"}'))) %>% 
-    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/44",
-                                      options = leaflet.esri::featureLayerOptions(where = where_au),
+                                                                             '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
+                                                                             '<br><b>IR Category:</b> \"+props.AU_parameter_category+\"',
+                                                                             '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                                                             '<br><b>Use Period:</b> \"+props.period+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                                                             ' \"}'))) %>%
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/63",
+                                      options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
                                       useServiceSymbology = TRUE,
-                                      group = "2022 303(d) Temperature Listed - Watershed (Spawning Criteria))",
+                                      group = "2022 303(d) Temperature Listed - Watershed (Spawning Criteria)",
                                       pathOptions = leaflet::pathOptions(pane="ir"),
-                                      color = "red",
-                                      weight = 1,
+                                      color = "#9A00C4",
+                                      weight = 2,
                                       opacity = 0.8,
-                                      fill = TRUE,
-                                      fillColor = "red",
+                                      fill=TRUE,
+                                      fillColor = "#9A00C4",
                                       fillOpacity = 0.25,
                                       labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
                                       labelOptions = leaflet::labelOptions(#noHide = T,
-                                        style = list("color" = "red","font-size" = "12px")),
-                                      highlightOptions = leaflet::highlightOptions(color="red",
+                                        style = list("color" = "#9A00C4","font-size" = "12px")),
+                                      highlightOptions = leaflet::highlightOptions(color="#9A00C4",
                                                                                    weight = 3,
-                                                                                   fillOpacity = 0.8,
+                                                                                   fillOpacity = 0.5,
                                                                                    bringToFront = TRUE,
                                                                                    sendToBack = TRUE),
                                       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                                                              '<b>AU Name:</b> \"+props.AU_Name+\"',
                                                                              '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-                                                                             ' \"}'))) %>% 
+                                                                             '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
+                                                                             '<br><b>IR Category:</b> \"+props.AU_parameter_category+\"',
+                                                                             '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                                                             '<br><b>Use Period:</b> \"+props.period+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                                                             ' \"}'))) %>%
     # __ WQS ----
   leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = reachcode,
@@ -734,8 +778,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                                                            '<br><b>Temperature Criteria:</b> \"+props.Temperature_Criteria+\"',
                                                                            '<br><b>Non Spawning 7DADM deg-C:</b> \"+props.Temperature_Criterion_7dADM_C+\"',
                                                                            '<br><b>Temperature Spawning Dates:</b> \"+props.Temperature_Spawn_dates+\"',
-                                                                           ' \"}'))
-  ) %>%
+                                                                           ' \"}'))) %>%
     leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
                                       options = leaflet.esri::featureLayerOptions(where = reachcode,
                                                                                   style = tempSpawncolor),
@@ -750,13 +793,86 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
                                                                              '<b>Waterbody Name:</b> \"+props.GNIS_Name+\"',
                                                                              '<br><b>Temperature Spawn Dates:</b> \"+props.Temperature_Spawn_dates+\"',
                                                                              '<br><b> Spawning Criterion 7DADM deg-C:</b> 13',
-                                                                             ' \"}')))
+                                                                             ' \"}'))) %>% 
+    # __ DMA ----
+  # leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+  #                                   options = leaflet.esri::featureLayerOptions(where = where_huc12_1,
+  #                                                                               style = DMAcolor,
+  #                                                                               simplifyFactor = 0.35),
+  #                                   group = "Land Ownership or Jurisdiction",
+  #                                   pathOptions = leaflet::pathOptions(pane="dma"),
+  #                                   fill = TRUE,
+  #                                   fillOpacity = 0.75,
+  #                                   weight = 0.1,
+  #                                   opacity = 0,
+  #                                   color = "white",
+  #                                   highlightOptions = leaflet::highlightOptions(weight = 3,
+  #                                                                                color = "white",
+  #                                                                                opacity = 1,
+  #                                                                                bringToFront = TRUE),
+  #                                   labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+  #                                   labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "12px")),
+  #                                   popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+  #                                                                          '<b>\"+props.DMA_RP+\"</b>',
+  #                                                                          '<br>\"+props.DMA_RP_Cl+\"',
+  #                                                                          '<br><b>HUC12:</b> \"+props.HUC12+\"',
+  #                                                                          '<br><b>Version:</b> \"+props.Version+\"',
+  #                                                                          ' \"}')),
+  #                                   popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500)) %>%
+  #   leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+  #                                     options = leaflet.esri::featureLayerOptions(where = where_huc12_2,
+  #                                                                                 style = DMAcolor,
+  #                                                                                 simplifyFactor = 0.35),
+  #                                     group = "Land Ownership or Jurisdiction",
+  #                                     pathOptions = leaflet::pathOptions(pane="dma"),
+  #                                     fill = TRUE,
+  #                                     fillOpacity = 0.75,
+  #                                     weight = 0.1,
+  #                                     opacity = 0,
+  #                                     color = "white",
+  #                                     highlightOptions = leaflet::highlightOptions(weight = 3,
+  #                                                                                  color = "white",
+  #                                                                                  opacity = 1,
+  #                                                                                  bringToFront = TRUE),
+  #                                     labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+  #                                     labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "12px")),
+  #                                     popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+  #                                                                            '<b>\"+props.DMA_RP+\"</b>',
+  #                                                                            '<br>\"+props.DMA_RP_Cl+\"',
+  #                                                                            '<br><b>HUC12:</b> \"+props.HUC12+\"',
+  #                                                                            '<br><b>Version:</b> \"+props.Version+\"',
+  #                                                                            ' \"}')),
+  #                                     popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500)) %>%
+    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                      options = leaflet.esri::featureLayerOptions(where = where_huc10,
+                                                                                  style = DMAcolor,
+                                                                                  simplifyFactor = 0.35),
+                                      group = "Land Ownership or Jurisdiction",
+                                      pathOptions = leaflet::pathOptions(pane="dma"),
+                                      fill = TRUE,
+                                      fillOpacity = 0.75,
+                                      weight = 0.1,
+                                      opacity = 0,
+                                      color = "white",
+                                      highlightOptions = leaflet::highlightOptions(weight = 3,
+                                                                                   color = "white",
+                                                                                   opacity = 1,
+                                                                                   bringToFront = TRUE),
+                                      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.DMA_RP+\" \"}"),
+                                      labelOptions = leaflet::labelOptions(style = list("color" = "black","font-size" = "12px")),
+                                      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                             '<b>\"+props.DMA_RP+\"</b>',
+                                                                             '<br>\"+props.DMA_RP_Cl+\"',
+                                                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                                                             '<br><b>Version:</b> \"+props.Version+\"',
+                                                                             ' \"}')),
+                                      popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500))
   
   # Project area layer ----
   # __ John Day River Basin ----
   if(qapp_project_area == "John Day River Basin") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
       tempCalibration.markers(temp_cal_sites) %>% 
@@ -767,7 +883,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -775,7 +891,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Lower Grande Ronde, Imnaha, and Wallowa Subbasins ----
   if(qapp_project_area == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       hsSolarModel(hs_solar_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
@@ -785,7 +901,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -801,14 +917,14 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       dplyr::rename(Stream = NAME)
     
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       # __ BES (2019)
       leaflet::addPolylines(data = bes_model_extent,
                             group = "Heat Source Shade Model Extent (New Models)",
                             options = leaflet::leafletOptions(pane="modbes"),
                             label = ~Stream,
                             labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
+                                                                     "font-size" = "12px")),
                             color = "#3690c0",
                             opacity = 1,
                             weight = 5,
@@ -824,7 +940,8 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Shade Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Shade Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Shade Model Extent (New Models)",
@@ -834,7 +951,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Malheur River Subbasins ----
   if(qapp_project_area == "Malheur River Subbasins") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsSolarModel(hs_solar_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
       tempCalibration.markers(temp_cal_sites) %>% 
@@ -843,7 +960,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -851,7 +968,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Middle Willamette Subbasins ----
   if(qapp_project_area == "Middle Willamette Subbasins") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
       tempCalibration.markers(temp_cal_sites) %>% 
@@ -861,7 +978,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -869,7 +986,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Middle Columbia-Hood, Miles Creeks ----
   if(qapp_project_area == "Middle Columbia-Hood, Miles Creeks") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       hsSolarModel(hs_solar_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
@@ -879,7 +996,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -894,14 +1011,14 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       sf::st_zm()
     
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       # __ new models
       leaflet::addPolylines(data = new.models,
                             group = "Heat Source Temperature Model Extent (New Models)",
                             options = leaflet::leafletOptions(pane="mod2009"),
                             label = ~Stream,
                             labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
+                                                                     "font-size" = "12px")),
                             color = "#993404",
                             opacity = 0.5,
                             weight = 10) %>% 
@@ -914,7 +1031,8 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -931,14 +1049,14 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       sf::st_zm() 
     
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       # __ Applegate and Little Applegate
       leaflet::addPolylines(data = map_hs_applegate_and_little_applegate,
                             group = "Heat Source Temperature Model Extent (New Models)",
                             options = leaflet::leafletOptions(pane="mod2009"),
                             label = ~Stream,
                             labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
+                                                                     "font-size" = "12px")),
                             color = "#993404",
                             opacity = 0.5,
                             weight = 10) %>% 
@@ -953,7 +1071,8 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -970,14 +1089,14 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       sf::st_zm()
     
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       # __ Bull Run River, Salmon River and Sandy Rivers (2016)
       leaflet::addPolylines(data = sandy_2016,
                             group = "Heat Source Temperature Model Extent (New Models)",
                             options = leaflet::leafletOptions(pane="mod2016"),
                             label = ~Name,
                             labelOptions = labelOptions(style = list("color" = "black",
-                                                                     "font-size" = "20px")),
+                                                                     "font-size" = "12px")),
                             color = "#993404",
                             opacity = 0.5,
                             weight = 10) %>% 
@@ -991,7 +1110,8 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = c("Heat Source Temperature Model Extent (New Models)",
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
+                                                  "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(c("Heat Source Temperature Model Extent (New Models)",
@@ -1001,7 +1121,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ South Umpqua and Umpqua Subbasins ----
   if(qapp_project_area == "South Umpqua and Umpqua Subbasins") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
       tempCalibration.markers(temp_cal_sites) %>% 
@@ -1012,7 +1132,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1020,7 +1140,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Southern Willamette Subbasins ----
   if(qapp_project_area == "Southern Willamette Subbasins") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       hsSolarArea(hs_solar_model_area) %>% 
       tempStation.markers(temp_stations) %>% 
@@ -1032,7 +1152,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1040,7 +1160,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Walla Walla Subbasin ----
   if(qapp_project_area == "Walla Walla Subbasin") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       hsSolarModel(hs_solar_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
@@ -1048,7 +1168,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       flowStation.markers(flow_stations) %>% 
       metStation.markders(met_stations) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1056,25 +1176,6 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Willamette River Mainstem and Major Tributaries ----
   if(qapp_project_area == "Willamette River Mainstem and Major Tributaries") {
     map_area <- map_basic %>% 
-      # ____ TMDL project scope ----
-    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/34",
-                                      options = leaflet.esri::featureLayerOptions(where = where_au),
-                                      useServiceSymbology = TRUE,
-                                      group = "TMDL Project Scope",
-                                      pathOptions = leaflet::pathOptions(pane="area"),
-                                      weight = 3,
-                                      color = "black",
-                                      opacity = 1,
-                                      fill=FALSE) %>%
-      leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/43",
-                                        options = leaflet.esri::featureLayerOptions(where = where_au),
-                                        useServiceSymbology = TRUE,
-                                        group = "TMDL Project Scope",
-                                        pathOptions = leaflet::pathOptions(pane="area"),
-                                        weight = 3,
-                                        color = "black",
-                                        opacity = 1,
-                                        fill=FALSE) %>%
       ceModel(ce_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
       tempCalibration.markers(temp_cal_sites) %>% 
@@ -1084,7 +1185,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
@@ -1092,7 +1193,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
   # __ Willow Creek Subbasin ----
   if(qapp_project_area == "Willow Creek Subbasin") {
     map_area <- map_basic %>% 
-      projectScope(pro_area) %>% 
+      #projectScope(pro_area) %>% 
       hsTempModel(hs_temp_model_extent) %>% 
       tempStation.markers(temp_stations) %>% 
       tempCalibration.markers(temp_cal_sites) %>% 
@@ -1101,7 +1202,7 @@ qapp_project_area = "Southern Willamette Subbasins"                        ---X
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       #effectiveShade.markers(shade) %>% 
-      leaflet::addLayersControl(overlayGroups = group.names,
+      leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",group.names),
                                 options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = TRUE)) %>% 
       leaflet::hideGroup(group.names.hide)
   }
