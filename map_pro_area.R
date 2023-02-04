@@ -239,7 +239,8 @@ qapp_project_area = "Sandy Subbasin"
   print(qapp_project_area)
   
   # Basic layers ----
-  map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
+  #map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
+  map.title <- tags$div(tag.map.title, HTML("Lower Columbia-Sandy River Subbasin"))
   map_basic <- leaflet::leaflet() %>%
     leaflet::addControl(map.title, position = "topleft", className="map-title") %>% 
     leaflet::addMiniMap(tiles = providers$OpenStreetMap,
