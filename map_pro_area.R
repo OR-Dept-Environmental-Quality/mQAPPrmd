@@ -47,13 +47,12 @@ tag.map.title <- tags$style(HTML("
 "))
 
 # PROJECT AREA MAPS ----
-
 ## for test:
 # qapp_project_area = "John Day River Basin"
 # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
-# qapp_project_area = "Lower Willamette and Clackamas Subbasins"          ---X
-# qapp_project_area = "Malheur River Subbasins"
-# qapp_project_area = "Middle Willamette Subbasins"                       ---X
+# qapp_project_area = "Lower Willamette and Clackamas Subbasins"
+qapp_project_area = "Malheur River Subbasins"
+# qapp_project_area = "Middle Willamette Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "North Umpqua Subbasin"
 # qapp_project_area = "Rogue River Basin"
@@ -64,10 +63,10 @@ tag.map.title <- tags$style(HTML("
 # qapp_project_area = "Willamette River Mainstem and Major Tributaries"
 # qapp_project_area = "Willow Creek Subbasin"
 
-for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("Sandy Subbasin",
-                                                                              "Lower Willamette and Clackamas Subbasins",
-                                                                              "Middle Willamette Subbasins",
-                                                                              "Southern Willamette Subbasins")),]$areas)) {
+#for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("Sandy Subbasin",
+#                                                                              "Lower Willamette and Clackamas Subbasins",
+#                                                                              "Middle Willamette Subbasins",
+#                                                                              "Southern Willamette Subbasins")),]$areas)) {
   
   file.name <- project.areas[which(project.areas$areas == qapp_project_area),]$file.name
   
@@ -1277,10 +1276,10 @@ for(qapp_project_area in sort(project.areas[which(!project.areas$areas %in% c("S
                                         <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">
                                         </a></div></body></html>', logo))
-  
-  # SAVE DATA ----
-  print(paste0(qapp_project_area,"...Save the map"))
-  htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
-  file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
-  
-}
+
+# SAVE DATA ----
+print(paste0(qapp_project_area,"...Save the map"))
+htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
+file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
+
+#}
