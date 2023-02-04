@@ -18,7 +18,7 @@ knitr::opts_chunk$set(results = "asis",
 options(kableExtra.auto_format = F)
 options(knitr.kable.NA = '')
 
-# for test: waterbody_name <- "Clackamas River"
+# for test: waterbody_name <- "Southern Willamette Subbasins"
 
 section.model.info <- model.info %>% 
   dplyr::filter(`Model Waterbody` %in%  waterbody_name)
@@ -40,7 +40,9 @@ the <- section.model.info %>%
 
 ## `r waterbody_name`
 
-`r paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if("T" %in% section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")`
+`r if(!waterbody_name == "Southern Willamette Subbasins"){paste0("The ",waterbody_name," model is a ",tolower(ifelse(unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter") == "Solar", "shade",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Primary Model Parameter")))," model developed using ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Model version"),". The model ",if("T" %in% section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"New Model"){paste0("will be")}else{paste0("was")}," developed by ",unique(section.model.info[which(section.model.info$"Model Waterbody" == waterbody_name),]$"Calibration Org"),".")}`
+
+`r if(waterbody_name == "Southern Willamette Subbasins"){paste0("Between 2014 and 2018 DEQ developed a shade model for streams in the southern portion of the Willamette Basin. The primary purpose of these models were to characterize the status of effective shade on project area streams and the gap between the current shade and the TMDL effective shade targets identified in the Willamette Basin TMDL (ODEQ, 2006). Results were stratified by Designated Management Agencies and HUC10 and HUC12 watersheds and subwatetersheds. A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading.  The modeling results were used by DEQ evaluate status of TMDL implementation by designated management agencies. The results of this modeling effort will be documented and included in the updated TMDL.")}`
 
 ### Model domain
 
@@ -50,7 +52,20 @@ model.domain <- unique(sort(section.model.info$`Model Extent Text`))
 
 ```
 
-The extent of the model domain is `r model.domain` The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.
+`r if(waterbody_name == "Southern Willamette Subbasins"){paste0(model.domain, " The model extent is shown in Figure 3 in addition to the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}else{paste0("The extent of the model domain is  ", model.domain, " The model extent is shown in the HTML interactive map that accompanies this QAPP and is referenced in Appendix D.")}`
+
+```{r sw_solar_map, eval.after="fig.cap", fig.cap=sw.solar.map, results='asis', cache=FALSE, eval=TRUE, fig.height=7, out.height='615px', echo=FALSE}
+
+sw.solar.map <- figs(name="solar.map",
+                     caption = paste0("Effective shade and solar flux modeling area in the southern portion of the Willamette Basin (170900)."))
+
+if(waterbody_name %in% "Southern Willamette Subbasins"){
+  
+  knitr::include_graphics(path = "./fig/Southern_Willamette_Solar_Flux_Modeling_Area.png")
+  
+}
+
+```
 
 ### Spatial and temporal resolution
 
@@ -61,6 +76,17 @@ A *dx* of `r unique(section.model.info$"Input dx")` `r unique(section.model.info
 ### Source characteristics
 
 ```{r, label=`sc`, include=FALSE}
+
+## 1st paragraph
+source.char.1 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_sourceChar.xlsx",
+                                   sheet = "sW_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar1)
+
+source.char.2 <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/tables_sourceChar.xlsx",
+                                   sheet = "sW_sourceChar") %>%
+  dplyr::filter(`Model Waterbody` == waterbody_name) %>% 
+  dplyr::pull(sourceChar2)
 
 # NPDES
 npdes.ind.waterbody <- npdes.ind.pro.area %>%
@@ -80,7 +106,9 @@ if(npdes.ind.n>0){
   
   npdes.ind.tbl <- knitr::kable(npdes.ind.waterbody, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("npdes.ind.waterbody_",waterbody_name),
-                                               caption = paste0("Summary of individual NPDES permitted discharges in ", the, waterbody_name, ".")))
+                                               caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                                paste0("Summary of individual NPDES permitted discharges in the upper portion of the McKenzie River."),
+                                                                paste0("Summary of individual NPDES permitted discharges in ", the, waterbody_name, "."))))
   
 }
 
@@ -97,7 +125,7 @@ if(npdes.ind.n > 1) {
 } 
 
 # NLCD
-nlcd.waterbody <- nlcd.pro.area %>% 
+nlcd.waterbody <- nlcd.pro.area %>%
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
@@ -107,8 +135,10 @@ if(NROW(nlcd.waterbody)>0){
   
   nlcd.wb.tbl <- knitr::kable(nlcd.waterbody, format = "pandoc", padding = 2,
                               caption = tbls(name = paste0("nlcd.waterbody_",waterbody_name),
-                                             caption = paste0("Summary of land uses along the model extent within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al., 2018).")))
-  
+                                             caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                              paste0("Summary of land uses along the model extent within 100 meters of the digitized centerline of the upper portion of the McKenzie River based on the 2016 National Land Cover Database (Yang et al., 2018)."),
+                                                              paste0("Summary of land uses along the model extent within 100 meters of the digitized ", waterbody_name, " centerline based on the 2016 National Land Cover Database (Yang et al., 2018)."))))
+
 }
 
 nlcd.text.waterbody <- nlcd.text.pro.area %>% 
@@ -125,27 +155,33 @@ if(NROW(dma.waterbody)>0){
   
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
-                                            caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons along the model extent within 100 meters of the digitized ", waterbody_name, " centerline.")))
+                                            caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                             paste0("Summary of potential designated management agencies (DMAs) or responsible persons along the model extent within 100 meters of the digitized centerline of the upper portion of the McKenzie River."),
+                                                             paste0("Summary of potential designated management agencies (DMAs) or responsible persons along the model extent within 100 meters of the digitized ", waterbody_name, " centerline."))))
   
 }
 
 ```
 
-The primary sources of thermal loading contributing to temperatures exceedances in `r paste0(the,waterbody_name)` include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, `r if(npdes.ind.n>0){paste0("point source discharges, ")}`reductions to the stream flow rate or volume, **[Update as needed]** and background sources (`r strip_alpha(section.model.info$"Abbreviated Reference")`). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. The contribution of these latter potential sources may be investigated as part of the model scenarios. 
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){paste0("The primary sources of thermal loading contributing to temperatures exceedances along the ",if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River")}else{waterbody_name}," include increases in solar radiation loading from the disturbance or removal of near-stream vegetation, ",if(npdes.ind.n>0){paste0("point source discharges,")},if(!is.na(source.char.1)){source.char.1}," and background sources (",strip_alpha(section.model.info$"Abbreviated Reference"),"). ",source.char.2," The contribution of these latter potential sources may be investigated as part of the model scenarios.")}`
 
-`r npdes.txt`
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){if(npdes.ind.n > 0){npdes.ind.tbl}else{npdes.txt}}`
 
-`r if(npdes.ind.n > 0){npdes.ind.tbl}`
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){paste0("The majority land use",if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}," along the ",if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River ")}else{waterbody_name}," ", if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}," ", if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}," accounting for about ",if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}," percent of the near-stream area. ",if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}," summarizes all the land uses within 100 meters of the digitized ",if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River")}else{waterbody_name}," centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.")}`
 
-The majority land use`r if(NROW(nlcd.text.waterbody)>0){s(nlcd.text.waterbody$n)}` along `r paste0(the,waterbody_name)` `r if(NROW(nlcd.text.waterbody)>0){is.are(nlcd.text.waterbody$n[1])}` `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$text}` accounting for about `r if(NROW(nlcd.text.waterbody)>0){nlcd.text.waterbody$MajorityPercent}` percent of the near-stream area. `r if(NROW(nlcd.waterbody)>0){tbls(name = paste0("nlcd.waterbody_",waterbody_name),display="cite")}` summarizes all the land uses within 100 meters of the digitized `r waterbody_name` centerline. Land uses were summarized using the 2016 National Land Cover Database (Yang et al., 2018). Note that Shrub/Scrub and Herbaceous land uses can be areas where forest clearcuts have occurred and would be classified as forest after regrowth.
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}}`
 
-`r if(NROW(nlcd.waterbody)>0){nlcd.wb.tbl}`
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){paste0("Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, the activities, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies (", if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}, ").")}`
 
-Anthropogenic related stream warming caused by nonpoint sources is closely associated with the uses, the activities, and the condition of vegetation adjacent to the stream. How activities and uses are managed in these areas is partially determined by a variety of different rules and management plans established by the landowner and any agency with land use authority. To better understand the spatial distribution of different agency rules or management plans along the model extent DEQ mapped known designated management agencies (`r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}`).
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){paste0("A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. ",if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}," summarizes the potential designated management agencies and responsible persons along the ",if(waterbody_name == "McKenzie River: Upper"){paste0("upper portion of the McKenzie River")}else{waterbody_name}," model extent.")}`
 
-A designated management agency is defined in OAR 340-042-0030(2) as a federal, state, or local governmental agency that has legal authority over a sector or source contributing pollutants. Typically, persons or designated management agencies that are identified in the TMDL Water Quality Management Plan (WQMP) are responsible for developing TMDL implementation plans and implementing management strategies to reduce pollutant loading. `r if(NROW(dma.waterbody)>0){tbls(name = paste0("dma.waterbody",waterbody_name),display="cite")}` summarizes the potential designated management agencies and responsible persons along `r paste0(the,waterbody_name)` model extent. 
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){if(NROW(dma.waterbody)>0){dma.wb.tbl}}`
 
-`r if(NROW(dma.waterbody)>0){dma.wb.tbl}`
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("The primary purpose of the Southern Willamette Subbasin models were to characterize the status of effective shade on waterbodies and the gap between the current shade and the TMDL effective shade targets identified in the Willamette Basin TMDL (ODEQ, 2006). Effective shade is a surrogate for solar radiation loading caused by the disturbance or removal of near-stream vegetation. Other potential sources of thermal loading were not evaluated by this model.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("The results of the modeling indicate that agricultural areas regulated by the Oregon Department of Agriculture have the largest number of assessed stream miles (1,853 miles out of a total of 3,459 assessed stream miles, which is about 54 percent) with effective shade that is greater than 50 percentage points below the TMDL shade target. Private non-federal forestlands regulated by the Oregon Department of Forestry has the second largest number of assessed streams miles in this category at 1,260 stream miles out of 5,994 total assessed miles (21 percent). The Oregon Department of Agriculture and Oregon Department of Forestry have the largest number of stream miles that they regulate compared to other designated management agencies. Most cities have fewer stream miles in their jurisdiction but have much higher proportion of effective shade that is greater than 50 percentage points below the TMDL shade target. For example, all the stream miles assessed in the cities of Halsey and Harrisburg (1.2 and 0.5 stream miles respectively) have effective shade that is greater than 50 percentage points below the TMDL shade target. On the opposite end of the spectrum, the federal forestlands managed by the Bureau of Land Management only have 3 percent of the assessed steam miles (41.7 miles out of 1658.5 miles) with effective shade that is greater than 50 percentage points below the TMDL shade target. BLM had the third highest number of assessed stream miles. Most of the federal forestlands managed by the USFS were not evaluated because of the lack of LiDAR.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("The Long Tom Watershed (1709000301) overall had the largest amount of assessed stream miles (372 miles out of 1,113 miles total, which is about 33 percent) with effective shade that is greater than 50 percentage points below the TMDL shade target.")}`
 
 ### Time frame of simulation
 
@@ -160,7 +196,21 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. `r paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")`
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL ",paste0("(", knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "), ")"),", the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext)))))," or in Section 6 and Section 7 of this document.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("There are three important assumptions made during the modeling effort. The first is that the model is setup to assume no cloud cover. This is done to isolate the solar radiation flux blocked by vegetation and topography only. The other two assumptions relate to how the effective shade targets were derived from the site potential vegetation types and the location of the stream as derived from the National Hydrography Dataset.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("The site potential vegetation scenario represents the effective shade under restored vegetation conditions and is the primary basis for the TMDL load allocation (ODEQ 2006). The site potential vegetation described in the TMDL is the type and mix of vegetation that is assumed to be restored in any given location and is the basis for the TMDL effective shade targets. The type and mix of restored vegetation that occurs in any given location is primarily based upon on the geomorphic mapping unit and the mix of forest, savanna, and prairie. In order to calculate the effective shade targets across the project area, the appropriate type of site potential vegetation needed to be spatially mapped. To complete this task, python scripts were developed to process a raster layer of the geomorphic units into site potential vegetation codes following the process laid out in the TMDL (ODEQ 2006). Two modifications to the approach needed to be made for the Southern Willamette project. Both modifications relate to the two land cover classes for water: open water and general water. ")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("General water are areas which include natural river channels, lakes, ponds, or wetland areas. Under the site potential vegetation scenario these features continued to stay as water. The 2006 effort mapped these areas using aerial photos and digitized them into a landcover feature class only for the streams that were modeled. The landcover class code used for general water was 3011. For this project general water features needed to be mapped across the entire study area. The National Wetland Inventory (USFWS, 2004) and the National Hydrography Dataset high resolution v2.2 databases contain extensive inventories of water features. These features were incorporated into the geomorphic raster. The assumption is that these spatial data features accurately capture most large river channels, lakes, ponds, or wetland areas that would be classified as “general water”.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("The National Wetland Inventory's classification system (FGDC, 2013) allowed the removal of most anthropogenic related water areas such as impounded reservoirs and gravel mining ponds. Waters classified as Lacustrine (L), Palustrine (P), Marine (M), or Estuarine (E) that are not forested (FO), scrub/shrub (SS), diked/impounded (h), a spoil (s), or excavated (x) were coded as general water. Forested and scrub/shrub classes were removed because they have emergent or overhanging vegetation. The NHD channel areas were used to map the riverine reaches because in some areas it was a little more accurate than NWI where the channel has migrated in recent years, mostly in portions of the Willamette River.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("Open water (code 2000) are areas representing the ACOE reservoirs within the boundaries of the original geomorphic feature class and other anthropogenic related water areas that did not meet the criteria for general water. Under the classification rules for site potential vegetation these areas were treated as prairie or savanna vegetation types. In the upland forest zone impounded reservoirs were not mapped. They were classified as upland forest (code 1900). The intent was that these site potential vegetation types would be present along the natural unimpouned channel (rather than actually present in the river channel). The reservoirs areas were not modeled so no effort was made to map the location of the where the water channel would be located in a natural (unimpounded) scenario.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("Mapping the natural channel within impoundments requires additional analysis and attention and is beyond the scope of this project. Therefore, impounded lakes and reservoirs and areas classified as open waters in the geomorphic layer will be treated the same as general water (no change). Just as was done in other scenarios, stream nodes in these areas will be removed from the analysis and excluded when calculating watershed effective shade.")}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("The second assumption relates to the spatial location of the stream. The 2006 TMDL effort mapped the modeled stream “centerlines” using aerial photos. For this project, it was not possible to digitize every stream in the project area. Instead, the stream location was determined using the National Hydrography Dataset high resolution v2.2 database. The stream locations in this version of NHD were primarily digitized from aerial photographs using a similar method that DEQ used for the TMDL. In places where the stream is masked by forest cover, it is often hard to “see” the stream channel and this can result in the digitized line not always matching the true location of the stream. For the TMDL project, DEQ considered remapping the stream locations by modeling the flow path using the LiDAR bare earth DEMs. This approach has shown to improve accuracy. The limitation with this approach is that it requires significant effort to identify and correct the DEM in places where road culverts occur. Because of the large project area and number of road crossings, it was determined that remapping the stream locations will require an effort and timeline that likely does not align with the project schedule or available resources. As a result, in forested areas where the stream is not visible, the effective shade results may characterize areas adjacent to the stream. The limitation will be included in the TMDL documentation.")}`
 
 ### Model inputs
 
@@ -251,7 +301,7 @@ if(!model.extent == TRUE){
       dplyr::rename(`Input Type` = `Model Location Type`) %>% 
       dplyr::arrange(`Input Type`,Parameter,desc(`Model Location`)) %>% 
       rbind(t6x6_met)
-
+    
     
   }
   
@@ -267,20 +317,24 @@ if(!model.extent == TRUE){
     
     t6x6_1_tbl <-  knitr::kable(t6x6_1, format = "pandoc", padding = 2,
                                 caption = tbls(name = paste0("t6x6_1", waterbody_name),
-                                               caption = paste0("Boundary condition and tributary inputs to the ", 
-                                                                ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
-                                                                waterbody_name, 
-                                                                " Heat Source model.")))
+                                               caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                                paste0("Boundary condition and tributary inputs to the Heat Source Model for the upper portion of the McKenzie River."),
+                                                                paste0("Boundary condition and tributary inputs to the ", 
+                                                                       ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
+                                                                       waterbody_name, 
+                                                                       " Heat Source model."))))
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
+  #t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
   
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!waterbody_name %in% "Southern Willamette Subbasins"){if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}}}`
+
+`r if(waterbody_name %in% "Southern Willamette Subbasins"){paste0("The model inputs to the model include Lidar derived vegetation heights and stream position (latitude and longitude) derived from the NHD flowlines.")}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
@@ -377,14 +431,16 @@ if(!model.extent == TRUE){
   
   t6x7 <- t6x7[,-3]
   
-  if(NROW(t6x7)>0){
+  if(NROW(t6x7)>0){    
     
     t6x7_tbl <- knitr::kable(t6x7, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("t6x7", waterbody_name),
-                                            caption = paste0("Calibration sites and parameters used in the ", 
-                                                             ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
-                                                             waterbody_name, 
-                                                             " Heat Source model.")))
+                                            caption = ifelse(waterbody_name == "McKenzie River: Upper", 
+                                                             paste0("Calibration sites and parameters used in the Heat Source Model for the upper portion of the McKenzie River."),
+                                                             paste0("Calibration sites and parameters used in the ", 
+                                                                    ifelse(is.na(section.model.info$`New Model`),"existing ",""), 
+                                                                    waterbody_name, 
+                                                                    " Heat Source model."))))
     
   }
   
@@ -400,6 +456,8 @@ if(!model.extent == TRUE){
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
+`r if(!waterbody_name == "Southern Willamette Subbasins"){if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}}`
+
+`r if(waterbody_name == "Southern Willamette Subbasins"){paste0("The model was calibrated primarily by comparing the model effective shade predictions to the field measured effective shade values summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". To improve the calibration results global changes to the canopy cover parameter were made iteratively. Canopy cover was the only calibration parameter. The final calibrated canopy cover value was 0.80 (80%). Other calibration parameters identified in Section 6.2 (landcover height and landcover overhang) were determined directly from LiDAR and were not adjusted. If it is determined that the model calibration needs to be modified to improve model fit the same three calibration parameters described in Section 6.1 will be candidates for adjustment.")}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
