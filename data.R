@@ -206,9 +206,10 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
 
 for(permit_Nbr in unique(sort(npdes.7q10$NPDES_Permit_Nbr))){
   
-  # test: permit_Nbr = "10029"
-  npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Latitude <- npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude
-  npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Longitude <- npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude
+  print(permit_Nbr)
+  # test: permit_Nbr = "100976"
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)}
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)}
   
 }
 
@@ -439,14 +440,15 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Willow Creek Subbasin"
 
 done <- c(
-  "Lower Willamette and Clackamas Subbasins",
-  "Middle Willamette Subbasins",
+  # "Lower Willamette and Clackamas Subbasins",
+  # "Middle Willamette Subbasins",
   # "North Umpqua Subbasin",
   # "Rogue River Basin",
-  # "Sandy Subbasin",
+  "Sandy Subbasin"#,
   # "South Umpqua and Umpqua Subbasins",
-  "Southern Willamette Subbasins",
-  "Willamette River Mainstem and Major Tributaries")
+  # "Southern Willamette Subbasins",
+  # "Willamette River Mainstem and Major Tributaries"
+  )
 
 for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
