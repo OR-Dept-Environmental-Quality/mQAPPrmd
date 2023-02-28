@@ -124,8 +124,8 @@ gen_ps <- rbind(gen_ps.lw,gen_ps.mw,gen_ps.sw)
 tcat45 <- rbind(tcat45.lw,tcat45.mw,tcat45.sw)
 
 # Project and AU layers ----
-pro_area <- sf::st_read(dsn = "//deqhq1/tmdl/TMDL_Willamette/Willamette_Subbasins_Temperature_2024/GIS/WillametteSubbasins/data/Willamette Subbasins Boundary.shp",
-                        layer = "Willamette Subbasins Boundary") %>% sf::st_transform(4326) %>% sf::st_zm()
+pro_area <- sf::st_read(dsn = "//deqhq1/tmdl/TMDL_Willamette/Willamette_Subbasins_Temperature_2024/GIS/WillametteSubbasins/data/Willamette Subbasins Boundary_modified.shp",
+                        layer = "Willamette Subbasins Boundary_modified") %>% sf::st_transform(4326) %>% sf::st_zm()
 au_rivers <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
                          layer = "AU_OR_Rivers_CoastLine") #%>% sf::st_transform(4326) %>% sf::st_zm()
 au_waterbodies <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
