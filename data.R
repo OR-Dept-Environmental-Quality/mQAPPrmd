@@ -1080,13 +1080,20 @@ pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_T
 #pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
 
 # _ Basin AUs ----
-au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
-                           layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326)
-au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
-                              layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
-au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
-                           layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
-sf::sf_use_s2(FALSE)
+# au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
+#                            layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326)
+# au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
+#                               layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
+# au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
+#                            layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
+# sf::sf_use_s2(FALSE)
+
+au_rivers <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+                         layer = "AU_OR_Rivers_CoastLine") #%>% sf::st_transform(4326) %>% sf::st_zm()
+au_waterbodies <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+                              layer = "AU_OR_Waterbodies") #%>% sf::st_transform(4326) %>% sf::st_zm()
+au_watershed <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+                            layer = "AU_OR_Watershed_Area") #%>% sf::st_transform(4326) %>% sf::st_zm()
 
 wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
 wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)

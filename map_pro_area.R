@@ -1108,10 +1108,10 @@ qapp_project_area = "Sandy Subbasin"
       tempBoundaryTributary.markers(temp_model_bc_tri) %>% 
       flowStation.markers(flow_stations) %>% 
       flowBoundaryTributary.markers(flow_model_bc_tri) %>% 
+      effectiveShade.markers(effective.shade.pro.area) %>% 
       metStation.markders(met_stations) %>% 
       indPS.markers(ind_ps) %>% 
       genPS.markers(gen_ps) %>% 
-      #effectiveShade.markers(shade) %>% 
       leaflet::addLayersControl(overlayGroups = c("TMDL Project Scope",
                                                   "Heat Source Temperature Model Extent (New Models)",
                                                   group.names),
