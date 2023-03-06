@@ -234,7 +234,6 @@ nlcd.text.tbl <- nlcd_buff %>%
                 General_Landcover=dplyr::case_when(Value %in% c(21, 22, 23, 24) ~ "developed areas",
                                                    Value %in% c(41, 42, 43, 90) ~ "forestry",
                                                    Value %in% c(81, 82) ~ "agriculture",
-                                                   Value %in% c(81, 82) ~ "agriculture",
                                                    Value %in% c(95) ~ "emergent herbaceous wetlands",
                                                    Value %in% c(52, 71) ~ shrubRC,
                                                    TRUE ~ NLCD_Land)) %>%

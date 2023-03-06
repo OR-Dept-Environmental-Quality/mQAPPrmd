@@ -207,9 +207,9 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
 for(permit_Nbr in unique(sort(npdes.7q10$NPDES_Permit_Nbr))){
   
   print(permit_Nbr)
-  # test: permit_Nbr = "100976"
-  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)}
-  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)}
+  # test: permit_Nbr = "100522"
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)[1]}
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)[1]}
   
 }
 
@@ -217,9 +217,10 @@ npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
 
 for(permit_Nbr in unique(sort(npdes.7q10$NPDES_Permit_Nbr))){
   
+  print(permit_Nbr)
   # test: permit_Nbr = "101917"
-  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)}
-  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)}
+  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)[1]}
+  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)[1]}
   
 }
 
@@ -1127,6 +1128,9 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 
 # map.tir_extent
 
+# _ Effective shade ----
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+
 # _ Project area map data ----
 ## for test:
 # qapp_project_area = "John Day River Basin"
@@ -1195,6 +1199,10 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
   
   #tir_extent
   
+  # effective shade
+  effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+  effective.shade.pro.area <- effective.shade %>% dplyr::filter(`Project Area` == qapp_project_area)
+  
   # _ Save Data ----
   save(pro_area,
        pro_scope_rivers,
@@ -1206,6 +1214,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
        ce_model_extent,
        sh_model_extent,
        #tir_extent,
+       effective.shade.pro.area,
        pro.cat.45.tbl,
        #file = paste0("./data/map_",file.name,".RData"))
        file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
