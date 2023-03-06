@@ -286,20 +286,22 @@ gageHeight.markers <- function(map, data) {
 
 effectiveShade.markers <- function(map, data) {
   
-  # data = shade
+  # data = effective.shade.pro.area
   leaflet::addMarkers(
     map,
     data = data,
     group = "Effective Shade Measurement Sites",
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
-    label = paste0(data$Station),
+    label = paste0(data$`Site Name`," (",data$`Site ID`,")"),
     labelOptions = labelOptions(textsize = "12px"),
-    popup = ~paste0("<b>Station:</b> ", data$Station,
+    popup = ~paste0("<b>Site:</b> ", paste0(data$`Site Name`," (",data$`Site ID`,")"),
                     "<br>", 
-                    "<b>Effective shade measurement time:</b> ", t57_date,
+                    "<b>Effective shade month:</b> ", data$`Shade Month`,
                     "<br>",
-                    "<b>Effective shade measurement value:</b> ", data$`Effective Shade`),
+                    "<b>Effective shade year:</b> ", data$`Shade Year`,
+                    "<br>",
+                    "<b>Effective shade measurement value:</b> ", paste0(data$Result,"%")),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
   

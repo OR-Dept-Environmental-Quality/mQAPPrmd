@@ -162,6 +162,11 @@ pro_scope_watershed <- au_watershed %>% sf::st_drop_geometry() %>%
   dplyr::filter(!AU_ID %in% wms.au.id)%>% 
   dplyr::pull(AU_ID)
 
+# Effective shade ----
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+effective.shade.pro.area <- effective.shade %>% 
+  dplyr::filter(`Project Area` %in% c("Lower Willamette and Clackamas Subbasins","Middle Willamette Subbasins","Southern Willamette Subbasins"))
+
 # where clause ----
 ## used in querying the feature layers from the REST Server
 where_huc8 <- paste0("HUC8 IN ('", paste(subbasin_huc8, collapse = "','"),"')")
@@ -206,7 +211,7 @@ dta.stations <- data.frame(project_area = qapp_project_area,
                                     "temp_stations",
                                     "flow_stations",
                                     "gage_height_stations_map",
-                                    #"shade",
+                                    "effective.shade.pro.area",
                                     "met_stations",
                                     "ind_ps",
                                     "gen_ps"),
@@ -216,7 +221,7 @@ dta.stations <- data.frame(project_area = qapp_project_area,
                                     nrow(temp_stations),
                                     nrow(flow_stations),
                                     nrow(gage_height_stations_map),
-                                    #nrow(shade),
+                                    nrow(effective.shade.pro.area),
                                     nrow(met_stations),
                                     nrow(ind_ps),
                                     nrow(gen_ps)),
@@ -226,7 +231,7 @@ dta.stations <- data.frame(project_area = qapp_project_area,
                                           "Stream Temperature Stations",
                                           "Stream Flow Stations",
                                           "Gage Height Stations",
-                                          #"Effective Shade Measurement Sites",
+                                          "Effective Shade Measurement Sites",
                                           "Meteorological Stations",
                                           "Individual NPDES Point Sources",
                                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)")) %>% 
@@ -833,6 +838,7 @@ map_area <- map_basic %>%
   tempBoundaryTributary.markers(temp_model_bc_tri) %>% 
   flowStation.markers(flow_stations) %>% 
   flowBoundaryTributary.markers(flow_model_bc_tri) %>% 
+  effectiveShade.markers(effective.shade.pro.area) %>% 
   metStation.markders(met_stations) %>% 
   indPS.markers(ind_ps) %>% 
   genPS.markers(gen_ps) %>% 
