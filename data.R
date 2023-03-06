@@ -206,9 +206,10 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
 
 for(permit_Nbr in unique(sort(npdes.7q10$NPDES_Permit_Nbr))){
   
-  # test: permit_Nbr = "10029"
-  npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Latitude <- npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude
-  npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Longitude <- npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude
+  print(permit_Nbr)
+  # test: permit_Nbr = "100522"
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)[1]}
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)[1]}
   
 }
 
@@ -216,9 +217,10 @@ npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
 
 for(permit_Nbr in unique(sort(npdes.7q10$NPDES_Permit_Nbr))){
   
+  print(permit_Nbr)
   # test: permit_Nbr = "101917"
-  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)}
-  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)}
+  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)[1]}
+  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)[1]}
   
 }
 
@@ -228,6 +230,7 @@ lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"),
                 HUC_8 = as.character(HUC_8),
                 HUC10 = as.character(HUC10),
                 HUC12 = as.character(HUC12))
+
 
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv")) %>% 
   dplyr::left_join(schedule, by=c("areas"="QAPP Project Area"))
@@ -439,14 +442,15 @@ snake_reachcodes <- pro.reaches %>%
 # qapp_project_area = "Willow Creek Subbasin"
 
 done <- c(
-  "Lower Willamette and Clackamas Subbasins",
-  "Middle Willamette Subbasins",
+  # "Lower Willamette and Clackamas Subbasins",
+  # "Middle Willamette Subbasins",
   # "North Umpqua Subbasin",
   # "Rogue River Basin",
-  # "Sandy Subbasin",
+  "Sandy Subbasin"#,
   # "South Umpqua and Umpqua Subbasins",
-  "Southern Willamette Subbasins",
-  "Willamette River Mainstem and Major Tributaries")
+  # "Southern Willamette Subbasins",
+  # "Willamette River Mainstem and Major Tributaries"
+  )
 
 for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
   
@@ -1078,13 +1082,20 @@ pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_T
 #pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
 
 # _ Basin AUs ----
-au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
-                           layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326)
-au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
-                              layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
-au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
-                           layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
-sf::sf_use_s2(FALSE)
+# au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
+#                            layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326)
+# au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
+#                               layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
+# au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
+#                            layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
+# sf::sf_use_s2(FALSE)
+
+au_rivers <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+                         layer = "AU_OR_Rivers_CoastLine") #%>% sf::st_transform(4326) %>% sf::st_zm()
+au_waterbodies <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+                              layer = "AU_OR_Waterbodies") #%>% sf::st_transform(4326) %>% sf::st_zm()
+au_watershed <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+                            layer = "AU_OR_Watershed_Area") #%>% sf::st_transform(4326) %>% sf::st_zm()
 
 wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
 wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)
@@ -1124,6 +1135,9 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
   sf::st_zm()
 
 # map.tir_extent
+
+# _ Effective shade ----
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
 
 # _ Project area map data ----
 ## for test:
@@ -1193,6 +1207,10 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
   
   #tir_extent
   
+  # effective shade
+  effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+  effective.shade.pro.area <- effective.shade %>% dplyr::filter(`Project Area` == qapp_project_area)
+  
   # _ Save Data ----
   save(pro_area,
        pro_scope_rivers,
@@ -1204,6 +1222,7 @@ for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$
        ce_model_extent,
        sh_model_extent,
        #tir_extent,
+       effective.shade.pro.area,
        pro.cat.45.tbl,
        #file = paste0("./data/map_",file.name,".RData"))
        file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))

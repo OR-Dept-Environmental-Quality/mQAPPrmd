@@ -153,7 +153,10 @@ cal.model <- readxl::read_xlsx(paste0(data.dir, "Model_Setup_Info.xlsx"), sheet 
   dplyr::mutate(mod_score = ifelse(mod_rmd == "hs6", "1",
                                    ifelse(mod_rmd == "hs7", "10",
                                           ifelse(mod_rmd == "hs8", "20", "0")))) %>% 
-  dplyr::mutate(mod_ref_intext = ifelse(mod_rmd == "ce", "(Wells, 2019)", # WMS
+  dplyr::mutate(mod_ref = ifelse(mod_rmd == "ce", 'Cole, T.M., and S. A. Wells. 2000. "CE-QUAL-W2: A Two-Dimensional, Laterally Averaged, Hydrodynamic and Water Quality Model, Version 3.0." Instruction Report EL-2000. US Army Engineering and Research Development Center, Vicksburg, MS.',
+                                 ifelse(mod_rmd == "sh", 'USFS (U.S. Forest Service). 1993. "SHADOW v. 2.3 - Stream Temperature Management Program. Prepared by Chris Park USFS, Pacific Northwest Region."',
+                                        NA))) %>% 
+  dplyr::mutate(mod_ref_intext = ifelse(mod_rmd == "ce", "(Cole and Wells, 2000)",
                                         ifelse(mod_rmd == "sh", "(USFS, 1993)",
                                                ifelse(mod_rmd %in% c("hs7","hs8"), "(Boyd and Kasper, 2003)",
                                                       NA))))
@@ -173,6 +176,8 @@ effective.shade.lookup <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xls
 inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_flow")
 
 # _ NPDES ----
+# correct master list lat/long based on 7Q10 lat/long 
+npdes.7q10 <- readxl::read_xlsx("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/7Q10E/7Q10.xlsx", sheet = "NPDES") 
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Individual_NDPES") %>% 
   dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ati ", "ATI ") %>%
@@ -199,7 +204,25 @@ npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet
   dplyr::mutate_at("Common Name", str_replace_all, "Wwtf", "WWTF") %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Wwtp", "WWTP")
 
+for(permit_Nbr in unique(sort(npdes.7q10$NPDES_Permit_Nbr))){
+  
+  print(permit_Nbr)
+  # test: permit_Nbr = "100522"
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)[1]}
+  if(!permit_Nbr == "10109"){npdes.ind[which(npdes.ind$`Permit Nbr` == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)[1]}
+  
+}
+
 npdes.gen <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Gen_NPDES")
+
+for(permit_Nbr in unique(sort(npdes.7q10$NPDES_Permit_Nbr))){
+  
+  print(permit_Nbr)
+  # test: permit_Nbr = "101917"
+  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Latitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Latitude)[1]}
+  if(!permit_Nbr == "101917"){npdes.gen[which(npdes.gen$PermitNbr == permit_Nbr),]$Longitude <- unique(npdes.7q10[which(npdes.7q10$NPDES_Permit_Nbr == permit_Nbr),]$Outfall_Longitude)[1]}
+  
+}
 
 # _ Lookup table & Project areas ----
 lookup.huc <- readxl::read_xlsx(paste0(data.dir, "Lookup_QAPPProjectArea.xlsx"), sheet = "Lookup_QAPPProjectArea") %>% 
@@ -265,7 +288,7 @@ cat.45.watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperat
 
 cat.45 <- rbind(cat.45.rivers[,c("AU_parameter_category","AU_Name","AU_ID","Period_(Year_Listed)","HUC_12","QAPP_Project_Area")],
                 cat.45.waterbodies[,c("AU_parameter_category","AU_Name","AU_ID","Period_(Year_Listed)","HUC_12","QAPP_Project_Area")],
-                cat.45.watershed[,c("AU_parameter_category","AU_Name","AU_ID","Period_(Year_Listed)","HUC_12","QAPP_Project_Area")])
+                cat.45.watershed[,c("AU_parameter_category","AU_Name","AU_ID","Period_(Year_Listed)","HUC_12","QAPP_Project_Area")]) 
 
 cat.45.tbl <- sf::st_drop_geometry(cat.45) %>%
   dplyr::mutate_at("AU_Name", stringr::str_replace_all, "Cre\\*", "Creek") %>%
@@ -1035,6 +1058,8 @@ map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent_W
   sf::st_transform(4326) %>% 
   sf::st_zm()
 
+# _ Effective shade ----
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
 ce_model_extent <- map_ce_model_extent %>% 
   dplyr::filter(Project_Na == qapp_project_area)
 
@@ -1053,6 +1078,7 @@ save(pro_area,
      hs_solar_model_area,
      ce_model_extent,
      sh_model_extent,
+     effective.shade.pro.area,
      gh.data.sample.count,
      pro.cat.45.tbl,
      #file = paste0("./data/map_",file.name,".RData"))
