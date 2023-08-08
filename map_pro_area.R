@@ -739,7 +739,8 @@ qapp_project_area = "Sandy Subbasin"
   #                                                                            '<br><b>Version:</b> \"+props.Version+\"',
   #                                                                            ' \"}')),
   #                                     popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500)) %>%
-    leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+    leaflet.esri::addEsriFeatureLayer(#url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                      url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/OR_DMAs/MapServer/0",
                                       options = leaflet.esri::featureLayerOptions(where = where_huc10,
                                                                                   style = DMAcolor,
                                                                                   simplifyFactor = 0.35),
