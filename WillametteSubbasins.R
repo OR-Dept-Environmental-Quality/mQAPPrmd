@@ -789,7 +789,8 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                            '<br><b> Spawning Criterion 7DADM deg-C:</b> 13',
                                                                            ' \"}'))) %>% 
   # __ DMA ----
-leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+leaflet.esri::addEsriFeatureLayer(#url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                  url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/OR_DMAs/MapServer/0",
                                   options = leaflet.esri::featureLayerOptions(where = where_huc8_lower,
                                                                               style = DMAcolor,
                                                                               simplifyFactor = 0.35),
@@ -816,7 +817,8 @@ leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7a
                                                                          '<br><b>Version:</b> \"+props.Version+\"',
                                                                          ' \"}')),
                                   popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500)) %>%
-  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+  leaflet.esri::addEsriFeatureLayer(#url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                    url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/OR_DMAs/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc8_middle,
                                                                                 style = DMAcolor,
                                                                                 simplifyFactor = 0.35),
@@ -843,7 +845,8 @@ leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7a
                                                                            '<br><b>Version:</b> \"+props.Version+\"',
                                                                            ' \"}')),
                                     popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500)) %>%
-  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+  leaflet.esri::addEsriFeatureLayer(#url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                    url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/OR_DMAs/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc8_southern,
                                                                                 style = DMAcolor,
                                                                                 simplifyFactor = 0.35),
