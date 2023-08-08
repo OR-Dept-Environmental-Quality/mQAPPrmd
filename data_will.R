@@ -171,7 +171,7 @@ risks <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "risks")
 abbr <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "abbr")
 data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
 rev <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "revision_history")
-effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")  %>% dplyr::filter(!`Result Status` == "REJECT")
 effective.shade.lookup <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Lookup")
 inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_flow")
 
@@ -1058,8 +1058,6 @@ map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent_W
   sf::st_transform(4326) %>% 
   sf::st_zm()
 
-# _ Effective shade ----
-effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
 ce_model_extent <- map_ce_model_extent %>% 
   dplyr::filter(Project_Na == qapp_project_area)
 
@@ -1069,6 +1067,9 @@ hs_temp_model_extent <- data.frame()
 hs_solar_model_extent <- data.frame()
 hs_solar_model_area <- data.frame()
 sh_model_extent <- data.frame()
+
+# _ Effective shade ----
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")  %>% dplyr::filter(!`Result Status` == "REJECT")
 
 save(pro_area,
      pro_reaches,
