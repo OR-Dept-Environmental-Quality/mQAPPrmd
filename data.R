@@ -171,7 +171,7 @@ risks <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "risks")
 abbr <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "abbr")
 data.gap <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "data_gap")
 rev <- readxl::read_xlsx(paste0(data.dir,"tables.xlsx"),sheet = "revision_history")
-effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade") %>% dplyr::filter(!`Result Status` == "REJECT")
 effective.shade.lookup <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Lookup")
 inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_flow")
 
@@ -446,7 +446,7 @@ qapp_project_area = "Sandy Subbasin"
   # "Middle Willamette Subbasins",
   # "North Umpqua Subbasin",
   # "Rogue River Basin",
-  "Sandy Subbasin"#,
+  # "Sandy Subbasin"#,
   # "South Umpqua and Umpqua Subbasins",
   # "Southern Willamette Subbasins",
   # "Willamette River Mainstem and Major Tributaries")
@@ -1136,7 +1136,7 @@ map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_strea
 # map.tir_extent
 
 # _ Effective shade ----
-effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
+effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade") %>% dplyr::filter(!`Result Status` == "REJECT")
 
 # _ Project area map data ----
 ## for test:
@@ -1207,7 +1207,6 @@ qapp_project_area = "Sandy Subbasin"
   #tir_extent
   
   # effective shade
-  effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade")
   effective.shade.pro.area <- effective.shade %>% dplyr::filter(`Project Area` == qapp_project_area)
   
   # _ Save Data ----
