@@ -109,7 +109,9 @@ hs_solar_model_extent <- rbind(hs_solar_model_extent.lw,hs_solar_model_extent.mw
 hs_solar_model_area <- rbind(hs_solar_model_area.lw,hs_solar_model_area.mw,hs_solar_model_area.sw)
 ce_model_extent <- rbind(ce_model_extent.lw,ce_model_extent.mw,ce_model_extent.sw)
 sh_model_extent <- rbind(sh_model_extent.lw,sh_model_extent.mw,sh_model_extent.sw)
+
 pro.cat.45.tbl <- rbind(pro.cat.45.tbl.lw,pro.cat.45.tbl.mw,pro.cat.45.tbl.sw)
+
 temp.data.sample.count <- rbind(temp.data.sample.count.lw,temp.data.sample.count.mw,temp.data.sample.count.sw)
 flow.data.sample.count <- rbind(flow.data.sample.count.lw,flow.data.sample.count.mw,flow.data.sample.count.sw)
 temp_stations <- rbind(temp_stations.lw,temp_stations.mw,temp_stations.sw)
@@ -124,8 +126,8 @@ gen_ps <- rbind(gen_ps.lw,gen_ps.mw,gen_ps.sw)
 tcat45 <- rbind(tcat45.lw,tcat45.mw,tcat45.sw)
 
 # Project and AU layers ----
-pro_area <- sf::st_read(dsn = "//deqhq1/tmdl/TMDL_Willamette/Willamette_Subbasins_Temperature_2024/GIS/WillametteSubbasins/data/Willamette Subbasins Boundary_modified.shp",
-                        layer = "Willamette Subbasins Boundary_modified") %>% sf::st_transform(4326) %>% sf::st_zm()
+pro_area <- sf::st_read(dsn = "//deqhq1/tmdl/TMDL_Willamette/Willamette_Subbasins_Temperature_2024/GIS/WillametteSubbasins/data/Willamette Subbasins Boundary.shp",
+                        layer = "Willamette Subbasins Boundary") %>% sf::st_transform(4326) %>% sf::st_zm()
 au_rivers <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
                          layer = "AU_OR_Rivers_CoastLine") #%>% sf::st_transform(4326) %>% sf::st_zm()
 au_waterbodies <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
