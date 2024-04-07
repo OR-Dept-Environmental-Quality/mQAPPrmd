@@ -103,11 +103,11 @@ map_hs_walla_walla_2017 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/T
   sf::st_zm() %>%
   dplyr::select(Stream, Project_Na)
 
-map_hs_applegate_and_little_applegate <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/applegate_and_little_applegate.shp",
-                                       layer = "applegate_and_little_applegate") %>% 
-  sf::st_transform(2992) %>% 
-  sf::st_zm() %>%
-  dplyr::select(Stream, Project_Na)
+# map_hs_applegate_and_little_applegate <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/gis/applegate_and_little_applegate.shp",
+#                                        layer = "applegate_and_little_applegate") %>% 
+#   sf::st_transform(2992) %>% 
+#   sf::st_zm() %>%
+#   dplyr::select(Stream, Project_Na)
 
 lookup_model_extents <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/Lookup_model_extents.xlsx", 
                                           sheet = "model_extent") 
@@ -136,8 +136,9 @@ model_extents <- rbind(map_hs_temp_model_extent,
                        map_hs_sandy_2016, 
                        map_hs_fish_creek_2009,
                        map_bes_model_extent,
-                       map_hs_walla_walla_2017,
-                       map_hs_applegate_and_little_applegate) %>%
+                       map_hs_walla_walla_2017#,
+                       #map_hs_applegate_and_little_applegate
+                       ) %>%
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins", "Bear Creek (Wallowa)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Bear Creek" & Project_Na == "Rogue River Basin", "Bear Creek (Rogue)", Stream)) %>% 
   dplyr::mutate(Stream = ifelse(Stream == "Elk Creek" & Project_Na == "Rogue River Basin", "Elk Creek (Rogue)", Stream)) %>% 
@@ -153,7 +154,7 @@ model_extents <- rbind(map_hs_temp_model_extent,
 sf::st_write(model_extents, paste0(output_gis_dir,"model_extents.shp"), delete_layer=TRUE) # kept in gis/archive
 
 # Read in county outline feature
-county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Master/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
+county_shp <- sf::st_read("//deqhq1/TMDL/DMA_Mapping/Main/GIS", layer = "orcnty24", stringsAsFactors = FALSE) %>% 
   sf::st_transform(2992) %>% 
   dplyr::select(County=COUNTY_NAM) %>%
   dplyr::mutate(County=stringr::str_to_title(County))
@@ -232,7 +233,6 @@ nlcd.text.tbl <- nlcd_buff %>%
                                          TRUE ~ "forestry"),
                 General_Landcover=dplyr::case_when(Value %in% c(21, 22, 23, 24) ~ "developed areas",
                                                    Value %in% c(41, 42, 43, 90) ~ "forestry",
-                                                   Value %in% c(81, 82) ~ "agriculture",
                                                    Value %in% c(81, 82) ~ "agriculture",
                                                    Value %in% c(95) ~ "emergent herbaceous wetlands",
                                                    Value %in% c(52, 71) ~ shrubRC,
