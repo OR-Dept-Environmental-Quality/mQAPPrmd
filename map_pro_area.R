@@ -27,7 +27,8 @@ data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_Q
 data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
 
 source("map_functions.R")
-project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
+# project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
+project.areas <-readxl::read_xlsx(paste0(data.dir,"qapp_project_areas.xlsx"), sheet = "qapp_project_areas_updated")
 
 #lgnd <- base64enc::base64encode("./fig/legend.png")
 logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
@@ -244,7 +245,7 @@ qapp_project_area = "Sandy Subbasin"
   
   # Basic layers ----
   #map.title <- tags$div(tag.map.title, HTML(paste0(qapp_project_area)))
-  map.title <- tags$div(tag.map.title, HTML("Lower Columbia-Sandy River Subbasin"))
+  map.title <- tags$div(tag.map.title, HTML("Lower Columbia-Sandy River Subbasin QAPP Map"))
   map_basic <- leaflet::leaflet() %>%
     leaflet::addControl(map.title, position = "topleft", className="map-title") %>% 
     leaflet::addMiniMap(tiles = providers$OpenStreetMap,
@@ -1177,7 +1178,7 @@ qapp_project_area = "Sandy Subbasin"
   
 # SAVE DATA ----
 print(paste0(qapp_project_area,"...Save the map"))
-htmlwidgets::saveWidget(map_final,paste0(map.file.name,".html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
-file.rename(paste0(map.file.name,".html"), paste0(map.dir,map.file.name,".html"))
+htmlwidgets::saveWidget(map_final,paste0(map.file.name,"_qapp.html"),selfcontained = TRUE) #selfcontained needs to be in the current working directory
+file.rename(paste0(map.file.name,"_qapp.html"), paste0(map.dir,map.file.name,"_qapp.html"))
 
 #}
