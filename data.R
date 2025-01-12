@@ -5,6 +5,7 @@ library(readxl)
 # library(rgdal)
 library(sf)
 library(lubridate)
+Sys.setenv(PROJ_LIB = "C:\\Users\\ygrund\\AppData\\Local\\R\\win-library\\4.3\\PROJ\\proj")
 
 # Functions ----
 strip_alpha <- function(x) {
@@ -61,6 +62,12 @@ numbers.to.words <- function(x) {
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_awqms_raw_state.RData") # df.awqms.raw.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_state.RData") # df.stations.state
 load("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/data/R/statewide/df_stations_complete.RData") # df.stations
+
+# check AWQMS data quality:
+# sort(unique(df.awqms.raw.state$Result_status))
+# "Accepted" "Final" "Provisional" "Rejected"
+# sort(unique(df.awqms.raw.state$DQL))
+# "A" "B" "C" "D" "E"
 
 awqms.data.temp <- df.awqms.raw.state %>% 
   # AWQMS QA/QC check:
@@ -376,7 +383,7 @@ pro_areas <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMD
 pro_areas_huc8 <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/Study_Areas_v5_HUC8_scope.shp",
                               layer = "Study_Areas_v5_HUC8_scope")
 
-# TempTMDL_QAPP_Reaches.shp includes Porject_Na = c("Willamette River Mainstem and Major Tributaries", "Snake River – Hells Canyon", 
+# TempTMDL_QAPP_Reaches.shp includes Porject_Na = c("Willamette River Mainstem and Major Tr ibutaries", "Snake River – Hells Canyon", 
 # and "Southern Willamette Subbasins" for the McKenzie river)
 pro.reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
                            layer = "TempTMDL_QAPP_Reaches",
@@ -402,3 +409,4 @@ snake_reachcodes <- pro.reaches %>%
   filter(Project_Na=="Snake River – Hells Canyon") %>%
   distinct(ReachCode) %>%
   pull(ReachCode)
+
