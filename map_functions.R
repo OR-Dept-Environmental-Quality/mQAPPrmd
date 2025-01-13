@@ -1,10 +1,10 @@
-# TMDL project scope ----
+# TMDL project area outline ----
 projectScope <- function(map, data) {
 
   leaflet::addPolygons(
     map,
     data = data,
-    group = "TMDL Project Scope Outline",
+    # group = "TMDL Project Scope Outline",
     options = leaflet::leafletOptions(pane="areaOutline"),
     fillColor = "transparent",
     fillOpacity = 0,
@@ -124,7 +124,7 @@ tempCalibration.markers <- function(map, data) {
     popup = ~paste0("<b>Model Waterbody:</b> ", `Model Waterbody`,
                     '<br>', "<b>Station:</b> ", `Model Location Name`,
                     '<br>', "<b>Station ID:</b> ", `Station ID`,
-                    '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
+                    # '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
                     '<br>', "<b>Calibration Parameter:</b> ", Parameter,
                     '<br>', "<b>Data Source:</b> ", `Data Source`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
@@ -146,7 +146,7 @@ tempBoundaryTributary.markers <- function(map, data) {
     popup = ~paste0("<b>Model Waterbody:</b> ", `Model Waterbody`,
                     '<br>', "<b>Station:</b> ", `Model Location Name`,
                     '<br>', "<b>Station ID:</b> ", `Station ID`,
-                    '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
+                    # '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
                     '<br>', "<b>Model Input Type:</b> ", `Model Location Type`,
                     '<br>', "<b>Model Input Parameter:</b> ", Parameter,
                     '<br>', "<b>Data Source:</b> ", `Data Source`),
@@ -191,7 +191,7 @@ flowBoundaryTributary.markers <- function(map, data) {
     popup = ~paste0("<b>Model Waterbody:</b> ", `Model Waterbody`,
                     '<br>', "<b>Station:</b> ", `Model Location Name`,
                     '<br>', "<b>Station ID:</b> ", `Station ID`,
-                    '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
+                    # '<br>', "<b>Model Location:</b> ", ifelse(`Model Location`== "NA", NA, paste0(round(as.numeric(`Model Location`),1), " ", `Location Units`)),
                     '<br>', "<b>Model Input Type:</b> ", `Model Location Type`,
                     '<br>', "<b>Model Input Parameter:</b> ", Parameter,
                     '<br>', "<b>Data Source:</b> ", `Data Source`),
@@ -214,9 +214,34 @@ metStation.markders <- function(map, data) {
   
 }
 
-indPS.markers <- function(map, data) {
+# indPS.markers <- function(map, data) {
+#   
+#   # data = ind_ps
+#   leaflet::addMarkers(
+#     map,
+#     data = data,
+#     group = "Individual NPDES Point Sources",
+#     options = leaflet::leafletOptions(pane="marker"),
+#     #clusterOptions = markerClusterOptions(),
+#     label = paste0(data$`Facility Name (Facility Number)`),
+#     labelOptions = labelOptions(textsize = "12px"),
+#     popup = ~paste0("<b>Facility Name (Facility Number):</b> ", data$`Facility Name (Facility Number)`,
+#                     "<br>", 
+#                     "<b>Permit Number:</b> ", data$`Permit Number`,
+#                     "<br>",
+#                     "<b>EPA Number:</b> ", data$`EPA Number`,
+#                     "<br>",
+#                     "<b>Permit Type and Description:</b> ", data$`Permit Type and Description`,
+#                     "<br>",
+#                     "<b>Stream River Mile:</b> ", data$`Stream River Mile`),
+#     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
+#   )
+#   
+# }
+
+indPS.outfalls.markers <- function(map, data) {
   
-  # data = ind_ps
+  # data = ind_ps_outfalls
   leaflet::addMarkers(
     map,
     data = data,
@@ -227,20 +252,22 @@ indPS.markers <- function(map, data) {
     labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Facility Name (Facility Number):</b> ", data$`Facility Name (Facility Number)`,
                     "<br>", 
-                    "<b>Permit Number:</b> ", data$`Permit Number`,
-                    "<br>",
                     "<b>EPA Number:</b> ", data$`EPA Number`,
                     "<br>",
                     "<b>Permit Type and Description:</b> ", data$`Permit Type and Description`,
                     "<br>",
-                    "<b>Stream River Mile:</b> ", data$`Stream River Mile`),
+                    "<b>Permit Outfall Number:</b> ", data$`Permit Outfall Number`,
+                    "<br>",
+                    "<b>Permit Outfall Location:</b> ", data$`Permit Outfall Location`,
+                    "<br>",
+                    "<b>AU ID:</b> ", data$`AU ID`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
   
 }
 
 genPS.markers <- function(map, data) {
-  
+
   # data = gen_ps
   leaflet::addMarkers(
     map,
@@ -251,15 +278,17 @@ genPS.markers <- function(map, data) {
     label = paste0(data$`Facility Name (Facility Number)`),
     labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>Facility Name (Facility Number):</b> ", data$`Facility Name (Facility Number)`,
-                    "<br>", 
+                    "<br>",
                     "<b>Permit Number:</b> ", data$`Permit Number`,
                     "<br>",
                     "<b>Permit Type and Description:</b> ", data$`Permit Type and Description`,
                     "<br>",
+                    "<b>Permit Outfall Number:</b> ", data$`Permit Outfall Number`,
+                    "<br>",
                     "<b>Stream River Mile:</b> ", data$`Stream River Mile`),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
-  
+
 }
 
 gageHeight.markers <- function(map, data) {
@@ -274,8 +303,8 @@ gageHeight.markers <- function(map, data) {
     label = paste0("USGS: ", data$Station, " (", data$`Station ID`,")"),
     labelOptions = labelOptions(textsize = "12px"),
     popup = ~paste0("<b>", 
-                    "USGS Station Name: ",
-                    data$Station,"<br>",
+                    "USGS Station Name: ", data$Station,
+                    "<br>",
                     "Station ID: ", data$`Station ID`,
                     sapply(data$Station, 
                            popupTable.gageHeight, USE.NAMES = FALSE)),
@@ -286,20 +315,22 @@ gageHeight.markers <- function(map, data) {
 
 effectiveShade.markers <- function(map, data) {
   
-  # data = shade
+  # data = effective.shade.pro.area
   leaflet::addMarkers(
     map,
     data = data,
     group = "Effective Shade Measurement Sites",
     options = leaflet::leafletOptions(pane="marker"),
     #clusterOptions = markerClusterOptions(),
-    label = paste0(data$Station),
+    label = paste0(data$`Site Name`," (",data$`Site ID`,")"),
     labelOptions = labelOptions(textsize = "12px"),
-    popup = ~paste0("<b>Station:</b> ", data$Station,
+    popup = ~paste0("<b>Site:</b> ", paste0(data$`Site Name`," (",data$`Site ID`,")"),
                     "<br>", 
-                    "<b>Effective shade measurement time:</b> ", t57_date,
+                    "<b>Effective shade month:</b> ", data$`Shade Month`,
                     "<br>",
-                    "<b>Effective shade measurement value:</b> ", data$`Effective Shade`),
+                    "<b>Effective shade year:</b> ", data$`Shade Year`,
+                    "<br>",
+                    "<b>Effective shade measurement value:</b> ", paste0(data$Result,"%")),
     popupOptions = leaflet::popupOptions(maxWidth = 650, maxHeight = 300)
   )
   

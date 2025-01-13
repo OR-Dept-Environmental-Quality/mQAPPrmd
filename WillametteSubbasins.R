@@ -109,7 +109,9 @@ hs_solar_model_extent <- rbind(hs_solar_model_extent.lw,hs_solar_model_extent.mw
 hs_solar_model_area <- rbind(hs_solar_model_area.lw,hs_solar_model_area.mw,hs_solar_model_area.sw)
 ce_model_extent <- rbind(ce_model_extent.lw,ce_model_extent.mw,ce_model_extent.sw)
 sh_model_extent <- rbind(sh_model_extent.lw,sh_model_extent.mw,sh_model_extent.sw)
+
 pro.cat.45.tbl <- rbind(pro.cat.45.tbl.lw,pro.cat.45.tbl.mw,pro.cat.45.tbl.sw)
+
 temp.data.sample.count <- rbind(temp.data.sample.count.lw,temp.data.sample.count.mw,temp.data.sample.count.sw)
 flow.data.sample.count <- rbind(flow.data.sample.count.lw,flow.data.sample.count.mw,flow.data.sample.count.sw)
 temp_stations <- rbind(temp_stations.lw,temp_stations.mw,temp_stations.sw)
@@ -162,6 +164,11 @@ pro_scope_watershed <- au_watershed %>% sf::st_drop_geometry() %>%
   dplyr::filter(!AU_ID %in% wms.au.id)%>% 
   dplyr::pull(AU_ID)
 
+# Effective shade ----
+effective.shade <- readxl::read_xlsx("//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/Effective_shade.xlsx",sheet = "Effective_shade")
+effective.shade.pro.area <- effective.shade %>% 
+  dplyr::filter(`Project Area` %in% c("Lower Willamette and Clackamas Subbasins","Middle Willamette Subbasins","Southern Willamette Subbasins"))
+
 # where clause ----
 ## used in querying the feature layers from the REST Server
 where_huc8 <- paste0("HUC8 IN ('", paste(subbasin_huc8, collapse = "','"),"')")
@@ -177,6 +184,10 @@ where_au_wms <- paste0("(AU_ID IN ('", paste(wms.au.id, collapse = "','"),"'))")
 where_au_yearRound <- paste0("(Pollutant = 'Temperature' AND AU_parameter_category IN ('4A','5') AND period = 'year_round') AND ",
                              "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
 where_au_spawning <- paste0("(Pollutant = 'Temperature' AND AU_parameter_category IN ('4A','5') AND period = 'spawn') AND ",
+                            "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
+where_au_yearRound_gnis <- paste0("(Pollutant = 'Temperature' AND GNIS_final_category IN ('4A','5') AND period = 'year_round') AND ",
+                             "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
+where_au_spawning_gnis <- paste0("(Pollutant = 'Temperature' AND GNIS_final_category IN ('4A','5') AND period = 'spawn') AND ",
                             "(AU_ID IN ('", paste(tcat45$`Assessment Unit ID`, collapse = "','"),"'))")
 reachcode <- paste(paste0("(ReachCode >= ", subbasin_huc8, "000000", " AND ReachCode <= ", subbasin_huc8,"999999)"),collapse =  " OR ")
 
@@ -206,7 +217,7 @@ dta.stations <- data.frame(project_area = qapp_project_area,
                                     "temp_stations",
                                     "flow_stations",
                                     "gage_height_stations_map",
-                                    #"shade",
+                                    "effective.shade.pro.area",
                                     "met_stations",
                                     "ind_ps",
                                     "gen_ps"),
@@ -216,7 +227,7 @@ dta.stations <- data.frame(project_area = qapp_project_area,
                                     nrow(temp_stations),
                                     nrow(flow_stations),
                                     nrow(gage_height_stations_map),
-                                    #nrow(shade),
+                                    nrow(effective.shade.pro.area),
                                     nrow(met_stations),
                                     nrow(ind_ps),
                                     nrow(gen_ps)),
@@ -226,7 +237,7 @@ dta.stations <- data.frame(project_area = qapp_project_area,
                                           "Stream Temperature Stations",
                                           "Stream Flow Stations",
                                           "Gage Height Stations",
-                                          #"Effective Shade Measurement Sites",
+                                          "Effective Shade Measurement Sites",
                                           "Meteorological Stations",
                                           "Individual NPDES Point Sources",
                                           "General NPDES Point Sources (GEN01, GEN03, GEN04, GEN05, GEN19, or GEN40)")) %>% 
@@ -527,6 +538,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                            '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                                                            ' \"}'))) %>%
   # __ IR ----
+  # ___ streams ----
 leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/50",
                                   options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                   useServiceSymbology = TRUE,
@@ -579,6 +591,7 @@ leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC
                                                                            '<br><b>Use Period:</b> \"+props.period+\"',
                                                                            '<br><b>HUC12:</b> \"+props.HUC_12+\"',
                                                                            ' \"}'))) %>%
+  # ___ waterbodies ----
   leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/51",
                                     options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
                                     useServiceSymbology = TRUE,
@@ -635,33 +648,35 @@ leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC
                                                                            '<br><b>Use Period:</b> \"+props.period+\"',
                                                                            '<br><b>HUC12:</b> \"+props.HUC_12+\"',
                                                                            ' \"}'))) %>%
-  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/63",
-                                    options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
-                                    useServiceSymbology = TRUE,
-                                    group = "2022 303(d) Temperature Listed - Watershed (Year Round Criteria)",
-                                    pathOptions = leaflet::pathOptions(pane="ir"),
-                                    color = "#9A00C4",
-                                    weight = 2,
-                                    opacity = 0.8,
-                                    fill=TRUE,
-                                    #9A00C4                                    fillOpacity = 0.25,
-                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
-                                    labelOptions = leaflet::labelOptions(#noHide = T,
-                                      style = list("color" = "#9A00C4","font-size" = "12px")),
-                                    highlightOptions = leaflet::highlightOptions(color="#9A00C4",
-                                                                                 weight = 3,
-                                                                                 fillOpacity = 0.5,
-                                                                                 bringToFront = TRUE,
-                                                                                 sendToBack = TRUE),
-                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
-                                                                           '<b>AU Name:</b> \"+props.AU_Name+\"',
-                                                                           '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-                                                                           '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
-                                                                           '<br><b>IR Category:</b> \"+props.AU_parameter_category+\"',
-                                                                           '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
-                                                                           '<br><b>Use Period:</b> \"+props.period+\"',
-                                                                           '<br><b>HUC12:</b> \"+props.HUC_12+\"',
-                                                                           ' \"}'))) %>%
+  # ___ watershed AUs ----
+leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/63",
+                                  options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
+                                  useServiceSymbology = TRUE,
+                                  group = "2022 303(d) Temperature Listed - Watershed (Year Round Criteria)",
+                                  pathOptions = leaflet::pathOptions(pane="ir"),
+                                  color = "#9A00C4",
+                                  weight = 2,
+                                  opacity = 0.8,
+                                  fill=TRUE,
+                                  fillColor = "#9A00C4",
+                                  fillOpacity = 0.25,
+                                  labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+                                  labelOptions = leaflet::labelOptions(#noHide = T,
+                                    style = list("color" = "#9A00C4","font-size" = "12px")),
+                                  highlightOptions = leaflet::highlightOptions(color="#9A00C4",
+                                                                               weight = 3,
+                                                                               fillOpacity = 0.5,
+                                                                               bringToFront = TRUE,
+                                                                               sendToBack = TRUE),
+                                  popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                         '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                         '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                         '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
+                                                                         '<br><b>IR Category:</b> \"+props.AU_parameter_category+\"',
+                                                                         '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                                                         '<br><b>Use Period:</b> \"+props.period+\"',
+                                                                         '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                                                         ' \"}'))) %>%
   leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/63",
                                     options = leaflet.esri::featureLayerOptions(where = where_au_spawning),
                                     useServiceSymbology = TRUE,
@@ -689,6 +704,59 @@ leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC
                                                                            '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
                                                                            '<br><b>Use Period:</b> \"+props.period+\"',
                                                                            '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                                                           ' \"}'))) %>%
+  # ___ watershed GNIS ----
+leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/52",
+                                  options = leaflet.esri::featureLayerOptions(where = where_au_yearRound_gnis),
+                                  useServiceSymbology = TRUE,
+                                  group = "2022 303(d) Temperature Listed - Watershed (Year Round Criteria)",
+                                  pathOptions = leaflet::pathOptions(pane="ir_gnis"),
+                                  color = "#9A00C4",
+                                  dashArray = "5,5",
+                                  weight = 2,
+                                  opacity = 0.8,
+                                  fill=FALSE,
+                                  labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_GNIS_Name+\" \"}"),
+                                  labelOptions = leaflet::labelOptions(#noHide = T,
+                                    style = list("color" = "#9A00C4","font-size" = "12px")),
+                                  highlightOptions = leaflet::highlightOptions(color="#9A00C4",
+                                                                               weight = 3,
+                                                                               fillOpacity = 0.5,
+                                                                               bringToFront = TRUE,
+                                                                               sendToBack = TRUE),
+                                  popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                         '<b>GNIS Name:</b> \"+props.AU_GNIS_Name+\"',
+                                                                         '<br><b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                         '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                         '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
+                                                                         '<br><b>GNIS IR Category:</b> \"+props.GNIS_final_category+\"',
+                                                                         '<br><b>Use Period:</b> \"+props.period+\"',
+                                                                         ' \"}'))) %>%
+  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/52",
+                                    options = leaflet.esri::featureLayerOptions(where = where_au_spawning_gnis),
+                                    useServiceSymbology = TRUE,
+                                    group = "2022 303(d) Temperature Listed - Watershed (Spawning Criteria)",
+                                    pathOptions = leaflet::pathOptions(pane="ir_gnis"),
+                                    color = "#9A00C4",
+                                    dashArray = "5,5",
+                                    weight = 2,
+                                    opacity = 0.8,
+                                    fill=FALSE,
+                                    labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_GNIS_Name+\" \"}"),
+                                    labelOptions = leaflet::labelOptions(#noHide = T,
+                                      style = list("color" = "#9A00C4","font-size" = "12px")),
+                                    highlightOptions = leaflet::highlightOptions(color="#9A00C4",
+                                                                                 weight = 3,
+                                                                                 fillOpacity = 0.5,
+                                                                                 bringToFront = TRUE,
+                                                                                 sendToBack = TRUE),
+                                    popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                           '<b>GNIS Name:</b> \"+props.AU_GNIS_Name+\"',
+                                                                           '<br><b>AU Name:</b> \"+props.AU_Name+\"',
+                                                                           '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                                                           '<br><b>Impaired Parameter:</b> \"+props.Pollutant+\"',
+                                                                           '<br><b>GNIS IR Category:</b> \"+props.GNIS_final_category+\"',
+                                                                           '<br><b>Use Period:</b> \"+props.period+\"',
                                                                            ' \"}'))) %>%
   # __ WQS ----
 leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WQStandards_WM/MapServer/0",
@@ -723,7 +791,8 @@ leaflet.esri::addEsriFeatureLayer(url="https://arcgis.deq.state.or.us/arcgis/res
                                                                            '<br><b> Spawning Criterion 7DADM deg-C:</b> 13',
                                                                            ' \"}'))) %>% 
   # __ DMA ----
-leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+leaflet.esri::addEsriFeatureLayer(#url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                  url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/OR_DMAs/MapServer/0",
                                   options = leaflet.esri::featureLayerOptions(where = where_huc8_lower,
                                                                               style = DMAcolor,
                                                                               simplifyFactor = 0.35),
@@ -750,7 +819,8 @@ leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7a
                                                                          '<br><b>Version:</b> \"+props.Version+\"',
                                                                          ' \"}')),
                                   popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500)) %>%
-  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+  leaflet.esri::addEsriFeatureLayer(#url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                    url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/OR_DMAs/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc8_middle,
                                                                                 style = DMAcolor,
                                                                                 simplifyFactor = 0.35),
@@ -777,7 +847,8 @@ leaflet.esri::addEsriFeatureLayer(url = "https://services.arcgis.com/uUvqNMGPm7a
                                                                            '<br><b>Version:</b> \"+props.Version+\"',
                                                                            ' \"}')),
                                     popupOptions = leaflet::popupOptions(maxWidth = 800, maxHeight = 500)) %>%
-  leaflet.esri::addEsriFeatureLayer(url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+  leaflet.esri::addEsriFeatureLayer(#url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/OR_DMAs/FeatureServer/0",
+                                    url="https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/OR_DMAs/MapServer/0",
                                     options = leaflet.esri::featureLayerOptions(where = where_huc8_southern,
                                                                                 style = DMAcolor,
                                                                                 simplifyFactor = 0.35),
@@ -833,6 +904,7 @@ map_area <- map_basic %>%
   tempBoundaryTributary.markers(temp_model_bc_tri) %>% 
   flowStation.markers(flow_stations) %>% 
   flowBoundaryTributary.markers(flow_model_bc_tri) %>% 
+  effectiveShade.markers(effective.shade.pro.area) %>% 
   metStation.markders(met_stations) %>% 
   indPS.markers(ind_ps) %>% 
   genPS.markers(gen_ps) %>% 
