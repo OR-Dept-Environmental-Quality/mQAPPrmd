@@ -98,6 +98,7 @@ if(npdes.ind.n > 1) {
 
 # NLCD
 nlcd.waterbody <- nlcd.pro.area %>% 
+  dplyr::mutate(NLCD_Land = ifelse(is.na(NLCD_Land),"Open Water",NLCD_Land)) %>% 
   dplyr::filter(Stream == waterbody_name) %>% 
   dplyr::select(NLCD_Land,Acres,Percentage) %>% 
   dplyr::rename("2016 NLCD Land Cover" = NLCD_Land,
@@ -126,6 +127,16 @@ if(NROW(dma.waterbody)>0){
   dma.wb.tbl <- knitr::kable(dma.waterbody, format = "pandoc", padding = 2,
                              caption = tbls(name = paste0("dma.waterbody",waterbody_name),
                                             caption = paste0("Summary of potential designated management agencies (DMAs) or responsible persons along the model extent within 100 meters of the digitized ", waterbody_name, " centerline.")))
+  
+}
+
+if(!waterbody_name %in% c("Grande Ronde and Wallowa River")){
+  
+  sc_txt <- paste0("and background sources (",strip_alpha(section.model.info$"Abbreviated Reference"),"). Other potential sources include channel modification and widening, reductions to stream flow rate, and warming caused by climate change. ")
+  
+} else {
+  
+  sc_txt <- paste0("reductions to stream flow rate or volume, and background sources (",strip_alpha(section.model.info$"Abbreviated Reference"),"). Other potential sources include channel modification and widening, and warming caused by climate change. ")
   
 }
 
@@ -160,7 +171,7 @@ model_period_end <- as.Date(as.numeric(unique(section.model.info$"Model Period E
 
 ### Important assumptions
 
-**[Update this section if any changes are proposed to the current condition calibration model]**. `r paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")`
+`r if(waterbody_name %in% c("Bear Creek","Grande Ronde and Wallowa River","Imnaha River","Lostine River","Minam River")){paste0("The effort currently described in the QAPP includes use of existing models. Key calibration assumptions made during the model setup and calibration process were documented in the original TMDL (",knitr::combine_words(strip_alpha(unique(sort(model.info[is.na(model.info$'Reference Report'),]$"Abbreviated Reference"))),sep = "; "),"), the model user guide ",knitr::combine_words(strip_alpha(unique(sort(unique(tmdl.mod.2$mod_ref_intext))))),".")}else{paste0("The effort currently described in the QAPP includes use of existing field and derived data also used for the original TMDL (DEQ, 2010). Many of assumptions used for that effort will be relied upon for these new models including use of the previously digitized near stream vegetation and landcover classifications. These process to develop these data sets were documented in the original TMDL (DEQ, 2010). Assumptions related to the model theory and underlying model equations can be found in the model user guide (Boyd and Kasper, 2003).")}`
 
 ### Model inputs
 
@@ -274,13 +285,11 @@ if(!model.extent == TRUE){
     
   }
   
-  t6x6_1.txt <- "**[Update for CE-QUAL-W2 model]**"
-  
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{t6x6_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x6_1)>0){paste0(tbls(name = paste0("t6x6_1", waterbody_name),display="cite")," summarizes the current configuration of the model input parameters and the source of these data. Temperature, flow, and meteorological input parameters are summarized to improve documentation of the TMDL approach.")}else{paste0("The model inputs will include stream position (latitude and longitude), vegetation height and cover classes derived from field measurements (DEQ, 2010) and heads digitization of near-stream land cover at a 1:5000 scale using black and white digital orthophoto quads (DOQs). Ground elevations and topographic shade angles will be derived from a DEM. The model will be setup to assume no cloud cover. This is done to isolate the solar radiation flux blocked by vegetation and topography only.")}}`
 
 `r if(!model.extent == TRUE){paste(chap6x6, collapse = "\n")}else{if(NROW(t6x6_1)>0){t6x6_1_tbl}}`
 
@@ -393,13 +402,11 @@ if(!model.extent == TRUE){
                     ifelse(tmdl.mod.2[which(tmdl.mod.2$`Model Waterbody`== waterbody_name),]$mod_rmd %in% c("hs6"),
                            print("The model location in the table below describes the distance of each input from the most upstream model node."),
                            print("")))
-  
-  t6x7_1.txt <- "**[Update for CE-QUAL-W2 model]**"
-  
+
 }
 
 ```
 
-`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{t6x7_1.txt}}`
+`r if(!model.extent == TRUE){} else {if(NROW(t6x7)>0){paste0("The expected model calibration sites and data sources are summarized in ",tbls(name = paste0("t6x7", waterbody_name),display="cite"),". ", mod.loc[1], if(NROW(t57)>0){paste0(" Effective shade model calibrations sites are summarized in ", tbls(name = "t57", display="cite"), ".")}," The model inputs and parameters that are expected to be modified to improve model fit are described in Section 6.1.")}else{paste0("All of the shade models will be calibrated primarily by comparing the model effective shade predictions to the field measured effective shade values summarized in ",if(NROW(t57)>0){tbls(name = "t57", display="cite")},". To improve the calibration results global changes to the canopy cover may be made iteratively. Other calibration parameters identified in Section 6.2 (landcover height and landcover overhang will likely not be adjusted. The landcover classification were developed based on field measured vegetation heights (ODEQ, 2010).")}}`
 
 `r if(!model.extent == TRUE) {paste(chap6x7, collapse = "\n")} else {if(NROW(t6x7)>0){t6x7_tbl}}`
