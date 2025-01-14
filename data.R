@@ -79,7 +79,7 @@ awqms.stations.temp <- df.stations.state %>%
 
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+data.dir.yg <- "E:/E-PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
 
 # _ USGS flow data ----
 load(paste0(data.dir,"/download/usgs_fl.RData")) # usgs.fl.stations & usgs.fl.data
@@ -179,7 +179,7 @@ inst.flow <- readxl::read_xlsx(paste0(data.dir,"Inst_flow.xlsx"),sheet = "Inst_f
 
 # _ NPDES ----
 # correct master list lat/long based on 7Q10 lat/long 
-npdes.7q10 <- readxl::read_xlsx("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/7Q10E/7Q10.xlsx", sheet = "NPDES") 
+npdes.7q10 <- readxl::read_xlsx("E:/E-PROJECTS/20200810_RyanMichie_TempTMDLReplacement/7Q10E/7Q10.xlsx", sheet = "NPDES") 
 npdes.ind <- readxl::read_xlsx(paste0(data.dir, "NPDES_Master_list.xlsx"), sheet = "Individual_NDPES") %>% 
   dplyr::mutate(`Common Name` = stringr::str_to_title(`Common Name`)) %>%
   dplyr::mutate_at("Common Name", str_replace_all, "Ati ", "ATI ") %>%

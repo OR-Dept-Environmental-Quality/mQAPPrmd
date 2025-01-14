@@ -10,7 +10,7 @@ project.areas.updated <- readxl::read_xlsx(paste0(data.dir,"qapp_project_areas.x
 
 ## for test:
 # qapp_project_area = "John Day River Basin"
-# qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
+qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # qapp_project_area = "Malheur River Subbasins"
 # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
 # qapp_project_area = "Rogue River Basin"
@@ -30,18 +30,18 @@ project.areas.updated <- readxl::read_xlsx(paste0(data.dir,"qapp_project_areas.x
 # qapp_project_area = c("Umpqua River Basin")
 # _______________________________________________________________
 
-done <- c(
+# done <- c(
   # "Lower Willamette and Clackamas Subbasins",
   # "Middle Willamette Subbasins",
   # "North Umpqua Subbasin",
   # "Rogue River Basin",
-  "Sandy Subbasin"#,
+  # "Sandy Subbasin"#,
   # "South Umpqua and Umpqua Subbasins",
   # "Southern Willamette Subbasins",
   # "Willamette River Mainstem and Major Tributaries"
-  )
+  # )
 
-for (qapp_project_area in project.areas.updated[which(!project.areas.updated$areas %in% done),]$areas) {
+# for (qapp_project_area in project.areas.updated[which(!project.areas.updated$areas %in% done),]$areas) {
   
   file.name <- project.areas.updated[which(project.areas.updated$areas %in% qapp_project_area),]$file.name
   file.dir <- project.areas.updated[which(project.areas.updated$areas %in% qapp_project_area),]$file.dir
@@ -614,7 +614,7 @@ for (qapp_project_area in project.areas.updated[which(!project.areas.updated$are
        # npdes.ind.pro.area,
        npdes.gen.pro.area,
        pro.cat.45.tbl,
-       file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/TMDL_Maps/R_html_maps/", file.name,"_map.RData"))
+       file = paste0("E:/E-PROJECTS/20200810_RyanMichie_TempTMDLReplacement/TMDL_Maps/R_html_maps/", file.name,"_map.RData"))
 
   # __ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
@@ -672,7 +672,7 @@ for (qapp_project_area in project.areas.updated[which(!project.areas.updated$are
                            Stations = station.output),
                       path=paste0(data.dir,"appendix_data/",file.name,"_appendix_data.xlsx"))
   
-}
+# }
 
 # Leaflet Map Data ----
 library(tidyverse)
@@ -682,7 +682,7 @@ library(sf)
 
 # _ * data.dir ----
 data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+data.dir.yg <- "E:/E-PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
 project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
 
 pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
