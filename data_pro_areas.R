@@ -30,7 +30,7 @@ qapp_project_area = "John Day River Basin"
 # qapp_project_area = c("Umpqua River Basin")
 # _______________________________________________________________
 
-done <- c(
+# done <- c(
   # "Lower Willamette and Clackamas Subbasins",
   # "Middle Willamette Subbasins",
   # "North Umpqua Subbasin",
@@ -39,7 +39,7 @@ done <- c(
   # "South Umpqua and Umpqua Subbasins",
   # "Southern Willamette Subbasins",
   # "Willamette River Mainstem and Major Tributaries"
-  )
+  # )
 
 # for (qapp_project_area in project.areas.updated[which(!project.areas.updated$areas %in% done),]$areas) {
   
@@ -614,7 +614,7 @@ done <- c(
        # npdes.ind.pro.area,
        npdes.gen.pro.area,
        pro.cat.45.tbl,
-       file = paste0("E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/TMDL_Maps/R_html_maps/", file.name,"_map.RData"))
+       file = paste0("E:/E-PROJECTS/20200810_RyanMichie_TempTMDLReplacement/TMDL_Maps/R_html_maps/", file.name,"_map.RData"))
 
   # __ Data output to Excel ----
   station.output.temp <- temp.stations %>% 
