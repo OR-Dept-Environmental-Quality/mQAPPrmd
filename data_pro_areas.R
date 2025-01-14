@@ -84,7 +84,7 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
   pro_area_huc12_union <- sf::st_union(pro_area_huc12) %>% 
     sf::st_transform(crs = sf::st_crs("+init=EPSG:4326"))
   
-  # _ IR2018/20 Cat 4 & 5 ----
+  # _ IR2022 Cat 4 & 5 ----
   pro.cat.45.tbl <- cat.45.tbl %>% 
     dplyr::filter(QAPP_Project_Area %in% qapp_project_area)
   
@@ -675,189 +675,189 @@ qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
 # }
 
 # Leaflet Map Data ----
-library(tidyverse)
-library(httr)
-library(geojsonsf)
-library(sf)
-
-# _ * data.dir ----
-data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
-data.dir.yg <- "E:/E-PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
-project.areas <- read.csv(paste0(data.dir,"qapp_project_areas.csv"))
-
-pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
-                         layer = "project_areas") %>% 
-  sf::st_transform(4326) %>% 
-  dplyr::mutate(color = dplyr::case_when(Project_Na == "John Day River Basin" ~ "#df65b0", #pink
-                                         Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins" ~ "yellow",
-                                         Project_Na == "Lower Willamette and Clackamas Subbasins" ~ "#253494", #blue
-                                         Project_Na == "Malheur River Subbasins" ~ "#78c679", #green
-                                         Project_Na == "Middle Willamette Subbasins" ~ "#253494", #blue
-                                         Project_Na == "Middle Columbia-Hood, Miles Creeks" ~ "yellow",
-                                         Project_Na == "North Umpqua Subbasin" ~ "purple",
-                                         Project_Na == "Rogue River Basin" ~ "#df65b0", #pink
-                                         Project_Na == "Sandy Subbasin" ~ "#253494", #blue
-                                         Project_Na == "South Umpqua and Umpqua Subbasins" ~ "purple",
-                                         Project_Na == "Southern Willamette Subbasins" ~ "#253494", #blue
-                                         Project_Na == "Walla Walla Subbasin" ~ "#78c679", #green
-                                         Project_Na == "Willow Creek Subbasin" ~ "#78c679")) %>%  #green
-  dplyr::left_join(project.areas, by = c("Project_Na" = "areas")) %>% 
-  #dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
-  #dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>")) %>% 
-  dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) #%>% 
-  #dplyr::arrange(EPA.Approval)
-
-pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
-                           layer = "TempTMDL_QAPP_Reaches") %>% 
-  sf::st_transform(4326) %>% 
-  dplyr::mutate(color = dplyr::case_when(Project_Na == "Willamette River Mainstem and Major Tributaries"~ "purple",
-                                         Project_Na == "Snake River – Hells Canyon"~ "yellow"))
-#pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
-
-# _ Basin AUs ----
-# au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
-#                            layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326)
-# au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
-#                               layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
-# au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
-#                            layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
-# sf::sf_use_s2(FALSE)
-
-au_rivers <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
-                         layer = "AU_OR_Rivers_CoastLine") #%>% sf::st_transform(4326) %>% sf::st_zm()
-au_waterbodies <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
-                              layer = "AU_OR_Waterbodies") #%>% sf::st_transform(4326) %>% sf::st_zm()
-au_watershed <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
-                            layer = "AU_OR_Watershed_Area") #%>% sf::st_transform(4326) %>% sf::st_zm()
-
-wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
-wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)
-columbia_aus <- sf::st_read(dsn = "//deqhq1/tmdl/Planning statewide/TMDL_Priorities/2018_2020_IR/working_2020_2024",
-                            layer="Columbia_River_AU_IDs",
-                            stringsAsFactors=FALSE) %>%
-  sf::st_drop_geometry()
-
-# _ Model Extents ----
-map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_model_extent.shp"),
-                                        layer = "hs_temp_model_extent")%>% 
-  sf::st_transform(4326) %>% 
-  sf::st_zm()
-
-map_hs_solar_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_solar_model_extent.shp"),
-                                         layer = "hs_solar_model_extent")%>% 
-  sf::st_transform(4326) %>% 
-  sf::st_zm()
-
-# Heat source solar model defined in area is only for the Southern Willamette Subbasins
-map_hs_solar_model_area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/shade_models/Southern_Willamette_ShadeModelArea.shp",
-                                       layer = "Southern_Willamette_ShadeModelArea")%>% 
-  sf::st_transform(4326) %>% 
-  sf::st_zm()%>% 
-  dplyr::mutate(Project_Na = "Southern Willamette Subbasins",
-                Name = "Southern Willamette Subbasins Heat Source Solar Model Area")
-
-map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent_Willamette.shp"),
-                                   layer = "ce_model_extent_Willamette")%>% 
-  sf::st_transform(4326) %>% 
-  sf::st_zm()
-
-# Shadow model is only for the Rouge River Basin
-map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_streams_temp_projects_clean.shp"),
-                                   layer = "shade_model_streams_temp_projects_clean")%>% 
-  sf::st_transform(4326) %>% 
-  sf::st_zm()
-
-# map.tir_extent
-
-# _ Effective shade ----
-effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade") %>% dplyr::filter(!`Result Status` == "REJECT")
-
-# _ Project area map data ----
-## for test:
-# qapp_project_area = "John Day River Basin"
-# qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
-# qapp_project_area = "Lower Willamette and Clackamas Subbasins"
-# qapp_project_area = "Malheur River Subbasins"
-# qapp_project_area = "Middle Willamette Subbasins"
-# qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
-# qapp_project_area = "North Umpqua Subbasin"
-# qapp_project_area = "Rogue River Basin"
-# qapp_project_area = "Sandy Subbasin"
-# qapp_project_area = "South Umpqua and Umpqua Subbasins" ---
-# qapp_project_area = "Southern Willamette Subbasins"
-# qapp_project_area = "Walla Walla Subbasin"
-# qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
-# qapp_project_area = "Willow Creek Subbasin"
-
-for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
-  
-  print(paste0(qapp_project_area, " map data..."))
-  
-  file.name <- project.areas[which(project.areas$areas %in% qapp_project_area),]$file.name
-  #load(paste0("./data/lookup.RData"))
-  load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
-  
-  subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% qapp_project_area),]$HUC_8)
-  subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% qapp_project_area),]$HUC10)
-  subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% qapp_project_area),]$HUC12)
-  
-  pro_area <- pro_areas %>% 
-    dplyr::filter(Project_Na %in% qapp_project_area)
-  
-  pro_scope_rivers <- au_rivers %>% sf::st_drop_geometry() %>% 
-    dplyr::left_join(lookup.huc,by="HUC12") %>% 
-    dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
-    dplyr::filter(!AU_ID %in% wms.au.id) %>% 
-    dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
-    dplyr::pull(AU_ID)
-  pro_scope_waterbodies <- au_waterbodies %>% sf::st_drop_geometry() %>% 
-    dplyr::left_join(lookup.huc,by="HUC12") %>% 
-    dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
-    dplyr::filter(!AU_ID %in% wms.au.id) %>% 
-    dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
-    dplyr::pull(AU_ID)
-  pro_scope_watershed <- au_watershed %>% sf::st_drop_geometry() %>% 
-    dplyr::left_join(lookup.huc,by="HUC12") %>% 
-    dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
-    dplyr::filter(!AU_ID %in% wms.au.id) %>% 
-    dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
-    dplyr::pull(AU_ID)
-  
-  hs_temp_model_extent <- map_hs_temp_model_extent %>% 
-    dplyr::filter(Project_Na %in% qapp_project_area)
-  
-  hs_solar_model_extent <- map_hs_solar_model_extent %>% 
-    dplyr::filter(Project_Na %in% qapp_project_area)
-  
-  hs_solar_model_area <-  map_hs_solar_model_area %>% 
-    dplyr::filter(Project_Na %in% qapp_project_area)
-  
-  ce_model_extent <- map_ce_model_extent %>% 
-    dplyr::filter(Project_Na %in% qapp_project_area)
-  
-  sh_model_extent <- map_sh_model_extent %>% 
-    dplyr::filter(Project_Na %in% qapp_project_area)
-  
-  #tir_extent
-  
-  # effective shade
-  effective.shade.pro.area <- effective.shade %>% dplyr::filter(`Project Area` %in% qapp_project_area)
-  
-  # _ Save Data ----
-  save(pro_area,
-       pro_scope_rivers,
-       pro_scope_waterbodies,
-       pro_scope_watershed,
-       hs_temp_model_extent,
-       hs_solar_model_extent,
-       hs_solar_model_area,
-       ce_model_extent,
-       sh_model_extent,
-       #tir_extent,
-       effective.shade.pro.area,
-       pro.cat.45.tbl,
-       #file = paste0("./data/map_",file.name,".RData"))
-       file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
-  
-  
-}
+# library(tidyverse)
+# library(httr)
+# library(geojsonsf)
+# library(sf)
+# 
+# # _ * data.dir ----
+# data.dir <- "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/model_QAPPs/R/data/"
+# data.dir.yg <- "E:/PROJECTS/20200810_RyanMichie_TempTMDLReplacement/R/branches/" # Yuan's location
+# project.areas <- readxl::read_xlsx(paste0(data.dir,"qapp_project_areas.xlsx"), sheet = "qapp_project_areas") 
+# 
+# pro_areas <- sf::st_read(dsn = paste0(data.dir,"gis/project_areas.shp"),
+#                          layer = "project_areas") %>% 
+#   sf::st_transform(4326) %>% 
+#   dplyr::mutate(color = dplyr::case_when(Project_Na == "John Day River Basin" ~ "#df65b0", #pink
+#                                          Project_Na == "Lower Grande Ronde, Imnaha, and Wallowa Subbasins" ~ "yellow",
+#                                          Project_Na == "Lower Willamette and Clackamas Subbasins" ~ "#253494", #blue
+#                                          Project_Na == "Malheur River Subbasins" ~ "#78c679", #green
+#                                          Project_Na == "Middle Willamette Subbasins" ~ "#253494", #blue
+#                                          Project_Na == "Middle Columbia-Hood, Miles Creeks" ~ "yellow",
+#                                          Project_Na == "North Umpqua Subbasin" ~ "purple",
+#                                          Project_Na == "Rogue River Basin" ~ "#df65b0", #pink
+#                                          Project_Na == "Sandy Subbasin" ~ "#253494", #blue
+#                                          Project_Na == "South Umpqua and Umpqua Subbasins" ~ "purple",
+#                                          Project_Na == "Southern Willamette Subbasins" ~ "#253494", #blue
+#                                          Project_Na == "Walla Walla Subbasin" ~ "#78c679", #green
+#                                          Project_Na == "Willow Creek Subbasin" ~ "#78c679")) %>%  #green
+#   dplyr::left_join(project.areas, by = c("Project_Na" = "areas")) %>% 
+#   #dplyr::mutate(CompleteD = format(as.Date(EPA.Approval,"%Y-%m-%d", tz="UTC"),"%b %d, %Y")) %>% 
+#   #dplyr::mutate(map_link = paste0("<a href='area_maps/'",file.name,".html'>",Project_Na,"</a>")) %>% 
+#   dplyr::mutate(map_link = paste0("<a href='area_maps/",file.name,".html'>",Project_Na,"</a>")) #%>% 
+#   #dplyr::arrange(EPA.Approval)
+# 
+# pro_reaches <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/willa_snake/TempTMDL_QAPP_Reaches.shp",
+#                            layer = "TempTMDL_QAPP_Reaches") %>% 
+#   sf::st_transform(4326) %>% 
+#   dplyr::mutate(color = dplyr::case_when(Project_Na == "Willamette River Mainstem and Major Tributaries"~ "purple",
+#                                          Project_Na == "Snake River – Hells Canyon"~ "yellow"))
+# #pro_reaches <- sf::st_zm(pro_reaches, drop = T, what = "ZM")
+# 
+# # _ Basin AUs ----
+# # au_rivers <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Rivers_CoastLine_2022Final.shp",
+# #                            layer = "AU_OR_Rivers_CoastLine_2022Final") %>% sf::st_transform(4326)
+# # au_waterbodies <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Waterbodies_2022Final.shp",
+# #                               layer = "AU_OR_Waterbodies_2022Final") %>% sf::st_transform(4326)
+# # au_watershed <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/AU_OR_Watershed_Area_2022Final.shp",
+# #                            layer = "AU_OR_Watershed_Area_2022Final") %>% sf::st_transform(4326)
+# # sf::sf_use_s2(FALSE)
+# 
+# au_rivers <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+#                          layer = "AU_OR_Rivers_CoastLine") #%>% sf::st_transform(4326) %>% sf::st_zm()
+# au_waterbodies <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+#                               layer = "AU_OR_Waterbodies") #%>% sf::st_transform(4326) %>% sf::st_zm()
+# au_watershed <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+#                             layer = "AU_OR_Watershed_Area") #%>% sf::st_transform(4326) %>% sf::st_zm()
+# 
+# wms.aus <- readxl::read_xlsx("//deqhq1/tmdl/TMDL_Willamette/Willamette_Mainstem_Temperature_2025/Project_Plans/Willamette_Mainstem_AUs_2022.04.15.xlsx",sheet = "Final_AUs")
+# wms.au.id <- wms.aus %>% dplyr::pull(AU_ID)
+# columbia_aus <- sf::st_read(dsn = "//deqhq1/tmdl/Planning statewide/TMDL_Priorities/2018_2020_IR/working_2020_2024",
+#                             layer="Columbia_River_AU_IDs",
+#                             stringsAsFactors=FALSE) %>%
+#   sf::st_drop_geometry()
+# 
+# # _ Model Extents ----
+# map_hs_temp_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_temp_model_extent.shp"),
+#                                         layer = "hs_temp_model_extent")%>% 
+#   sf::st_transform(4326) %>% 
+#   sf::st_zm()
+# 
+# map_hs_solar_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/hs_solar_model_extent.shp"),
+#                                          layer = "hs_solar_model_extent")%>% 
+#   sf::st_transform(4326) %>% 
+#   sf::st_zm()
+# 
+# # Heat source solar model defined in area is only for the Southern Willamette Subbasins
+# map_hs_solar_model_area <- sf::st_read(dsn = "//deqhq1/TMDL/Planning statewide/Temperature_TMDL_Revisions/GIS/shade_models/Southern_Willamette_ShadeModelArea.shp",
+#                                        layer = "Southern_Willamette_ShadeModelArea")%>% 
+#   sf::st_transform(4326) %>% 
+#   sf::st_zm()%>% 
+#   dplyr::mutate(Project_Na = "Southern Willamette Subbasins",
+#                 Name = "Southern Willamette Subbasins Heat Source Solar Model Area")
+# 
+# map_ce_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/ce_model_extent_Willamette.shp"),
+#                                    layer = "ce_model_extent_Willamette")%>% 
+#   sf::st_transform(4326) %>% 
+#   sf::st_zm()
+# 
+# # Shadow model is only for the Rouge River Basin
+# map_sh_model_extent <- sf::st_read(dsn = paste0(data.dir, "gis/shade_model_streams_temp_projects_clean.shp"),
+#                                    layer = "shade_model_streams_temp_projects_clean")%>% 
+#   sf::st_transform(4326) %>% 
+#   sf::st_zm()
+# 
+# # map.tir_extent
+# 
+# # _ Effective shade ----
+# effective.shade <- readxl::read_xlsx(paste0(data.dir,"Effective_shade.xlsx"),sheet = "Effective_shade") %>% dplyr::filter(!`Result Status` == "REJECT")
+# 
+# # _ Project area map data ----
+# ## for test:
+# # qapp_project_area = "John Day River Basin"
+# # qapp_project_area = "Lower Grande Ronde, Imnaha, and Wallowa Subbasins"
+# # qapp_project_area = "Lower Willamette and Clackamas Subbasins"
+# # qapp_project_area = "Malheur River Subbasins"
+# # qapp_project_area = "Middle Willamette Subbasins"
+# # qapp_project_area = "Middle Columbia-Hood, Miles Creeks"
+# # qapp_project_area = "North Umpqua Subbasin"
+# # qapp_project_area = "Rogue River Basin"
+# # qapp_project_area = "Sandy Subbasin"
+# # qapp_project_area = "South Umpqua and Umpqua Subbasins" ---
+# # qapp_project_area = "Southern Willamette Subbasins"
+# # qapp_project_area = "Walla Walla Subbasin"
+# # qapp_project_area = "Willamette River Mainstem and Major Tributaries" ---
+# # qapp_project_area = "Willow Creek Subbasin"
+# 
+# for (qapp_project_area in project.areas[which(!project.areas$areas %in% done),]$areas) {
+#   
+#   print(paste0(qapp_project_area, " map data..."))
+#   
+#   file.name <- project.areas[which(project.areas$areas %in% qapp_project_area),]$file.name
+#   #load(paste0("./data/lookup.RData"))
+#   load(paste0(data.dir.yg,file.name,"/mQAPPrmd/data/lookup.RData"))
+#   
+#   subbasin_huc8 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% qapp_project_area),]$HUC_8)
+#   subbasin_huc10 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% qapp_project_area),]$HUC10)
+#   subbasin_huc12 <- unique(lookup.huc[which(lookup.huc$QAPP_Project_Area %in% qapp_project_area),]$HUC12)
+#   
+#   pro_area <- pro_areas %>% 
+#     dplyr::filter(Project_Na %in% qapp_project_area)
+#   
+#   pro_scope_rivers <- au_rivers %>% sf::st_drop_geometry() %>% 
+#     dplyr::left_join(lookup.huc,by="HUC12") %>% 
+#     dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
+#     dplyr::filter(!AU_ID %in% wms.au.id) %>% 
+#     dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
+#     dplyr::pull(AU_ID)
+#   pro_scope_waterbodies <- au_waterbodies %>% sf::st_drop_geometry() %>% 
+#     dplyr::left_join(lookup.huc,by="HUC12") %>% 
+#     dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
+#     dplyr::filter(!AU_ID %in% wms.au.id) %>% 
+#     dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
+#     dplyr::pull(AU_ID)
+#   pro_scope_watershed <- au_watershed %>% sf::st_drop_geometry() %>% 
+#     dplyr::left_join(lookup.huc,by="HUC12") %>% 
+#     dplyr::filter(QAPP_Project_Area %in% qapp_project_area) %>% 
+#     dplyr::filter(!AU_ID %in% wms.au.id) %>% 
+#     dplyr::filter(!AU_ID %in% columbia_aus$AU_ID) %>% 
+#     dplyr::pull(AU_ID)
+#   
+#   hs_temp_model_extent <- map_hs_temp_model_extent %>% 
+#     dplyr::filter(Project_Na %in% qapp_project_area)
+#   
+#   hs_solar_model_extent <- map_hs_solar_model_extent %>% 
+#     dplyr::filter(Project_Na %in% qapp_project_area)
+#   
+#   hs_solar_model_area <-  map_hs_solar_model_area %>% 
+#     dplyr::filter(Project_Na %in% qapp_project_area)
+#   
+#   ce_model_extent <- map_ce_model_extent %>% 
+#     dplyr::filter(Project_Na %in% qapp_project_area)
+#   
+#   sh_model_extent <- map_sh_model_extent %>% 
+#     dplyr::filter(Project_Na %in% qapp_project_area)
+#   
+#   #tir_extent
+#   
+#   # effective shade
+#   effective.shade.pro.area <- effective.shade %>% dplyr::filter(`Project Area` %in% qapp_project_area)
+#   
+#   # _ Save Data ----
+#   save(pro_area,
+#        pro_scope_rivers,
+#        pro_scope_waterbodies,
+#        pro_scope_watershed,
+#        hs_temp_model_extent,
+#        hs_solar_model_extent,
+#        hs_solar_model_area,
+#        ce_model_extent,
+#        sh_model_extent,
+#        #tir_extent,
+#        effective.shade.pro.area,
+#        pro.cat.45.tbl,
+#        #file = paste0("./data/map_",file.name,".RData"))
+#        file = paste0(data.dir.yg,file.name,"/mQAPPrmd/data/map_",file.name,".RData"))
+#   
+#   
+# }
