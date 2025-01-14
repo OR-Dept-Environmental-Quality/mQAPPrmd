@@ -3,7 +3,7 @@ date: "`r paste0(format(Sys.Date(), '%m/%d/%Y'), ' - DRAFT version XX')`"
 output:
   officedown::rdocx_document:
   word_document:
-    reference_docx: C:/Users/ygrund/C-PROJECTS/TempTMDL/rmd_template.docx
+    reference_docx: T:/Temperature_TMDL_Revisions/model_QAPPs/R/data/rmd_template.docx
     keep_md: yes
     toc: yes
     fig_caption: yes
@@ -32,6 +32,7 @@ knitr::opts_chunk$set(results = "asis",
                       fig.width = 12, 
                       fig.height = 7)
 
+# devtools::install_github("adletaw/captioner")
 library(knitr); library(kableExtra)
 library(officedown);library(officer)
 library(tidyverse)
